@@ -14,7 +14,8 @@ public class BaseActivity extends SherlockFragmentActivity {
         super.onCreate(savedInstanceState);
         
         if (!AccountUtils.isAuthenticated(this)) {
-            
+            AccountUtils.startAuthenticationFlow(this, getIntent());
+            finish();
         }
     }
 
