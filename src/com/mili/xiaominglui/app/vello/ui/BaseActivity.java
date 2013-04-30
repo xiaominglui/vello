@@ -10,7 +10,7 @@ public class BaseActivity extends SherlockFragmentActivity {
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-	setTheme(R.style.Theme_Sherlock);
+	setTheme(R.style.Theme_Sherlock_Light_DarkActionBar);
         super.onCreate(savedInstanceState);
         
         if (!AccountUtils.isAuthenticated(this)) {
@@ -18,5 +18,4 @@ public class BaseActivity extends SherlockFragmentActivity {
             finish();
         }
     }
-
 }

@@ -135,4 +135,20 @@ public class AccountUtils {
 		.getDefaultSharedPreferences(context);
 	sp.edit().putString(PREF_AUTH_TOKEN, authToken).commit();
     }
+    
+    public static void invalidateAuthToken(final Context context) {
+	AccountManager am = AccountManager.get(context);
+	am.invalidateAuthToken(Constants.ACCOUNT_TYPE,
+		getAuthToken(context));
+	setAuthToken(context, null);
+    }
+    
+    public static void signOut(final Context context) {
+	invalidateAuthToken(context);
+	SharedPreferences sp = PreferenceManager
+		.getDefaultSharedPreferences(context);
+	sp.edit().clear().commit();
+//	context.getContentResolver().delete(
+//		VelloProviderContract.BASE_CONTENT_URI, null, null);
+    }
 }

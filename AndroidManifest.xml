@@ -38,7 +38,6 @@
         
         <activity
             android:name="com.mili.xiaominglui.app.vello.ui.AuthenticatorActivity"
-            android:theme="@android:style/Theme.Dialog"
             android:excludeFromRecents="true"
             android:configChanges="orientation|keyboardHidden"
             >
