@@ -3,26 +3,33 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical" >
+
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        />
+        android:layout_weight="1" />
+
     <com.viewpagerindicator.UnderlinePageIndicator
         android:id="@+id/indicator"
-        android:layout_height="2dp"
         android:layout_width="fill_parent"
-        />
-    
+        android:layout_height="2dp" />
+
     <Button
         android:id="@+id/log_in"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Log In" />
+
     <Button
         android:id="@+id/sign_up"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Sign Up" />
+
 </LinearLayout>

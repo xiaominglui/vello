@@ -7,6 +7,14 @@
     <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="17" />
+    
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"/>
+    <!-- required for setIsSyncable -->
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
 
     <application
         android:allowBackup="true"
@@ -27,6 +35,31 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <activity
+            android:name="com.mili.xiaominglui.app.vello.ui.AuthenticatorActivity"
+            android:theme="@android:style/Theme.Dialog"
+            android:excludeFromRecents="true"
+            android:configChanges="orientation|keyboardHidden"
+            >
+            <!--
+                No intent-filter here! This activity is only ever launched by
+                someone who explicitly knows the class name
+            -->
+        </activity>
+        
+        <!-- The authenticator service -->
+        <service
+            android:name="com.mili.xiaominglui.app.vello.authenticator.AuthenticationService"
+            android:exported="false">
+            <intent-filter>
+                <action
+                    android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
     </application>
 
 </manifest>
