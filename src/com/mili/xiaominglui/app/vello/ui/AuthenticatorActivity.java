@@ -70,10 +70,8 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         Log.i(TAG, "onCreate(" + icicle + ")");
         super.onCreate(icicle);
         Log.i(TAG, "loading data from Intent");
-        requestWindowFeature(Window.FEATURE_LEFT_ICON);
+        requestWindowFeature(Window.FEATURE_PROGRESS);
         setContentView(R.layout.activity_oauth);
-        getWindow().setFeatureDrawableResource(
-                Window.FEATURE_LEFT_ICON, android.R.drawable.ic_dialog_alert);
         mWebView = (WebView) findViewById(R.id.webview);
         
         WebSettings webSettings = mWebView.getSettings();
@@ -104,7 +102,6 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, mUsername);
         intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, Constants.ACCOUNT_TYPE);
         intent.putExtra(AccountManager.KEY_PASSWORD, authToken);
-//        intent.putExtra(AccountManager.KEY_AUTHTOKEN, authToken);
         setAccountAuthenticatorResult(intent.getExtras());
         finish();
     }

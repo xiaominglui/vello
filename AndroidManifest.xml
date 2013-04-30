@@ -39,6 +39,7 @@
         <activity
             android:name="com.mili.xiaominglui.app.vello.ui.AuthenticatorActivity"
             android:excludeFromRecents="true"
+            android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|keyboardHidden"
             >
             <!--
@@ -59,6 +60,10 @@
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
+        
+        <service
+            android:name=".data.service.VelloRequestService"
+            android:exported="false" />
     </application>
 
 </manifest>

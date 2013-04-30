@@ -23,6 +23,13 @@ public class AccountUtils {
 
     private static final String PREF_CHOSEN_ACCOUNT = "chosen_account";
     private static final String PREF_AUTH_TOKEN = "auth_token";
+    private static final String PREF_BOARD_ID = "board_id";
+    private static final String PREF_BOARD_NAME = "board_name";
+    private static final String PREF_BOARD_NAME_DEFAULT = "MyWords";
+    
+    public static boolean isInitialized(final Context context) {
+	return !TextUtils.isEmpty(getTrelloBoardId(context));
+    }
 
     public static boolean isAuthenticated(final Context context) {
 	return !TextUtils.isEmpty(getChosenAccountName(context));
@@ -98,6 +105,18 @@ public class AccountUtils {
 		}
 	    }
 	};
+    }
+    
+    public static String getTrelloBoardId(final Context context) {
+	SharedPreferences sp = PreferenceManager
+		.getDefaultSharedPreferences(context);
+	return sp.getString(PREF_BOARD_ID, null);
+    }
+    
+    public static String getTrelloBoardName(final Context context) {
+	SharedPreferences sp = PreferenceManager
+		.getDefaultSharedPreferences(context);
+	return sp.getString(PREF_BOARD_NAME, PREF_BOARD_NAME_DEFAULT);
     }
     
     public static String getChosenAccountName(final Context context) {
