@@ -12,6 +12,7 @@ import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.data.model.Board;
 import com.mili.xiaominglui.app.vello.data.model.List;
+import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment.ConnectionErrorDialogListener;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
@@ -61,6 +62,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		mRequestList.remove(request);
 	    }
 	}
+	getDueWordCardList();
     }
 
     @Override
@@ -218,6 +220,15 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		    configureVocabularyBoard(id);
 		}
 		return;
+		
+	    case VelloRequestFactory.REQUEST_TYPE_GET_DUE_WORDCARD_LIST:
+		ArrayList<WordCard> wordCardList = resultData
+		.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST);
+		
+		for (WordCard wc : wordCardList) {
+		    System.out.println(wc.name);
+		}
+		return;
 	    default:
 		return;
 	    }
@@ -293,6 +304,13 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		.configureVocabularyBoardRequest(id);
 	mRequestManager.execute(configureVocabularyBoardRequest, this);
 	mRequestList.add(configureVocabularyBoardRequest);
+    }
+    
+    private void getDueWordCardList() {
+	setProgressBarIndeterminateVisibility(true);
+	Request getDueWordCardListRequest = VelloRequestFactory.getDueWordCardListRequest(VelloRequestFactory.REQUEST_TYPE_GET_DUE_WORDCARD_LIST);
+	mRequestManager.execute(getDueWordCardListRequest, this);
+	mRequestList.add(getDueWordCardListRequest);
     }
 
     @Override

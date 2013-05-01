@@ -28,5 +28,6 @@ public final class WSConfig {
     
     
     public static final String WS_TRELLO_FIELD_LISTS = "/lists";
+    public static final String WS_TRELLO_FIELD_CARDS = "/cards";
     
 }

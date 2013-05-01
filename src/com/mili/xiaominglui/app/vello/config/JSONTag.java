@@ -16,5 +16,12 @@ public final class JSONTag {
     public static final String LIST_ELEM_ID = "id";
     public static final String LIST_ELEM_NAME = "name";
     public static final String LIST_ELEM_CLOSED = "closed";
+    
+    // Trello Card tags
+    public static final String CARD_ELEM_ID = "id";
+    public static final String CARD_ELEM_NAME = "name";
+    public static final String CARD_ELEM_DUE = "due";
+    public static final String CARD_ELEM_DESC = "desc";
+    public static final String CARD_ELEM_IDLIST = "idList";
 
 }

@@ -6,6 +6,7 @@ import com.mili.xiaominglui.app.vello.data.operation.CheckVocabularyListOperatio
 import com.mili.xiaominglui.app.vello.data.operation.ConfigureVocabularyBoardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CreateVocabularyBoardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CreateVocabularyListOperation;
+import com.mili.xiaominglui.app.vello.data.operation.GetDueWordCardListOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ReopenVocabularyListOperation;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 
@@ -31,8 +32,8 @@ public class VelloRequestService extends RequestService {
 	    return new CreateVocabularyListOperation();
 	case VelloRequestFactory.REQUEST_TYPE_CREATE_VOCABULARY_BOARD:
 	    return new CreateVocabularyBoardOperation();
-	case VelloRequestFactory.REQUEST_TYPE_QUERY_WORD_LIST_DOING:
-	    return null;
+	case VelloRequestFactory.REQUEST_TYPE_GET_DUE_WORDCARD_LIST:
+	    return new GetDueWordCardListOperation();
 	case VelloRequestFactory.REQUEST_TYPE_QUERY_WORD:
 	    return null;
 	}

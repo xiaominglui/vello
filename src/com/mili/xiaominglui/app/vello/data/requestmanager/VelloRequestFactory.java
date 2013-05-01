@@ -9,7 +9,7 @@ import com.mili.xiaominglui.app.vello.data.operation.WordListOperation;
 public final class VelloRequestFactory {
     
     // Request types
-    public static final int REQUEST_TYPE_QUERY_WORD_LIST_DOING = 0;
+    public static final int REQUEST_TYPE_GET_DUE_WORDCARD_LIST = 0;
     public static final int REQUEST_TYPE_QUERY_WORD = 1;
     public static final int REQUEST_TYPE_CHECK_VOCABULARY_BOARD = 2;
     public static final int REQUEST_TYPE_CONFIGURE_VOCABULARY_BOARD = 3;
@@ -20,6 +20,7 @@ public final class VelloRequestFactory {
     
     // Response data
     public static final String BUNDLE_EXTRA_TRELLO_BOARD_LIST = "com.mili.xiaominglui.app.vello.extra.boardList";
+    public static final String BUNDLE_EXTRA_WORDCARD_LIST = "com.mili.xiaominglui.app.vello.extra.wordCardList";
     public static final String BUNDLE_EXTRA_VOCABULARY_BOARD_ID = "com.mili.xiaominglui.app.vello.extra.boardId";
     public static final String BUNDLE_EXTRA_VOCABULARY_LIST_LIST = "com.mili.xiaominglui.app.vello.extra.listList";
     public static final String BUNDLE_EXTRA_VOCABULARY_LIST_ID = "com.mili.xiaominglui.app.vello.extra.listId";
@@ -33,8 +34,8 @@ public final class VelloRequestFactory {
 	// no public constructor
     }
     
-    public static Request getMyDoingWordListRequest(int returnFormat) {
-	Request request = new Request(REQUEST_TYPE_QUERY_WORD_LIST_DOING);
+    public static Request getDueWordCardListRequest(int returnFormat) {
+	Request request = new Request(REQUEST_TYPE_GET_DUE_WORDCARD_LIST);
 	request.put(WordListOperation.PARAM_RETURN_FORMAT, returnFormat);
 	return request;
     }
