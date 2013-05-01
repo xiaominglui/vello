@@ -23,12 +23,25 @@ public class AccountUtils {
 
     private static final String PREF_CHOSEN_ACCOUNT = "chosen_account";
     private static final String PREF_AUTH_TOKEN = "auth_token";
-    private static final String PREF_BOARD_ID = "board_id";
-    private static final String PREF_BOARD_NAME = "board_name";
-    private static final String PREF_BOARD_NAME_DEFAULT = "MyWords";
+    private static final String PREF_VOCABULARY_BOARD_ID = "board_id";
+    private static final String PREF_VOCABULARY_BOARD_NAME = "board_name";
+    private static final String PREF_VOCABULARY_BOARD_NAME_DEFAULT = "MyWords";
+    private static final String PREF_VOCABULARY_BOARD_VERIFICATION_STRING = "TrelloDB";
     
-    public static boolean isInitialized(final Context context) {
-	return !TextUtils.isEmpty(getTrelloBoardId(context));
+//    private static final String[] PREF_VOCABULARY_LIST_ID = {"new", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"};
+    public static final String[] VOCABULARY_LISTS_TITLE_ID = {"new", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"};
+    
+    public static boolean hasVocabularyBoard(final Context context) {
+	return !TextUtils.isEmpty(getVocabularyBoardId(context));
+    }
+    
+    public static boolean isVocabularyBoardWellFormed(final Context context) {
+	for (int i = 0; i < VOCABULARY_LISTS_TITLE_ID.length; i++) {
+	    if (TextUtils.isEmpty(getVocabularyListId(context, i))) {
+		return false;
+	    }
+	}
+	return true;
     }
 
     public static boolean isAuthenticated(final Context context) {
@@ -107,22 +120,48 @@ public class AccountUtils {
 	};
     }
     
-    public static String getTrelloBoardId(final Context context) {
+    public static String getVocabularyBoardId(final Context context) {
 	SharedPreferences sp = PreferenceManager
 		.getDefaultSharedPreferences(context);
-	return sp.getString(PREF_BOARD_ID, null);
+	return sp.getString(PREF_VOCABULARY_BOARD_ID, null);
     }
     
-    public static String getTrelloBoardName(final Context context) {
+    public static void setVocabularyBoardId(final Context context, final String id) {
 	SharedPreferences sp = PreferenceManager
 		.getDefaultSharedPreferences(context);
-	return sp.getString(PREF_BOARD_NAME, PREF_BOARD_NAME_DEFAULT);
+	sp.edit().putString(PREF_VOCABULARY_BOARD_ID, id).commit();
+    }
+    
+    public static String getVocabularyBoardName(final Context context) {
+	SharedPreferences sp = PreferenceManager
+		.getDefaultSharedPreferences(context);
+	return sp.getString(PREF_VOCABULARY_BOARD_NAME, PREF_VOCABULARY_BOARD_NAME_DEFAULT);
+    }
+    
+    public static String getVocabularyBoardVerification() {
+	return PREF_VOCABULARY_BOARD_VERIFICATION_STRING;
     }
     
     public static String getChosenAccountName(final Context context) {
 	SharedPreferences sp = PreferenceManager
 		.getDefaultSharedPreferences(context);
 	return sp.getString(PREF_CHOSEN_ACCOUNT, null);
+    }
+    
+    public static String getVocabularyListId(final Context context, final int position) {
+	SharedPreferences sp = PreferenceManager
+		.getDefaultSharedPreferences(context);
+	return sp.getString(VOCABULARY_LISTS_TITLE_ID[position], null);
+    }
+    
+    public static void setVocabularyListId(final Context context, final String id, final int position) {
+	SharedPreferences sp = PreferenceManager
+		.getDefaultSharedPreferences(context);
+	sp.edit().putString(VOCABULARY_LISTS_TITLE_ID[position], id).commit();
+    }
+    
+    public static String getVocabularyListTitle(final int position) {
+	return VOCABULARY_LISTS_TITLE_ID[position];
     }
 
     private static void setChosenAccountName(final Context context,

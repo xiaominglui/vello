@@ -37,8 +37,8 @@ public class TrelloBoardListJsonFactory {
 		board.idOrganization = jsonBoard.getString(JSONTag.BOARD_ELEM_IDORGANIZATION);
 		
 		boardList.add(board);
-		
 	    }
+	    
 	} catch (JSONException e) {
 	    Log.e(TAG, "JSONException", e);
             throw new DataException(e);
