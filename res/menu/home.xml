@@ -23,6 +23,12 @@
         android:actionViewClass="android.widget.SearchView"
         android:showAsAction="ifRoom|collapseActionView" />
 	-->
+	<item
+    android:id="@+id/refresh_button"          
+    android:actionViewClass=
+        "com.manuelpeinado.refreshactionitem.RefreshActionItem"
+    android:showAsAction="always"
+    android:title="@string/action_refresh"/>
 	
     <item android:id="@+id/menu_about"
         android:title="@string/description_about"

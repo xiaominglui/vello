@@ -5,14 +5,19 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Window;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
+import com.haarman.listviewanimations.ArrayAdapter;
 import com.haarman.listviewanimations.itemmanipulation.OnDismissCallback;
 import com.haarman.listviewanimations.itemmanipulation.SwipeDismissAdapter;
 import com.haarman.listviewanimations.swinginadapters.prepared.SwingBottomInAnimationAdapter;
+import com.manuelpeinado.refreshactionitem.ProgressIndicatorType;
+import com.manuelpeinado.refreshactionitem.RefreshActionItem;
+import com.manuelpeinado.refreshactionitem.RefreshActionItem.RefreshActionListener;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.adapter.GoogleCardsAdapter;
 import com.mili.xiaominglui.app.vello.data.model.Board;
@@ -23,14 +28,16 @@ import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment.Conn
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MainActivity extends BaseActivity implements RequestListener,
-	ConnectionErrorDialogListener, OnDismissCallback {
+	ConnectionErrorDialogListener, OnDismissCallback, RefreshActionListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private Menu mOptionsMenu;
     private Context mContext;
 
     private GoogleCardsAdapter mGoogleCardsAdapter;
+    private RefreshActionItem mRefreshActionItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,21 +62,35 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	ListView listView = (ListView) findViewById(R.id.activity_googlecards_listview);
 	mGoogleCardsAdapter = new GoogleCardsAdapter(this);
 	SwingBottomInAnimationAdapter swingBottomInAnimationAdapter = new SwingBottomInAnimationAdapter(
-		new SwipeDismissAdapter(mGoogleCardsAdapter, this));
+		new SwipeDismissAdapter(mGoogleCardsAdapter,
+			new MyOnDismissCallback(mGoogleCardsAdapter)));
 	swingBottomInAnimationAdapter.setListView(listView);
 
 	listView.setAdapter(swingBottomInAnimationAdapter);
 
-//	mGoogleCardsAdapter.addAll(getItems());
-
     }
 
-    private ArrayList<Integer> getItems() {
-	ArrayList<Integer> items = new ArrayList<Integer>();
-	for (int i = 0; i < 100; i++) {
-	    items.add(i);
+    private class MyOnDismissCallback implements OnDismissCallback {
+
+	private ArrayAdapter<WordCard> mAdapter;
+
+	public MyOnDismissCallback(ArrayAdapter<WordCard> adapter) {
+	    mAdapter = adapter;
 	}
-	return items;
+
+	@Override
+	public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+	    for (int position : reverseSortedPositions) {
+		// handle review word request here
+		// TODO
+		mAdapter.remove(position);
+	    }
+	    Toast.makeText(
+		    mContext,
+		    "Removed positions: "
+			    + Arrays.toString(reverseSortedPositions),
+		    Toast.LENGTH_SHORT).show();
+	}
     }
 
     @Override
@@ -80,14 +101,13 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
 	    if (mRequestManager.isRequestInProgress(request)) {
 		mRequestManager.addRequestListener(this, request);
-		setProgressBarIndeterminateVisibility(true);
+		mRefreshActionItem.showProgress(true);
 	    } else {
 		mRequestManager.callListenerWithCachedData(this, request);
 		i--;
 		mRequestList.remove(request);
 	    }
 	}
-	getDueWordCardList();
     }
 
     @Override
@@ -113,6 +133,12 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	super.onCreateOptionsMenu(menu);
 	mOptionsMenu = menu;
 	getSupportMenuInflater().inflate(R.menu.home, menu);
+	MenuItem item = menu.findItem(R.id.refresh_button);
+	mRefreshActionItem = (RefreshActionItem) item.getActionView();
+	mRefreshActionItem.setMenuItem(item);
+	mRefreshActionItem.setProgressIndicatorType(ProgressIndicatorType.INDETERMINATE);
+	mRefreshActionItem.setRefreshActionListener(this);
+	getDueWordCardList();
 	// setupSearchMenuItem(menu);
 	return true;
     }
@@ -133,7 +159,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
     @Override
     public void onRequestFinished(Request request, Bundle resultData) {
 	if (mRequestList.contains(request)) {
-	    setProgressBarIndeterminateVisibility(false);
+	    mRefreshActionItem.showProgress(false);
 	    mRequestList.remove(request);
 
 	    switch (request.getRequestType()) {
@@ -250,6 +276,8 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	    case VelloRequestFactory.REQUEST_TYPE_GET_DUE_WORDCARD_LIST:
 		ArrayList<WordCard> wordCardList = resultData
 			.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST);
+		int num = wordCardList.size();
+		mRefreshActionItem.showBadge(String.valueOf(num));
 		mGoogleCardsAdapter.addAll(wordCardList);
 		return;
 	    default:
@@ -266,7 +294,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
     @Override
     public void onRequestDataError(Request request) {
 	if (mRequestList.contains(request)) {
-	    setProgressBarIndeterminateVisibility(false);
+	    mRefreshActionItem.showProgress(false);
 	    mRequestList.remove(request);
 
 	    showBadDataErrorDialog();
@@ -279,7 +307,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
     }
 
     private void checkVocabularyBoard() {
-	setProgressBarIndeterminateVisibility(true);
+	mRefreshActionItem.showProgress(true);
 	Request checkVocabularyBoardRequest = VelloRequestFactory
 		.checkVocabularyBoardRequest();
 	mRequestManager.execute(checkVocabularyBoardRequest, this);
@@ -287,7 +315,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
     }
 
     private void createVocabularyBoard() {
-	setProgressBarIndeterminateVisibility(true);
+	mRefreshActionItem.showProgress(true);
 	Request createVocabularyBoardRequest = VelloRequestFactory
 		.createVocabularyBoardRequest();
 	mRequestManager.execute(createVocabularyBoardRequest, this);
@@ -295,7 +323,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
     }
 
     private void createVocabularyList(int position) {
-	setProgressBarIndeterminateVisibility(true);
+	mRefreshActionItem.showProgress(true);
 	Request createVocabularyListRequest = VelloRequestFactory
 		.createVocabularyListRequest(position);
 	mRequestManager.execute(createVocabularyListRequest, this);
@@ -303,7 +331,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
     }
 
     private void reOpenVocabulayList(int position, String id) {
-	setProgressBarIndeterminateVisibility(true);
+	mRefreshActionItem.showProgress(true);
 	Request reOpenVocabularyListRequest = VelloRequestFactory
 		.reOpenVocabularyListRequest(position, id);
 	mRequestManager.execute(reOpenVocabularyListRequest, this);
@@ -311,7 +339,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
     }
 
     private void checkVocabularyLists() {
-	setProgressBarIndeterminateVisibility(true);
+	mRefreshActionItem.showProgress(true);
 	for (int i = 0; i < AccountUtils.VOCABULARY_LISTS_TITLE_ID.length; i++) {
 	    Request checkVocabularyListReqest = VelloRequestFactory
 		    .checkVocabularyListRequest(i);
@@ -323,7 +351,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
     }
 
     private void configureVocabularyBoard(String id) {
-	setProgressBarIndeterminateVisibility(true);
+	mRefreshActionItem.showProgress(true);
 	Request configureVocabularyBoardRequest = VelloRequestFactory
 		.configureVocabularyBoardRequest(id);
 	mRequestManager.execute(configureVocabularyBoardRequest, this);
@@ -331,7 +359,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
     }
 
     private void getDueWordCardList() {
-	setProgressBarIndeterminateVisibility(true);
+	mRefreshActionItem.showProgress(true);
 	Request getDueWordCardListRequest = VelloRequestFactory
 		.getDueWordCardListRequest(VelloRequestFactory.REQUEST_TYPE_GET_DUE_WORDCARD_LIST);
 	mRequestManager.execute(getDueWordCardListRequest, this);
@@ -351,5 +379,12 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	for (int position : reverseSortedPositions) {
 	    mGoogleCardsAdapter.remove(position);
 	}
+    }
+
+    @Override
+    public void onRefreshButtonClick(RefreshActionItem sender) {
+	// TODO Auto-generated method stub
+//	mRefreshActionItem.showProgress(true);
+	getDueWordCardList();
     }
 }
