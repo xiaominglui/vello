@@ -4,12 +4,17 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Window;
+import android.widget.ListView;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
+import com.haarman.listviewanimations.itemmanipulation.OnDismissCallback;
+import com.haarman.listviewanimations.itemmanipulation.SwipeDismissAdapter;
+import com.haarman.listviewanimations.swinginadapters.prepared.SwingBottomInAnimationAdapter;
 import com.mili.xiaominglui.app.vello.R;
+import com.mili.xiaominglui.app.vello.adapter.GoogleCardsAdapter;
 import com.mili.xiaominglui.app.vello.data.model.Board;
 import com.mili.xiaominglui.app.vello.data.model.List;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
@@ -20,10 +25,12 @@ import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import java.util.ArrayList;
 
 public class MainActivity extends BaseActivity implements RequestListener,
-	ConnectionErrorDialogListener {
+	ConnectionErrorDialogListener, OnDismissCallback {
     private static final String TAG = MainActivity.class.getSimpleName();
     private Menu mOptionsMenu;
     private Context mContext;
+
+    private GoogleCardsAdapter mGoogleCardsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +52,24 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	}
 
 	setContentView(R.layout.activity_main);
+	ListView listView = (ListView) findViewById(R.id.activity_googlecards_listview);
+	mGoogleCardsAdapter = new GoogleCardsAdapter(this);
+	SwingBottomInAnimationAdapter swingBottomInAnimationAdapter = new SwingBottomInAnimationAdapter(
+		new SwipeDismissAdapter(mGoogleCardsAdapter, this));
+	swingBottomInAnimationAdapter.setListView(listView);
+
+	listView.setAdapter(swingBottomInAnimationAdapter);
+
+//	mGoogleCardsAdapter.addAll(getItems());
+
+    }
+
+    private ArrayList<Integer> getItems() {
+	ArrayList<Integer> items = new ArrayList<Integer>();
+	for (int i = 0; i < 100; i++) {
+	    items.add(i);
+	}
+	return items;
     }
 
     @Override
@@ -197,7 +222,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
 				    + id);
 		}
 		return;
-		
+
 	    case VelloRequestFactory.REQUEST_TYPE_CREATE_VOCABULARY_LIST:
 		if (resultData != null) {
 		    // create list successfully
@@ -211,23 +236,21 @@ public class MainActivity extends BaseActivity implements RequestListener,
 				    + id);
 		}
 		return;
-		
+
 	    case VelloRequestFactory.REQUEST_TYPE_CREATE_VOCABULARY_BOARD:
 		if (resultData != null) {
 		    // create vocabulary board successfully
-		    String id = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_BOARD_ID);
-		    
+		    String id = resultData
+			    .getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_BOARD_ID);
+
 		    configureVocabularyBoard(id);
 		}
 		return;
-		
+
 	    case VelloRequestFactory.REQUEST_TYPE_GET_DUE_WORDCARD_LIST:
 		ArrayList<WordCard> wordCardList = resultData
-		.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST);
-		
-		for (WordCard wc : wordCardList) {
-		    System.out.println(wc.name);
-		}
+			.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST);
+		mGoogleCardsAdapter.addAll(wordCardList);
 		return;
 	    default:
 		return;
@@ -265,7 +288,8 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     private void createVocabularyBoard() {
 	setProgressBarIndeterminateVisibility(true);
-	Request createVocabularyBoardRequest = VelloRequestFactory.createVocabularyBoardRequest();
+	Request createVocabularyBoardRequest = VelloRequestFactory
+		.createVocabularyBoardRequest();
 	mRequestManager.execute(createVocabularyBoardRequest, this);
 	mRequestList.add(createVocabularyBoardRequest);
     }
@@ -305,10 +329,11 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	mRequestManager.execute(configureVocabularyBoardRequest, this);
 	mRequestList.add(configureVocabularyBoardRequest);
     }
-    
+
     private void getDueWordCardList() {
 	setProgressBarIndeterminateVisibility(true);
-	Request getDueWordCardListRequest = VelloRequestFactory.getDueWordCardListRequest(VelloRequestFactory.REQUEST_TYPE_GET_DUE_WORDCARD_LIST);
+	Request getDueWordCardListRequest = VelloRequestFactory
+		.getDueWordCardListRequest(VelloRequestFactory.REQUEST_TYPE_GET_DUE_WORDCARD_LIST);
 	mRequestManager.execute(getDueWordCardListRequest, this);
 	mRequestList.add(getDueWordCardListRequest);
     }
@@ -319,5 +344,12 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     @Override
     public void connectionErrorDialogRetry(Request request) {
+    }
+
+    @Override
+    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+	for (int position : reverseSortedPositions) {
+	    mGoogleCardsAdapter.remove(position);
+	}
     }
 }
