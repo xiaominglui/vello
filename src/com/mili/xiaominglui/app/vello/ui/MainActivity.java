@@ -1,6 +1,7 @@
 package com.mili.xiaominglui.app.vello.ui;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Window;
@@ -20,12 +21,16 @@ import com.manuelpeinado.refreshactionitem.RefreshActionItem;
 import com.manuelpeinado.refreshactionitem.RefreshActionItem.RefreshActionListener;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.adapter.GoogleCardsAdapter;
+import com.mili.xiaominglui.app.vello.data.factory.IcibaWordXmlParser;
 import com.mili.xiaominglui.app.vello.data.model.Board;
+import com.mili.xiaominglui.app.vello.data.model.IcibaWord;
 import com.mili.xiaominglui.app.vello.data.model.List;
+import com.mili.xiaominglui.app.vello.data.model.Word;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment.ConnectionErrorDialogListener;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
+import com.tjerkw.slideexpandable.library.SlideExpandableListAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,16 +70,18 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		new SwipeDismissAdapter(mGoogleCardsAdapter,
 			new MyOnDismissCallback(mGoogleCardsAdapter)));
 	swingBottomInAnimationAdapter.setListView(listView);
+	
+	SlideExpandableListAdapter slideExpandableListAdapter = new SlideExpandableListAdapter(swingBottomInAnimationAdapter, R.id.expandable_toggle_button, R.id.expandable);
 
-	listView.setAdapter(swingBottomInAnimationAdapter);
+	listView.setAdapter(slideExpandableListAdapter);
 
     }
 
     private class MyOnDismissCallback implements OnDismissCallback {
 
-	private ArrayAdapter<WordCard> mAdapter;
+	private ArrayAdapter<Word> mAdapter;
 
-	public MyOnDismissCallback(ArrayAdapter<WordCard> adapter) {
+	public MyOnDismissCallback(ArrayAdapter<Word> adapter) {
 	    mAdapter = adapter;
 	}
 
@@ -159,7 +166,6 @@ public class MainActivity extends BaseActivity implements RequestListener,
     @Override
     public void onRequestFinished(Request request, Bundle resultData) {
 	if (mRequestList.contains(request)) {
-	    mRefreshActionItem.showProgress(false);
 	    mRequestList.remove(request);
 
 	    switch (request.getRequestType()) {
@@ -276,9 +282,10 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	    case VelloRequestFactory.REQUEST_TYPE_GET_DUE_WORDCARD_LIST:
 		ArrayList<WordCard> wordCardList = resultData
 			.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST);
-		int num = wordCardList.size();
-		mRefreshActionItem.showBadge(String.valueOf(num));
-		mGoogleCardsAdapter.addAll(wordCardList);
+		
+		for (WordCard wordCard : wordCardList) {
+		    new WordCardToWordTask().execute(wordCard);
+		}
 		return;
 	    default:
 		return;
@@ -383,8 +390,36 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     @Override
     public void onRefreshButtonClick(RefreshActionItem sender) {
-	// TODO Auto-generated method stub
-//	mRefreshActionItem.showProgress(true);
+	mGoogleCardsAdapter.clear();
 	getDueWordCardList();
+    }
+    
+    private class WordCardToWordTask extends AsyncTask<WordCard, Integer, ArrayList<Word>> {
+
+	@Override
+	protected ArrayList<Word> doInBackground(WordCard... wordcards) {
+	    
+	    ArrayList<Word> wordList = new ArrayList<Word>();
+	    for (WordCard wordcard : wordcards) {
+		IcibaWord word = new IcibaWord();
+		String xmlWord = wordcard.desc;
+		word = new IcibaWordXmlParser().parse(xmlWord);
+		
+		if (word == null) {
+		    word = new IcibaWord();
+		}
+		word.idCard = wordcard.id;
+		word.keyword = wordcard.name;
+		wordList.add(word);
+	    }
+	    return wordList;
+	}
+
+	@Override
+	protected void onPostExecute(ArrayList<Word> result) {
+		mGoogleCardsAdapter.addAll(result);
+		mRefreshActionItem.showBadge(String.valueOf(mGoogleCardsAdapter.getCount()));
+		mRefreshActionItem.showProgress(false);
+	}
     }
 }
