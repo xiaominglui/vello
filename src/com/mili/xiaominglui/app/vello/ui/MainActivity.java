@@ -139,7 +139,6 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		String due = reviewedWord.due;
 		if (due == null) {
 		    // new word via lookup
-		    initializeWordCard(idCard);
 		    mAdapter.remove(position);
 		    showCurrentBadge();
 		} else {
@@ -412,20 +411,24 @@ public class MainActivity extends BaseActivity implements RequestListener,
 			.getString(VelloRequestFactory.BUNDLE_EXTRA_DICTIONARY_ICIBA_RESPONSE);
 		String keyword = request
 			.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
+
 		IcibaWord word = IcibaWordXmlParser.parse(wsResult);
 		if (word.definition.size() > 0) {
-		    // response a valid word and save to trello
+		    // response a available word and save to trello
 		    // begin save word flow
 		    checkWordCardStatus(keyword, wsResult);
 
 		} else {
-		    // no valid word, tell user the truth.
-		    // TODO
+		    // NOT available word, tell user the truth.
+		    Toast.makeText(mContext, R.string.toast_not_available_word,
+			    Toast.LENGTH_SHORT).show();
+		    mRefreshActionItem.showProgress(false);
 		}
-		mRefreshActionItem.showProgress(false);
+
 		if (VelloConfig.DEBUG_SWITCH) {
 		    Log.d(TAG, "look up word end.");
 		}
+
 		return;
 
 	    case VelloRequestFactory.REQUEST_TYPE_CHECK_WORDCARD_STATUS:
@@ -433,43 +436,45 @@ public class MainActivity extends BaseActivity implements RequestListener,
 			.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST);
 		String newWord = request
 			.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
-		String newResult = request
+		String newWordResult = request
 			.getString(VelloRequestFactory.PARAM_EXTRA_CHECK_WORDCARD_WS_RESULT);
 		if (existedWordCardList.isEmpty()) {
 		    // new word, should add WordCard
 		    if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "new word, should add WordCard");
 		    }
-		    addWordCard(newWord, newResult);
+		    addWordCard(newWord, newWordResult);
 		} else {
-		    // word exists
-		    if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "word exists");
-		    }
-		    if (existedWordCardList.size() > 1) {
-			if (VelloConfig.DEBUG_SWITCH) {
-			    Log.d(TAG,
-				    "more than ONE WordCard with the same title, it should NOT be happen! Check why?");
-			}
-		    } else if (existedWordCardList.size() == 1) {
-			// the right condition
-			for (WordCard w : existedWordCardList) {
+		    // check more to decide
+		    // filter to find the right one
+		    for (WordCard w : existedWordCardList) {
+			if (w.name.equals(newWord)) {
+			    // got the right word card
 			    if (w.closed.equals("true")) {
-				// the existed word card has be closed, re-open
+				// the existed word card has be closed,
+				// re-open
 				// it.
 				reOpenWordCard(w.id);
 			    } else {
 				if (w.due.equals("null")) {
 				    // the existed word card has not be
-				    // initialized, initialize it.
+				    // initialized, initialize it. this is the
+				    // double check
 				    initializeWordCard(w.id);
 				} else {
-				    // the existed word is in review process, do
+				    // the existed word is in review
+				    // process, do
 				    // nothing at present.
 				}
 			    }
+			    if (VelloConfig.DEBUG_SWITCH) {
+				Log.d(TAG, "check wordcard status end.");
+			    }
+			    return;
 			}
 		    }
+
+		    addWordCard(newWord, newWordResult);
 		}
 		if (VelloConfig.DEBUG_SWITCH) {
 		    Log.d(TAG, "check wordcard status end.");
@@ -480,16 +485,19 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		WordCard addedWordCard = resultData
 			.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 		if (addedWordCard != null) {
-		    // added wordcard here
-		    // show it to user
+		    // show added wordcard to user
 		    new WordCardToWordTask().execute(addedWordCard);
+		    // at the same time initialize it.
+		    initializeWordCard(addedWordCard.id);
 		} else {
 		    // add failed
-		    // TODO
+		    // do nothing at present
 		}
+
 		if (VelloConfig.DEBUG_SWITCH) {
 		    Log.d(TAG, "addWordCard end.");
 		}
+
 		return;
 
 	    case VelloRequestFactory.REQUEST_TYPE_REOPEN_WORDCARD:
@@ -502,6 +510,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		    // reopen failed
 		    // do nothing at present.
 		}
+		mRefreshActionItem.showProgress(false);
 		if (VelloConfig.DEBUG_SWITCH) {
 		    Log.d(TAG, "reOpenzeWordCard end.");
 		}
@@ -726,13 +735,6 @@ public class MainActivity extends BaseActivity implements RequestListener,
     @Override
     public void connectionErrorDialogRetry(Request request) {
     }
-
-    // @Override
-    // public void onDismiss(ListView listView, int[] reverseSortedPositions) {
-    // for (int position : reverseSortedPositions) {
-    // mGoogleCardsAdapter.remove(position);
-    // }
-    // }
 
     @Override
     public void onRefreshButtonClick(RefreshActionItem sender) {
