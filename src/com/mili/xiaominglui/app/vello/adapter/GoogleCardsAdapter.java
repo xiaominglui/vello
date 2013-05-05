@@ -70,8 +70,6 @@ public class GoogleCardsAdapter extends ArrayAdapter<Word> {
 		    .findViewById(R.id.definition_area);
 	    view.setTag(viewHolder);
 
-	    // viewHolder.imageView = (ImageView) view
-	    // .findViewById(R.id.activity_googlecards_card_imageview);
 	} else {
 	    viewHolder = (ViewHolder) view.getTag();
 	}
@@ -81,7 +79,15 @@ public class GoogleCardsAdapter extends ArrayAdapter<Word> {
 
 	viewHolder.textViewKeyword.setText(getItem(position).keyword);
 
+	
+
+	viewHolder.iconicLifeCount.setIcon(FontAwesomeIcon.HEART);
+	viewHolder.iconicLifeCount.setTextColor(Color.GRAY);
+	viewHolder.textViewLifeCount.setText("7");
+	viewHolder.textViewLifeCount.setTextColor(Color.GRAY);
+	
 	p = word.phonetics;
+	viewHolder.phonetic_area.removeAllViews();
 	for (Phonetics phonetics : p) {
 	    View phoneticsView = LayoutInflater.from(mContext).inflate(
 		    R.layout.phonetics_item, null);
@@ -94,12 +100,8 @@ public class GoogleCardsAdapter extends ArrayAdapter<Word> {
 	    viewHolder.phonetic_area.addView(phoneticsGroup);
 	}
 
-	viewHolder.iconicLifeCount.setIcon(FontAwesomeIcon.HEART);
-	viewHolder.iconicLifeCount.setTextColor(Color.GRAY);
-	viewHolder.textViewLifeCount.setText("7");
-	viewHolder.textViewLifeCount.setTextColor(Color.GRAY);
-
 	d = word.definition;
+	viewHolder.definition_area.removeAllViews();
 	for (Definition definition : d) {
 	    View definitionView = LayoutInflater.from(mContext).inflate(
 		    R.layout.definition_item, null);
@@ -111,8 +113,6 @@ public class GoogleCardsAdapter extends ArrayAdapter<Word> {
 		    .setText(definition.definiens);
 	    viewHolder.definition_area.addView(definiitionGroup);
 	}
-	// setImageView(viewHolder, position);
-
 	return view;
     }
 

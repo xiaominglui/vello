@@ -49,8 +49,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends BaseActivity implements RequestListener,
-	ConnectionErrorDialogListener, OnDismissCallback,
-	RefreshActionListener, OnQueryTextListener, OnSuggestionListener {
+	ConnectionErrorDialogListener, RefreshActionListener,
+	OnQueryTextListener, OnSuggestionListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private Menu mOptionsMenu;
     private Context mContext;
@@ -312,7 +312,6 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		    }
 
 		}
-
 		// no vocabulary list found
 		createVocabularyList(position);
 		if (VelloConfig.DEBUG_SWITCH) {
@@ -400,8 +399,10 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	    case VelloRequestFactory.REQUEST_TYPE_CHECK_WORDCARD_STATUS:
 		ArrayList<WordCard> existedWordCardList = resultData
 			.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST);
-		String newWord = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
-		String newResult = request.getString(VelloRequestFactory.PARAM_EXTRA_CHECK_WORDCARD_WS_RESULT);
+		String newWord = request
+			.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
+		String newResult = request
+			.getString(VelloRequestFactory.PARAM_EXTRA_CHECK_WORDCARD_WS_RESULT);
 		if (existedWordCardList.isEmpty()) {
 		    // new word, should add WordCard
 		    if (VelloConfig.DEBUG_SWITCH) {
@@ -415,20 +416,24 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		    }
 		    if (existedWordCardList.size() > 1) {
 			if (VelloConfig.DEBUG_SWITCH) {
-			    Log.d(TAG, "more than ONE WordCard with the same title, it should NOT be happen! Check why?");
+			    Log.d(TAG,
+				    "more than ONE WordCard with the same title, it should NOT be happen! Check why?");
 			}
 		    } else if (existedWordCardList.size() == 1) {
 			// the right condition
 			for (WordCard w : existedWordCardList) {
 			    if (w.closed.equals("true")) {
-				// the existed word card has be closed, re-open it.
+				// the existed word card has be closed, re-open
+				// it.
 				reOpenWordCard(w.id);
 			    } else {
 				if (w.due.equals("null")) {
-				    // the existed word card has not be initialized, initialize it.
+				    // the existed word card has not be
+				    // initialized, initialize it.
 				    initializeWordCard(w.id);
 				} else {
-				    // the existed word is in review process, do nothing at present.
+				    // the existed word is in review process, do
+				    // nothing at present.
 				}
 			    }
 			}
@@ -438,9 +443,10 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		    Log.d(TAG, "check wordcard status end.");
 		}
 		return;
-		
+
 	    case VelloRequestFactory.REQUEST_TYPE_ADD_WORDCARD:
-		WordCard addedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+		WordCard addedWordCard = resultData
+			.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 		if (addedWordCard != null) {
 		    // added wordcard here
 		    // show it to user
@@ -453,9 +459,10 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		    Log.d(TAG, "addWordCard end.");
 		}
 		return;
-		
+
 	    case VelloRequestFactory.REQUEST_TYPE_REOPEN_WORDCARD:
-		WordCard reopenedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+		WordCard reopenedWordCard = resultData
+			.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 		if (reopenedWordCard != null) {
 		    // reopened
 		    // do nothing at present.
@@ -467,9 +474,10 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		    Log.d(TAG, "reOpenzeWordCard end.");
 		}
 		return;
-		
+
 	    case VelloRequestFactory.REQUEST_TYPE_INITIALIZE_WORDCARD:
-		WordCard initializedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+		WordCard initializedWordCard = resultData
+			.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 		if (initializedWordCard != null) {
 		    // initialized
 		    // do nothing at present
@@ -617,7 +625,8 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	if (VelloConfig.DEBUG_SWITCH) {
 	    Log.d(TAG, "addWordCard start...");
 	}
-	Request addWordCard = VelloRequestFactory.addWordCardRequest(keyword, data);
+	Request addWordCard = VelloRequestFactory.addWordCardRequest(keyword,
+		data);
 	mRequestManager.execute(addWordCard, this);
 	mRequestList.add(addWordCard);
     }
@@ -627,7 +636,8 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	if (VelloConfig.DEBUG_SWITCH) {
 	    Log.d(TAG, "initializeWordCard start...");
 	}
-	Request initializeWordCard = VelloRequestFactory.initializeWordCardRequest(idCard);
+	Request initializeWordCard = VelloRequestFactory
+		.initializeWordCardRequest(idCard);
 	mRequestManager.execute(initializeWordCard, this);
 	mRequestList.add(initializeWordCard);
     }
@@ -637,7 +647,8 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	if (VelloConfig.DEBUG_SWITCH) {
 	    Log.d(TAG, "reOpenWordCard start...");
 	}
-	Request reOpenWordCard = VelloRequestFactory.reOpenWordCardRequest(idCard);
+	Request reOpenWordCard = VelloRequestFactory
+		.reOpenWordCardRequest(idCard);
 	mRequestManager.execute(reOpenWordCard, this);
 	mRequestList.add(reOpenWordCard);
     }
@@ -658,12 +669,12 @@ public class MainActivity extends BaseActivity implements RequestListener,
     public void connectionErrorDialogRetry(Request request) {
     }
 
-    @Override
-    public void onDismiss(ListView listView, int[] reverseSortedPositions) {
-	for (int position : reverseSortedPositions) {
-	    mGoogleCardsAdapter.remove(position);
-	}
-    }
+    // @Override
+    // public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+    // for (int position : reverseSortedPositions) {
+    // mGoogleCardsAdapter.remove(position);
+    // }
+    // }
 
     @Override
     public void onRefreshButtonClick(RefreshActionItem sender) {
