@@ -20,13 +20,13 @@ import org.xml.sax.SAXException;
 
 public class IcibaWordXmlParser {
     private static final String TAG = IcibaWordXmlParser.class.getSimpleName();
-    private IcibaWord word;
-    private Phoneticss phoneticss;
-    private Phonetics phonetics;
-    private Definitions definitions;
-    private Definition definition;
+    private static IcibaWord word;
+    private static Phoneticss phoneticss;
+    private static Phonetics phonetics;
+    private static Definitions definitions;
+    private static Definition definition;
     
-    public IcibaWord parse(String xml) {
+    public static IcibaWord parse(String xml) {
 	RootElement dict = new RootElement("dict");
 	Element dictPs = dict.getChild("ps");
 	Element dictPron = dict.getChild("pron");

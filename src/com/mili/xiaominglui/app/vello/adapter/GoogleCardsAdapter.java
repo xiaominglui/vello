@@ -48,6 +48,8 @@ public class GoogleCardsAdapter extends ArrayAdapter<Word> {
 	IcibaWord word = (IcibaWord) getItem(position);
 	ViewHolder viewHolder;
 	View view = convertView;
+	Phoneticss p;
+	Definitions d;
 	if (view == null) {
 	    view = LayoutInflater.from(mContext).inflate(
 		    R.layout.activity_googlecards_card, parent, false);
@@ -79,7 +81,7 @@ public class GoogleCardsAdapter extends ArrayAdapter<Word> {
 
 	viewHolder.textViewKeyword.setText(getItem(position).keyword);
 
-	Phoneticss p = word.phonetics;
+	p = word.phonetics;
 	for (Phonetics phonetics : p) {
 	    View phoneticsView = LayoutInflater.from(mContext).inflate(
 		    R.layout.phonetics_item, null);
@@ -94,10 +96,10 @@ public class GoogleCardsAdapter extends ArrayAdapter<Word> {
 
 	viewHolder.iconicLifeCount.setIcon(FontAwesomeIcon.HEART);
 	viewHolder.iconicLifeCount.setTextColor(Color.GRAY);
-	viewHolder.textViewLifeCount.setText("6");
+	viewHolder.textViewLifeCount.setText("7");
 	viewHolder.textViewLifeCount.setTextColor(Color.GRAY);
 
-	Definitions d = word.definition;
+	d = word.definition;
 	for (Definition definition : d) {
 	    View definitionView = LayoutInflater.from(mContext).inflate(
 		    R.layout.definition_item, null);

@@ -1,15 +1,27 @@
 package com.mili.xiaominglui.app.vello.ui;
 
+import android.app.SearchManager;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.BaseColumns;
+import android.support.v4.widget.CursorAdapter;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.widget.SearchView;
+import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
+import com.actionbarsherlock.widget.SearchView.OnSuggestionListener;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
 import com.haarman.listviewanimations.ArrayAdapter;
@@ -21,6 +33,7 @@ import com.manuelpeinado.refreshactionitem.RefreshActionItem;
 import com.manuelpeinado.refreshactionitem.RefreshActionItem.RefreshActionListener;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.adapter.GoogleCardsAdapter;
+import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.factory.IcibaWordXmlParser;
 import com.mili.xiaominglui.app.vello.data.model.Board;
 import com.mili.xiaominglui.app.vello.data.model.IcibaWord;
@@ -36,13 +49,41 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends BaseActivity implements RequestListener,
-	ConnectionErrorDialogListener, OnDismissCallback, RefreshActionListener {
+	ConnectionErrorDialogListener, OnDismissCallback,
+	RefreshActionListener, OnQueryTextListener, OnSuggestionListener {
     private static final String TAG = MainActivity.class.getSimpleName();
     private Menu mOptionsMenu;
     private Context mContext;
 
     private GoogleCardsAdapter mGoogleCardsAdapter;
     private RefreshActionItem mRefreshActionItem;
+
+    private SuggestionsAdapter mSuggestionsAdapter;
+    private static final String[] COLUMNS = { BaseColumns._ID,
+	    SearchManager.SUGGEST_COLUMN_TEXT_1, };
+
+    private class SuggestionsAdapter extends CursorAdapter {
+
+	public SuggestionsAdapter(Context context, Cursor c) {
+	    super(context, c, 0);
+	}
+
+	@Override
+	public View newView(Context context, Cursor cursor, ViewGroup parent) {
+	    LayoutInflater inflater = LayoutInflater.from(context);
+	    View v = inflater.inflate(android.R.layout.simple_list_item_1,
+		    parent, false);
+	    return v;
+	}
+
+	@Override
+	public void bindView(View view, Context context, Cursor cursor) {
+	    TextView tv = (TextView) view;
+	    final int textIndex = cursor
+		    .getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1);
+	    tv.setText(cursor.getString(textIndex));
+	}
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +111,10 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		new SwipeDismissAdapter(mGoogleCardsAdapter,
 			new MyOnDismissCallback(mGoogleCardsAdapter)));
 	swingBottomInAnimationAdapter.setListView(listView);
-	
-	SlideExpandableListAdapter slideExpandableListAdapter = new SlideExpandableListAdapter(swingBottomInAnimationAdapter, R.id.expandable_toggle_button, R.id.expandable);
+
+	SlideExpandableListAdapter slideExpandableListAdapter = new SlideExpandableListAdapter(
+		swingBottomInAnimationAdapter, R.id.expandable_toggle_button,
+		R.id.expandable);
 
 	listView.setAdapter(slideExpandableListAdapter);
 
@@ -140,10 +183,37 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	super.onCreateOptionsMenu(menu);
 	mOptionsMenu = menu;
 	getSupportMenuInflater().inflate(R.menu.home, menu);
+
+	SearchView searchView = new SearchView(getSupportActionBar()
+		.getThemedContext());
+	searchView.setQueryHint("Search for word...");
+	searchView.setOnQueryTextListener(this);
+	searchView.setOnSuggestionListener(this);
+	if (mSuggestionsAdapter == null) {
+	    MatrixCursor cursor = new MatrixCursor(COLUMNS);
+	    cursor.addRow(new String[] { "1", "'Murica" });
+	    cursor.addRow(new String[] { "2", "Canada" });
+	    cursor.addRow(new String[] { "3", "Denmark" });
+	    mSuggestionsAdapter = new SuggestionsAdapter(getSupportActionBar()
+		    .getThemedContext(), cursor);
+	}
+
+	searchView.setSuggestionsAdapter(mSuggestionsAdapter);
+	boolean isLight = false;
+	menu.add("Search")
+		.setIcon(
+			isLight ? R.drawable.ic_search_inverse
+				: R.drawable.abs__ic_search)
+		.setActionView(searchView)
+		.setShowAsAction(
+			MenuItem.SHOW_AS_ACTION_IF_ROOM
+				| MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+
 	MenuItem item = menu.findItem(R.id.refresh_button);
 	mRefreshActionItem = (RefreshActionItem) item.getActionView();
 	mRefreshActionItem.setMenuItem(item);
-	mRefreshActionItem.setProgressIndicatorType(ProgressIndicatorType.INDETERMINATE);
+	mRefreshActionItem
+		.setProgressIndicatorType(ProgressIndicatorType.INDETERMINATE);
 	mRefreshActionItem.setRefreshActionListener(this);
 	getDueWordCardList();
 	// setupSearchMenuItem(menu);
@@ -196,6 +266,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
 		// no vocabulary board found, need create one
 		createVocabularyBoard();
+		if (VelloConfig.DEBUG_SWITCH) {
+		    Log.d(TAG, "check vocabulary board end.");
+		}
 		return;
 
 	    case VelloRequestFactory.REQUEST_TYPE_CONFIGURE_VOCABULARY_BOARD:
@@ -211,6 +284,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
 		// continue to check vocabulary list if not well formed
 		checkVocabularyLists();
+		if (VelloConfig.DEBUG_SWITCH) {
+		    Log.d(TAG, "configure vocabulary board end.");
+		}
 		return;
 
 	    case VelloRequestFactory.REQUEST_TYPE_CHECK_VOCABULARY_LIST:
@@ -239,6 +315,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
 		// no vocabulary list found
 		createVocabularyList(position);
+		if (VelloConfig.DEBUG_SWITCH) {
+		    Log.d(TAG, "check vocabulary list end.");
+		}
 		return;
 
 	    case VelloRequestFactory.REQUEST_TYPE_REOPEN_VOCABULARY_LIST:
@@ -253,6 +332,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
 			    "reopen list successfully! vocabulary list id = "
 				    + id);
 		}
+		if (VelloConfig.DEBUG_SWITCH) {
+		    Log.d(TAG, "reopen vocabulary list end.");
+		}
 		return;
 
 	    case VelloRequestFactory.REQUEST_TYPE_CREATE_VOCABULARY_LIST:
@@ -263,9 +345,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		    int pos = resultData
 			    .getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
 		    AccountUtils.setVocabularyListId(mContext, id, pos);
-		    Log.d(TAG,
-			    "create list successfully! vocabulary list id = "
-				    + id);
+		}
+		if (VelloConfig.DEBUG_SWITCH) {
+		    Log.d(TAG, "create vocabulary list end.");
 		}
 		return;
 
@@ -277,16 +359,129 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
 		    configureVocabularyBoard(id);
 		}
+		if (VelloConfig.DEBUG_SWITCH) {
+		    Log.d(TAG, "create vocabulary board end.");
+		}
 		return;
 
 	    case VelloRequestFactory.REQUEST_TYPE_GET_DUE_WORDCARD_LIST:
 		ArrayList<WordCard> wordCardList = resultData
 			.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST);
-		
+
 		for (WordCard wordCard : wordCardList) {
 		    new WordCardToWordTask().execute(wordCard);
 		}
+		if (VelloConfig.DEBUG_SWITCH) {
+		    Log.d(TAG, "get due word card list end.");
+		}
 		return;
+
+	    case VelloRequestFactory.REQUEST_TYPE_LOOK_UP_WORD:
+		String wsResult = resultData
+			.getString(VelloRequestFactory.BUNDLE_EXTRA_DICTIONARY_ICIBA_RESPONSE);
+		String keyword = request
+			.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
+		IcibaWord word = IcibaWordXmlParser.parse(wsResult);
+		if (word != null) {
+		    // response a valid word and save to trello
+		    // begin save word flow
+		    checkWordCardStatus(keyword, wsResult);
+
+		} else {
+		    // no valid word, tell user the truth.
+		    // TODO
+		}
+		mRefreshActionItem.showProgress(false);
+		if (VelloConfig.DEBUG_SWITCH) {
+		    Log.d(TAG, "look up word end.");
+		}
+		return;
+
+	    case VelloRequestFactory.REQUEST_TYPE_CHECK_WORDCARD_STATUS:
+		ArrayList<WordCard> existedWordCardList = resultData
+			.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST);
+		String newWord = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
+		String newResult = request.getString(VelloRequestFactory.PARAM_EXTRA_CHECK_WORDCARD_WS_RESULT);
+		if (existedWordCardList.isEmpty()) {
+		    // new word, should add WordCard
+		    if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "new word, should add WordCard");
+		    }
+		    addWordCard(newWord, newResult);
+		} else {
+		    // word exists
+		    if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "word exists");
+		    }
+		    if (existedWordCardList.size() > 1) {
+			if (VelloConfig.DEBUG_SWITCH) {
+			    Log.d(TAG, "more than ONE WordCard with the same title, it should NOT be happen! Check why?");
+			}
+		    } else if (existedWordCardList.size() == 1) {
+			// the right condition
+			for (WordCard w : existedWordCardList) {
+			    if (w.closed.equals("true")) {
+				// the existed word card has be closed, re-open it.
+				reOpenWordCard(w.id);
+			    } else {
+				if (w.due.equals("null")) {
+				    // the existed word card has not be initialized, initialize it.
+				    initializeWordCard(w.id);
+				} else {
+				    // the existed word is in review process, do nothing at present.
+				}
+			    }
+			}
+		    }
+		}
+		if (VelloConfig.DEBUG_SWITCH) {
+		    Log.d(TAG, "check wordcard status end.");
+		}
+		return;
+		
+	    case VelloRequestFactory.REQUEST_TYPE_ADD_WORDCARD:
+		WordCard addedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+		if (addedWordCard != null) {
+		    // added wordcard here
+		    // show it to user
+		    new WordCardToWordTask().execute(addedWordCard);
+		} else {
+		    // add failed
+		    // TODO
+		}
+		if (VelloConfig.DEBUG_SWITCH) {
+		    Log.d(TAG, "addWordCard end.");
+		}
+		return;
+		
+	    case VelloRequestFactory.REQUEST_TYPE_REOPEN_WORDCARD:
+		WordCard reopenedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+		if (reopenedWordCard != null) {
+		    // reopened
+		    // do nothing at present.
+		} else {
+		    // reopen failed
+		    // do nothing at present.
+		}
+		if (VelloConfig.DEBUG_SWITCH) {
+		    Log.d(TAG, "reOpenzeWordCard end.");
+		}
+		return;
+		
+	    case VelloRequestFactory.REQUEST_TYPE_INITIALIZE_WORDCARD:
+		WordCard initializedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+		if (initializedWordCard != null) {
+		    // initialized
+		    // do nothing at present
+		} else {
+		    // initialized failed
+		    // do nothing at present
+		}
+		if (VelloConfig.DEBUG_SWITCH) {
+		    Log.d(TAG, "initializeWordCard end.");
+		}
+		return;
+
 	    default:
 		return;
 	    }
@@ -315,6 +510,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     private void checkVocabularyBoard() {
 	mRefreshActionItem.showProgress(true);
+	if (VelloConfig.DEBUG_SWITCH) {
+	    Log.d(TAG, "checkVocabularyBoard start...");
+	}
 	Request checkVocabularyBoardRequest = VelloRequestFactory
 		.checkVocabularyBoardRequest();
 	mRequestManager.execute(checkVocabularyBoardRequest, this);
@@ -323,6 +521,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     private void createVocabularyBoard() {
 	mRefreshActionItem.showProgress(true);
+	if (VelloConfig.DEBUG_SWITCH) {
+	    Log.d(TAG, "createVocabularyBoard start...");
+	}
 	Request createVocabularyBoardRequest = VelloRequestFactory
 		.createVocabularyBoardRequest();
 	mRequestManager.execute(createVocabularyBoardRequest, this);
@@ -331,6 +532,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     private void createVocabularyList(int position) {
 	mRefreshActionItem.showProgress(true);
+	if (VelloConfig.DEBUG_SWITCH) {
+	    Log.d(TAG, "createVocabularyList start...");
+	}
 	Request createVocabularyListRequest = VelloRequestFactory
 		.createVocabularyListRequest(position);
 	mRequestManager.execute(createVocabularyListRequest, this);
@@ -339,6 +543,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     private void reOpenVocabulayList(int position, String id) {
 	mRefreshActionItem.showProgress(true);
+	if (VelloConfig.DEBUG_SWITCH) {
+	    Log.d(TAG, "reOpenVocabulayList start...");
+	}
 	Request reOpenVocabularyListRequest = VelloRequestFactory
 		.reOpenVocabularyListRequest(position, id);
 	mRequestManager.execute(reOpenVocabularyListRequest, this);
@@ -347,6 +554,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     private void checkVocabularyLists() {
 	mRefreshActionItem.showProgress(true);
+	if (VelloConfig.DEBUG_SWITCH) {
+	    Log.d(TAG, "checkVocabularyLists start...");
+	}
 	for (int i = 0; i < AccountUtils.VOCABULARY_LISTS_TITLE_ID.length; i++) {
 	    Request checkVocabularyListReqest = VelloRequestFactory
 		    .checkVocabularyListRequest(i);
@@ -359,6 +569,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     private void configureVocabularyBoard(String id) {
 	mRefreshActionItem.showProgress(true);
+	if (VelloConfig.DEBUG_SWITCH) {
+	    Log.d(TAG, "configureVocabularyBoard start...");
+	}
 	Request configureVocabularyBoardRequest = VelloRequestFactory
 		.configureVocabularyBoardRequest(id);
 	mRequestManager.execute(configureVocabularyBoardRequest, this);
@@ -367,10 +580,74 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     private void getDueWordCardList() {
 	mRefreshActionItem.showProgress(true);
+	if (VelloConfig.DEBUG_SWITCH) {
+	    Log.d(TAG, "getDueWordCardList start...");
+	}
 	Request getDueWordCardListRequest = VelloRequestFactory
-		.getDueWordCardListRequest(VelloRequestFactory.REQUEST_TYPE_GET_DUE_WORDCARD_LIST);
+		.getDueWordCardListRequest();
 	mRequestManager.execute(getDueWordCardListRequest, this);
 	mRequestList.add(getDueWordCardListRequest);
+    }
+
+    private void lookUpWord(String keyword) {
+	mRefreshActionItem.showProgress(true);
+	if (VelloConfig.DEBUG_SWITCH) {
+	    Log.d(TAG, "look up word start...");
+	}
+	Request lookUpWordRequest = VelloRequestFactory
+		.lookUpWordRequest(keyword);
+	mRequestManager.execute(lookUpWordRequest, this);
+	mRequestList.add(lookUpWordRequest);
+
+    }
+
+    private void checkWordCardStatus(String keyword, String wsResult) {
+	mRefreshActionItem.showProgress(true);
+	if (VelloConfig.DEBUG_SWITCH) {
+	    Log.d(TAG, "checkWordCardStatusRequest start...");
+	}
+	Request checkWordCardStatus = VelloRequestFactory
+		.checkWordCardStatusRequest(keyword, wsResult);
+	mRequestManager.execute(checkWordCardStatus, this);
+	mRequestList.add(checkWordCardStatus);
+    }
+
+    private void addWordCard(String keyword, String data) {
+	mRefreshActionItem.showProgress(true);
+	if (VelloConfig.DEBUG_SWITCH) {
+	    Log.d(TAG, "addWordCard start...");
+	}
+	Request addWordCard = VelloRequestFactory.addWordCardRequest(keyword, data);
+	mRequestManager.execute(addWordCard, this);
+	mRequestList.add(addWordCard);
+    }
+
+    private void initializeWordCard(String idCard) {
+	mRefreshActionItem.showProgress(true);
+	if (VelloConfig.DEBUG_SWITCH) {
+	    Log.d(TAG, "initializeWordCard start...");
+	}
+	Request initializeWordCard = VelloRequestFactory.initializeWordCardRequest(idCard);
+	mRequestManager.execute(initializeWordCard, this);
+	mRequestList.add(initializeWordCard);
+    }
+
+    private void reOpenWordCard(String idCard) {
+	mRefreshActionItem.showProgress(true);
+	if (VelloConfig.DEBUG_SWITCH) {
+	    Log.d(TAG, "reOpenWordCard start...");
+	}
+	Request reOpenWordCard = VelloRequestFactory.reOpenWordCardRequest(idCard);
+	mRequestManager.execute(reOpenWordCard, this);
+	mRequestList.add(reOpenWordCard);
+    }
+
+    private void archiveWordCard(String idCard) {
+	// TODO
+    }
+
+    private void reviewedWordCard() {
+	// TODO
     }
 
     @Override
@@ -393,18 +670,19 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	mGoogleCardsAdapter.clear();
 	getDueWordCardList();
     }
-    
-    private class WordCardToWordTask extends AsyncTask<WordCard, Integer, ArrayList<Word>> {
+
+    private class WordCardToWordTask extends
+	    AsyncTask<WordCard, Integer, ArrayList<Word>> {
 
 	@Override
 	protected ArrayList<Word> doInBackground(WordCard... wordcards) {
-	    
+
 	    ArrayList<Word> wordList = new ArrayList<Word>();
 	    for (WordCard wordcard : wordcards) {
 		IcibaWord word = new IcibaWord();
 		String xmlWord = wordcard.desc;
-		word = new IcibaWordXmlParser().parse(xmlWord);
-		
+		word = IcibaWordXmlParser.parse(xmlWord);
+
 		if (word == null) {
 		    word = new IcibaWord();
 		}
@@ -417,9 +695,37 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
 	@Override
 	protected void onPostExecute(ArrayList<Word> result) {
-		mGoogleCardsAdapter.addAll(result);
-		mRefreshActionItem.showBadge(String.valueOf(mGoogleCardsAdapter.getCount()));
-		mRefreshActionItem.showProgress(false);
+	    mGoogleCardsAdapter.addAll(result);
+	    mRefreshActionItem.showBadge(String.valueOf(mGoogleCardsAdapter
+		    .getCount()));
+	    mRefreshActionItem.showProgress(false);
 	}
+    }
+
+    @Override
+    public boolean onSuggestionSelect(int position) {
+	// TODO Auto-generated method stub
+	return false;
+    }
+
+    @Override
+    public boolean onSuggestionClick(int position) {
+	// TODO Auto-generated method stub
+	return false;
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+	// TODO Auto-generated method stub
+	if (query != null) {
+	    lookUpWord(query);
+	}
+	return true;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+	// TODO Auto-generated method stub
+	return false;
     }
 }

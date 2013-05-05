@@ -1,13 +1,18 @@
 package com.mili.xiaominglui.app.vello.data.service;
 
 import com.foxykeep.datadroid.service.RequestService;
+import com.mili.xiaominglui.app.vello.data.operation.AddWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CheckVocabularyBoardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CheckVocabularyListOperation;
+import com.mili.xiaominglui.app.vello.data.operation.CheckWordCardStatusOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ConfigureVocabularyBoardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CreateVocabularyBoardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CreateVocabularyListOperation;
 import com.mili.xiaominglui.app.vello.data.operation.GetDueWordCardListOperation;
+import com.mili.xiaominglui.app.vello.data.operation.InitializeWordCardOperation;
+import com.mili.xiaominglui.app.vello.data.operation.QueryWordOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ReopenVocabularyListOperation;
+import com.mili.xiaominglui.app.vello.data.operation.ReopenWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 
 public class VelloRequestService extends RequestService {
@@ -34,8 +39,16 @@ public class VelloRequestService extends RequestService {
 	    return new CreateVocabularyBoardOperation();
 	case VelloRequestFactory.REQUEST_TYPE_GET_DUE_WORDCARD_LIST:
 	    return new GetDueWordCardListOperation();
-	case VelloRequestFactory.REQUEST_TYPE_QUERY_WORD:
-	    return null;
+	case VelloRequestFactory.REQUEST_TYPE_LOOK_UP_WORD:
+	    return new QueryWordOperation();
+	case VelloRequestFactory.REQUEST_TYPE_CHECK_WORDCARD_STATUS:
+	    return new CheckWordCardStatusOperation();
+	case VelloRequestFactory.REQUEST_TYPE_ADD_WORDCARD:
+	    return new AddWordCardOperation();
+	case VelloRequestFactory.REQUEST_TYPE_REOPEN_WORDCARD:
+	    return new ReopenWordCardOperation();
+	case VelloRequestFactory.REQUEST_TYPE_INITIALIZE_WORDCARD:
+	    return new InitializeWordCardOperation();
 	}
 	return null;
     }

@@ -9,6 +9,7 @@ public class WordCard implements Parcelable {
     public String desc;
     public String due;
     public String idList;
+    public String closed;
     
     public WordCard() {
 	
@@ -24,5 +25,6 @@ public class WordCard implements Parcelable {
 	dest.writeString(desc);
 	dest.writeString(due);
 	dest.writeString(idList);
+	dest.writeString(closed);
     }
 }

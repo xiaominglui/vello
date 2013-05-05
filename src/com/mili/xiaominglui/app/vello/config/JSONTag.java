@@ -23,5 +23,9 @@ public final class JSONTag {
     public static final String CARD_ELEM_DUE = "due";
     public static final String CARD_ELEM_DESC = "desc";
     public static final String CARD_ELEM_IDLIST = "idList";
+    public static final String CARD_ELEM_CLOSED = "closed";
+    
+    // Trello Search tags
+    public static final String SEARCH_ELEM_CARDS = "cards";
 
 }

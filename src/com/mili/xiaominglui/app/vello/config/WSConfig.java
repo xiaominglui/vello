@@ -15,6 +15,8 @@ public final class WSConfig {
     
     public static final String WS_TRELLO_TARGET_BOARD = "/boards";
     public static final String WS_TRELLO_TARGET_LIST = "/lists";
+    public static final String WS_TRELLO_TARGET_SEARCH = "/search";
+    public static final String WS_TRELLO_TARGET_CARD ="/cards";
     
     public static final String WS_TRELLO_PARAM_FILTER = "filter";
     public static final String WS_TRELLO_PARAM_APP_KEY = "key";
@@ -25,9 +27,18 @@ public final class WSConfig {
     public static final String WS_TRELLO_PARAM_NAME = "name";
     public static final String WS_TRELLO_PARAM_DESC = "desc";
     public static final String WS_TRELLO_PARAM_IDBOARD = "idBoard";
+    public static final String WS_TRELLO_PARAM_IDBOARDS = "idBoards";
+    public static final String WS_TRELLO_PARAM_QUERY = "query";
+    public static final String WS_TRELLO_PARAM_MODELTYPES = "modelTypes";
+    public static final String WS_TRELLO_PARAM_CARD_FIELDS = "card_fields";
+    public static final String WS_TRELLO_PARAM_IDLIST = "idList";
+    public static final String WS_TRELLO_PARAM_DUE = "due";
     
     
     public static final String WS_TRELLO_FIELD_LISTS = "/lists";
     public static final String WS_TRELLO_FIELD_CARDS = "/cards";
     
+    // iciba
+    public static final String WS_DICTIONARY_ICIBA_API = "http://dict-co.iciba.com/api/dictionary.php";
+    public static final String WS_DICTIONARY_ICIBA_PARAM_KEYWORD = "w";
 }

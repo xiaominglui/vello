@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.foxykeep.datadroid.exception.DataException;
 import com.mili.xiaominglui.app.vello.config.JSONTag;
+import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 
@@ -30,6 +31,7 @@ public class DueWordCardListJsonFactory {
 	ArrayList<WordCard> wordCardList = new ArrayList<WordCard>();
 	Calendar rightNow = Calendar.getInstance();
 	long rightNowUnixTime = rightNow.getTimeInMillis();
+	
 	try {
 	    JSONArray jsonCardArray = new JSONArray(wsResponse);
 	    int size = jsonCardArray.length();
@@ -64,9 +66,10 @@ public class DueWordCardListJsonFactory {
 	} catch (ParseException e) {
 	    Log.e(TAG, "ParseException", e);
 	}
-	
+
 	Bundle bundle = new Bundle();
-	bundle.putParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST, wordCardList);
+	bundle.putParcelableArrayList(
+		VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST, wordCardList);
 	return bundle;
     }
 
