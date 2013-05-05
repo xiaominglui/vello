@@ -19,9 +19,9 @@
             android:gravity="center"
             android:paddingBottom="16dp"
             android:paddingLeft="16dp"
-            android:paddingRight="16dp"
+            android:paddingRight="5dp"
             android:paddingTop="5dp"
-            android:textSize="17sp" />
+            android:textSize="20sp" />
 
         <LinearLayout
             android:id="@+id/keyword_area"
@@ -35,11 +35,6 @@
                 android:layout_height="wrap_content"
                 android:textIsSelectable="true"
                 android:textSize="35sp" />
-            <LinearLayout
-                android:id="@+id/phonetics_area"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" />
         </LinearLayout>
 
         <LinearLayout
@@ -48,6 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
+            android:layout_below="@+id/expandable_toggle_button"
             android:orientation="horizontal" >
 
             <com.atermenji.android.iconictextview.IconicTextView
@@ -72,11 +68,16 @@
         android:id="@+id/expandable"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/card_background_white"
-        android:orientation="horizontal"
+        android:background="@drawable/card_background_memo"
+        android:orientation="vertical"
         android:padding="16dp" >
 
         <!-- put whatever you want in the expandable view -->
+        <LinearLayout
+                android:id="@+id/phonetics_area"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
 
         <LinearLayout
                 android:id="@+id/definition_area"

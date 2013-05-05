@@ -20,6 +20,7 @@ import com.mili.xiaominglui.app.vello.data.model.IcibaWord;
 import com.mili.xiaominglui.app.vello.data.model.Phonetics;
 import com.mili.xiaominglui.app.vello.data.model.Phoneticss;
 import com.mili.xiaominglui.app.vello.data.model.Word;
+import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class GoogleCardsAdapter extends ArrayAdapter<Word> {
 
@@ -50,6 +51,7 @@ public class GoogleCardsAdapter extends ArrayAdapter<Word> {
 	View view = convertView;
 	Phoneticss p;
 	Definitions d;
+	int positionList = AccountUtils.getVocabularyListPosition(mContext, word.idList);
 	if (view == null) {
 	    view = LayoutInflater.from(mContext).inflate(
 		    R.layout.activity_googlecards_card, parent, false);
@@ -83,7 +85,7 @@ public class GoogleCardsAdapter extends ArrayAdapter<Word> {
 
 	viewHolder.iconicLifeCount.setIcon(FontAwesomeIcon.HEART);
 	viewHolder.iconicLifeCount.setTextColor(Color.GRAY);
-	viewHolder.textViewLifeCount.setText("7");
+	viewHolder.textViewLifeCount.setText(String.valueOf(8 - positionList));
 	viewHolder.textViewLifeCount.setTextColor(Color.GRAY);
 	
 	p = word.phonetics;

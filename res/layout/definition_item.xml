@@ -10,12 +10,14 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_marginRight="3dp"
+        android:textSize="17sp"
         android:textIsSelectable="false" />
 
     <TextView
         android:id="@+id/definiens"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textIsSelectable="true" />
+        android:textIsSelectable="true"
+        android:textSize="17sp" />
 
 </LinearLayout>

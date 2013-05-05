@@ -133,7 +133,32 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	    for (int position : reverseSortedPositions) {
 		// handle review word request here
 		// TODO
-		mAdapter.remove(position);
+		Word reviewedWord = mAdapter.getItem(position);
+		String idCard = reviewedWord.idCard;
+		String idList = reviewedWord.idList;
+		String due = reviewedWord.due;
+		if (due == null) {
+		    // new word via lookup
+		    initializeWordCard(idCard);
+		    mAdapter.remove(position);
+		    showCurrentBadge();
+		} else {
+		    // nomal review
+		    int positionList = AccountUtils.getVocabularyListPosition(
+			    mContext, idList);
+		    if (positionList > -1) {
+			reviewedWordCard(idCard, positionList);
+			mAdapter.remove(position);
+		    } else {
+			// idPosition invalid, this is should not be happen,
+			// check
+			// why?
+			if (VelloConfig.DEBUG_SWITCH) {
+			    Log.d(TAG,
+				    "idPosition invalid, this is should not be happen, check why?");
+			}
+		    }
+		}
 	    }
 	    Toast.makeText(
 		    mContext,
@@ -151,7 +176,6 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
 	    if (mRequestManager.isRequestInProgress(request)) {
 		mRequestManager.addRequestListener(this, request);
-		mRefreshActionItem.showProgress(true);
 	    } else {
 		mRequestManager.callListenerWithCachedData(this, request);
 		i--;
@@ -367,9 +391,17 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		ArrayList<WordCard> wordCardList = resultData
 			.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST);
 
-		for (WordCard wordCard : wordCardList) {
-		    new WordCardToWordTask().execute(wordCard);
+		if (wordCardList.size() > 0) {
+		    for (WordCard wordCard : wordCardList) {
+			new WordCardToWordTask().execute(wordCard);
+		    }
+		} else {
+		    // no word card need review
+		    Toast.makeText(mContext, R.string.toast_no_word_now,
+			    Toast.LENGTH_SHORT).show();
+		    mRefreshActionItem.showProgress(false);
 		}
+
 		if (VelloConfig.DEBUG_SWITCH) {
 		    Log.d(TAG, "get due word card list end.");
 		}
@@ -381,7 +413,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		String keyword = request
 			.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
 		IcibaWord word = IcibaWordXmlParser.parse(wsResult);
-		if (word != null) {
+		if (word.definition.size() > 0) {
 		    // response a valid word and save to trello
 		    // begin save word flow
 		    checkWordCardStatus(keyword, wsResult);
@@ -480,13 +512,32 @@ public class MainActivity extends BaseActivity implements RequestListener,
 			.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 		if (initializedWordCard != null) {
 		    // initialized
-		    // do nothing at present
+		    // should show to user
+		    // TODO
 		} else {
 		    // initialized failed
 		    // do nothing at present
 		}
+		mRefreshActionItem.showProgress(false);
 		if (VelloConfig.DEBUG_SWITCH) {
 		    Log.d(TAG, "initializeWordCard end.");
+		}
+		return;
+
+	    case VelloRequestFactory.REQUEST_TYPE_REVIEWED_WORDCARD:
+		WordCard reviewedWordCard = resultData
+			.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+		if (reviewedWordCard != null) {
+		    // reviewed
+
+		} else {
+		    // reviewed failed
+		    // do nothing at present
+		}
+		mRefreshActionItem.showProgress(false);
+		showCurrentBadge();
+		if (VelloConfig.DEBUG_SWITCH) {
+		    Log.d(TAG, "reviewedWordCard end.");
 		}
 		return;
 
@@ -657,8 +708,15 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	// TODO
     }
 
-    private void reviewedWordCard() {
-	// TODO
+    private void reviewedWordCard(String idCard, int position) {
+	mRefreshActionItem.showProgress(true);
+	if (VelloConfig.DEBUG_SWITCH) {
+	    Log.d(TAG, "reviewedWordCard start...");
+	}
+	Request reviewedWordCard = VelloRequestFactory.reviewedWordCardRequest(
+		idCard, position);
+	mRequestManager.execute(reviewedWordCard, this);
+	mRequestList.add(reviewedWordCard);
     }
 
     @Override
@@ -698,7 +756,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		    word = new IcibaWord();
 		}
 		word.idCard = wordcard.id;
+		word.idList = wordcard.idList;
 		word.keyword = wordcard.name;
+		word.due = wordcard.due;
 		wordList.add(word);
 	    }
 	    return wordList;
@@ -707,9 +767,15 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	@Override
 	protected void onPostExecute(ArrayList<Word> result) {
 	    mGoogleCardsAdapter.addAll(result);
-	    mRefreshActionItem.showBadge(String.valueOf(mGoogleCardsAdapter
-		    .getCount()));
+	    showCurrentBadge();
 	    mRefreshActionItem.showProgress(false);
+	}
+    }
+
+    private void showCurrentBadge() {
+	int num = mGoogleCardsAdapter.getCount();
+	if (num > 0) {
+	    mRefreshActionItem.showBadge(String.valueOf(num));
 	}
     }
 

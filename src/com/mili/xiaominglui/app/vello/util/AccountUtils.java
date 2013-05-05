@@ -163,6 +163,15 @@ public class AccountUtils {
     public static String getVocabularyListTitle(final int position) {
 	return VOCABULARY_LISTS_TITLE_ID[position];
     }
+    
+    public static int getVocabularyListPosition(final Context context, final String idList) {
+	for (int i = 0; i < VOCABULARY_LISTS_TITLE_ID.length; i++) {
+	    if (getVocabularyListId(context, i).equals(idList)) {
+		return i;
+	    }
+	}
+	return -1;
+    }
 
     private static void setChosenAccountName(final Context context,
 	    final String accountName) {
