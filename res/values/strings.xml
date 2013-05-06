@@ -11,6 +11,8 @@
     <string name="taking_a_while">This is taking a while&#8230;</string>
     <string name="toast_no_word_now">Well done! no word need review now!</string>
     <string name="toast_not_available_word">NOT a word?</string>
+    <string name="toast_get_due_word">Checking vocabulary&#8230;</string>
+    <string name="toast_init_vocabulary">Initialize your vocabulary&#8230;</string>
     
     <string name="retry">Retry</string>
     <string name="description_about">About</string>
