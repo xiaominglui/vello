@@ -128,12 +128,20 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		String idCard = reviewedWord.idCard;
 		String idList = reviewedWord.idList;
 		String due = reviewedWord.due;
+		Log.d("mingo.lv", "isClicked = " + reviewedWord.hasExpanded);
 		if (due == null) {
 		    // new word via lookup
 		    mAdapter.remove(position);
 		    showCurrentBadge();
 		} else {
-		    // nomal review
+
+		    if (reviewedWord.hasExpanded) {
+			// not reviewed
+			mAdapter.remove(position);
+			showCurrentBadge();
+			return;
+		    }
+		    // reviewed
 		    int positionList = AccountUtils.getVocabularyListPosition(
 			    mContext, idList);
 		    if (positionList > -1) {
@@ -449,7 +457,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
 			    // got the right word card
 			    // show with user first
 			    new WordCardToWordTask().execute(w);
-			    
+
 			    if (w.closed.equals("true")) {
 				// the existed word card has be closed,
 				// re-open
@@ -464,7 +472,8 @@ public class MainActivity extends BaseActivity implements RequestListener,
 				    // initialized, initialize it. this is the
 				    // double check
 				    if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "initialize existed word card.");
+					Log.d(TAG,
+						"initialize existed word card.");
 				    }
 				    initializeWordCard(w.id);
 				} else {
@@ -472,7 +481,8 @@ public class MainActivity extends BaseActivity implements RequestListener,
 				    // process, do
 				    // nothing at present.
 				    if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "the existed word is in review.");
+					Log.d(TAG,
+						"the existed word is in review.");
 				    }
 				}
 			    }

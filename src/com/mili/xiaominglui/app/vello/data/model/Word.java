@@ -5,4 +5,5 @@ public class Word {
     public String idList;
     public String keyword;
     public String due;
+    public boolean hasExpanded;
 }

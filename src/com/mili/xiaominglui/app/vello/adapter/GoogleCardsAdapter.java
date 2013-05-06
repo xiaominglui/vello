@@ -6,7 +6,9 @@ import android.graphics.Color;
 import android.support.v4.util.LruCache;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -47,7 +49,7 @@ public class GoogleCardsAdapter extends ArrayAdapter<Word> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-	IcibaWord word = (IcibaWord) getItem(position);
+	final IcibaWord word = (IcibaWord) getItem(position);
 	ViewHolder viewHolder;
 	View view = convertView;
 	Phoneticss p;
@@ -79,6 +81,13 @@ public class GoogleCardsAdapter extends ArrayAdapter<Word> {
 
 	viewHolder.iconicToggleButton.setIcon(FontAwesomeIcon.INFO_SIGN);
 	viewHolder.iconicToggleButton.setTextColor(Color.GRAY);
+	viewHolder.iconicToggleButton.setOnTouchListener(new OnTouchListener() {
+	    @Override
+	    public boolean onTouch(View v, MotionEvent event) {
+		word.hasExpanded = true;
+		return false;
+	    }
+	});
 
 	viewHolder.textViewKeyword.setText(getItem(position).keyword);
 
