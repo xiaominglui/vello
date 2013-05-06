@@ -32,6 +32,8 @@ public class CheckWordCardStatusResponseJsonFactory {
 		wordCard.name = jsonCard.getString(JSONTag.CARD_ELEM_NAME);
 		wordCard.due = jsonCard.getString(JSONTag.CARD_ELEM_DUE);
 		wordCard.closed = jsonCard.getString(JSONTag.CARD_ELEM_CLOSED);
+		wordCard.desc = jsonCard.getString(JSONTag.CARD_ELEM_DESC);
+		wordCard.idList = jsonCard.getString(JSONTag.CARD_ELEM_IDLIST);
 		wordCardList.add(wordCard);
 	    }
 	} catch (JSONException e) {

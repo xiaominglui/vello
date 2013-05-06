@@ -36,7 +36,7 @@ public class CheckWordCardStatusOperation implements Operation {
 	parameterMap.put(WSConfig.WS_TRELLO_PARAM_QUERY, keyword);
 	parameterMap.put(WSConfig.WS_TRELLO_PARAM_IDBOARDS, vocabularyBoardId);
 	parameterMap.put(WSConfig.WS_TRELLO_PARAM_MODELTYPES, "cards");
-	parameterMap.put(WSConfig.WS_TRELLO_PARAM_CARD_FIELDS, "name,closed,due");
+	parameterMap.put(WSConfig.WS_TRELLO_PARAM_CARD_FIELDS, "name,closed,due,desc,idList");
 	parameterMap.put(WSConfig.WS_TRELLO_PARAM_APP_KEY, WSConfig.VELLO_APP_KEY);
 	parameterMap.put(WSConfig.WS_TRELLO_PARAM_ACCESS_TOKEN, token);
 	

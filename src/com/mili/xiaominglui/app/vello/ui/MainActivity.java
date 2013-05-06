@@ -95,15 +95,6 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	    return;
 	}
 
-	if (!AccountUtils.hasVocabularyBoard(mContext)) {
-	    // vocabulary board id not found
-	    checkVocabularyBoard();
-	}
-
-	if (!AccountUtils.isVocabularyBoardWellFormed(mContext)) {
-	    // checkVocabularyLists();
-	}
-
 	setContentView(R.layout.activity_main);
 	ListView listView = (ListView) findViewById(R.id.activity_googlecards_listview);
 	mGoogleCardsAdapter = new GoogleCardsAdapter(this);
@@ -148,6 +139,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		    if (positionList > -1) {
 			reviewedWordCard(idCard, positionList);
 			mAdapter.remove(position);
+			showCurrentBadge();
 		    } else {
 			// idPosition invalid, this is should not be happen,
 			// check
@@ -159,11 +151,6 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		    }
 		}
 	    }
-	    Toast.makeText(
-		    mContext,
-		    "Removed positions: "
-			    + Arrays.toString(reverseSortedPositions),
-		    Toast.LENGTH_SHORT).show();
 	}
     }
 
@@ -238,6 +225,16 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	mRefreshActionItem
 		.setProgressIndicatorType(ProgressIndicatorType.INDETERMINATE);
 	mRefreshActionItem.setRefreshActionListener(this);
+
+	if (!AccountUtils.hasVocabularyBoard(mContext)) {
+	    // vocabulary board id not found
+	    checkVocabularyBoard();
+	}
+
+	if (!AccountUtils.isVocabularyBoardWellFormed(mContext)) {
+	    checkVocabularyLists();
+	}
+
 	getDueWordCardList();
 	// setupSearchMenuItem(menu);
 	return true;
@@ -450,26 +447,39 @@ public class MainActivity extends BaseActivity implements RequestListener,
 		    for (WordCard w : existedWordCardList) {
 			if (w.name.equals(newWord)) {
 			    // got the right word card
+			    // show with user first
+			    new WordCardToWordTask().execute(w);
+			    
 			    if (w.closed.equals("true")) {
 				// the existed word card has be closed,
 				// re-open
 				// it.
+				if (VelloConfig.DEBUG_SWITCH) {
+				    Log.d(TAG, "re-open existed word card.");
+				}
 				reOpenWordCard(w.id);
 			    } else {
 				if (w.due.equals("null")) {
 				    // the existed word card has not be
 				    // initialized, initialize it. this is the
 				    // double check
+				    if (VelloConfig.DEBUG_SWITCH) {
+					Log.d(TAG, "initialize existed word card.");
+				    }
 				    initializeWordCard(w.id);
 				} else {
 				    // the existed word is in review
 				    // process, do
 				    // nothing at present.
+				    if (VelloConfig.DEBUG_SWITCH) {
+					Log.d(TAG, "the existed word is in review.");
+				    }
 				}
 			    }
 			    if (VelloConfig.DEBUG_SWITCH) {
 				Log.d(TAG, "check wordcard status end.");
 			    }
+			    showCurrentBadge();
 			    return;
 			}
 		    }
@@ -778,6 +788,8 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	int num = mGoogleCardsAdapter.getCount();
 	if (num > 0) {
 	    mRefreshActionItem.showBadge(String.valueOf(num));
+	} else {
+	    mRefreshActionItem.hideBadge();
 	}
     }
 
@@ -795,11 +807,10 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-	// TODO Auto-generated method stub
 	if (query != null) {
 	    lookUpWord(query);
 	}
-	return true;
+	return false;
     }
 
     @Override
