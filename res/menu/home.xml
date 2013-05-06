@@ -28,6 +28,7 @@
     android:actionViewClass=
         "com.manuelpeinado.refreshactionitem.RefreshActionItem"
     android:showAsAction="always"
+    android:orderInCategory="98"
     android:title="@string/action_refresh"/>
 	
     <item android:id="@+id/menu_about"

@@ -20,7 +20,7 @@ public class VelloRequestService extends RequestService {
     
     @Override
     protected int getMaximumNumberOfThreads() {
-        return 1;
+        return 3;
     }
 
     @Override

@@ -41,12 +41,12 @@ import com.mili.xiaominglui.app.vello.data.model.List;
 import com.mili.xiaominglui.app.vello.data.model.Word;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
+import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment;
 import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment.ConnectionErrorDialogListener;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.tjerkw.slideexpandable.library.SlideExpandableListAdapter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class MainActivity extends BaseActivity implements RequestListener,
 	ConnectionErrorDialogListener, RefreshActionListener,
@@ -201,6 +201,12 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	super.onCreateOptionsMenu(menu);
 	mOptionsMenu = menu;
 	getSupportMenuInflater().inflate(R.menu.home, menu);
+	MenuItem item = menu.findItem(R.id.refresh_button);
+	mRefreshActionItem = (RefreshActionItem) item.getActionView();
+	mRefreshActionItem.setMenuItem(item);
+	mRefreshActionItem
+		.setProgressIndicatorType(ProgressIndicatorType.INDETERMINATE);
+	mRefreshActionItem.setRefreshActionListener(this);
 
 	SearchView searchView = new SearchView(getSupportActionBar()
 		.getThemedContext());
@@ -209,30 +215,22 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	searchView.setOnSuggestionListener(this);
 	if (mSuggestionsAdapter == null) {
 	    MatrixCursor cursor = new MatrixCursor(COLUMNS);
-	    cursor.addRow(new String[] { "1", "'Murica" });
-	    cursor.addRow(new String[] { "2", "Canada" });
-	    cursor.addRow(new String[] { "3", "Denmark" });
+	    cursor.addRow(new String[] { "1", "apple" });
+	    cursor.addRow(new String[] { "2", "word" });
+	    cursor.addRow(new String[] { "3", "show" });
 	    mSuggestionsAdapter = new SuggestionsAdapter(getSupportActionBar()
 		    .getThemedContext(), cursor);
 	}
 
 	searchView.setSuggestionsAdapter(mSuggestionsAdapter);
 	boolean isLight = false;
-	menu.add("Search")
+	menu.add(Menu.NONE, 0, 97, "Search")
 		.setIcon(
 			isLight ? R.drawable.ic_search_inverse
 				: R.drawable.abs__ic_search)
 		.setActionView(searchView)
 		.setShowAsAction(
-			MenuItem.SHOW_AS_ACTION_IF_ROOM
-				| MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-
-	MenuItem item = menu.findItem(R.id.refresh_button);
-	mRefreshActionItem = (RefreshActionItem) item.getActionView();
-	mRefreshActionItem.setMenuItem(item);
-	mRefreshActionItem
-		.setProgressIndicatorType(ProgressIndicatorType.INDETERMINATE);
-	mRefreshActionItem.setRefreshActionListener(this);
+			MenuItem.SHOW_AS_ACTION_ALWAYS);
 
 	if (!AccountUtils.hasVocabularyBoard(mContext)) {
 	    // vocabulary board id not found
@@ -578,6 +576,12 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     @Override
     public void onRequestConnectionError(Request request, int statusCode) {
+	if (mRequestList.contains(request)) {
+            setProgressBarIndeterminateVisibility(false);
+            mRequestList.remove(request);
+
+            ConnectionErrorDialogFragment.show(this, request, this);
+        }
 
     }
 
@@ -750,10 +754,12 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     @Override
     public void connectionErrorDialogCancel(Request request) {
+	mRefreshActionItem.showProgress(false);
     }
 
     @Override
     public void connectionErrorDialogRetry(Request request) {
+	getDueWordCardList();
     }
 
     @Override
