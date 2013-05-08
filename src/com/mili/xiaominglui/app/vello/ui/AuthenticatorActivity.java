@@ -1,18 +1,20 @@
+
 package com.mili.xiaominglui.app.vello.ui;
 
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Window;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
-
 
 /**
  * Activity which displays login screen to the user.
@@ -33,24 +35,20 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
     /** The tag used to log to adb console. */
     private static final String TAG = "AuthenticatorActivity";
 
-
-
-    
     private WebView mWebView;
 
     private String mUsername = "me";
-    
+
     private class MyWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            
+
             if (url.contains("#token=")) {
                 String token = (url.split("#token="))[1];
                 if (token != null && token.length() == Constants.AUTHTOKEN_LENGTH) {
-                    Log.d(TAG, "handle the token");
                     finishLogin(token);
+                    return true;
                 } else {
-                    // TODO handle exception
                 }
                 return true;
             } else {
@@ -58,33 +56,46 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
                 return true;
             }
         }
-    }
 
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void onCreate(Bundle icicle) {
+        final Activity activity = this;
+        final ProgressDialog progressDialog = new ProgressDialog(activity);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setCancelable(false);
 
-        Log.i(TAG, "onCreate(" + icicle + ")");
         super.onCreate(icicle);
-        Log.i(TAG, "loading data from Intent");
-        requestWindowFeature(Window.FEATURE_PROGRESS);
         setContentView(R.layout.activity_oauth);
         mWebView = (WebView) findViewById(R.id.webview);
-        
+
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
-        
+
+        mWebView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onProgressChanged(WebView view, int progress) {
+                // TODO Auto-generated method stub
+                progressDialog.show();
+                progressDialog.setProgress(0);
+                activity.setProgress(progress * 1000);
+
+                progressDialog.incrementProgressBy(progress);
+
+                if (progress == 100 && progressDialog.isShowing())
+                    progressDialog.dismiss();
+            }
+        });
+
         mWebView.setWebViewClient(new MyWebViewClient());
         mWebView.loadUrl("file:///android_asset/connect.html");
-        
+
     }
-
-
-
 
     /**
      * Called when response is received from the server for authentication
@@ -92,7 +103,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
      * AccountAuthenticatorResult which is sent back to the caller. We store the
      * authToken that's returned from the server as the 'password' for this
      * account - so we're never storing the user's actual password locally.
-     *
+     * 
      * @param result the confirmCredentials result.
      */
     private void finishLogin(String authToken) {

@@ -4,7 +4,7 @@ jQuery(function($) {
 		
 	}, onAuthorize = function() {
 		$("body").addClass("authorized");
-		setTimeout(closeCurrentTab, 10000);
+		setTimeout(closeCurrentTab, 10);
 	};
 						  
 	Trello.authorize({
