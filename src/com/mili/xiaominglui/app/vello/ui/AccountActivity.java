@@ -162,6 +162,9 @@ public class AccountActivity extends SherlockFragmentActivity implements
 	ContentResolver.setIsSyncable(mMyTrelloAccount,
 		VelloProviderContract.CONTENT_AUTHORITY, 1);
 	
+	// Initialize Vocabulary Board here
+	
+	
 	if (mFinishIntent != null) {
 	    mFinishIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 	    mFinishIntent.setAction(Intent.ACTION_MAIN);

@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ListView;
@@ -49,6 +50,7 @@ import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.tjerkw.slideexpandable.library.SlideExpandableListAdapter;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class MainActivity extends BaseActivity implements RequestListener,
         ConnectionErrorDialogListener, RefreshActionListener,
@@ -233,6 +235,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
         }
 
         searchView.setSuggestionsAdapter(mSuggestionsAdapter);
+        
         boolean isLight = false;
         menu.add(Menu.NONE, 0, 97, "Search")
                 .setIcon(
@@ -243,9 +246,10 @@ public class MainActivity extends BaseActivity implements RequestListener,
                         MenuItem.SHOW_AS_ACTION_ALWAYS);
 
         if (AccountUtils.hasVocabularyBoard(mContext) && AccountUtils.isVocabularyBoardWellFormed(mContext)) {
-            // vocabulary board id not found
+            // all initialized
             getDueWordCardList();
         } else {
+            // begin to check vocabulary board
             checkVocabularyBoard();
         }
 
@@ -267,6 +271,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     @Override
     public void onRequestFinished(Request request, Bundle resultData) {
+        mRefreshActionItem.showProgress(false);
         if (mRequestList.contains(request)) {
             mRequestList.remove(request);
 
@@ -279,14 +284,14 @@ public class MainActivity extends BaseActivity implements RequestListener,
                                 .getVocabularyBoardName(mContext))
                                 && board.desc.equals(AccountUtils
                                         .getVocabularyBoardVerification())) {
-                            // find out vocabulary board, check the closed flag.
+                            // s - 0 find out vocabulary board, check the closed flag.
 
                             if (!board.closed.equals("true")) {
-                                // vocabulary board is not well configured.
+                                // s - 0.0 vocabulary board is NOT well configured.
                                 configureVocabularyBoard(board.id);
                                 return;
                             } else {
-                                // well configured vocabulary board, save id
+                                // s - 0.1 well configured vocabulary board, save id
                                 AccountUtils.setVocabularyBoardId(mContext,
                                         board.id);
                                 checkVocabularyLists();
@@ -295,7 +300,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
                         }
                     }
 
-                    // no vocabulary board found, need create one
+                    // s - 1 NO vocabulary board found, need create one
                     createVocabularyBoard();
                     if (VelloConfig.DEBUG_SWITCH) {
                         Log.d(TAG, "check vocabulary board end.");
@@ -303,6 +308,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
                     return;
 
                 case VelloRequestFactory.REQUEST_TYPE_CONFIGURE_VOCABULARY_BOARD:
+                    String boardId = request.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_BOARD_ID);
                     if (resultData != null) {
                         // configure board successfully & save it
                         String id = resultData
@@ -314,10 +320,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
                         // continue to check vocabulary list if not well formed
                         checkVocabularyLists();
-                    }
-
-                    if (VelloConfig.DEBUG_SWITCH) {
-                        Log.d(TAG, "configure vocabulary board end.");
+                    } else {
+                        // configure board failed, try again
+                        configureVocabularyBoard(boardId);
                     }
                     return;
 
@@ -339,9 +344,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
                                 AccountUtils.setVocabularyListId(mContext, list.id,
                                         position);
                                 if (AccountUtils.isVocabularyBoardWellFormed(mContext)) {
+                                    AppMsg.makeText(this, R.string.toast_init_vocabulary_end, AppMsg.STYLE_INFO).setLayoutGravity(Gravity.BOTTOM).show();
                                     getDueWordCardList();
                                 }
-                                mRefreshActionItem.showProgress(false);
                                 return;
                             }
 
@@ -356,6 +361,8 @@ public class MainActivity extends BaseActivity implements RequestListener,
                     return;
 
                 case VelloRequestFactory.REQUEST_TYPE_REOPEN_VOCABULARY_LIST:
+                    int positonList = request.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
+                    String idList = request.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_ID);
                     if (resultData != null) {
                         // reopen list successfully
                         String id = resultData
@@ -364,19 +371,17 @@ public class MainActivity extends BaseActivity implements RequestListener,
                                 .getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
                         AccountUtils.setVocabularyListId(mContext, id, pos);
                         if (AccountUtils.isVocabularyBoardWellFormed(mContext)) {
+                            AppMsg.makeText(this, R.string.toast_init_vocabulary_end, AppMsg.STYLE_INFO).setLayoutGravity(Gravity.BOTTOM).show();
                             getDueWordCardList();
                         }
-                        Log.d(TAG,
-                                "reopen list successfully! vocabulary list id = "
-                                        + id);
+                    } else {
+                        // reopen failed, try again
+                        reOpenVocabulayList(positonList, idList);
                     }
-                    if (VelloConfig.DEBUG_SWITCH) {
-                        Log.d(TAG, "reopen vocabulary list end.");
-                    }
-                    mRefreshActionItem.showProgress(false);
                     return;
 
                 case VelloRequestFactory.REQUEST_TYPE_CREATE_VOCABULARY_LIST:
+                    int positionList = request.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
                     if (resultData != null) {
                         // create list successfully
                         String id = resultData
@@ -385,13 +390,16 @@ public class MainActivity extends BaseActivity implements RequestListener,
                                 .getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
                         AccountUtils.setVocabularyListId(mContext, id, pos);
                         if (AccountUtils.isVocabularyBoardWellFormed(mContext)) {
+                            AppMsg.makeText(this, R.string.toast_init_vocabulary_end, AppMsg.STYLE_INFO).setLayoutGravity(Gravity.BOTTOM).show();
                             getDueWordCardList();
                         }
+                    } else {
+                        // create list failed, try again
+                        createVocabularyList(positionList);
                     }
                     if (VelloConfig.DEBUG_SWITCH) {
                         Log.d(TAG, "create vocabulary list end.");
                     }
-                    mRefreshActionItem.showProgress(false);
                     return;
 
                 case VelloRequestFactory.REQUEST_TYPE_CREATE_VOCABULARY_BOARD:
@@ -401,9 +409,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
                                 .getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_BOARD_ID);
 
                         configureVocabularyBoard(id);
-                    }
-                    if (VelloConfig.DEBUG_SWITCH) {
-                        Log.d(TAG, "create vocabulary board end.");
+                    } else {
+                        // create vocabulary board failed, try again
+                        createVocabularyBoard();
                     }
                     return;
 
@@ -412,14 +420,14 @@ public class MainActivity extends BaseActivity implements RequestListener,
                             .getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST);
 
                     if (wordCardList.size() > 0) {
+                        // show word cards need review
                         for (WordCard wordCard : wordCardList) {
                             new WordCardToWordTask().execute(wordCard);
                         }
                     } else {
-                        // no word card need review
+                        // NO word card need review
                         AppMsg.makeText(this, R.string.toast_no_word_now, AppMsg.STYLE_INFO)
-                                .setLayoutGravity(Gravity.BOTTOM).show();
-                        mRefreshActionItem.showProgress(false);
+                                .setLayoutGravity(Gravity.TOP).show();
                     }
 
                     if (VelloConfig.DEBUG_SWITCH) {
@@ -443,7 +451,6 @@ public class MainActivity extends BaseActivity implements RequestListener,
                         // NOT available word, tell user the truth.
                         AppMsg.makeText(this, R.string.toast_not_available_word, AppMsg.STYLE_ALERT)
                                 .setLayoutGravity(Gravity.TOP).show();
-                        mRefreshActionItem.showProgress(false);
                     }
 
                     if (VelloConfig.DEBUG_SWITCH) {
@@ -547,7 +554,6 @@ public class MainActivity extends BaseActivity implements RequestListener,
                         // reopen failed
                         // do nothing at present.
                     }
-                    mRefreshActionItem.showProgress(false);
                     if (VelloConfig.DEBUG_SWITCH) {
                         Log.d(TAG, "reOpenzeWordCard end.");
                     }
@@ -564,7 +570,6 @@ public class MainActivity extends BaseActivity implements RequestListener,
                         // initialized failed
                         // do nothing at present
                     }
-                    mRefreshActionItem.showProgress(false);
                     if (VelloConfig.DEBUG_SWITCH) {
                         Log.d(TAG, "initializeWordCard end.");
                     }
@@ -580,7 +585,6 @@ public class MainActivity extends BaseActivity implements RequestListener,
                         // reviewed failed
                         // do nothing at present
                     }
-                    mRefreshActionItem.showProgress(false);
                     showCurrentBadge();
                     if (VelloConfig.DEBUG_SWITCH) {
                         Log.d(TAG, "reviewedWordCard end.");
@@ -624,7 +628,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
         if (VelloConfig.DEBUG_SWITCH) {
             Log.d(TAG, "checkVocabularyBoard start...");
         }
-        AppMsg.makeText(this, R.string.toast_init_vocabulary, AppMsg.STYLE_INFO)
+        AppMsg.makeText(this, R.string.toast_init_vocabulary_start, AppMsg.STYLE_INFO)
                 .setLayoutGravity(Gravity.BOTTOM).show();
         Request checkVocabularyBoardRequest = VelloRequestFactory
                 .checkVocabularyBoardRequest();
@@ -667,12 +671,11 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     private void checkVocabularyLists() {
         mRefreshActionItem.showProgress(true);
-        if (VelloConfig.DEBUG_SWITCH) {
-            Log.d(TAG, "checkVocabularyLists start...");
-        }
-        AppMsg.makeText(this, R.string.toast_init_vocabulary, AppMsg.STYLE_INFO)
-                .setLayoutGravity(Gravity.BOTTOM).show();
+        
         for (int i = 0; i < AccountUtils.VOCABULARY_LISTS_TITLE_ID.length; i++) {
+            if (VelloConfig.DEBUG_SWITCH) {
+                Log.d(TAG, "checkVocabularyLists start..." + i);
+            }
             Request checkVocabularyListReqest = VelloRequestFactory
                     .checkVocabularyListRequest(i);
 
@@ -785,7 +788,8 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     @Override
     public void connectionErrorDialogRetry(Request request) {
-        getDueWordCardList();
+        mRequestManager.execute(request, this);
+        mRequestList.add(request);
     }
 
     @Override
@@ -850,7 +854,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
     @Override
     public boolean onQueryTextSubmit(String query) {
         if (query != null) {
-            lookUpWord(query);
+            lookUpWord(query.trim().toLowerCase());
         }
         return false;
     }
