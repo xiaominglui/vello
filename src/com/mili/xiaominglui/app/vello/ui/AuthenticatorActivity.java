@@ -47,7 +47,6 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
                 String token = (url.split("#token="))[1];
                 if (token != null && token.length() == Constants.AUTHTOKEN_LENGTH) {
                     finishLogin(token);
-                    return true;
                 } else {
                 }
                 return true;
