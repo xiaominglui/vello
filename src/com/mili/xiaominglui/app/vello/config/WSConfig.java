@@ -33,10 +33,13 @@ public final class WSConfig {
     public static final String WS_TRELLO_PARAM_CARD_FIELDS = "card_fields";
     public static final String WS_TRELLO_PARAM_IDLIST = "idList";
     public static final String WS_TRELLO_PARAM_DUE = "due";
+    public static final String WS_TRELLO_PARAM_TEXT = "text";
     
     
     public static final String WS_TRELLO_FIELD_LISTS = "/lists";
     public static final String WS_TRELLO_FIELD_CARDS = "/cards";
+    
+    public static final String WS_TRELLO_ACTION_COMMENTS = "/actions/comments";
     
     // iciba
     public static final String WS_DICTIONARY_ICIBA_API = "http://dict-co.iciba.com/api/dictionary.php";

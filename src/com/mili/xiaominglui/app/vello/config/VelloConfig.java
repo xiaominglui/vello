@@ -24,5 +24,8 @@ public class VelloConfig {
 	7 * 24 * 60 * 60 * 1000,
 	15 * 24 * 60 * 60 * 1000,
 	-1 };
+    
+    // ACRA related
+    public static final String CRASH_LOGGER_CARD_ID_SHORTLINK = "https://trello.com/c/pamv10IM";
 
 }

@@ -15,7 +15,6 @@ import com.foxykeep.datadroid.service.RequestService.Operation;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.config.WSConfig;
 import com.mili.xiaominglui.app.vello.data.factory.CreateVocabularyBoardResponseJsonFactory;
-import com.mili.xiaominglui.app.vello.data.factory.VocabularyListJsonFactory;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 import java.util.HashMap;

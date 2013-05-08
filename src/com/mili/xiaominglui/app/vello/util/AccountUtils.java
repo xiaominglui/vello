@@ -14,6 +14,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.ui.AccountActivity;
@@ -215,6 +217,10 @@ public class AccountUtils {
 	SharedPreferences sp = PreferenceManager
 		.getDefaultSharedPreferences(context);
 	sp.edit().clear().commit();
+	CookieSyncManager.createInstance(context);
+	CookieManager cookieManager = CookieManager.getInstance();
+	cookieManager.removeAllCookie();
+	
 //	context.getContentResolver().delete(
 //		VelloProviderContract.BASE_CONTENT_URI, null, null);
     }
