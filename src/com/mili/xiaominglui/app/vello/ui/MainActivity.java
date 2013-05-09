@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -216,8 +217,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
         SearchView searchView = new SearchView(getSupportActionBar()
                 .getThemedContext());
-        searchView.setQueryHint("Search for word...");
+        searchView.setQueryHint(getResources().getText(R.string.action_query_hint));
         searchView.setOnQueryTextListener(this);
+        /*
         searchView.setOnSuggestionListener(this);
         if (mSuggestionsAdapter == null) {
             MatrixCursor cursor = new MatrixCursor(COLUMNS);
@@ -235,15 +237,16 @@ public class MainActivity extends BaseActivity implements RequestListener,
         }
 
         searchView.setSuggestionsAdapter(mSuggestionsAdapter);
+        */
         
         boolean isLight = false;
-        menu.add(Menu.NONE, 0, 97, "Search")
+        menu.add(Menu.NONE, 0, 97, R.string.description_search)
                 .setIcon(
                         isLight ? R.drawable.ic_search_inverse
                                 : R.drawable.abs__ic_search)
                 .setActionView(searchView)
                 .setShowAsAction(
-                        MenuItem.SHOW_AS_ACTION_ALWAYS);
+                        MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
 
         if (AccountUtils.hasVocabularyBoard(mContext) && AccountUtils.isVocabularyBoardWellFormed(mContext)) {
             // all initialized
@@ -847,8 +850,10 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     @Override
     public boolean onSuggestionClick(int position) {
-        // TODO Auto-generated method stub
-        return false;
+        Cursor c = (Cursor) mSuggestionsAdapter.getItem(position);
+        String query = c.getString(c.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1));
+        Toast.makeText(this, "Suggestion clicked: " + query, Toast.LENGTH_LONG).show();
+        return true;
     }
 
     @Override
@@ -856,7 +861,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
         if (query != null) {
             lookUpWord(query.trim().toLowerCase());
         }
-        return false;
+        return true;
     }
 
     @Override
