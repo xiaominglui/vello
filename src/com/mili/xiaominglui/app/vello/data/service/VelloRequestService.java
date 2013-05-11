@@ -1,3 +1,4 @@
+
 package com.mili.xiaominglui.app.vello.data.service;
 
 import com.foxykeep.datadroid.service.RequestService;
@@ -8,6 +9,7 @@ import com.mili.xiaominglui.app.vello.data.operation.CheckWordCardStatusOperatio
 import com.mili.xiaominglui.app.vello.data.operation.ConfigureVocabularyBoardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CreateVocabularyBoardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CreateVocabularyListOperation;
+import com.mili.xiaominglui.app.vello.data.operation.GetAllWordCardListOperation;
 import com.mili.xiaominglui.app.vello.data.operation.GetDueWordCardListOperation;
 import com.mili.xiaominglui.app.vello.data.operation.InitializeWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.LookUpWordOperation;
@@ -17,7 +19,7 @@ import com.mili.xiaominglui.app.vello.data.operation.ReviewedWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 
 public class VelloRequestService extends RequestService {
-    
+
     @Override
     protected int getMaximumNumberOfThreads() {
         return 3;
@@ -25,35 +27,37 @@ public class VelloRequestService extends RequestService {
 
     @Override
     public Operation getOperationForType(int requestType) {
-	switch (requestType) {
-	case VelloRequestFactory.REQUEST_TYPE_CHECK_VOCABULARY_BOARD:
-	    return new CheckVocabularyBoardOperation();
-	case VelloRequestFactory.REQUEST_TYPE_CONFIGURE_VOCABULARY_BOARD:
-	    return new ConfigureVocabularyBoardOperation();
-	case VelloRequestFactory.REQUEST_TYPE_CHECK_VOCABULARY_LIST:
-	    return new CheckVocabularyListOperation();
-	case VelloRequestFactory.REQUEST_TYPE_REOPEN_VOCABULARY_LIST:
-	    return new ReopenVocabularyListOperation();
-	case VelloRequestFactory.REQUEST_TYPE_CREATE_VOCABULARY_LIST:
-	    return new CreateVocabularyListOperation();
-	case VelloRequestFactory.REQUEST_TYPE_CREATE_VOCABULARY_BOARD:
-	    return new CreateVocabularyBoardOperation();
-	case VelloRequestFactory.REQUEST_TYPE_GET_DUE_WORDCARD_LIST:
-	    return new GetDueWordCardListOperation();
-	case VelloRequestFactory.REQUEST_TYPE_LOOK_UP_WORD:
-	    return new LookUpWordOperation();
-	case VelloRequestFactory.REQUEST_TYPE_CHECK_WORDCARD_STATUS:
-	    return new CheckWordCardStatusOperation();
-	case VelloRequestFactory.REQUEST_TYPE_ADD_WORDCARD:
-	    return new AddWordCardOperation();
-	case VelloRequestFactory.REQUEST_TYPE_REOPEN_WORDCARD:
-	    return new ReopenWordCardOperation();
-	case VelloRequestFactory.REQUEST_TYPE_INITIALIZE_WORDCARD:
-	    return new InitializeWordCardOperation();
-	case VelloRequestFactory.REQUEST_TYPE_REVIEWED_WORDCARD:
-	    return new ReviewedWordCardOperation();
-	}
-	return null;
+        switch (requestType) {
+            case VelloRequestFactory.REQUEST_TYPE_CHECK_VOCABULARY_BOARD:
+                return new CheckVocabularyBoardOperation();
+            case VelloRequestFactory.REQUEST_TYPE_CONFIGURE_VOCABULARY_BOARD:
+                return new ConfigureVocabularyBoardOperation();
+            case VelloRequestFactory.REQUEST_TYPE_CHECK_VOCABULARY_LIST:
+                return new CheckVocabularyListOperation();
+            case VelloRequestFactory.REQUEST_TYPE_REOPEN_VOCABULARY_LIST:
+                return new ReopenVocabularyListOperation();
+            case VelloRequestFactory.REQUEST_TYPE_CREATE_VOCABULARY_LIST:
+                return new CreateVocabularyListOperation();
+            case VelloRequestFactory.REQUEST_TYPE_CREATE_VOCABULARY_BOARD:
+                return new CreateVocabularyBoardOperation();
+            case VelloRequestFactory.REQUEST_TYPE_GET_DUE_WORDCARD_LIST:
+                return new GetDueWordCardListOperation();
+            case VelloRequestFactory.REQUEST_TYPE_LOOK_UP_WORD:
+                return new LookUpWordOperation();
+            case VelloRequestFactory.REQUEST_TYPE_CHECK_WORDCARD_STATUS:
+                return new CheckWordCardStatusOperation();
+            case VelloRequestFactory.REQUEST_TYPE_ADD_WORDCARD:
+                return new AddWordCardOperation();
+            case VelloRequestFactory.REQUEST_TYPE_REOPEN_WORDCARD:
+                return new ReopenWordCardOperation();
+            case VelloRequestFactory.REQUEST_TYPE_INITIALIZE_WORDCARD:
+                return new InitializeWordCardOperation();
+            case VelloRequestFactory.REQUEST_TYPE_REVIEWED_WORDCARD:
+                return new ReviewedWordCardOperation();
+            case VelloRequestFactory.REQUEST_TYPE_GET_ALL_WORDCARD_LIST:
+                return new GetAllWordCardListOperation();
+        }
+        return null;
     }
 
 }

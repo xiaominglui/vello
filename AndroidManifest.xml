@@ -63,6 +63,11 @@
         <service
             android:name=".data.service.VelloRequestService"
             android:exported="false" />
+
+        <provider
+            android:name=".data.provider.VelloProvider"
+            android:authorities="com.mili.xiaominglui.app.vello.provider.VelloProvider"
+            android:exported="false" />
     </application>
 
 </manifest>

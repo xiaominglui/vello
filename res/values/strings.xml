@@ -6,7 +6,6 @@
     <string name="action_refresh">Refresh</string>
     <string name="action_query_hint">Search word&#8230;</string>
     <string name="action_invalid_query">Invalid query</string>
-    <string name="hello_world">Hello world!</string>
     <string name="no_connection_cant_login">Can\'t sign in. Check your network connection.</string>
     <string name="taking_a_while">This is taking a while&#8230;</string>
     <string name="toast_no_word_now">Good job! No word now!</string>

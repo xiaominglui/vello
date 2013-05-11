@@ -2,20 +2,28 @@
 package com.mili.xiaominglui.app.vello.ui;
 
 import android.app.SearchManager;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.CharArrayBuffer;
 import android.database.Cursor;
-import android.database.MatrixCursor;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.BaseColumns;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,10 +33,11 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.widget.SearchView;
 import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.actionbarsherlock.widget.SearchView.OnSuggestionListener;
+import com.atermenji.android.iconictextview.IconicTextView;
+import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
 import com.devspark.appmsg.AppMsg;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
-import com.haarman.listviewanimations.ArrayAdapter;
 import com.haarman.listviewanimations.itemmanipulation.OnDismissCallback;
 import com.haarman.listviewanimations.itemmanipulation.SwipeDismissAdapter;
 import com.haarman.listviewanimations.swinginadapters.prepared.SwingBottomInAnimationAdapter;
@@ -36,31 +45,37 @@ import com.manuelpeinado.refreshactionitem.ProgressIndicatorType;
 import com.manuelpeinado.refreshactionitem.RefreshActionItem;
 import com.manuelpeinado.refreshactionitem.RefreshActionItem.RefreshActionListener;
 import com.mili.xiaominglui.app.vello.R;
-import com.mili.xiaominglui.app.vello.adapter.GoogleCardsAdapter;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.factory.IcibaWordXmlParser;
 import com.mili.xiaominglui.app.vello.data.model.Board;
+import com.mili.xiaominglui.app.vello.data.model.Definition;
+import com.mili.xiaominglui.app.vello.data.model.Definitions;
 import com.mili.xiaominglui.app.vello.data.model.IcibaWord;
 import com.mili.xiaominglui.app.vello.data.model.List;
+import com.mili.xiaominglui.app.vello.data.model.Phonetics;
+import com.mili.xiaominglui.app.vello.data.model.Phoneticss;
 import com.mili.xiaominglui.app.vello.data.model.Word;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
+import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
+import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment;
 import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment.ConnectionErrorDialogListener;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.tjerkw.slideexpandable.library.SlideExpandableListAdapter;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Locale;
+import java.util.Calendar;
+import java.util.Date;
 
 public class MainActivity extends BaseActivity implements RequestListener,
         ConnectionErrorDialogListener, RefreshActionListener,
-        OnQueryTextListener, OnSuggestionListener {
+        OnQueryTextListener, OnSuggestionListener, LoaderCallbacks<Cursor> {
     private static final String TAG = MainActivity.class.getSimpleName();
-    private Menu mOptionsMenu;
     private Context mContext;
 
-    private GoogleCardsAdapter mGoogleCardsAdapter;
+    private GoogleCardsCursorAdapter mGoogleCardsAdapter;
     private RefreshActionItem mRefreshActionItem;
 
     private SuggestionsAdapter mSuggestionsAdapter;
@@ -92,6 +107,8 @@ public class MainActivity extends BaseActivity implements RequestListener,
         }
     }
 
+    private LayoutInflater mInflater;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,7 +121,8 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
         setContentView(R.layout.activity_main);
         ListView listView = (ListView) findViewById(R.id.activity_googlecards_listview);
-        mGoogleCardsAdapter = new GoogleCardsAdapter(this);
+        // mGoogleCardsAdapter = new GoogleCardsCursorAdapter(this);
+        mGoogleCardsAdapter = new GoogleCardsCursorAdapter(this);
         SwingBottomInAnimationAdapter swingBottomInAnimationAdapter = new SwingBottomInAnimationAdapter(
                 new SwipeDismissAdapter(mGoogleCardsAdapter,
                         new MyOnDismissCallback(mGoogleCardsAdapter)));
@@ -116,55 +134,49 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
         listView.setAdapter(slideExpandableListAdapter);
 
+        getSupportLoaderManager().initLoader(0, null, this);
+        mInflater = getLayoutInflater();
     }
 
     private class MyOnDismissCallback implements OnDismissCallback {
 
-        private ArrayAdapter<Word> mAdapter;
+        private GoogleCardsCursorAdapter mAdapter;
 
-        public MyOnDismissCallback(ArrayAdapter<Word> adapter) {
+        public MyOnDismissCallback(GoogleCardsCursorAdapter adapter) {
             mAdapter = adapter;
         }
 
         @Override
         public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+            Cursor c = mAdapter.getCursor();
             for (int position : reverseSortedPositions) {
-                // handle review word request here
-                // TODO
-                Word reviewedWord = mAdapter.getItem(position);
-                String idCard = reviewedWord.idCard;
-                String idList = reviewedWord.idList;
-                String due = reviewedWord.due;
-                Log.d("mingo.lv", "isClicked = " + reviewedWord.hasExpanded);
-                if (due == null) {
-                    // new word via lookup
-                    mAdapter.remove(position);
-                    showCurrentBadge();
+                c.moveToPosition(position);
+                int id = c.getInt(DbWordCard.Columns.ID.getIndex());
+                String idList = c.getString(DbWordCard.Columns.ID_LIST.getIndex());
+                int positionList = AccountUtils.getVocabularyListPosition(mContext, idList);
+                
+                ContentValues cv = new ContentValues();
+                if (positionList == VelloConfig.VOCABULARY_LIST_POSITION_8TH) {
+                    cv.put(DbWordCard.Columns.CLOSED.getName(), "true");
+                    
                 } else {
+                    Calendar rightNow = Calendar.getInstance();
+                    long rightNowUnixTime = rightNow.getTimeInMillis();
+                    long delta = VelloConfig.VOCABULARY_LIST_DUE_DELTA[position];
+                    long dueUnixTime = rightNowUnixTime + delta;
 
-                    if (reviewedWord.hasExpanded) {
-                        // not reviewed
-                        mAdapter.remove(position);
-                        showCurrentBadge();
-                        return;
-                    }
-                    // reviewed
-                    int positionList = AccountUtils.getVocabularyListPosition(
-                            mContext, idList);
-                    if (positionList > -1) {
-                        reviewedWordCard(idCard, positionList);
-                        mAdapter.remove(position);
-                        showCurrentBadge();
-                    } else {
-                        // idPosition invalid, this is should not be happen,
-                        // check
-                        // why?
-                        if (VelloConfig.DEBUG_SWITCH) {
-                            Log.d(TAG,
-                                    "idPosition invalid, this is should not be happen, check why?");
-                        }
-                    }
+                    SimpleDateFormat format = new SimpleDateFormat(
+                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                    Date dueDate = new Date(dueUnixTime);
+                    String stringDueDate = format.format(dueDate);
+                    cv.put(DbWordCard.Columns.DUE.getName(), stringDueDate);
+                    
+                    String newIdList = AccountUtils.getVocabularyListId(mContext,
+                            position + 1);
+                    cv.put(DbWordCard.Columns.ID_LIST.getName(), newIdList);
                 }
+                Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI, id);
+                getContentResolver().update(uri, cv, null, null);
             }
         }
     }
@@ -206,7 +218,6 @@ public class MainActivity extends BaseActivity implements RequestListener,
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        mOptionsMenu = menu;
         getSupportMenuInflater().inflate(R.menu.home, menu);
         MenuItem item = menu.findItem(R.id.refresh_button);
         mRefreshActionItem = (RefreshActionItem) item.getActionView();
@@ -220,25 +231,15 @@ public class MainActivity extends BaseActivity implements RequestListener,
         searchView.setQueryHint(getResources().getText(R.string.action_query_hint));
         searchView.setOnQueryTextListener(this);
         /*
-        searchView.setOnSuggestionListener(this);
-        if (mSuggestionsAdapter == null) {
-            MatrixCursor cursor = new MatrixCursor(COLUMNS);
-            cursor.addRow(new String[] {
-                    "1", "apple"
-            });
-            cursor.addRow(new String[] {
-                    "2", "word"
-            });
-            cursor.addRow(new String[] {
-                    "3", "show"
-            });
-            mSuggestionsAdapter = new SuggestionsAdapter(getSupportActionBar()
-                    .getThemedContext(), cursor);
-        }
+         * searchView.setOnSuggestionListener(this); if (mSuggestionsAdapter ==
+         * null) { MatrixCursor cursor = new MatrixCursor(COLUMNS);
+         * cursor.addRow(new String[] { "1", "apple" }); cursor.addRow(new
+         * String[] { "2", "word" }); cursor.addRow(new String[] { "3", "show"
+         * }); mSuggestionsAdapter = new
+         * SuggestionsAdapter(getSupportActionBar() .getThemedContext(),
+         * cursor); } searchView.setSuggestionsAdapter(mSuggestionsAdapter);
+         */
 
-        searchView.setSuggestionsAdapter(mSuggestionsAdapter);
-        */
-        
         boolean isLight = false;
         menu.add(Menu.NONE, 0, 97, R.string.description_search)
                 .setIcon(
@@ -248,9 +249,11 @@ public class MainActivity extends BaseActivity implements RequestListener,
                 .setShowAsAction(
                         MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
 
-        if (AccountUtils.hasVocabularyBoard(mContext) && AccountUtils.isVocabularyBoardWellFormed(mContext)) {
+        if (AccountUtils.hasVocabularyBoard(mContext)
+                && AccountUtils.isVocabularyBoardWellFormed(mContext)) {
             // all initialized
-            getDueWordCardList();
+            // getDueWordCardList();
+//            getAllWordCardList();
         } else {
             // begin to check vocabulary board
             checkVocabularyBoard();
@@ -287,14 +290,17 @@ public class MainActivity extends BaseActivity implements RequestListener,
                                 .getVocabularyBoardName(mContext))
                                 && board.desc.equals(AccountUtils
                                         .getVocabularyBoardVerification())) {
-                            // s - 0 find out vocabulary board, check the closed flag.
+                            // s - 0 find out vocabulary board, check the closed
+                            // flag.
 
                             if (!board.closed.equals("true")) {
-                                // s - 0.0 vocabulary board is NOT well configured.
+                                // s - 0.0 vocabulary board is NOT well
+                                // configured.
                                 configureVocabularyBoard(board.id);
                                 return;
                             } else {
-                                // s - 0.1 well configured vocabulary board, save id
+                                // s - 0.1 well configured vocabulary board,
+                                // save id
                                 AccountUtils.setVocabularyBoardId(mContext,
                                         board.id);
                                 checkVocabularyLists();
@@ -311,7 +317,8 @@ public class MainActivity extends BaseActivity implements RequestListener,
                     return;
 
                 case VelloRequestFactory.REQUEST_TYPE_CONFIGURE_VOCABULARY_BOARD:
-                    String boardId = request.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_BOARD_ID);
+                    String boardId = request
+                            .getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_BOARD_ID);
                     if (resultData != null) {
                         // configure board successfully & save it
                         String id = resultData
@@ -347,8 +354,10 @@ public class MainActivity extends BaseActivity implements RequestListener,
                                 AccountUtils.setVocabularyListId(mContext, list.id,
                                         position);
                                 if (AccountUtils.isVocabularyBoardWellFormed(mContext)) {
-                                    AppMsg.makeText(this, R.string.toast_init_vocabulary_end, AppMsg.STYLE_INFO).setLayoutGravity(Gravity.BOTTOM).show();
-                                    getDueWordCardList();
+                                    AppMsg.makeText(this, R.string.toast_init_vocabulary_end,
+                                            AppMsg.STYLE_INFO).setLayoutGravity(Gravity.BOTTOM)
+                                            .show();
+                                    // getDueWordCardList();
                                 }
                                 return;
                             }
@@ -364,8 +373,10 @@ public class MainActivity extends BaseActivity implements RequestListener,
                     return;
 
                 case VelloRequestFactory.REQUEST_TYPE_REOPEN_VOCABULARY_LIST:
-                    int positonList = request.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
-                    String idList = request.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_ID);
+                    int positonList = request
+                            .getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
+                    String idList = request
+                            .getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_ID);
                     if (resultData != null) {
                         // reopen list successfully
                         String id = resultData
@@ -374,8 +385,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
                                 .getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
                         AccountUtils.setVocabularyListId(mContext, id, pos);
                         if (AccountUtils.isVocabularyBoardWellFormed(mContext)) {
-                            AppMsg.makeText(this, R.string.toast_init_vocabulary_end, AppMsg.STYLE_INFO).setLayoutGravity(Gravity.BOTTOM).show();
-                            getDueWordCardList();
+                            AppMsg.makeText(this, R.string.toast_init_vocabulary_end,
+                                    AppMsg.STYLE_INFO).setLayoutGravity(Gravity.BOTTOM).show();
+                            // getDueWordCardList();
                         }
                     } else {
                         // reopen failed, try again
@@ -384,7 +396,8 @@ public class MainActivity extends BaseActivity implements RequestListener,
                     return;
 
                 case VelloRequestFactory.REQUEST_TYPE_CREATE_VOCABULARY_LIST:
-                    int positionList = request.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
+                    int positionList = request
+                            .getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
                     if (resultData != null) {
                         // create list successfully
                         String id = resultData
@@ -393,8 +406,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
                                 .getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
                         AccountUtils.setVocabularyListId(mContext, id, pos);
                         if (AccountUtils.isVocabularyBoardWellFormed(mContext)) {
-                            AppMsg.makeText(this, R.string.toast_init_vocabulary_end, AppMsg.STYLE_INFO).setLayoutGravity(Gravity.BOTTOM).show();
-                            getDueWordCardList();
+                            AppMsg.makeText(this, R.string.toast_init_vocabulary_end,
+                                    AppMsg.STYLE_INFO).setLayoutGravity(Gravity.BOTTOM).show();
+                            // getDueWordCardList();
                         }
                     } else {
                         // create list failed, try again
@@ -429,7 +443,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
                         }
                     } else {
                         // NO word card need review
-                        AppMsg.makeText(this, R.string.toast_no_word_now, AppMsg.STYLE_INFO)
+                        AppMsg.makeText(this, R.string.toast_no_word_now, AppMsg.STYLE_CONFIRM)
                                 .setLayoutGravity(Gravity.TOP).show();
                     }
 
@@ -491,7 +505,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
                                     if (VelloConfig.DEBUG_SWITCH) {
                                         Log.d(TAG, "re-open existed word card.");
                                     }
-                                    reOpenWordCard(w.id);
+                                    reOpenWordCard(w.idCard);
                                 } else {
                                     if (w.due.equals("null")) {
                                         // the existed word card has not be
@@ -502,7 +516,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
                                             Log.d(TAG,
                                                     "initialize existed word card.");
                                         }
-                                        initializeWordCard(w.id);
+                                        initializeWordCard(w.idCard);
                                     } else {
                                         // the existed word is in review
                                         // process, do
@@ -535,7 +549,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
                         // show added wordcard to user
                         new WordCardToWordTask().execute(addedWordCard);
                         // at the same time initialize it.
-                        initializeWordCard(addedWordCard.id);
+                        initializeWordCard(addedWordCard.idCard);
                     } else {
                         // add failed
                         // do nothing at present
@@ -674,7 +688,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     private void checkVocabularyLists() {
         mRefreshActionItem.showProgress(true);
-        
+
         for (int i = 0; i < AccountUtils.VOCABULARY_LISTS_TITLE_ID.length; i++) {
             if (VelloConfig.DEBUG_SWITCH) {
                 Log.d(TAG, "checkVocabularyLists start..." + i);
@@ -711,6 +725,20 @@ public class MainActivity extends BaseActivity implements RequestListener,
                 .getDueWordCardListRequest();
         mRequestManager.execute(getDueWordCardListRequest, this);
         mRequestList.add(getDueWordCardListRequest);
+    }
+
+    private void getAllWordCardList() {
+        mRefreshActionItem.showProgress(true);
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "getAllWordCardList start ...");
+        }
+
+        AppMsg.makeText(this, R.string.toast_get_due_word, AppMsg.STYLE_INFO)
+                .setLayoutGravity(Gravity.BOTTOM).show();
+        Request getAllWordCardListRequest = VelloRequestFactory.getAllWordCardListRequest();
+        mRequestManager.execute(getAllWordCardListRequest, this);
+        mRequestList.add(getAllWordCardListRequest);
+
     }
 
     private void lookUpWord(String keyword) {
@@ -797,8 +825,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
     @Override
     public void onRefreshButtonClick(RefreshActionItem sender) {
-        mGoogleCardsAdapter.clear();
-        getDueWordCardList();
+        // mGoogleCardsAdapter.clear();
+        // getDueWordCardList();
+        getAllWordCardList();
     }
 
     private class WordCardToWordTask extends
@@ -816,7 +845,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
                 if (word == null) {
                     word = new IcibaWord();
                 }
-                word.idCard = wordcard.id;
+                word.idCard = wordcard.idCard;
                 word.idList = wordcard.idList;
                 word.keyword = wordcard.name;
                 word.due = wordcard.due;
@@ -827,7 +856,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
         @Override
         protected void onPostExecute(ArrayList<Word> result) {
-            mGoogleCardsAdapter.addAll(result);
+            // mGoogleCardsAdapter.addAll(result);
             showCurrentBadge();
             mRefreshActionItem.showProgress(false);
         }
@@ -868,5 +897,130 @@ public class MainActivity extends BaseActivity implements RequestListener,
     public boolean onQueryTextChange(String newText) {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        ProviderCriteria criteria = new ProviderCriteria();
+        criteria.addSortOrder(DbWordCard.Columns.DUE, true);
+
+        Calendar rightNow = Calendar.getInstance();
+        SimpleDateFormat format = new SimpleDateFormat(
+                "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        String now = format.format(rightNow.getTime());
+        criteria.addLt(DbWordCard.Columns.DUE, now, true);
+        
+        criteria.addNe(DbWordCard.Columns.CLOSED, "true");
+        
+        return new CursorLoader(this, DbWordCard.CONTENT_URI, DbWordCard.PROJECTION, criteria.getWhereClause(), criteria.getWhereParams(),
+                criteria.getOrderClause());
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mGoogleCardsAdapter.changeCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loder) {
+        mGoogleCardsAdapter.changeCursor(null);
+    }
+
+    class ViewHolder {
+        private IcibaWord mWord;
+        private String mDesc;
+        private IconicTextView mIconicToggleButton;
+        private IconicTextView mIconicLifeCount;
+        private TextView mTextViewLifeCount;
+        private String mIdList;
+        private TextView mTextViewKeyword;
+        private CharArrayBuffer mCharArrayBufferKeyword;
+
+        private LinearLayout mLinearLayoutPhoneticArea;
+        private LinearLayout mLinearLayoutDefinitionArea;
+
+        private Phoneticss p;
+        private Definitions d;
+
+        public ViewHolder(View view) {
+            mIconicToggleButton = (IconicTextView) view.findViewById(R.id.expandable_toggle_button);
+
+            mIconicLifeCount = (IconicTextView) view.findViewById(R.id.life_sign);
+            mTextViewLifeCount = (TextView) view.findViewById(R.id.life_count);
+
+            mTextViewKeyword = (TextView) view.findViewById(R.id.keyword);
+            mCharArrayBufferKeyword = new CharArrayBuffer(20);
+
+            mLinearLayoutPhoneticArea = (LinearLayout) view.findViewById(R.id.phonetics_area);
+            mLinearLayoutDefinitionArea = (LinearLayout) view.findViewById(R.id.definition_area);
+
+        }
+
+        public void populateView(Cursor c) {
+            mDesc = c.getString(DbWordCard.Columns.DESC.getIndex());
+            mWord = IcibaWordXmlParser.parse(mDesc);
+            mIconicToggleButton.setIcon(FontAwesomeIcon.INFO_SIGN);
+            mIconicToggleButton.setTextColor(Color.GRAY);
+
+            mIconicLifeCount.setIcon(FontAwesomeIcon.HEART);
+            mIconicLifeCount.setTextColor(Color.GRAY);
+            mIdList = c.getString(DbWordCard.Columns.ID_LIST.getIndex());
+            int positionList = AccountUtils.getVocabularyListPosition(mContext, mIdList);
+            mTextViewLifeCount.setText(String.valueOf(8 - positionList));
+            mTextViewLifeCount.setTextColor(Color.GRAY);
+
+            c.copyStringToBuffer(DbWordCard.Columns.NAME.getIndex(), mCharArrayBufferKeyword);
+            mTextViewKeyword.setText(mCharArrayBufferKeyword.data, 0,
+                    mCharArrayBufferKeyword.sizeCopied);
+
+            p = mWord.phonetics;
+            mLinearLayoutPhoneticArea.removeAllViews();
+            for (Phonetics phonetics : p) {
+                View phoneticsView = LayoutInflater.from(mContext).inflate(R.layout.phonetics_item,
+                        null);
+                LinearLayout phoneticsGroup = (LinearLayout) phoneticsView
+                        .findViewById(R.id.phonetics_group);
+                ((TextView) phoneticsView.findViewById(R.id.phonetics_symbol))
+                        .setText("[" + phonetics.symbol + "]");
+                ((IconicTextView) phoneticsView.findViewById(R.id.phonetics_sound))
+                        .setIcon(FontAwesomeIcon.VOLUME_UP);
+                ((IconicTextView) phoneticsView.findViewById(R.id.phonetics_sound))
+                        .setTextColor(Color.GRAY);
+                mLinearLayoutPhoneticArea.addView(phoneticsGroup);
+            }
+
+            d = mWord.definition;
+            mLinearLayoutDefinitionArea.removeAllViews();
+            for (Definition definition : d) {
+                View definitionView = LayoutInflater.from(mContext).inflate(
+                        R.layout.definition_item, null);
+                LinearLayout definiitionGroup = (LinearLayout) definitionView
+                        .findViewById(R.id.definition_group);
+                ((TextView) definitionView.findViewById(R.id.pos))
+                        .setText(definition.pos);
+                ((TextView) definitionView.findViewById(R.id.definiens))
+                        .setText(definition.definiens);
+                mLinearLayoutDefinitionArea.addView(definiitionGroup);
+            }
+        }
+    }
+
+    class GoogleCardsCursorAdapter extends CursorAdapter {
+        public GoogleCardsCursorAdapter(Context context) {
+            super(context, null, false);
+        }
+
+        @Override
+        public void bindView(View view, Context context, Cursor cursor) {
+            ((ViewHolder) view.getTag()).populateView(cursor);
+
+        }
+
+        @Override
+        public View newView(Context context, Cursor arg1, ViewGroup parent) {
+            View view = mInflater.inflate(R.layout.activity_googlecards_card, null);
+            view.setTag(new ViewHolder(view));
+            return view;
+        }
     }
 }
