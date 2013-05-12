@@ -1,5 +1,7 @@
 package com.mili.xiaominglui.app.vello.ui;
 
+import java.util.ArrayList;
+
 import android.os.Bundle;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -8,8 +10,6 @@ import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestManager;
 import com.mili.xiaominglui.app.vello.dialogs.ErrorDialogFragment.ErrorDialogFragmentBuilder;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
-
-import java.util.ArrayList;
 
 public class BaseActivity extends SherlockFragmentActivity {
     private static final String SAVED_STATE_REQUEST_LIST = "savedStateRequestList";

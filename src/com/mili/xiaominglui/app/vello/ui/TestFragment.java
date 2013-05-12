@@ -1,5 +1,7 @@
 package com.mili.xiaominglui.app.vello.ui;
 
+import com.actionbarsherlock.app.SherlockFragment;
+
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -8,8 +10,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
-
-import com.actionbarsherlock.app.SherlockFragment;
 
 public final class TestFragment extends SherlockFragment {
     private static final String KEY_CONTENT = "TestFragment:Content";
