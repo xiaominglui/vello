@@ -26,12 +26,12 @@ public class VelloContent {
         
         public static enum Columns implements ColumnMetadata {
             ID(BaseColumns._ID, "INTEGER"),
-            ID_CARD("card_id", "text"),
-            NAME("name", "text"),
-            DESC("desc", "text"),
+            ID_CARD("card_id", "VARCHAR"),
+            NAME("name", "VARCHAR"),
+            DESC("desc", "VARCHAR"),
             DUE("due", "VARCHAR"),
-            CLOSED("closed", "text"),
-            ID_LIST("list_id", "text"),
+            CLOSED("closed", "SMALLINT"),
+            ID_LIST("list_id", "VARCHAR"),
             DATE_LAST_ACTIVITY("dateLastActivity", "VARCHAR");
 
             private final String mName;
