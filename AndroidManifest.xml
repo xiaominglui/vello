@@ -68,6 +68,18 @@
             android:name=".data.provider.VelloProvider"
             android:authorities="com.mili.xiaominglui.app.vello.provider.VelloProvider"
             android:exported="false" />
+        <service
+            android:name=".syncadapter.SyncService"
+            android:exported="false">
+            <intent-filter>
+                <action
+                    android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
+        <service android:name=".VelloService"></service>
     </application>
 
 </manifest>
