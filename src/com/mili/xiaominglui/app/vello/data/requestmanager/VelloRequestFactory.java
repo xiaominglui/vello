@@ -138,5 +138,9 @@ public final class VelloRequestFactory {
         request.setMemoryCacheEnabled(true);
         return request;
     }
+    
+	public static Request syncTrelloDBRequest() {
+
+	}
 
 }
