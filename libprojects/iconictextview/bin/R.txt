@@ -1,0 +1,4 @@
+int raw entypo 0x7f020000
+int raw entypo_social 0x7f020001
+int raw font_awesome 0x7f020002
+int raw iconic 0x7f020003
