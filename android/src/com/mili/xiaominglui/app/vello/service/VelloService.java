@@ -3,16 +3,18 @@ package com.mili.xiaominglui.app.vello.service;
 import java.util.ArrayList;
 
 import com.foxykeep.datadroid.requestmanager.Request;
+import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestManager;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
-public class VelloService extends Service {
+public class VelloService extends Service implements RequestListener {
 	private static final String TAG = VelloService.class.getSimpleName();
 	
 	protected VelloRequestManager mRequestManager;
@@ -35,5 +37,32 @@ public class VelloService extends Service {
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "syncTrelloDB start...");
 		}
+		Request syncTrelloDB = VelloRequestFactory.syncTrelloDBRequest();
+		mRequestManager.execute(syncTrelloDB, this);
+		mRequestList.add(syncTrelloDB);
 	}
+
+    @Override
+    public void onRequestFinished(Request request, Bundle resultData) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onRequestConnectionError(Request request, int statusCode) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onRequestDataError(Request request) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void onRequestCustomError(Request request, Bundle resultData) {
+        // TODO Auto-generated method stub
+
+    }
 }
