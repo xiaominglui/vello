@@ -1,12 +1,14 @@
 package com.mili.xiaominglui.app.vello.syncadapter;
 
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
+import com.mili.xiaominglui.app.vello.service.VelloService;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SyncResult;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -35,7 +37,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     	if (VelloConfig.DEBUG_SWITCH) {
     		Log.d(TAG, "onPerformSync...");
     	}
-        
+    	
+    	Intent intent = new Intent(mContext, VelloService.class);
+    	mContext.startService(intent);
     }
 
     /**

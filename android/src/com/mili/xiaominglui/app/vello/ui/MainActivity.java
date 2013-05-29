@@ -9,6 +9,7 @@ import android.app.SearchManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.CharArrayBuffer;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -64,6 +65,7 @@ import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment;
 import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment.ConnectionErrorDialogListener;
+import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.tjerkw.slideexpandable.library.SlideExpandableListAdapter;
 
@@ -836,7 +838,9 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	public void onRefreshButtonClick(RefreshActionItem sender) {
 		// mGoogleCardsAdapter.clear();
 		// getDueWordCardList();
-		getAllWordCardList();
+//		getAllWordCardList();
+		Intent intent = new Intent(this, VelloService.class);
+		startService(intent);
 	}
 
 	private class WordCardToWordTask extends

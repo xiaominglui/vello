@@ -79,7 +79,7 @@
                 android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />
         </service>
-        <service android:name=".VelloService"></service>
+        <service android:name=".service.VelloService"></service>
     </application>
 
 </manifest>
