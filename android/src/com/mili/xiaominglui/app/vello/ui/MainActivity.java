@@ -917,19 +917,19 @@ public class MainActivity extends BaseActivity implements RequestListener,
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		ProviderCriteria criteria = new ProviderCriteria();
-		criteria.addSortOrder(DbWordCard.Columns.DUE, true);
-
-		Calendar rightNow = Calendar.getInstance();
-		SimpleDateFormat format = new SimpleDateFormat(
-				"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-		String now = format.format(rightNow.getTime());
-		criteria.addLt(DbWordCard.Columns.DUE, now, true);
-
-		criteria.addNe(DbWordCard.Columns.CLOSED, "true");
+//		criteria.addSortOrder(DbWordCard.Columns.DUE, true);
+//
+//		Calendar rightNow = Calendar.getInstance();
+//		SimpleDateFormat format = new SimpleDateFormat(
+//				"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+//		String now = format.format(rightNow.getTime());
+//		criteria.addLt(DbWordCard.Columns.DUE, now, true);
+//
+//		criteria.addNe(DbWordCard.Columns.CLOSED, "true");
 
 		return new CursorLoader(this, DbWordCard.CONTENT_URI,
-				DbWordCard.PROJECTION, criteria.getWhereClause(),
-				criteria.getWhereParams(), criteria.getOrderClause());
+				DbWordCard.PROJECTION, null,
+				null, criteria.getOrderClause());
 	}
 
 	@Override

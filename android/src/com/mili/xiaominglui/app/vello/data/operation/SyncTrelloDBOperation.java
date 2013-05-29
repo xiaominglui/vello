@@ -18,6 +18,7 @@ import com.foxykeep.datadroid.service.RequestService.Operation;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.config.WSConfig;
 import com.mili.xiaominglui.app.vello.data.factory.AllWordCardListJsonFactory;
+import com.mili.xiaominglui.app.vello.data.factory.SyncTrelloDBResponseJsonFactory;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
@@ -48,7 +49,7 @@ public class SyncTrelloDBOperation implements Operation {
 		HashMap<String, String> parameterMap = new HashMap<String, String>();
 		parameterMap.put(WSConfig.WS_TRELLO_PARAM_FILTER, "open");
 		parameterMap.put(WSConfig.WS_TRELLO_PARAM_FIELDS,
-				"name,desc,due,idList");
+				"name,desc,due,idList,dateLastActivity");
 		parameterMap.put(WSConfig.WS_TRELLO_PARAM_APP_KEY,
 				WSConfig.VELLO_APP_KEY);
 		parameterMap.put(WSConfig.WS_TRELLO_PARAM_ACCESS_TOKEN, token);
@@ -59,15 +60,13 @@ public class SyncTrelloDBOperation implements Operation {
 		networkConnection.setParameters(parameterMap);
 		ConnectionResult result = networkConnection.execute();
 
-		ArrayList<WordCard> wordCardList = new ArrayList<WordCard>();
+		ArrayList<WordCard> remoteWordCardList = new ArrayList<WordCard>();
+		remoteWordCardList = SyncTrelloDBResponseJsonFactory.parseResult(result.body);
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "result.body = " + result.body);
 		}
 
-		// Clear the table
-		 context.getContentResolver().delete(DbWordCard.CONTENT_URI, null, null);
-
-		int wordCardListSize = wordCardList.size();
+		int wordCardListSize = remoteWordCardList.size();
 		if (wordCardListSize > 0) {
 			ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
 			Calendar rightNow = Calendar.getInstance();
@@ -76,7 +75,7 @@ public class SyncTrelloDBOperation implements Operation {
 					"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 			Date date;
 
-			for (WordCard wordCard : wordCardList) {
+			for (WordCard wordCard : remoteWordCardList) {
 				String dueString = wordCard.due;
 				if (!dueString.equals("null")) {
 					try {
@@ -106,8 +105,6 @@ public class SyncTrelloDBOperation implements Operation {
 				throw new DataException(e);
 			}
 		}
-
 		return null;
 	}
-
 }
