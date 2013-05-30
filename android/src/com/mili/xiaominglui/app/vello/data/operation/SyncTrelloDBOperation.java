@@ -1,10 +1,9 @@
 package com.mili.xiaominglui.app.vello.data.operation;
 
-import android.content.ContentProviderOperation;
+import java.util.HashMap;
+
 import android.content.Context;
-import android.content.OperationApplicationException;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.util.Log;
 
 import com.foxykeep.datadroid.exception.ConnectionException;
@@ -17,20 +16,9 @@ import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.service.RequestService.Operation;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.config.WSConfig;
-import com.mili.xiaominglui.app.vello.data.factory.AllWordCardListJsonFactory;
 import com.mili.xiaominglui.app.vello.data.factory.SyncTrelloDBResponseJsonFactory;
-import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
-import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
-import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
 
 public class SyncTrelloDBOperation implements Operation {
 	private static final String TAG = SyncTrelloDBOperation.class
@@ -60,51 +48,10 @@ public class SyncTrelloDBOperation implements Operation {
 		networkConnection.setParameters(parameterMap);
 		ConnectionResult result = networkConnection.execute();
 
-		ArrayList<WordCard> remoteWordCardList = new ArrayList<WordCard>();
-		remoteWordCardList = SyncTrelloDBResponseJsonFactory.parseResult(result.body);
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "result.body = " + result.body);
 		}
+		return SyncTrelloDBResponseJsonFactory.parseResult(result.body);
 
-		int wordCardListSize = remoteWordCardList.size();
-		if (wordCardListSize > 0) {
-			ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
-			Calendar rightNow = Calendar.getInstance();
-			long rightNowUnixTime = rightNow.getTimeInMillis();
-			SimpleDateFormat format = new SimpleDateFormat(
-					"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-			Date date;
-
-			for (WordCard wordCard : remoteWordCardList) {
-				String dueString = wordCard.due;
-				if (!dueString.equals("null")) {
-					try {
-						date = format.parse(dueString);
-						long dueUnixTime = date.getTime();
-						if (dueUnixTime <= rightNowUnixTime) {
-							// it is time to review, insert words to local DB
-							// cache
-							operationList.add(ContentProviderOperation
-									.newInsert(DbWordCard.CONTENT_URI)
-									.withValues(wordCard.toContentVaalues())
-									.build());
-
-						}
-					} catch (ParseException e) {
-						Log.e(TAG, "ParseException", e);
-					}
-				}
-			}
-			
-			try {
-				context.getContentResolver().applyBatch(
-						VelloProvider.AUTHORITY, operationList);
-			} catch (RemoteException e) {
-				throw new DataException(e);
-			} catch (OperationApplicationException e) {
-				throw new DataException(e);
-			}
-		}
-		return null;
 	}
 }

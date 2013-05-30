@@ -6,17 +6,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.Bundle;
 import android.util.Log;
 
 import com.foxykeep.datadroid.exception.DataException;
 import com.mili.xiaominglui.app.vello.config.JSONTag;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
+import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 
 public class SyncTrelloDBResponseJsonFactory {
 	private static final String TAG = SyncTrelloDBResponseJsonFactory.class
 			.getSimpleName();
 
-	public static ArrayList<WordCard> parseResult(String wsResponse)
+	public static Bundle parseResult(String wsResponse)
 			throws DataException {
 		ArrayList<WordCard> wordCardList = new ArrayList<WordCard>();
 
@@ -39,8 +41,10 @@ public class SyncTrelloDBResponseJsonFactory {
 			Log.e(TAG, "JSONException", e);
 			throw new DataException(e);
 		}
+		Bundle bundle = new Bundle();
+		bundle.putParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST, wordCardList);
 
-		return wordCardList;
+		return bundle;
 	}
 
 }

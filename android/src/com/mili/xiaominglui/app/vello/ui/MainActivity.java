@@ -602,22 +602,6 @@ public class MainActivity extends BaseActivity implements RequestListener,
 				}
 				return;
 
-			case VelloRequestFactory.REQUEST_TYPE_REVIEWED_WORDCARD:
-				WordCard reviewedWordCard = resultData
-						.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
-				if (reviewedWordCard != null) {
-					// reviewed
-
-				} else {
-					// reviewed failed
-					// do nothing at present
-				}
-				showCurrentBadge();
-				if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "reviewedWordCard end.");
-				}
-				return;
-
 			default:
 				return;
 			}
@@ -806,21 +790,6 @@ public class MainActivity extends BaseActivity implements RequestListener,
 				.reOpenWordCardRequest(idCard);
 		mRequestManager.execute(reOpenWordCard, this);
 		mRequestList.add(reOpenWordCard);
-	}
-
-	private void archiveWordCard(String idCard) {
-		// TODO
-	}
-
-	private void reviewedWordCard(String idCard, int position) {
-		mRefreshActionItem.showProgress(true);
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "reviewedWordCard start...");
-		}
-		Request reviewedWordCard = VelloRequestFactory.reviewedWordCardRequest(
-				idCard, position);
-		mRequestManager.execute(reviewedWordCard, this);
-		mRequestList.add(reviewedWordCard);
 	}
 
 	@Override

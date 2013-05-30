@@ -20,35 +20,38 @@ import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import java.util.HashMap;
 
 public class GetDueWordCardListOperation implements Operation {
-    private static final String TAG = GetDueWordCardListOperation.class.getSimpleName();
+	private static final String TAG = GetDueWordCardListOperation.class
+			.getSimpleName();
 
-    @Override
-    public Bundle execute(Context context, Request request)
-	    throws ConnectionException, DataException, CustomRequestException {
-	String token = AccountUtils.getAuthToken(context);
-	String vocabularyBoardId = AccountUtils.getVocabularyBoardId(context);
+	@Override
+	public Bundle execute(Context context, Request request)
+			throws ConnectionException, DataException, CustomRequestException {
+		String token = AccountUtils.getAuthToken(context);
+		String vocabularyBoardId = AccountUtils.getVocabularyBoardId(context);
 
-	String urlString = WSConfig.TRELLO_API_URL
-		+ WSConfig.WS_TRELLO_TARGET_BOARD + "/" + vocabularyBoardId
-		+ WSConfig.WS_TRELLO_FIELD_CARDS;
+		String urlString = WSConfig.TRELLO_API_URL
+				+ WSConfig.WS_TRELLO_TARGET_BOARD + "/" + vocabularyBoardId
+				+ WSConfig.WS_TRELLO_FIELD_CARDS;
 
-	HashMap<String, String> parameterMap = new HashMap<String, String>();
-	parameterMap.put(WSConfig.WS_TRELLO_PARAM_FILTER, "open");
-	parameterMap.put(WSConfig.WS_TRELLO_PARAM_FIELDS, "name,desc,due,idList");
-	parameterMap.put(WSConfig.WS_TRELLO_PARAM_APP_KEY, WSConfig.VELLO_APP_KEY);
-	parameterMap.put(WSConfig.WS_TRELLO_PARAM_ACCESS_TOKEN, token);
-	
-	NetworkConnection networkConnection = new NetworkConnection(context,
-		urlString);
-	networkConnection.setMethod(Method.GET);
-	networkConnection.setParameters(parameterMap);
-	ConnectionResult result = networkConnection.execute();
-	
-	if (VelloConfig.DEBUG_SWITCH) {
-	    Log.d(TAG, "result.body = " + result.body);
+		HashMap<String, String> parameterMap = new HashMap<String, String>();
+		parameterMap.put(WSConfig.WS_TRELLO_PARAM_FILTER, "open");
+		parameterMap.put(WSConfig.WS_TRELLO_PARAM_FIELDS,
+				"name,desc,due,idList");
+		parameterMap.put(WSConfig.WS_TRELLO_PARAM_APP_KEY,
+				WSConfig.VELLO_APP_KEY);
+		parameterMap.put(WSConfig.WS_TRELLO_PARAM_ACCESS_TOKEN, token);
+
+		NetworkConnection networkConnection = new NetworkConnection(context,
+				urlString);
+		networkConnection.setMethod(Method.GET);
+		networkConnection.setParameters(parameterMap);
+		ConnectionResult result = networkConnection.execute();
+
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "result.body = " + result.body);
+		}
+
+		return DueWordCardListJsonFactory.parseResult(result.body);
 	}
-	
-	return DueWordCardListJsonFactory.parseResult(result.body);
-    }
 
 }
