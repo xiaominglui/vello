@@ -28,6 +28,11 @@
     <string name="dialog_error_data_error_title">Incorrect data</string>
     <string name="dialog_error_data_error_message">Received data is invalid.</string>
     
+    <string name="local_service_started">LOCAL_SERVICE_STARTED</string>
+    <string name="local_service_stopped">LOCAL_SERVICE_STOPPED</string>
+    <string name="local_service_connected">LOCAL_SERVICE_CONNECTED</string>
+    <string name="local_service_disconnected">LOCAL_SERVICE_DISCONNECTED</string>
+    
     
 
 </resources>
