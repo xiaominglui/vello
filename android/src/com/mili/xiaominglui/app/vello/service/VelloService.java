@@ -8,7 +8,10 @@ import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Toast;
@@ -31,14 +34,74 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class VelloService extends Service implements RequestListener {
     private static final String TAG = VelloService.class.getSimpleName();
     private NotificationManager mNM;
+    
+    private Timer timer = new Timer();
+    private int counter = 0, incrementby = 1;
+    private static boolean isRunning = false;
+    ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients.
+    
+    int mValue = 0; // Holds last value set by a client.
+    public static final int MSG_REGISTER_CLIENT = 1;
+    public static final int MSG_UNREGISTER_CLIENT = 2;
+    public static final int MSG_SET_INT_VALUE = 3;
+    public static final int MSG_SET_STRING_VALUE = 4;
+    
 
     // Unique Identification Number for the Notification.
     // We use it on Notification start, and to cancel it.
     private int NOTIFICATION = R.string.local_service_started;
+    
+    final Messenger mMessenger = new Messenger(new IncomingHandler()); // Target we publish for clients to send messages to IncomingHandler.
+
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mMessenger.getBinder();
+    }
+    class IncomingHandler extends Handler { // Handler of incoming messages from clients.
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case MSG_REGISTER_CLIENT:
+                mClients.add(msg.replyTo);
+                break;
+            case MSG_UNREGISTER_CLIENT:
+                mClients.remove(msg.replyTo);
+                break;
+            case MSG_SET_INT_VALUE:
+                incrementby = msg.arg1;
+                break;
+            default:
+                super.handleMessage(msg);
+            }
+        }
+    }
+    
+    private void sendMessageToUI(int intvaluetosend) {
+        for (int i=mClients.size()-1; i>=0; i--) {
+            try {
+                // Send data as an Integer
+                mClients.get(i).send(Message.obtain(null, MSG_SET_INT_VALUE, intvaluetosend, 0));
+
+                //Send data as a String
+                Bundle b = new Bundle();
+                b.putString("str1", "ab" + intvaluetosend + "cd");
+                Message msg = Message.obtain(null, MSG_SET_STRING_VALUE);
+                msg.setData(b);
+                mClients.get(i).send(msg);
+
+            } catch (RemoteException e) {
+                // The client is dead. Remove it from the list; we are going through the list from back to front so this is safe to do inside the loop.
+                mClients.remove(i);
+            }
+        }
+    }
 
     /**
      * Class for clients to access. Because we know this service always runs in
@@ -57,29 +120,53 @@ public class VelloService extends Service implements RequestListener {
         // stopped, so return sticky.
         return START_STICKY;
     }
+    
+    private void onTimerTick() {
+        Log.i("TimerTick", "Timer doing work." + counter);
+        try {
+            counter += incrementby;
+            sendMessageToUI(counter);
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mBinder;
+        } catch (Throwable t) { //you should always ultimately catch all exceptions in timer tasks.
+            Log.e("TimerTick", "Timer Tick Failed.", t);            
+        }
     }
     
+    public static boolean isRunning() {
+        return isRunning;
+    }
+
     @Override
     public void onCreate() {
+        super.onCreate();
+        Log.i(TAG, "VelloService Started.");
         mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mRequestManager = VelloRequestManager.from(this);
         mRequestList = new ArrayList<Request>();
         
         // Display a notification about us starting.  We put an icon in the status bar.
 //        showNotification();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                onTimerTick();
+                
+            }
+        }, 0, 100L);
+        isRunning = true;
     }
 
     @Override
     public void onDestroy() {
         // Cancel the persistent notification.
+        Log.i(TAG, "VelloService Stopped.");
+        isRunning = false;
         mNM.cancel(NOTIFICATION);
 
         // Tell the user we stopped.
-        Toast.makeText(this, R.string.local_service_stopped, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.local_service_stopped, Toast.LENGTH_LONG).show();
     }
     
  // This is the object that receives interactions from clients.  See

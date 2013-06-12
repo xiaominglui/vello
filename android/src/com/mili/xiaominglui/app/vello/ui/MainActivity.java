@@ -1,6 +1,7 @@
 
 package com.mili.xiaominglui.app.vello.ui;
 
+import android.app.Activity;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.ContentUris;
@@ -83,9 +84,40 @@ public class MainActivity extends BaseActivity implements RequestListener,
         OnQueryTextListener, OnSuggestionListener, LoaderCallbacks<Cursor> {
     private static final String TAG = MainActivity.class.getSimpleName();
     private Context mContext;
+    private Activity mActivity;
     
-    private VelloService mBoundService;
+    private static final int MSG_SPINNER_ON = 0;
+    private static final int MSG_SPINNER_OFF = 1;
+    private static final int MSG_DIALOG_BADDATAERROR_SHOW = 2;
+    
+    private Handler mUICallback = new Handler() {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            // TODO
+                case MSG_SPINNER_ON:
+                    mRefreshActionItem.showProgress(true);
+                    return;
+                case MSG_SPINNER_OFF:
+                    mRefreshActionItem.showProgress(false);
+                    return;
+                case MSG_DIALOG_BADDATAERROR_SHOW:
+                    showBadDataErrorDialog();
+                    return;
+                case VelloService.MSG_SET_INT_VALUE:
+                    AppMsg.makeText(mActivity, "Int Message: " + msg.arg1, AppMsg.STYLE_INFO).show();
+                    return;
+                case VelloService.MSG_SET_STRING_VALUE:
+                    String str1 = msg.getData().getString("str1");
+                    AppMsg.makeText(mActivity, "Str Message: " + str1, AppMsg.STYLE_INFO).show();
+                    return;
+            }
+        }
+    };
+    
+    Messenger mService = null;
     private boolean mIsBound;
+    
+    final Messenger mMessenger = new Messenger(mUICallback);
 
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
@@ -94,23 +126,41 @@ public class MainActivity extends BaseActivity implements RequestListener,
             // interact with the service.  Because we have bound to a explicit
             // service that we know is running in our own process, we can
             // cast its IBinder to a concrete class and directly access it.
-            mBoundService = ((VelloService.LocalBinder)service).getService();
-
+            mService = new Messenger(service);
             // Tell the user about this for our demo.
             Toast.makeText(getApplicationContext(), R.string.local_service_connected,
                     Toast.LENGTH_SHORT).show();
+            
+            try {
+                Message msg = Message.obtain(null, VelloService.MSG_REGISTER_CLIENT);
+                msg.replyTo = mMessenger;
+                mService.send(msg);
+            } catch (RemoteException e) {
+             // In this case the service has crashed before we could even do anything with it
+            }
         }
 
         public void onServiceDisconnected(ComponentName className) {
             // This is called when the connection with the service has been
-            // unexpectedly disconnected -- that is, its process crashed.
-            // Because it is running in our same process, we should never
-            // see this happen.
-            mBoundService = null;
+            // unexpectedly disconnected - process crashed.
+            mService = null;
             Toast.makeText(getApplicationContext(), R.string.local_service_disconnected,
                     Toast.LENGTH_SHORT).show();
         }
     };
+    
+    private void sendMessageToService(int intvaluetosend) {
+        if (mIsBound) {
+            if (mService != null) {
+                try {
+                    Message msg = Message.obtain(null, VelloService.MSG_SET_INT_VALUE, intvaluetosend, 0);
+                    msg.replyTo = mMessenger;
+                    mService.send(msg);
+                } catch (RemoteException e) {
+                }
+            }
+        }
+    }
 
     void doBindService() {
         // Establish a connection with the service.  We use an explicit
@@ -127,6 +177,13 @@ public class MainActivity extends BaseActivity implements RequestListener,
             // Detach our existing connection.
             unbindService(mConnection);
             mIsBound = false;
+        }
+    }
+    
+    private void CheckIfServiceIsRunning() {
+        //If the service is running when the activity starts, we want to automatically bind to it.
+        if (VelloService.isRunning()) {
+            doBindService();
         }
     }
 
@@ -163,22 +220,6 @@ public class MainActivity extends BaseActivity implements RequestListener,
     }
 
     private LayoutInflater mInflater;
-
-    private static final int MSG_SPINNER_ON = 0;
-    private static final int MSG_SPINNER_OFF = 1;
-    private Handler mUICallback = new Handler() {
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-            // TODO
-                case MSG_SPINNER_ON:
-                    mRefreshActionItem.showProgress(true);
-                    return;
-                case MSG_SPINNER_OFF:
-                    mRefreshActionItem.showProgress(false);
-                    return;
-            }
-        }
-    };
 
     private class MyOnDismissCallback implements OnDismissCallback {
 
@@ -230,6 +271,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = getApplicationContext();
+        mActivity = this;
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
         if (isFinishing()) {
@@ -253,8 +295,8 @@ public class MainActivity extends BaseActivity implements RequestListener,
 
         getSupportLoaderManager().initLoader(0, null, this);
         mInflater = getLayoutInflater();
-        
         doBindService();
+//        CheckIfServiceIsRunning();
 
     }
 
@@ -904,6 +946,7 @@ public class MainActivity extends BaseActivity implements RequestListener,
         // getAllWordCardList();
         // Intent intent = new Intent(this, VelloService.class);
         // startService(intent);
+        sendMessageToService(10);
     }
 
     private class WordCardToWordTask extends
