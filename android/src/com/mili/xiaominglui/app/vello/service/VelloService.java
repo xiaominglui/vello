@@ -34,26 +34,19 @@ import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestManager;
 import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment.ConnectionErrorDialogListener;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
+import java.lang.ref.WeakReference;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class VelloService extends Service implements RequestListener, ConnectionErrorDialogListener {
     private static final String TAG = VelloService.class.getSimpleName();
     private NotificationManager mNM;
 
-    private Timer timer = new Timer();
-    private int counter = 0, incrementby = 1;
     private static boolean isRunning = false;
-    ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track
-                                                                // of all
-                                                                // current
-                                                                // registered
-                                                                // clients.
+    ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients.
 
     int mValue = 0; // Holds last value set by a client.
     public static final int MSG_UNREGISTER_CLIENT = -1;
@@ -71,44 +64,47 @@ public class VelloService extends Service implements RequestListener, Connection
     public static final int MSG_SHOW_CURRENT_BADGE = 10;
 
     public static final int MSG_CHECK_VOCABULARY_BOARD = 100;
+    public static final int MSG_GET_DUE_WORDCARD_LIST = 101;
 
     // Unique Identification Number for the Notification.
     // We use it on Notification start, and to cancel it.
     private int NOTIFICATION = R.string.local_service_started;
 
-    final Messenger mMessenger = new Messenger(new IncomingHandler()); // Target
-                                                                       // we
-                                                                       // publish
-                                                                       // for
-                                                                       // clients
-                                                                       // to
-                                                                       // send
-                                                                       // messages
-                                                                       // to
-                                                                       // IncomingHandler.
+    final Messenger mMessenger = new Messenger(new IncomingHandler(this));
 
     @Override
     public IBinder onBind(Intent intent) {
         return mMessenger.getBinder();
     }
 
-    class IncomingHandler extends Handler { // Handler of incoming messages from
-                                            // clients.
+    static class IncomingHandler extends Handler { // Handler of incoming messages from clients.
+        private final WeakReference<VelloService> mService;
+        
+        IncomingHandler(VelloService service) {
+            mService = new WeakReference<VelloService>(service);
+        }
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_REGISTER_CLIENT:
-                    mClients.add(msg.replyTo);
-                    break;
-                case MSG_UNREGISTER_CLIENT:
-                    mClients.remove(msg.replyTo);
-                    break;
-                case MSG_CHECK_VOCABULARY_BOARD:
-                    checkVocabularyBoard();
-                    break;
-                default:
-                    super.handleMessage(msg);
+            VelloService service = mService.get();
+            if (service != null) {
+                switch (msg.what) {
+                    case MSG_REGISTER_CLIENT:
+                        service.mClients.add(msg.replyTo);
+                        break;
+                    case MSG_UNREGISTER_CLIENT:
+                        service.mClients.remove(msg.replyTo);
+                        break;
+                    case MSG_CHECK_VOCABULARY_BOARD:
+                        service.checkVocabularyBoard();
+                        break;
+                    case MSG_GET_DUE_WORDCARD_LIST:
+                        service.getDueWordCardList();
+                        break;
+                    default:
+                        super.handleMessage(msg);
+                }
             }
+            
         }
     }
 
@@ -135,6 +131,11 @@ public class VelloService extends Service implements RequestListener, Connection
                 mClients.remove(i);
             }
         }
+    }
+
+    public void handleMessage(Message msg) {
+        // TODO Auto-generated method stub
+        
     }
 
     @Override
@@ -209,10 +210,10 @@ public class VelloService extends Service implements RequestListener, Connection
     }
 
     private void checkVocabularyBoard() {
-
         if (VelloConfig.DEBUG_SWITCH) {
             Log.d(TAG, "checkVocabularyBoard start...");
         }
+        sendMessageToUI(MSG_SPINNER_ON);
         sendMessageToUI(VelloService.MSG_TOAST_INIT_VOCABULARY_START);
 
         Request checkVocabularyBoardRequest = VelloRequestFactory
@@ -222,7 +223,6 @@ public class VelloService extends Service implements RequestListener, Connection
     }
 
     private void createVocabularyBoard() {
-        sendMessageToUI(VelloService.MSG_SPINNER_ON);
         if (VelloConfig.DEBUG_SWITCH) {
             Log.d(TAG, "createVocabularyBoard start...");
         }
@@ -233,7 +233,6 @@ public class VelloService extends Service implements RequestListener, Connection
     }
 
     private void createVocabularyList(int position) {
-        sendMessageToUI(VelloService.MSG_SPINNER_ON);
         if (VelloConfig.DEBUG_SWITCH) {
             Log.d(TAG, "createVocabularyList start...");
         }
@@ -244,7 +243,6 @@ public class VelloService extends Service implements RequestListener, Connection
     }
 
     private void reOpenVocabulayList(int position, String id) {
-        sendMessageToUI(VelloService.MSG_SPINNER_ON);
         if (VelloConfig.DEBUG_SWITCH) {
             Log.d(TAG, "reOpenVocabulayList start...");
         }
@@ -255,8 +253,6 @@ public class VelloService extends Service implements RequestListener, Connection
     }
 
     private void checkVocabularyLists() {
-        sendMessageToUI(VelloService.MSG_SPINNER_ON);
-
         for (int i = 0; i < AccountUtils.VOCABULARY_LISTS_TITLE_ID.length; i++) {
             if (VelloConfig.DEBUG_SWITCH) {
                 Log.d(TAG, "checkVocabularyLists start..." + i);
@@ -271,7 +267,6 @@ public class VelloService extends Service implements RequestListener, Connection
     }
 
     private void configureVocabularyBoard(String id) {
-        sendMessageToUI(VelloService.MSG_SPINNER_ON);
         if (VelloConfig.DEBUG_SWITCH) {
             Log.d(TAG, "configureVocabularyBoard start...");
         }
@@ -284,25 +279,12 @@ public class VelloService extends Service implements RequestListener, Connection
     private void getDueWordCardList() {
         sendMessageToUI(VelloService.MSG_SPINNER_ON);
         if (VelloConfig.DEBUG_SWITCH) {
-            Log.d(TAG, "getDueWordCardList start...");
-        }
-
-        sendMessageToUI(VelloService.MSG_TOAST_GET_DUE_WORD);
-        Request getDueWordCardListRequest = VelloRequestFactory
-                .getDueWordCardListRequest();
-        mRequestManager.execute(getDueWordCardListRequest, this);
-        mRequestList.add(getDueWordCardListRequest);
-    }
-
-    private void getAllWordCardList() {
-        sendMessageToUI(VelloService.MSG_SPINNER_ON);
-        if (VelloConfig.DEBUG_SWITCH) {
             Log.d(TAG, "getAllWordCardList start ...");
         }
 
         sendMessageToUI(VelloService.MSG_TOAST_GET_DUE_WORD);
         Request getAllWordCardListRequest = VelloRequestFactory
-                .getAllWordCardListRequest();
+                .getDueWordCardListRequest();
         mRequestManager.execute(getAllWordCardListRequest, this);
         mRequestList.add(getAllWordCardListRequest);
 
@@ -547,6 +529,7 @@ public class VelloService extends Service implements RequestListener, Connection
                                 if (AccountUtils
                                         .isVocabularyBoardWellFormed(getApplicationContext())) {
                                     sendMessageToUI(MSG_TOAST_INIT_VOCABULARY_END);
+                                    sendMessageToUI(MSG_SPINNER_OFF);
                                     getDueWordCardList();
                                 }
                                 return;
@@ -576,6 +559,7 @@ public class VelloService extends Service implements RequestListener, Connection
                         AccountUtils.setVocabularyListId(getApplicationContext(), id, pos);
                         if (AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
                             sendMessageToUI(MSG_TOAST_INIT_VOCABULARY_END);
+                            sendMessageToUI(MSG_SPINNER_OFF);
                             getDueWordCardList();
                         }
                     } else {
@@ -596,6 +580,7 @@ public class VelloService extends Service implements RequestListener, Connection
                         AccountUtils.setVocabularyListId(getApplicationContext(), id, pos);
                         if (AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
                             sendMessageToUI(MSG_TOAST_INIT_VOCABULARY_END);
+                            sendMessageToUI(MSG_SPINNER_OFF);
                             getDueWordCardList();
                         }
                     } else {
@@ -619,28 +604,6 @@ public class VelloService extends Service implements RequestListener, Connection
                         createVocabularyBoard();
                     }
                     return;
-
-                case VelloRequestFactory.REQUEST_TYPE_GET_DUE_WORDCARD_LIST:
-                    ArrayList<WordCard> wordCardList = resultData
-                            .getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST);
-
-                    if (wordCardList.size() > 0) {
-                        // show word cards need review
-                        for (WordCard wordCard : wordCardList) {
-                            // TODO
-                            // new WordCardToWordTask().execute(wordCard);
-                        }
-                    } else {
-                        // NO word card need review
-                        sendMessageToUI(MSG_TOAST_NO_WORD_NOW);
-
-                    }
-
-                    if (VelloConfig.DEBUG_SWITCH) {
-                        Log.d(TAG, "get due word card list end.");
-                    }
-                    return;
-
                 case VelloRequestFactory.REQUEST_TYPE_LOOK_UP_WORD:
                     String wsResult = resultData
                             .getString(VelloRequestFactory.BUNDLE_EXTRA_DICTIONARY_ICIBA_RESPONSE);

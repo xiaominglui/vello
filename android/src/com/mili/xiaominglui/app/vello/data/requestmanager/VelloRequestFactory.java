@@ -19,8 +19,7 @@ public final class VelloRequestFactory {
     public static final int REQUEST_TYPE_REOPEN_WORDCARD = 10;
     public static final int REQUEST_TYPE_INITIALIZE_WORDCARD = 11;
     public static final int REQUEST_TYPE_REVIEWED_WORDCARD = 12;
-    public static final int REQUEST_TYPE_GET_ALL_WORDCARD_LIST = 13;
-    public static final int REQUEST_TYPE_SYNC_TRELLODB = 14;
+    public static final int REQUEST_TYPE_SYNC_TRELLODB = 13;
 
     // Response data
     public static final String BUNDLE_EXTRA_TRELLO_BOARD_LIST = "com.mili.xiaominglui.app.vello.extra.boardList";
@@ -45,15 +44,9 @@ public final class VelloRequestFactory {
 
     public static Request getDueWordCardListRequest() {
         Request request = new Request(REQUEST_TYPE_GET_DUE_WORDCARD_LIST);
-        request.setMemoryCacheEnabled(true);
         return request;
     }
     
-    public static Request getAllWordCardListRequest() {
-        Request request = new Request(REQUEST_TYPE_GET_ALL_WORDCARD_LIST);
-        return request;
-    }
-
     public static Request checkVocabularyBoardRequest() {
         Request request = new Request(REQUEST_TYPE_CHECK_VOCABULARY_BOARD);
         request.setMemoryCacheEnabled(true);

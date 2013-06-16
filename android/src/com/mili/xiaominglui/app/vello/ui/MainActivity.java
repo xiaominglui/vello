@@ -13,7 +13,6 @@ import android.database.CharArrayBuffer;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -57,17 +56,14 @@ import com.mili.xiaominglui.app.vello.data.model.Definitions;
 import com.mili.xiaominglui.app.vello.data.model.IcibaWord;
 import com.mili.xiaominglui.app.vello.data.model.Phonetics;
 import com.mili.xiaominglui.app.vello.data.model.Phoneticss;
-import com.mili.xiaominglui.app.vello.data.model.Word;
-import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
-import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.tjerkw.slideexpandable.library.SlideExpandableListAdapter;
 
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -77,60 +73,63 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
     private Context mContext;
     private Activity mActivity;
 
-    private Handler mUICallback = new Handler() {
+    private MyHandler mUICallback = new MyHandler(this);
+    
+    static class MyHandler extends Handler {
+        WeakReference<MainActivity> mActivity;
+
+        MyHandler(MainActivity activity) {
+            mActivity = new WeakReference<MainActivity>(activity);
+        }
+
+        @Override
         public void handleMessage(Message msg) {
+            MainActivity theActivity = mActivity.get();
             switch (msg.what) {
                 case VelloService.MSG_SPINNER_ON:
-                    mRefreshActionItem.showProgress(true);
-                    return;
+                    theActivity.mRefreshActionItem.showProgress(true);
+                    break;
                 case VelloService.MSG_SPINNER_OFF:
-                    mRefreshActionItem.showProgress(false);
-                    return;
+                    theActivity.mRefreshActionItem.showProgress(false);
+                    break;
                 case VelloService.MSG_DIALOG_BAD_DATA_ERROR_SHOW:
-                    showBadDataErrorDialog();
-                    return;
+                    theActivity.showBadDataErrorDialog();
+                    break;
                 case VelloService.MSG_DIALOG_CONNECTION_ERROR_SHOW:
                     // TODO
-                    // ConnectionErrorDialogFragment.show();
-                    return;
+//                     ConnectionErrorDialogFragment.show();
+                    break;
                 case VelloService.MSG_TOAST_INIT_VOCABULARY_START:
-                    AppMsg.makeText(mActivity, R.string.toast_init_vocabulary_start,
+                    AppMsg.makeText(theActivity.mActivity, R.string.toast_init_vocabulary_start,
                             AppMsg.STYLE_INFO).setLayoutGravity(Gravity.BOTTOM).show();
-                    return;
+                    break;
                 case VelloService.MSG_TOAST_GET_DUE_WORD:
-                    AppMsg.makeText(mActivity, R.string.toast_get_due_word, AppMsg.STYLE_INFO)
+                    AppMsg.makeText(theActivity.mActivity, R.string.toast_get_due_word, AppMsg.STYLE_INFO)
                             .setLayoutGravity(Gravity.BOTTOM).show();
-                    return;
+                    break;
                 case VelloService.MSG_TOAST_INIT_VOCABULARY_END:
-                    AppMsg.makeText(mActivity,
+                    AppMsg.makeText(theActivity.mActivity,
                             R.string.toast_init_vocabulary_end,
                             AppMsg.STYLE_INFO)
                             .setLayoutGravity(Gravity.BOTTOM)
                             .show();
-                    return;
+                    break;
                 case VelloService.MSG_TOAST_NO_WORD_NOW:
-                    AppMsg.makeText(mActivity, R.string.toast_no_word_now,
+                    AppMsg.makeText(theActivity.mActivity, R.string.toast_no_word_now,
                             AppMsg.STYLE_CONFIRM).setLayoutGravity(Gravity.TOP)
                             .show();
-                    return;
+                    break;
                 case VelloService.MSG_TOAST_NOT_AVAILABLE_WORD:
-                    AppMsg.makeText(mActivity, R.string.toast_not_available_word,
+                    AppMsg.makeText(theActivity.mActivity, R.string.toast_not_available_word,
                             AppMsg.STYLE_ALERT).setLayoutGravity(Gravity.TOP)
                             .show();
-                    return;
+                    break;
                 case VelloService.MSG_SHOW_CURRENT_BADGE:
-                    showCurrentBadge();
-                    return;
-
-                    /*
-                     * case VelloService.MSG_SET_STRING_VALUE: String str1 =
-                     * msg.getData().getString("str1");
-                     * AppMsg.makeText(mActivity, "Str Message: " + str1,
-                     * AppMsg.STYLE_INFO).show(); return;
-                     */
+                    theActivity.showCurrentBadge();
+                    break;
             }
         }
-    };
+    }
 
     Messenger mService = null;
     private boolean mIsBound;
@@ -157,6 +156,16 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
                 // In this case the service has crashed before we could even do
                 // anything with it
             }
+
+            if (AccountUtils.hasVocabularyBoard(mContext)
+                    && AccountUtils.isVocabularyBoardWellFormed(mContext)) {
+                // all initialized
+                // getDueWordCardList();
+                sendMessageToService(VelloService.MSG_GET_DUE_WORDCARD_LIST);
+            } else {
+                // begin to check vocabulary board
+                sendMessageToService(VelloService.MSG_CHECK_VOCABULARY_BOARD);
+            }
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -173,8 +182,6 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             if (mService != null) {
                 try {
                     Message msg = Message.obtain(null, type);
-//                    Message msg = Message.obtain(null, VelloService.MSG_CHECK_VOCABULARY_BOARD,
-//                            intvaluetosend, 0);
                     msg.replyTo = mMessenger;
                     mService.send(msg);
                 } catch (RemoteException e) {
@@ -198,14 +205,6 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             // Detach our existing connection.
             unbindService(mConnection);
             mIsBound = false;
-        }
-    }
-
-    private void CheckIfServiceIsRunning() {
-        // If the service is running when the activity starts, we want to
-        // automatically bind to it.
-        if (VelloService.isRunning()) {
-            doBindService();
         }
     }
 
@@ -318,8 +317,6 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
         getSupportLoaderManager().initLoader(0, null, this);
         mInflater = getLayoutInflater();
         doBindService();
-        // CheckIfServiceIsRunning();
-
     }
 
     @Override
@@ -407,18 +404,6 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
                 .setActionView(searchView)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
 
-        if (AccountUtils.hasVocabularyBoard(mContext)
-                && AccountUtils.isVocabularyBoardWellFormed(mContext)) {
-            // all initialized
-            // getDueWordCardList();
-            // getAllWordCardList();
-        } else {
-            // begin to check vocabulary board
-            // TODO
-            sendMessageToService(VelloService.MSG_CHECK_VOCABULARY_BOARD);
-//             checkVocabularyBoard();
-        }
-
         return true;
     }
 
@@ -442,39 +427,6 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
         // getAllWordCardList();
         // Intent intent = new Intent(this, VelloService.class);
         // startService(intent);
-        sendMessageToService(10);
-    }
-
-    private class WordCardToWordTask extends
-            AsyncTask<WordCard, Integer, ArrayList<Word>> {
-
-        @Override
-        protected ArrayList<Word> doInBackground(WordCard... wordcards) {
-
-            ArrayList<Word> wordList = new ArrayList<Word>();
-            for (WordCard wordcard : wordcards) {
-                IcibaWord word = new IcibaWord();
-                String xmlWord = wordcard.desc;
-                word = IcibaWordXmlParser.parse(xmlWord);
-
-                if (word == null) {
-                    word = new IcibaWord();
-                }
-                word.idCard = wordcard.idCard;
-                word.idList = wordcard.idList;
-                word.keyword = wordcard.name;
-                word.due = wordcard.due;
-                wordList.add(word);
-            }
-            return wordList;
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<Word> result) {
-            // mGoogleCardsAdapter.addAll(result);
-            showCurrentBadge();
-            mRefreshActionItem.showProgress(false);
-        }
     }
 
     private void showCurrentBadge() {
@@ -504,30 +456,29 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
     @Override
     public boolean onQueryTextSubmit(String query) {
         if (query != null) {
-//            TODO
-//             lookUpWord(query.trim().toLowerCase());
+            // TODO
+            // lookUpWord(query.trim().toLowerCase());
         }
         return true;
     }
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         ProviderCriteria criteria = new ProviderCriteria();
-        // criteria.addSortOrder(DbWordCard.Columns.DUE, true);
-        //
-        // Calendar rightNow = Calendar.getInstance();
-        // SimpleDateFormat format = new SimpleDateFormat(
-        // "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        // String now = format.format(rightNow.getTime());
-        // criteria.addLt(DbWordCard.Columns.DUE, now, true);
-        //
-        // criteria.addNe(DbWordCard.Columns.CLOSED, "true");
+        criteria.addSortOrder(DbWordCard.Columns.DUE, true);
+
+        Calendar rightNow = Calendar.getInstance();
+        SimpleDateFormat format = new SimpleDateFormat(
+                "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        String now = format.format(rightNow.getTime());
+        criteria.addLt(DbWordCard.Columns.DUE, now, true);
+
+//        criteria.addNe(DbWordCard.Columns.CLOSED, "true");
 
         return new CursorLoader(this, DbWordCard.CONTENT_URI,
                 DbWordCard.PROJECTION, null,

@@ -37,9 +37,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     	if (VelloConfig.DEBUG_SWITCH) {
     		Log.d(TAG, "onPerformSync...");
     	}
-    	
-    	Intent intent = new Intent(mContext, VelloService.class);
-    	mContext.startService(intent);
+    	// TODO
+//    	Intent intent = new Intent(mContext, VelloService.class);
+//    	mContext.startService(intent);
     }
 
     /**

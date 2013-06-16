@@ -9,7 +9,7 @@ import com.mili.xiaominglui.app.vello.data.operation.CheckWordCardStatusOperatio
 import com.mili.xiaominglui.app.vello.data.operation.ConfigureVocabularyBoardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CreateVocabularyBoardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CreateVocabularyListOperation;
-import com.mili.xiaominglui.app.vello.data.operation.GetAllWordCardListOperation;
+import com.mili.xiaominglui.app.vello.data.operation.GetDueWordCardListOperation;
 import com.mili.xiaominglui.app.vello.data.operation.GetDueWordCardListOperation;
 import com.mili.xiaominglui.app.vello.data.operation.InitializeWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.LookUpWordOperation;
@@ -55,8 +55,6 @@ public class VelloRequestService extends RequestService {
                 return new InitializeWordCardOperation();
             case VelloRequestFactory.REQUEST_TYPE_REVIEWED_WORDCARD:
                 return new ReviewedWordCardOperation();
-            case VelloRequestFactory.REQUEST_TYPE_GET_ALL_WORDCARD_LIST:
-                return new GetAllWordCardListOperation();
             case VelloRequestFactory.REQUEST_TYPE_SYNC_TRELLODB:
                 return new SyncTrelloDBOperation();
         }
