@@ -22,6 +22,7 @@ import com.mili.xiaominglui.app.vello.data.factory.DueWordCardListJsonFactory;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
+import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 import java.util.ArrayList;
@@ -66,6 +67,7 @@ public class GetDueWordCardListOperation implements Operation {
 
 		// Adds the wordcards in the database
 		int wordCardListSize = wordCardList.size();
+		Bundle bundle = new Bundle();
 		if (wordCardListSize > 0) {
 			ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
 			for (WordCard wordCard : wordCardList) {
@@ -77,6 +79,7 @@ public class GetDueWordCardListOperation implements Operation {
 			try {
 				context.getContentResolver().applyBatch(
 						VelloProvider.AUTHORITY, operationList);
+				bundle.putBoolean(VelloRequestFactory.BUNDLE_EXTRA_RESULT_STATUS, true);
 			} catch (RemoteException e) {
 				throw new DataException(e);
 			} catch (OperationApplicationException e) {
@@ -84,6 +87,6 @@ public class GetDueWordCardListOperation implements Operation {
 			}
 		}
 
-		return null;
+		return bundle;
 	}
 }

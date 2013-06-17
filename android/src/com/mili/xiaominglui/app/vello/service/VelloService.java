@@ -745,6 +745,16 @@ public class VelloService extends Service implements RequestListener, Connection
                     }
                     return;
 
+                case VelloRequestFactory.REQUEST_TYPE_GET_DUE_WORDCARD_LIST:
+                    sendMessageToUI(MSG_SPINNER_OFF);
+                    boolean finished = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_RESULT_STATUS);
+                    if (finished) {
+                        // TODO finished expectly
+                    } else {
+                        // TODO something error
+                    }
+                    return;
+                    
                 default:
                     return;
             }

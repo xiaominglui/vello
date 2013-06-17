@@ -160,8 +160,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             if (AccountUtils.hasVocabularyBoard(mContext)
                     && AccountUtils.isVocabularyBoardWellFormed(mContext)) {
                 // all initialized
-                // getDueWordCardList();
-                sendMessageToService(VelloService.MSG_GET_DUE_WORDCARD_LIST);
+                // do nothing now
             } else {
                 // begin to check vocabulary board
                 sendMessageToService(VelloService.MSG_CHECK_VOCABULARY_BOARD);
@@ -422,11 +421,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 
     @Override
     public void onRefreshButtonClick(RefreshActionItem sender) {
-        // mGoogleCardsAdapter.clear();
-        // getDueWordCardList();
-        // getAllWordCardList();
-        // Intent intent = new Intent(this, VelloService.class);
-        // startService(intent);
+        sendMessageToService(VelloService.MSG_GET_DUE_WORDCARD_LIST);
     }
 
     private void showCurrentBadge() {
@@ -481,8 +476,8 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 //        criteria.addNe(DbWordCard.Columns.CLOSED, "true");
 
         return new CursorLoader(this, DbWordCard.CONTENT_URI,
-                DbWordCard.PROJECTION, null,
-                null, criteria.getOrderClause());
+                DbWordCard.PROJECTION, criteria.getWhereClause(),
+                criteria.getWhereParams(), criteria.getOrderClause());
     }
 
     @Override
@@ -540,7 +535,11 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             mIdList = c.getString(DbWordCard.Columns.ID_LIST.getIndex());
             int positionList = AccountUtils.getVocabularyListPosition(mContext,
                     mIdList);
-            mTextViewLifeCount.setText(String.valueOf(8 - positionList));
+            String lifeString = "N";
+            if (positionList != 0) {
+                lifeString = String.valueOf(8 - positionList + 1);
+            }
+            mTextViewLifeCount.setText(lifeString);
             mTextViewLifeCount.setTextColor(Color.GRAY);
 
             c.copyStringToBuffer(DbWordCard.Columns.NAME.getIndex(),
