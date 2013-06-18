@@ -263,11 +263,12 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
                 ContentValues cv = new ContentValues();
                 if (positionList == VelloConfig.VOCABULARY_LIST_POSITION_8TH) {
                     cv.put(DbWordCard.Columns.CLOSED.getName(), "true");
+                    cv.put(DbWordCard.Columns.SYNCINNEXT.getName(), "true");
 
                 } else {
                     Calendar rightNow = Calendar.getInstance();
                     long rightNowUnixTime = rightNow.getTimeInMillis();
-                    long delta = VelloConfig.VOCABULARY_LIST_DUE_DELTA[position];
+                    long delta = VelloConfig.VOCABULARY_LIST_DUE_DELTA[positionList];
                     long dueUnixTime = rightNowUnixTime + delta;
 
                     SimpleDateFormat format = new SimpleDateFormat(
@@ -277,8 +278,9 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
                     cv.put(DbWordCard.Columns.DUE.getName(), stringDueDate);
 
                     String newIdList = AccountUtils.getVocabularyListId(
-                            mContext, position + 1);
+                            mContext, positionList + 1);
                     cv.put(DbWordCard.Columns.ID_LIST.getName(), newIdList);
+                    cv.put(DbWordCard.Columns.SYNCINNEXT.getName(), "true");
                 }
                 Uri uri = ContentUris
                         .withAppendedId(DbWordCard.CONTENT_URI, id);
@@ -472,8 +474,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
                 "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         String now = format.format(rightNow.getTime());
         criteria.addLt(DbWordCard.Columns.DUE, now, true);
-
-//        criteria.addNe(DbWordCard.Columns.CLOSED, "true");
+        criteria.addNe(DbWordCard.Columns.SYNCINNEXT, "true");
 
         return new CursorLoader(this, DbWordCard.CONTENT_URI,
                 DbWordCard.PROJECTION, criteria.getWhereClause(),

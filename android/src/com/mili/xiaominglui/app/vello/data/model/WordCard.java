@@ -45,6 +45,7 @@ public class WordCard implements Parcelable {
         cv.put(DbWordCard.Columns.CLOSED.getName(), closed);
         cv.put(DbWordCard.Columns.ID_LIST.getName(), idList);
         cv.put(DbWordCard.Columns.DATE_LAST_ACTIVITY.getName(), dateLastActivity);
+        cv.put(DbWordCard.Columns.SYNCINNEXT.getName(), "false");
         return cv;
     }
 }
