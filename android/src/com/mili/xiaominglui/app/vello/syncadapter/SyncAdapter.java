@@ -1,15 +1,20 @@
 package com.mili.xiaominglui.app.vello.syncadapter;
 
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
+import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
+import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
+import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SyncResult;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -40,6 +45,26 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     	// TODO
 //    	Intent intent = new Intent(mContext, VelloService.class);
 //    	mContext.startService(intent);
+    	// query all local items that syncInNext=true
+    	final String[] PROJECTION = new String[] {
+    	        DbWordCard.Columns.ID_CARD.getName(),
+    	        DbWordCard.Columns.ID_LIST.getName(),
+    	        DbWordCard.Columns.DUE.getName(),
+    	        DbWordCard.Columns.DATE_LAST_ACTIVITY.getName()
+    	};
+    	final ContentResolver resolver = mContext.getContentResolver();
+    	ProviderCriteria criteria = new ProviderCriteria();
+    	criteria.addEq(DbWordCard.Columns.SYNCINNEXT, "true");
+    	Cursor c = resolver.query(DbWordCard.CONTENT_URI, PROJECTION, criteria.getWhereClause(), criteria.getWhereParams(), criteria.getOrderClause());
+    	// sync all local items above to Trello
+    	if (c != null) {
+    	    while (c.moveToNext()) {
+    	        String idCard = c.getString(DbWordCard.Columns.ID_CARD.getIndex());
+    	        String idList = c.getString(DbWordCard.Columns.ID_LIST.getIndex());
+    	    }
+    	}
+    	
+    	// full sync due items from trello
     }
 
     /**

@@ -273,9 +273,13 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 
                     SimpleDateFormat format = new SimpleDateFormat(
                             "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                    Date dueDate = new Date(dueUnixTime);
-                    String stringDueDate = format.format(dueDate);
-                    cv.put(DbWordCard.Columns.DUE.getName(), stringDueDate);
+//                    Date dueDate = new Date(dueUnixTime);
+//                    String stringDueDate = format.format(dueDate);
+//                    cv.put(DbWordCard.Columns.DUE.getName(), stringDueDate);
+                    
+                    Date now = new Date(rightNowUnixTime);
+                    String stringNow = format.format(now);
+                    cv.put(DbWordCard.Columns.DATE_LAST_ACTIVITY.getName(), stringNow);
 
                     String newIdList = AccountUtils.getVocabularyListId(
                             mContext, positionList + 1);
