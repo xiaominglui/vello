@@ -1,9 +1,11 @@
 
 package com.mili.xiaominglui.app.vello.ui;
 
+import android.accounts.Account;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -49,6 +51,7 @@ import com.manuelpeinado.refreshactionitem.ProgressIndicatorType;
 import com.manuelpeinado.refreshactionitem.RefreshActionItem;
 import com.manuelpeinado.refreshactionitem.RefreshActionItem.RefreshActionListener;
 import com.mili.xiaominglui.app.vello.R;
+import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.factory.IcibaWordXmlParser;
 import com.mili.xiaominglui.app.vello.data.model.Definition;
@@ -57,6 +60,7 @@ import com.mili.xiaominglui.app.vello.data.model.IcibaWord;
 import com.mili.xiaominglui.app.vello.data.model.Phonetics;
 import com.mili.xiaominglui.app.vello.data.model.Phoneticss;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
+import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
@@ -273,9 +277,9 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 
                     SimpleDateFormat format = new SimpleDateFormat(
                             "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-//                    Date dueDate = new Date(dueUnixTime);
-//                    String stringDueDate = format.format(dueDate);
-//                    cv.put(DbWordCard.Columns.DUE.getName(), stringDueDate);
+                    Date dueDate = new Date(dueUnixTime);
+                    String stringDueDate = format.format(dueDate);
+                    cv.put(DbWordCard.Columns.DUE.getName(), stringDueDate);
                     
                     Date now = new Date(rightNowUnixTime);
                     String stringNow = format.format(now);
@@ -427,7 +431,8 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 
     @Override
     public void onRefreshButtonClick(RefreshActionItem sender) {
-        sendMessageToService(VelloService.MSG_GET_DUE_WORDCARD_LIST);
+//        sendMessageToService(VelloService.MSG_GET_DUE_WORDCARD_LIST);
+    	triggerRefresh();
     }
 
     private void showCurrentBadge() {
@@ -604,5 +609,12 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             view.setTag(new ViewHolder(view));
             return view;
         }
+    }
+    
+    private void triggerRefresh() {
+        Bundle extras = new Bundle();
+        extras.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        ContentResolver.requestSync(
+                new Account(AccountUtils.getChosenAccountName(this), Constants.ACCOUNT_TYPE), VelloProvider.AUTHORITY, extras);
     }
 }

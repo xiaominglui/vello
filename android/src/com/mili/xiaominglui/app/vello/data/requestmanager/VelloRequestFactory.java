@@ -38,6 +38,7 @@ public final class VelloRequestFactory {
     public static final String PARAM_EXTRA_VOCABULARY_CARD_ID = "com.mili.xiaominglui.app.vello.extra.cardId";
     public static final String PARAM_EXTRA_QUERY_WORD_KEYWORD = "com.mili.xiaominglui.app.vello.extra.keyword";
     public static final String PARAM_EXTRA_CHECK_WORDCARD_WS_RESULT = "com.mili.xiaominglui.app.vello.extra.ws.result";
+    public static final String PARAM_EXTRA_DATE_LAST_ACTIVITY = "com.mili.xiaominglui.app.vello.extra.dateLastActivity";
 
     private VelloRequestFactory() {
         // no public constructor

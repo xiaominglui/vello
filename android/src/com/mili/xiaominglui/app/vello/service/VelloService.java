@@ -40,6 +40,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 
 public class VelloService extends Service implements RequestListener, ConnectionErrorDialogListener {
     private static final String TAG = VelloService.class.getSimpleName();
@@ -65,6 +66,9 @@ public class VelloService extends Service implements RequestListener, Connection
 
     public static final int MSG_CHECK_VOCABULARY_BOARD = 100;
     public static final int MSG_GET_DUE_WORDCARD_LIST = 101;
+    public static final int MSG_REVIEWED_WORDCARD = 102;
+    public static final int MSG_REVIEWED_WORDCARD_PLUS = 103;
+    public static final int MSG_CLOSE_WORDCARD = 104;
 
     // Unique Identification Number for the Notification.
     // We use it on Notification start, and to cancel it.
@@ -100,6 +104,11 @@ public class VelloService extends Service implements RequestListener, Connection
                     case MSG_GET_DUE_WORDCARD_LIST:
                         service.getDueWordCardList();
                         break;
+                    case MSG_REVIEWED_WORDCARD:
+                    	String cardID = (String) msg.obj;
+                    	int listPosition = msg.arg1;
+                    	service.reviewedWordCard(cardID, listPosition);
+                    	break;
                     default:
                         super.handleMessage(msg);
                 }
@@ -530,7 +539,7 @@ public class VelloService extends Service implements RequestListener, Connection
                                         .isVocabularyBoardWellFormed(getApplicationContext())) {
                                     sendMessageToUI(MSG_TOAST_INIT_VOCABULARY_END);
                                     sendMessageToUI(MSG_SPINNER_OFF);
-                                    getDueWordCardList();
+//                                    getDueWordCardList();
                                 }
                                 return;
                             }
@@ -560,7 +569,7 @@ public class VelloService extends Service implements RequestListener, Connection
                         if (AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
                             sendMessageToUI(MSG_TOAST_INIT_VOCABULARY_END);
                             sendMessageToUI(MSG_SPINNER_OFF);
-                            getDueWordCardList();
+//                            getDueWordCardList();
                         }
                     } else {
                         // reopen failed, try again
@@ -581,7 +590,7 @@ public class VelloService extends Service implements RequestListener, Connection
                         if (AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
                             sendMessageToUI(MSG_TOAST_INIT_VOCABULARY_END);
                             sendMessageToUI(MSG_SPINNER_OFF);
-                            getDueWordCardList();
+//                            getDueWordCardList();
                         }
                     } else {
                         // create list failed, try again

@@ -36,6 +36,7 @@ public class ReviewedWordCardOperation implements Operation {
 		.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_CARD_ID);
 	int position = request
 		.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
+	
 	String urlString = WSConfig.TRELLO_API_URL
 		+ WSConfig.WS_TRELLO_TARGET_CARD + "/" + idCard;
 	HashMap<String, String> parameterMap = new HashMap<String, String>();
