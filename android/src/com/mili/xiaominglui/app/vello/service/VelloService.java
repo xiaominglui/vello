@@ -146,11 +146,6 @@ public class VelloService extends Service implements RequestListener, Connection
         }
     }
 
-    public void handleMessage(Message msg) {
-        // TODO Auto-generated method stub
-        
-    }
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i("LocalService", "Received start id " + startId + ": " + intent);
@@ -197,17 +192,7 @@ public class VelloService extends Service implements RequestListener, Connection
             VelloContent.DbWordCard.Columns.ID_LIST.getName()
     };
 
-    private void syncTrelloDB() {
-        if (VelloConfig.DEBUG_SWITCH) {
-            Log.d(TAG, "syncTrelloDB start...");
-        }
-        Request syncTrelloDB = VelloRequestFactory.syncTrelloDBRequest();
-        mRequestManager.execute(syncTrelloDB, this);
-        mRequestList.add(syncTrelloDB);
-    }
-
     private void archiveWordCard(String idCard) {
-        // TODO
     	if (VelloConfig.DEBUG_SWITCH) {
     		Log.d(TAG, "archiveWordCard start...");
     	}
@@ -217,8 +202,6 @@ public class VelloService extends Service implements RequestListener, Connection
     }
 
     private void reviewedWordCard(String idCard, int position) {
-        // TODO
-        // mRefreshActionItem.showProgress(true);
         if (VelloConfig.DEBUG_SWITCH) {
             Log.d(TAG, "reviewedWordCard start...");
         }
@@ -371,93 +354,6 @@ public class VelloService extends Service implements RequestListener, Connection
             mRequestList.remove(request);
 
             switch (request.getRequestType()) {
-                case VelloRequestFactory.REQUEST_TYPE_SYNC_TRELLODB:
-                    ArrayList<WordCard> remoteWordCardList = resultData
-                            .getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST);
-                    int wordCardListSize = remoteWordCardList.size();
-                    if (wordCardListSize > 0) {
-                        ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
-                        Calendar rightNow = Calendar.getInstance();
-                        long rightNowUnixTime = rightNow.getTimeInMillis();
-                        SimpleDateFormat format = new SimpleDateFormat(
-                                "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                        Date date;
-
-                        for (WordCard wordCard : remoteWordCardList) {
-                            String dueString = wordCard.due;
-                            String id = wordCard.idCard;
-                            if (!dueString.equals("null")) {
-                                try {
-                                    date = format.parse(dueString);
-                                    long dueUnixTime = date.getTime();
-                                    if (dueUnixTime <= rightNowUnixTime) {
-                                        // it is time to review, insert words to
-                                        // local DB
-                                        // cache
-                                        ProviderCriteria criteria = new ProviderCriteria(
-                                                VelloContent.DbWordCard.Columns.ID_CARD, id);
-                                        Cursor c = getContentResolver().query(
-                                                VelloContent.DbWordCard.CONTENT_URI, mProjection,
-                                                criteria.getWhereClause(),
-                                                criteria.getWhereParams(),
-                                                criteria.getOrderClause());
-                                        if (c != null) {
-                                            // if local DB cache has the word &&
-                                            // syncInNext = true
-                                            // +1 and check to archive or update
-                                            // word card
-                                            while (c.moveToNext()) {
-                                                String idCard = c
-                                                        .getString(DbWordCard.Columns.ID_CARD
-                                                                .getIndex());
-                                                String syncInNext = c
-                                                        .getString(DbWordCard.Columns.SYNCINNEXT
-                                                                .getIndex());
-                                                String idList = c
-                                                        .getString(DbWordCard.Columns.ID_LIST
-                                                                .getIndex());
-                                                if (syncInNext.equals("true")) {
-                                                    int position = AccountUtils
-                                                            .getVocabularyListPosition(this, idList);
-                                                    if (position == VelloConfig.VOCABULARY_LIST_POSITION_8TH) {
-                                                        // archive this word &&
-                                                        // delete word row
-                                                        archiveWordCard(idCard);
-                                                    } else {
-                                                        // TODO
-                                                        // +1 and update
-                                                        // wordcard
-                                                        reviewedWordCard(idCard, position);
-                                                        // +1 and update word
-                                                        // row
-                                                    }
-                                                }
-                                            }
-
-                                        } else {
-                                            // local DB cache has NOT the word,
-                                            // insert directly
-                                            operationList.add(ContentProviderOperation
-                                                    .newInsert(DbWordCard.CONTENT_URI)
-                                                    .withValues(wordCard.toContentVaalues())
-                                                    .build());
-                                        }
-                                    }
-                                } catch (ParseException e) {
-                                    Log.e(TAG, "ParseException", e);
-                                }
-                            }
-                        }
-
-                        try {
-                            getContentResolver().applyBatch(VelloProvider.AUTHORITY, operationList);
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
-                        } catch (OperationApplicationException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    return;
                 case VelloRequestFactory.REQUEST_TYPE_REVIEWED_WORDCARD:
                     WordCard reviewedWordCard = resultData
                             .getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
