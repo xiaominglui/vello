@@ -25,6 +25,7 @@ import com.mili.xiaominglui.app.vello.data.model.Board;
 import com.mili.xiaominglui.app.vello.data.model.IcibaWord;
 import com.mili.xiaominglui.app.vello.data.model.List;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
+import com.mili.xiaominglui.app.vello.data.model.WordList;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
@@ -67,7 +68,7 @@ public class VelloService extends Service implements RequestListener, Connection
     public static final int MSG_CHECK_VOCABULARY_BOARD = 100;
     public static final int MSG_GET_DUE_WORDCARD_LIST = 101;
     public static final int MSG_REVIEWED_WORDCARD = 102;
-    public static final int MSG_REVIEWED_WORDCARD_PLUS = 103;
+    public static final int MSG_REVIEWED_PLUS_WORDCARD = 103;
     public static final int MSG_CLOSE_WORDCARD = 104;
 
     // Unique Identification Number for the Notification.
@@ -109,6 +110,10 @@ public class VelloService extends Service implements RequestListener, Connection
                     	int listPosition = msg.arg1;
                     	service.reviewedWordCard(cardID, listPosition);
                     	break;
+                    case MSG_REVIEWED_PLUS_WORDCARD:
+                        String plusCardID = (String) msg.obj;
+                        service.reviewedPlusWordCard(plusCardID);
+                        break;
                     case MSG_CLOSE_WORDCARD:
                     	String cardId = (String) msg.obj;
                     	service.archiveWordCard(cardId);
@@ -209,6 +214,15 @@ public class VelloService extends Service implements RequestListener, Connection
                 idCard, position);
         mRequestManager.execute(reviewedWordCard, this);
         mRequestList.add(reviewedWordCard);
+    }
+    
+    private void reviewedPlusWordCard(String idCard) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "reviewedPlusWordCard start...");
+        }
+        Request reviewedPlusWordCard = VelloRequestFactory.reviewedPlusWordCardRequest(idCard);
+        mRequestManager.execute(reviewedPlusWordCard, this);
+        mRequestList.add(reviewedPlusWordCard);
     }
 
     private void checkVocabularyBoard() {
@@ -367,6 +381,16 @@ public class VelloService extends Service implements RequestListener, Connection
                     sendMessageToUI(MSG_SHOW_CURRENT_BADGE);
                     if (VelloConfig.DEBUG_SWITCH) {
                         Log.d(TAG, "reviewedWordCard end.");
+                    }
+                    return;
+                    
+                case VelloRequestFactory.REQUEST_TYPE_REVIEWED_PLUS_WORDCARD:
+                    WordList wordList = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDLIST);
+                    String idReviewedPlusCard = request.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_CARD_ID);
+                    if (wordList != null) {
+                        String idList = wordList.id;
+                        int position = AccountUtils.getVocabularyListPosition(getApplicationContext(), idList);
+                        reviewedWordCard(idReviewedPlusCard, position);
                     }
                     return;
 

@@ -19,12 +19,14 @@ public final class VelloRequestFactory {
     public static final int REQUEST_TYPE_REOPEN_WORDCARD = 10;
     public static final int REQUEST_TYPE_INITIALIZE_WORDCARD = 11;
     public static final int REQUEST_TYPE_REVIEWED_WORDCARD = 12;
-    public static final int REQUEST_TYPE_ARCHIVE_WORDCARD = 13;
+    public static final int REQUEST_TYPE_REVIEWED_PLUS_WORDCARD = 13;
+    public static final int REQUEST_TYPE_ARCHIVE_WORDCARD = 14;
 
     // Response data
     public static final String BUNDLE_EXTRA_TRELLO_BOARD_LIST = "com.mili.xiaominglui.app.vello.extra.boardList";
     public static final String BUNDLE_EXTRA_WORDCARD_LIST = "com.mili.xiaominglui.app.vello.extra.wordCardList";
     public static final String BUNDLE_EXTRA_WORDCARD = "com.mili.xiaominglui.app.vello.extra.wordCard";
+    public static final String BUNDLE_EXTRA_WORDLIST = "com.mili.xiaominglui.app.vello.extra.wordList";
     public static final String BUNDLE_EXTRA_VOCABULARY_BOARD_ID = "com.mili.xiaominglui.app.vello.extra.boardId";
     public static final String BUNDLE_EXTRA_VOCABULARY_LIST_LIST = "com.mili.xiaominglui.app.vello.extra.listList";
     public static final String BUNDLE_EXTRA_VOCABULARY_LIST_ID = "com.mili.xiaominglui.app.vello.extra.listId";
@@ -132,6 +134,13 @@ public final class VelloRequestFactory {
         request.put(PARAM_EXTRA_VOCABULARY_CARD_ID, idCard);
         request.put(PARAM_EXTRA_VOCABULARY_LIST_POSITION, position);
         request.setMemoryCacheEnabled(true);
+        return request;
+    }
+    
+    public static Request reviewedPlusWordCardRequest(String idCard) {
+        Request request = new Request(REQUEST_TYPE_REVIEWED_PLUS_WORDCARD);
+        request.put(PARAM_EXTRA_VOCABULARY_CARD_ID, idCard);
+        request.setMemoryCacheEnabled(false);
         return request;
     }
     

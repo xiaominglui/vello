@@ -1,3 +1,4 @@
+
 package com.mili.xiaominglui.app.vello.data.operation;
 
 import android.content.Context;
@@ -26,63 +27,63 @@ import java.util.HashMap;
 
 public class ReviewedWordCardOperation implements Operation {
     private static final String TAG = ReviewedWordCardOperation.class
-	    .getSimpleName();
+            .getSimpleName();
 
     @Override
     public Bundle execute(Context context, Request request)
-	    throws ConnectionException, DataException, CustomRequestException {
-	String token = AccountUtils.getAuthToken(context);
-	String idCard = request
-		.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_CARD_ID);
-	int position = request
-		.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
-	
-	String urlString = WSConfig.TRELLO_API_URL
-		+ WSConfig.WS_TRELLO_TARGET_CARD + "/" + idCard;
-	HashMap<String, String> parameterMap = new HashMap<String, String>();
+            throws ConnectionException, DataException, CustomRequestException {
+        String token = AccountUtils.getAuthToken(context);
+        String idCard = request
+                .getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_CARD_ID);
+        int position = request
+                .getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
 
-	if (position == VelloConfig.VOCABULARY_LIST_POSITION_8TH) {
-	    // should archive the wordcard
-	    parameterMap.put(WSConfig.WS_TRELLO_PARAM_CLOSED, "true");
-	    if (VelloConfig.DEBUG_SWITCH) {
-		Log.d(TAG, "last position, word card is closed");
-	    }
+        String urlString = WSConfig.TRELLO_API_URL
+                + WSConfig.WS_TRELLO_TARGET_CARD + "/" + idCard;
+        HashMap<String, String> parameterMap = new HashMap<String, String>();
 
-	} else {
-	    Calendar rightNow = Calendar.getInstance();
-	    long rightNowUnixTime = rightNow.getTimeInMillis();
-	    long delta = VelloConfig.VOCABULARY_LIST_DUE_DELTA[position];
-	    long dueUnixTime = rightNowUnixTime + delta;
+        if (position == VelloConfig.VOCABULARY_LIST_POSITION_8TH) {
+            // should archive the wordcard
+            parameterMap.put(WSConfig.WS_TRELLO_PARAM_CLOSED, "true");
+            if (VelloConfig.DEBUG_SWITCH) {
+                Log.d(TAG, "last position, word card is closed");
+            }
 
-	    SimpleDateFormat format = new SimpleDateFormat(
-		    "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-	    Date dueDate = new Date(dueUnixTime);
-	    String stringDueDate = format.format(dueDate);
-	    String newIdList = AccountUtils.getVocabularyListId(context,
-		    position + 1);
-	    parameterMap.put(WSConfig.WS_TRELLO_PARAM_DUE, stringDueDate);
-	    parameterMap.put(WSConfig.WS_TRELLO_PARAM_IDLIST, newIdList);
+        } else {
+            Calendar rightNow = Calendar.getInstance();
+            long rightNowUnixTime = rightNow.getTimeInMillis();
+            long delta = VelloConfig.VOCABULARY_LIST_DUE_DELTA[position];
+            long dueUnixTime = rightNowUnixTime + delta;
 
-	    if (VelloConfig.DEBUG_SWITCH) {
-		Log.d(TAG, "stringDueDate = " + stringDueDate);
-		Log.d(TAG, "newIdList = " + newIdList);
-	    }
-	}
+            SimpleDateFormat format = new SimpleDateFormat(
+                    "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            Date dueDate = new Date(dueUnixTime);
+            String stringDueDate = format.format(dueDate);
+            String newIdList = AccountUtils.getVocabularyListId(context,
+                    position + 1);
+            parameterMap.put(WSConfig.WS_TRELLO_PARAM_DUE, stringDueDate);
+            parameterMap.put(WSConfig.WS_TRELLO_PARAM_IDLIST, newIdList);
 
-	parameterMap.put(WSConfig.WS_TRELLO_PARAM_APP_KEY,
-		WSConfig.VELLO_APP_KEY);
-	parameterMap.put(WSConfig.WS_TRELLO_PARAM_ACCESS_TOKEN, token);
+            if (VelloConfig.DEBUG_SWITCH) {
+                Log.d(TAG, "stringDueDate = " + stringDueDate);
+                Log.d(TAG, "newIdList = " + newIdList);
+            }
+        }
 
-	NetworkConnection networkConnection = new NetworkConnection(context,
-		urlString);
-	networkConnection.setMethod(Method.PUT);
-	networkConnection.setParameters(parameterMap);
-	ConnectionResult result = networkConnection.execute();
+        parameterMap.put(WSConfig.WS_TRELLO_PARAM_APP_KEY,
+                WSConfig.VELLO_APP_KEY);
+        parameterMap.put(WSConfig.WS_TRELLO_PARAM_ACCESS_TOKEN, token);
 
-	if (VelloConfig.DEBUG_SWITCH) {
-	    Log.d(TAG, "result.body = " + result.body);
-	}
-	return ReviewedWordCardResponseJsonFactory.parseResult(result.body);
+        NetworkConnection networkConnection = new NetworkConnection(context,
+                urlString);
+        networkConnection.setMethod(Method.PUT);
+        networkConnection.setParameters(parameterMap);
+        ConnectionResult result = networkConnection.execute();
+
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "result.body = " + result.body);
+        }
+        return ReviewedWordCardResponseJsonFactory.parseResult(result.body);
     }
 
 }

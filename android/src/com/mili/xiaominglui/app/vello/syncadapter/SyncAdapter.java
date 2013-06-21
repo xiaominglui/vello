@@ -219,7 +219,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 	private void sendReviewedPlusMessage(String idCard) {
 		try {
-            Message msg = Message.obtain(null, VelloService.MSG_REVIEWED_WORDCARD_PLUS);
+            Message msg = Message.obtain(null, VelloService.MSG_REVIEWED_PLUS_WORDCARD);
             msg.obj = idCard;
             mService.send(msg);
         } catch (RemoteException e) {
