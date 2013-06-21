@@ -1,13 +1,12 @@
 package com.mili.xiaominglui.app.vello.data.factory;
 
-import android.os.Bundle;
-
 import com.google.gson.Gson;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 
-public class ReviewedWordCardResponseJsonFactory {
-    private static final String TAG = ReviewedWordCardResponseJsonFactory.class.getSimpleName();
+import android.os.Bundle;
+
+public class ArchiveWordCardResponseJsonFactory {
 
 	public static Bundle parseResult(String wsResponse) {
 		Gson gson = new Gson();
@@ -20,4 +19,5 @@ public class ReviewedWordCardResponseJsonFactory {
 		}
 		return null;
 	}
+
 }

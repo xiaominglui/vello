@@ -3,6 +3,7 @@ package com.mili.xiaominglui.app.vello.data.service;
 
 import com.foxykeep.datadroid.service.RequestService;
 import com.mili.xiaominglui.app.vello.data.operation.AddWordCardOperation;
+import com.mili.xiaominglui.app.vello.data.operation.ArchiveWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CheckVocabularyBoardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CheckVocabularyListOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CheckWordCardStatusOperation;
@@ -57,6 +58,8 @@ public class VelloRequestService extends RequestService {
                 return new ReviewedWordCardOperation();
             case VelloRequestFactory.REQUEST_TYPE_SYNC_TRELLODB:
                 return new SyncTrelloDBOperation();
+            case VelloRequestFactory.REQUEST_TYPE_ARCHIVE_WORDCARD:
+            	return new ArchiveWordCardOperation();
         }
         return null;
     }

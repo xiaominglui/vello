@@ -109,6 +109,10 @@ public class VelloService extends Service implements RequestListener, Connection
                     	int listPosition = msg.arg1;
                     	service.reviewedWordCard(cardID, listPosition);
                     	break;
+                    case MSG_CLOSE_WORDCARD:
+                    	String cardId = (String) msg.obj;
+                    	service.archiveWordCard(cardId);
+                    	break;
                     default:
                         super.handleMessage(msg);
                 }
@@ -204,6 +208,12 @@ public class VelloService extends Service implements RequestListener, Connection
 
     private void archiveWordCard(String idCard) {
         // TODO
+    	if (VelloConfig.DEBUG_SWITCH) {
+    		Log.d(TAG, "archiveWordCard start...");
+    	}
+    	Request archiveWordCard = VelloRequestFactory.archiveWordCardRequest(idCard);
+    	mRequestManager.execute(archiveWordCard, this);
+    	mRequestList.add(archiveWordCard);
     }
 
     private void reviewedWordCard(String idCard, int position) {
@@ -763,6 +773,17 @@ public class VelloService extends Service implements RequestListener, Connection
                         // TODO something error
                     }
                     return;
+                    
+                case VelloRequestFactory.REQUEST_TYPE_ARCHIVE_WORDCARD:
+                	WordCard closedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+                	String idCard = request.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_CARD_ID);
+                	if (closedWordCard != null && closedWordCard.closed.equals("true")) {
+                		// success, do nothing
+                	} else {
+                		// retry 
+                		archiveWordCard(idCard);
+                	}
+                	return;
                     
                 default:
                     return;
