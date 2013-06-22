@@ -128,9 +128,6 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
                             AppMsg.STYLE_ALERT).setLayoutGravity(Gravity.TOP)
                             .show();
                     break;
-                case VelloService.MSG_SHOW_CURRENT_BADGE:
-                    theActivity.showCurrentBadge();
-                    break;
             }
         }
     }

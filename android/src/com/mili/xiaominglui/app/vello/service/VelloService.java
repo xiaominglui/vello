@@ -63,7 +63,6 @@ public class VelloService extends Service implements RequestListener, Connection
     public static final int MSG_TOAST_GET_DUE_WORD = 7;
     public static final int MSG_TOAST_NO_WORD_NOW = 8;
     public static final int MSG_TOAST_NOT_AVAILABLE_WORD = 9;
-    public static final int MSG_SHOW_CURRENT_BADGE = 10;
 
     public static final int MSG_CHECK_VOCABULARY_BOARD = 100;
     public static final int MSG_GET_DUE_WORDCARD_LIST = 101;
@@ -130,18 +129,6 @@ public class VelloService extends Service implements RequestListener, Connection
         for (int i = mClients.size() - 1; i >= 0; i--) {
             try {
                 mClients.get(i).send(Message.obtain(null, type));
-                // Send data as an Integer
-                // mClients.get(i).send(Message.obtain(null, MSG_SET_INT_VALUE,
-                // intvaluetosend, 0));
-
-                // Send data as a String
-                /*
-                 * Bundle b = new Bundle(); b.putString("str1", "ab" +
-                 * intvaluetosend + "cd"); Message msg = Message.obtain(null,
-                 * MSG_SET_STRING_VALUE); msg.setData(b);
-                 * mClients.get(i).send(msg);
-                 */
-
             } catch (RemoteException e) {
                 // The client is dead. Remove it from the list; we are going
                 // through the list from back to front so this is safe to do
@@ -378,7 +365,6 @@ public class VelloService extends Service implements RequestListener, Connection
                         // reviewed failed
                         // do nothing at present
                     }
-                    sendMessageToUI(MSG_SHOW_CURRENT_BADGE);
                     if (VelloConfig.DEBUG_SWITCH) {
                         Log.d(TAG, "reviewedWordCard end.");
                     }
@@ -621,7 +607,6 @@ public class VelloService extends Service implements RequestListener, Connection
                                 if (VelloConfig.DEBUG_SWITCH) {
                                     Log.d(TAG, "check wordcard status end.");
                                 }
-                                sendMessageToUI(MSG_SHOW_CURRENT_BADGE);
                                 return;
                             }
                         }
