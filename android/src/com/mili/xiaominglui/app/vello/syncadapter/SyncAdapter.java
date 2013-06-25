@@ -1,28 +1,11 @@
 package com.mili.xiaominglui.app.vello.syncadapter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import com.foxykeep.datadroid.exception.ConnectionException;
-import com.foxykeep.datadroid.exception.DataException;
-import com.foxykeep.datadroid.network.NetworkConnection;
-import com.foxykeep.datadroid.network.NetworkConnection.ConnectionResult;
-import com.foxykeep.datadroid.network.NetworkConnection.Method;
-import com.mili.xiaominglui.app.vello.R;
-import com.mili.xiaominglui.app.vello.config.VelloConfig;
-import com.mili.xiaominglui.app.vello.config.WSConfig;
-import com.mili.xiaominglui.app.vello.data.factory.AllWordCardListJsonFactory;
-import com.mili.xiaominglui.app.vello.data.model.WordCard;
-import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
-import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
-import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
-import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
-import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
-import com.mili.xiaominglui.app.vello.service.VelloService;
-import com.mili.xiaominglui.app.vello.util.AccountUtils;
-
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ComponentName;
 import android.content.ContentProviderClient;
@@ -39,9 +22,30 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.foxykeep.datadroid.exception.ConnectionException;
+import com.foxykeep.datadroid.exception.DataException;
+import com.foxykeep.datadroid.network.NetworkConnection;
+import com.foxykeep.datadroid.network.NetworkConnection.ConnectionResult;
+import com.foxykeep.datadroid.network.NetworkConnection.Method;
+import com.mili.xiaominglui.app.vello.R;
+import com.mili.xiaominglui.app.vello.config.VelloConfig;
+import com.mili.xiaominglui.app.vello.config.WSConfig;
+import com.mili.xiaominglui.app.vello.data.factory.AllWordCardListJsonFactory;
+import com.mili.xiaominglui.app.vello.data.model.WordCard;
+import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
+import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
+import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
+import com.mili.xiaominglui.app.vello.service.VelloService;
+import com.mili.xiaominglui.app.vello.ui.MainActivity;
+import com.mili.xiaominglui.app.vello.util.AccountUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
@@ -194,6 +198,25 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 				} catch (OperationApplicationException e) {
 					throw new DataException(e);
 				}
+
+                Intent intent = new Intent(mContext, MainActivity.class);
+                PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
+
+                // Build notification
+                // TODO need refine
+                Notification noti = new Notification.Builder(mContext)
+                        .setContentTitle("You have words need reviewing!")
+                        .setContentText("Click me to begin reviewing!")
+                        .setSmallIcon(R.drawable.ic_launcher)
+                        .setContentIntent(pIntent).build();
+
+                NotificationManager notificationManager = (NotificationManager)
+                        mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+
+                // Hide the notification after its selected
+                noti.flags |= Notification.FLAG_AUTO_CANCEL;
+
+                notificationManager.notify(0, noti);
 			}
 		} catch (ConnectionException e) {
 			// TODO Auto-generated catch block
