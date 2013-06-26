@@ -2,12 +2,14 @@
 package com.mili.xiaominglui.app.vello.data.model;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 
 public class WordCard implements Parcelable {
+    public int id;
     public String idCard;
     public String name;
     public String desc;
@@ -19,6 +21,17 @@ public class WordCard implements Parcelable {
     public WordCard() {
 
     }
+    
+    public WordCard(Cursor c) {
+        id = c.getInt(DbWordCard.Columns.ID.getIndex());
+        idCard = c.getString(DbWordCard.Columns.ID_CARD.getIndex());
+        name = c.getString(DbWordCard.Columns.NAME.getIndex());
+        desc = c.getString(DbWordCard.Columns.DESC.getIndex());
+        due = c.getString(DbWordCard.Columns.DUE.getIndex());
+        idList = c.getString(DbWordCard.Columns.ID_LIST.getIndex());
+        closed = c.getString(DbWordCard.Columns.CLOSED.getIndex());
+        dateLastActivity = c.getString(DbWordCard.Columns.DATE_LAST_ACTIVITY.getIndex());
+    }
 
     @Override
     public int describeContents() {
@@ -27,6 +40,7 @@ public class WordCard implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
         dest.writeString(idCard);
         dest.writeString(name);
         dest.writeString(desc);

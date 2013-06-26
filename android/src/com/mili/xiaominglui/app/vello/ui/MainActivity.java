@@ -18,6 +18,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.Resources;
 import android.database.CharArrayBuffer;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -311,7 +312,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
         }
     }
     
-    private Word mSelectedWord;
+    private WordCard mSelectedWordCard;
     
     // Saved status for undo
     private WordCard mDeletedWord;
@@ -418,7 +419,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 			@Override
 			public void onSwipe(View view) {
 				final WordCardAdapter.ItemHolder itemHolder = (ItemHolder) view.getTag();
-				mAdapter.removeSelectedId(itemHolder.word.id);
+				mAdapter.removeSelectedId(itemHolder.wordcard.id);
 				
 			}
 		});
@@ -737,6 +738,8 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
     public class WordCardAdapter extends CursorAdapter {
     	private final Context mContext;
     	private final LayoutInflater mFactory;
+    	private final int mBackgroundColorSelected;
+        private final int mBackgroundColor;
     	private final ListView mList;
     	
     	private final HashSet<Integer> mExpanded = new HashSet<Integer>();
@@ -759,7 +762,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             View hairLine;
             
     		// Other states
-            IcibaWord word;
+            WordCard wordcard;
             String mDesc;
             String mIdList;
             CharArrayBuffer mCharArrayBufferKeyword;
@@ -790,6 +793,11 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
     		mContext = context;
     		mFactory = LayoutInflater.from(context);
     		mList = list;
+    		
+    		Resources res = mContext.getResources();
+    		
+    		mBackgroundColorSelected = res.getColor(R.color.alarm_selected_color);
+            mBackgroundColor = res.getColor(R.color.alarm_whiteish);
     		
     		if (expandedIds != null) {
     			buildHashSetFromArray(expandedIds, mExpanded);
@@ -826,9 +834,18 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
     	}
 
 		@Override
-		public void bindView(View arg0, Context arg1, Cursor arg2) {
+		public void bindView(View view, Context context, Cursor cursor) {
 			// TODO Auto-generated method stub
-			
+		    final WordCard wordcard = new WordCard(cursor);
+		    final ItemHolder itemHolder = (ItemHolder) view.getTag();
+		    itemHolder.wordcard = wordcard;
+		    
+			if (mSelectedWords.contains(itemHolder.wordcard.id)) {
+			    itemHolder.alarmItem.setBackgroundColor(mBackgroundColorSelected);
+                itemHolder.alarmItem.setAlpha(1f);
+			} else {
+			    itemHolder.alarmItem.setBackgroundColor(mBackgroundColor);
+			}
 		}
 
 		@Override
@@ -855,7 +872,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
                 View v = mList.getChildAt(i);
                 if (v != null) {
                     ItemHolder h = (ItemHolder)(v.getTag());
-                    if (h != null && h.word.id == id) {
+                    if (h != null && h.wordcard.id == id) {
                         return v;
                     }
                 }

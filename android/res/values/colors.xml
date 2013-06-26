@@ -4,4 +4,5 @@
     <color name="transparent">#00000000</color>
     <color name="transparent_white">#66ffffff</color>
     <color name="alarm_whiteish">#0cffffff</color>
+    <color name="alarm_selected_color">#aa0099cc</color>
 </resources>
