@@ -1,7 +1,14 @@
 
 package com.mili.xiaominglui.app.vello.ui;
 
+import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+
 import android.accounts.Account;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.ComponentName;
@@ -14,6 +21,7 @@ import android.content.ServiceConnection;
 import android.database.CharArrayBuffer;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,8 +34,10 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -35,12 +45,16 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.view.ActionMode;
+import com.actionbarsherlock.view.ActionMode.Callback;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.actionbarsherlock.widget.SearchView;
 import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.actionbarsherlock.widget.SearchView.OnSuggestionListener;
+import com.android.deskclock.widget.ActionableToastBar;
+import com.android.deskclock.widget.swipeablelistview.SwipeableListView;
 import com.atermenji.android.iconictextview.IconicTextView;
 import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
 import com.devspark.appmsg.AppMsg;
@@ -59,23 +73,26 @@ import com.mili.xiaominglui.app.vello.data.model.Definitions;
 import com.mili.xiaominglui.app.vello.data.model.IcibaWord;
 import com.mili.xiaominglui.app.vello.data.model.Phonetics;
 import com.mili.xiaominglui.app.vello.data.model.Phoneticss;
+import com.mili.xiaominglui.app.vello.data.model.Word;
+import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.service.VelloService;
+import com.mili.xiaominglui.app.vello.ui.MainActivity.WordCardAdapter.ItemHolder;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.tjerkw.slideexpandable.library.SlideExpandableListAdapter;
 
-import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-
 public class MainActivity extends BaseActivity implements RefreshActionListener,
-        OnQueryTextListener, OnSuggestionListener, LoaderCallbacks<Cursor> {
+        OnQueryTextListener, OnSuggestionListener, LoaderCallbacks<Cursor>, Callback {
     private static final String TAG = MainActivity.class.getSimpleName();
     private Context mContext;
     private Activity mActivity;
+    
+    private static final String KEY_EXPANDED_IDS = "expandedIds";
+    private static final String KEY_SELECTED_WORDS = "selectedWords";
+    private static final String KEY_DELETED_WORD = "deletedWord";
+    private static final String KEY_UNDO_SHOWING = "undoShowing";
 
     private MyHandler mUICallback = new MyHandler(this);
     
@@ -293,6 +310,16 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             }
         }
     }
+    
+    private Word mSelectedWord;
+    
+    // Saved status for undo
+    private WordCard mDeletedWord;
+    private boolean mUndoShowing = false;
+    private SwipeableListView mWordsList;
+    private WordCardAdapter mAdapter;
+    private ActionableToastBar mUndoBar;
+    private ActionMode mActionMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -305,20 +332,22 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             return;
         }
 
-        setContentView(R.layout.activity_main);
-        ListView listView = (ListView) findViewById(R.id.activity_googlecards_listview);
+        initialize(savedInstanceState);
+        updateLayout();
+        
+        
         // mGoogleCardsAdapter = new GoogleCardsCursorAdapter(this);
-        mGoogleCardsAdapter = new GoogleCardsCursorAdapter(this);
-        SwingBottomInAnimationAdapter swingBottomInAnimationAdapter = new SwingBottomInAnimationAdapter(
-                new SwipeDismissAdapter(mGoogleCardsAdapter,
-                        new MyOnDismissCallback(mGoogleCardsAdapter)));
-        swingBottomInAnimationAdapter.setListView(listView);
-
-        SlideExpandableListAdapter slideExpandableListAdapter = new SlideExpandableListAdapter(
-                swingBottomInAnimationAdapter, R.id.expandable_toggle_button,
-                R.id.expandable);
-
-        listView.setAdapter(slideExpandableListAdapter);
+//        mGoogleCardsAdapter = new GoogleCardsCursorAdapter(this);
+//        SwingBottomInAnimationAdapter swingBottomInAnimationAdapter = new SwingBottomInAnimationAdapter(
+//                new SwipeDismissAdapter(mGoogleCardsAdapter,
+//                        new MyOnDismissCallback(mGoogleCardsAdapter)));
+//        swingBottomInAnimationAdapter.setListView(listView);
+//
+//        SlideExpandableListAdapter slideExpandableListAdapter = new SlideExpandableListAdapter(
+//                swingBottomInAnimationAdapter, R.id.expandable_toggle_button,
+//                R.id.expandable);
+//
+//        listView.setAdapter(slideExpandableListAdapter);
 
         getSupportLoaderManager().initLoader(0, null, this);
         mInflater = getLayoutInflater();
@@ -365,10 +394,96 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
         super.onDestroy();
         doUnbindService();
     }
+    
+    private void initialize(Bundle savedState) {
+    	setContentView(R.layout.activity_main);
+    	int[] expandedIds = null;
+    	int[] selectedWords = null;
+    	
+    	if (savedState != null) {
+    		expandedIds = savedState.getIntArray(KEY_EXPANDED_IDS);
+    		mDeletedWord = savedState.getParcelable(KEY_DELETED_WORD);
+    		mUndoShowing = savedState.getBoolean(KEY_UNDO_SHOWING);
+    		selectedWords = savedState.getIntArray(KEY_SELECTED_WORDS);
+    	}
+    	
+    	mWordsList = (SwipeableListView) findViewById(R.id.words_list);
+    	mAdapter = new WordCardAdapter(mContext, expandedIds, selectedWords, mWordsList);
+    	mWordsList.setAdapter(mAdapter);
+    	mWordsList.setVerticalScrollBarEnabled(true);
+    	mWordsList.enableSwipe(true);
+    	mWordsList.setOnCreateContextMenuListener(this);
+    	mWordsList.setOnItemSwipeListener(new SwipeableListView.OnItemSwipeListener() {
+			
+			@Override
+			public void onSwipe(View view) {
+				final WordCardAdapter.ItemHolder itemHolder = (ItemHolder) view.getTag();
+				mAdapter.removeSelectedId(itemHolder.word.id);
+				
+			}
+		});
+    	
+    	mWordsList.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                hideUndoBar(true, event);
+                return false;
+            }
+        });
+
+        mUndoBar = (ActionableToastBar) findViewById(R.id.undo_bar);
+
+        if (mUndoShowing) {
+            mUndoBar.show(new ActionableToastBar.ActionClickedListener() {
+                @Override
+                public void onActionClicked() {
+                    asyncAddWord(mDeletedWord);
+                    mDeletedWord = null;
+                    mUndoShowing = false;
+                }
+            }, 0, getResources().getString(R.string.alarm_deleted), true, R.string.alarm_undo,
+                    true);
+        }
+    	
+    	// Show action mode if needed
+        int selectedNum = mAdapter.getSelectedItemsNum();
+        if (selectedNum > 0) {
+            mActionMode = startActionMode(this);
+            setActionModeTitle(selectedNum);
+        }
+    }
+    
+    protected void asyncAddWord(final WordCard wordcard) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void hideUndoBar(boolean animate, MotionEvent event) {
+        if (mUndoBar != null) {
+            if (event != null && mUndoBar.isEventInToastBar(event)) {
+                // Avoid touches inside the undo bar.
+                return;
+            }
+            mUndoBar.hide(animate);
+        }
+        mDeletedWord = null;
+        mUndoShowing = false;
+    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        // TODO
+//        outState.putIntArray(KEY_EXPANDED_IDS, mAdapter.getExpandedArray());
+        outState.putParcelable(KEY_DELETED_WORD, mDeletedWord);
+        outState.putBoolean(KEY_UNDO_SHOWING, mUndoShowing);
+    }
+    
+    private void updateLayout() {
+        final ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP, ActionBar.DISPLAY_HOME_AS_UP);
+        }
     }
 
     @Override
@@ -489,7 +604,8 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mGoogleCardsAdapter.changeCursor(data);
+//        mGoogleCardsAdapter.changeCursor(data);
+        mAdapter.swapCursor(data);
     }
 
     @Override
@@ -587,6 +703,176 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             }
         }
     }
+    
+    /***
+     * Activate/update/close action mode according to the number of selected views.
+     */
+    private void updateActionMode() {
+        int selectedNum = mAdapter.getSelectedItemsNum();
+        if (mActionMode == null && selectedNum > 0) {
+            // Start the action mode
+            mActionMode = startActionMode(this);
+            setActionModeTitle(selectedNum);
+        } else if (mActionMode != null) {
+            if (selectedNum > 0) {
+                // Update the number of selected items in the title
+                setActionModeTitle(selectedNum);
+            } else {
+                // No selected items. close the action mode
+                mActionMode.finish();
+                mActionMode = null;
+            }
+        }
+    }
+    
+    /***
+     * Display the number of selected items on the action bar in action mode
+     * @param items - number of selected items
+     */
+    private void setActionModeTitle(int items) {
+        mActionMode.setTitle(String.format(getString(R.string.alarms_selected), items));
+    }
+
+    
+    public class WordCardAdapter extends CursorAdapter {
+    	private final Context mContext;
+    	private final LayoutInflater mFactory;
+    	private final ListView mList;
+    	
+    	private final HashSet<Integer> mExpanded = new HashSet<Integer>();
+    	private final HashSet<Integer> mSelectedWords = new HashSet<Integer>();
+    	
+    	public class ItemHolder {
+    		// views for optimization
+    		LinearLayout alarmItem;
+            IconicTextView mIconicToggleButton;
+            IconicTextView mIconicLifeCount;
+            TextView mTextViewLifeCount;
+            TextView mTextViewKeyword;
+            
+            View expandArea;
+
+            LinearLayout mLinearLayoutPhoneticArea;
+            LinearLayout mLinearLayoutDefinitionArea;
+            ViewGroup collapse;
+            
+            View hairLine;
+            
+    		// Other states
+            IcibaWord word;
+            String mDesc;
+            String mIdList;
+            CharArrayBuffer mCharArrayBufferKeyword;
+            Phoneticss p;
+            Definitions d;
+    	}
+    	
+    	// Used for scrolling an expanded item in the list to make sure it is fully visible.
+    	private int mScrollWordId = -1;
+    	private final Runnable mScrollRunnable = new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				if (mScrollWordId != -1) {
+					View v = getViewById(mScrollWordId);
+                    if (v != null) {
+                        Rect rect = new Rect(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
+                        mList.requestChildRectangleOnScreen(v, rect, false);
+                    }
+                    mScrollWordId = -1;
+				}
+			}
+    	};
+    	
+    	public WordCardAdapter(Context context, int[] expandedIds, int[] selectedWords, ListView list) {
+    		super(context, null, 0);
+    		mContext = context;
+    		mFactory = LayoutInflater.from(context);
+    		mList = list;
+    		
+    		if (expandedIds != null) {
+    			buildHashSetFromArray(expandedIds, mExpanded);
+    		}
+    		
+    		if (selectedWords != null) {
+    			buildHashSetFromArray(selectedWords, mSelectedWords);
+    		}
+    	}
+    	
+    	@Override
+    	public View getView(int position, View convertView, ViewGroup parent) {
+    		if (!getCursor().moveToPosition(position)) {
+                // May happen if the last word was deleted and the cursor refreshed while the
+                // list is updated.
+                Log.v(TAG, "couldn't move cursor to position " + position);
+                return null;
+            }
+            View v;
+            if (convertView == null) {
+                v = newView(mContext, getCursor(), parent);
+            } else {
+                // Do a translation check to test for animation. Change this to something more
+                // reliable and robust in the future.
+                if (convertView.getTranslationX() != 0 || convertView.getTranslationY() != 0) {
+                    // view was animated, reset
+                    v = newView(mContext, getCursor(), parent);
+                } else {
+                    v = convertView;
+                }
+            }
+            bindView(v, mContext, getCursor());
+            return v;
+    	}
+
+		@Override
+		public void bindView(View arg0, Context arg1, Cursor arg2) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public View newView(Context context, Cursor cursor, ViewGroup parent) {
+			final View view = mFactory.inflate(R.layout.alarm_time, parent, false);
+			
+			// standard view holder optimization
+            final ItemHolder holder = new ItemHolder();
+            holder.alarmItem = (LinearLayout) view.findViewById(R.id.alarm_item);
+            holder.expandArea = view.findViewById(R.id.expand_area);
+            holder.hairLine = view.findViewById(R.id.hairline);
+            holder.collapse = (ViewGroup) view.findViewById(R.id.collapse);
+            
+            view.setTag(holder);
+			return view;
+		}
+		
+		public void removeSelectedId(int id) {
+			mSelectedWords.remove(id);
+		}
+		
+		private View getViewById(int id) {
+            for (int i = 0; i < mList.getCount(); i++) {
+                View v = mList.getChildAt(i);
+                if (v != null) {
+                    ItemHolder h = (ItemHolder)(v.getTag());
+                    if (h != null && h.word.id == id) {
+                        return v;
+                    }
+                }
+            }
+            return null;
+        }
+		
+		private void buildHashSetFromArray(int[] ids, HashSet<Integer> set) {
+            for (int id : ids) {
+                set.add(id);
+            }
+        }
+		
+		public int getSelectedItemsNum() {
+            return mSelectedWords.size();
+        }
+    }
 
     class GoogleCardsCursorAdapter extends CursorAdapter {
         public GoogleCardsCursorAdapter(Context context) {
@@ -614,4 +900,31 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
         ContentResolver.requestSync(
                 new Account(AccountUtils.getChosenAccountName(this), Constants.ACCOUNT_TYPE), VelloProvider.AUTHORITY, extras);
     }
+
+	@Override
+	public boolean onCreateActionMode(
+			com.actionbarsherlock.view.ActionMode mode, Menu menu) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean onPrepareActionMode(
+			com.actionbarsherlock.view.ActionMode mode, Menu menu) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean onActionItemClicked(
+			com.actionbarsherlock.view.ActionMode mode, MenuItem item) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void onDestroyActionMode(com.actionbarsherlock.view.ActionMode mode) {
+		// TODO Auto-generated method stub
+		
+	}
 }

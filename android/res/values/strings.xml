@@ -33,6 +33,15 @@
     <string name="local_service_connected">LOCAL_SERVICE_CONNECTED</string>
     <string name="local_service_disconnected">LOCAL_SERVICE_DISCONNECTED</string>
     
+    <!-- Toast content when an alarm was deleted  -->
+    <string name="alarm_deleted">Alarm deleted.</string>
+    <!-- Displays the number of alarms selected from the list of alarms. -->
+    <string name="alarms_selected">selected</string>
+    <!-- Description of the button to undo change to alarm -->
+    <string name="alarm_undo">undo</string>
+    <!-- Description of the up caret in the alarm alert screen to collapse the alarm content to summary perspective. [CHAR LIMIT=NONE] -->
+    <string name="collapse_alarm">Collapse alarm</string>
+    
     
 
 </resources>

@@ -4,5 +4,7 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="element_spacing_normal">8dp</dimen>
+    <dimen name="body_font_size">18sp</dimen>
+    <dimen name="toast_bar_bottom_margin_in_conversation">24dip</dimen>
 
 </resources>
