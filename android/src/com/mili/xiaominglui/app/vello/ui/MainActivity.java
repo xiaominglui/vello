@@ -4,7 +4,6 @@ package com.mili.xiaominglui.app.vello.ui;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashSet;
 
 import android.accounts.Account;
@@ -13,8 +12,6 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -23,7 +20,6 @@ import android.database.CharArrayBuffer;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -59,22 +55,17 @@ import com.android.deskclock.widget.swipeablelistview.SwipeableListView;
 import com.atermenji.android.iconictextview.IconicTextView;
 import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
 import com.devspark.appmsg.AppMsg;
-import com.haarman.listviewanimations.itemmanipulation.OnDismissCallback;
-import com.haarman.listviewanimations.itemmanipulation.SwipeDismissAdapter;
-import com.haarman.listviewanimations.swinginadapters.prepared.SwingBottomInAnimationAdapter;
 import com.manuelpeinado.refreshactionitem.ProgressIndicatorType;
 import com.manuelpeinado.refreshactionitem.RefreshActionItem;
 import com.manuelpeinado.refreshactionitem.RefreshActionItem.RefreshActionListener;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
-import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.factory.IcibaWordXmlParser;
 import com.mili.xiaominglui.app.vello.data.model.Definition;
 import com.mili.xiaominglui.app.vello.data.model.Definitions;
 import com.mili.xiaominglui.app.vello.data.model.IcibaWord;
 import com.mili.xiaominglui.app.vello.data.model.Phonetics;
 import com.mili.xiaominglui.app.vello.data.model.Phoneticss;
-import com.mili.xiaominglui.app.vello.data.model.Word;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
@@ -82,7 +73,6 @@ import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.ui.MainActivity.WordCardAdapter.ItemHolder;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
-import com.tjerkw.slideexpandable.library.SlideExpandableListAdapter;
 
 public class MainActivity extends BaseActivity implements RefreshActionListener,
         OnQueryTextListener, OnSuggestionListener, LoaderCallbacks<Cursor>, Callback {
@@ -226,7 +216,6 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
         }
     }
 
-    private GoogleCardsCursorAdapter mGoogleCardsAdapter;
     private RefreshActionItem mRefreshActionItem;
 
     private SuggestionsAdapter mSuggestionsAdapter;
@@ -260,6 +249,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 
     private LayoutInflater mInflater;
 
+    /*
     private class MyOnDismissCallback implements OnDismissCallback {
 
         private GoogleCardsCursorAdapter mAdapter;
@@ -311,6 +301,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             }
         }
     }
+    */
     
     private WordCard mSelectedWordCard;
     
@@ -442,7 +433,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
                     mDeletedWord = null;
                     mUndoShowing = false;
                 }
-            }, 0, getResources().getString(R.string.alarm_deleted), true, R.string.alarm_undo,
+            }, 0, getResources().getString(R.string.word_deleted), true, R.string.word_undo,
                     true);
         }
     	
@@ -548,6 +539,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
     	triggerRefresh();
     }
 
+    /*
     private void showCurrentBadge() {
         int num = mGoogleCardsAdapter.getCount();
         if (num > 0) {
@@ -556,6 +548,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             mRefreshActionItem.hideBadge();
         }
     }
+    */
 
     @Override
     public boolean onSuggestionSelect(int position) {
@@ -611,7 +604,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 
     @Override
     public void onLoaderReset(Loader<Cursor> loder) {
-        mGoogleCardsAdapter.changeCursor(null);
+    	mAdapter.swapCursor(null);
     }
 
     class ViewHolder {
@@ -731,7 +724,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
      * @param items - number of selected items
      */
     private void setActionModeTitle(int items) {
-        mActionMode.setTitle(String.format(getString(R.string.alarms_selected), items));
+        mActionMode.setTitle(String.format(getString(R.string.words_selected), items));
     }
 
     
@@ -753,6 +746,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             TextView textViewKeyword;
             
             View expandArea;
+            View infoArea;
 
             LinearLayout linearLayoutPhoneticArea;
             LinearLayout linearLayoutDefinitionArea;
@@ -763,7 +757,6 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
     		// Other states
             WordCard wordcard;
             IcibaWord word;
-            String desc;
             String idList;
             Phoneticss p;
             Definitions d;
@@ -838,8 +831,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 		    final WordCard wordcard = new WordCard(cursor);
 		    final ItemHolder itemHolder = (ItemHolder) view.getTag();
 		    itemHolder.wordcard = wordcard;
-		    itemHolder.desc = itemHolder.wordcard.desc;
-		    itemHolder.word = IcibaWordXmlParser.parse(itemHolder.desc);
+		    itemHolder.word = IcibaWordXmlParser.parse(wordcard.desc);
 		    
 			if (mSelectedWords.contains(itemHolder.wordcard.id)) {
 			    itemHolder.alarmItem.setBackgroundColor(mBackgroundColorSelected);
@@ -860,8 +852,8 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             itemHolder.textViewLifeCount.setText(lifeString);
             itemHolder.textViewLifeCount.setTextColor(Color.GRAY);
 
-            itemHolder.textViewKeyword.setText(itemHolder.word.keyword);
-
+            itemHolder.textViewKeyword.setText(itemHolder.wordcard.name);
+            
             itemHolder.p = itemHolder.word.phonetics;
             itemHolder.linearLayoutPhoneticArea.removeAllViews();
             for (Phonetics phonetics : itemHolder.p) {
@@ -893,6 +885,10 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
                         .setText(definition.definiens);
                 itemHolder.linearLayoutDefinitionArea.addView(definiitionGroup);
             }
+            
+            itemHolder.expandArea.setVisibility(isWordExpanded(wordcard) ? View.VISIBLE : View.GONE);
+//            itemHolder.expandArea.setOnLongClickListener(mLongClickListener);
+            itemHolder.infoArea.setVisibility(!isWordExpanded(wordcard) ? View.VISIBLE : View.GONE);
 			
 		}
 
@@ -907,6 +903,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             holder.textViewLifeCount = (TextView) view.findViewById(R.id.life_count);
             holder.textViewKeyword = (TextView) view.findViewById(R.id.keyword);
             holder.expandArea = view.findViewById(R.id.expand_area);
+            holder.infoArea = view.findViewById(R.id.info_area);
             holder.linearLayoutPhoneticArea = (LinearLayout) view.findViewById(R.id.phonetics_area);
             holder.linearLayoutDefinitionArea = (LinearLayout) view.findViewById(R.id.definition_area);
             holder.hairLine = view.findViewById(R.id.hairline);
@@ -919,6 +916,14 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 		public void removeSelectedId(int id) {
 			mSelectedWords.remove(id);
 		}
+		
+		private boolean isWordExpanded(WordCard wordcard) {
+            return mExpanded.contains(wordcard.id);
+        }
+
+        private void collapseWord(WordCard alarm) {
+            mExpanded.remove(alarm.id);
+        }
 		
 		private View getViewById(int id) {
             for (int i = 0; i < mList.getCount(); i++) {
@@ -944,6 +949,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
         }
     }
 
+    /*
     class GoogleCardsCursorAdapter extends CursorAdapter {
         public GoogleCardsCursorAdapter(Context context) {
             super(context, null, false);
@@ -963,6 +969,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             return view;
         }
     }
+    */
     
     private void triggerRefresh() {
         Bundle extras = new Bundle();

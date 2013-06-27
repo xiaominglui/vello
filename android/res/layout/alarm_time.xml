@@ -79,7 +79,6 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:background="#28ffffff"/>
-    <!--
     <FrameLayout
         android:id="@+id/info_area"
         android:layout_width="match_parent"
@@ -88,37 +87,16 @@
         android:gravity="center_vertical"
         android:clickable="true"
         android:background="@drawable/item_background">
-        <com.android.deskclock.widget.EllipsizeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginRight="48dp"
-            android:gravity="center_vertical"
-            >
-            <TextView android:id="@+id/label"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      style="@style/alarm_label_not_caps"
-                      android:textColor="@color/clock_gray"
-                      android:ellipsize="end"
-                      android:singleLine="true"/>
-            <TextView android:id="@+id/daysOfWeek"
-                      android:layout_height="wrap_content"
-                      android:layout_width="wrap_content"
-                      style="@style/alarm_label_bold"
-                      android:textColor="@color/clock_white"
-                      android:ellipsize="none"
-                      android:singleLine="true"/>
-        </com.android.deskclock.widget.EllipsizeLayout>
+
         <ImageView
             android:id="@+id/expand"
             android:layout_width="48dp"
             android:layout_height="32dp"
-            android:contentDescription="@string/expand_alarm"
+            android:contentDescription="@string/expand_word"
             android:src="@drawable/ic_expand_down"
             android:layout_gravity="right"
             />
     </FrameLayout>
-    -->
     <LinearLayout
         android:id="@+id/expand_area"
         android:orientation="vertical"
@@ -151,7 +129,7 @@
             android:layout_height="32dp"
             android:background="@drawable/item_background"
             android:clickable="true"
-            android:contentDescription="@string/collapse_alarm"
+            android:contentDescription="@string/collapse_word"
             >
             <ImageView
                 android:layout_width="48dp"
