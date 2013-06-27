@@ -748,7 +748,6 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
     	public class ItemHolder {
     		// views for optimization
     		LinearLayout alarmItem;
-            IconicTextView iconicToggleButton;
             IconicTextView iconicLifeCount;
             TextView textViewLifeCount;
             TextView textViewKeyword;
@@ -839,6 +838,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 		    final WordCard wordcard = new WordCard(cursor);
 		    final ItemHolder itemHolder = (ItemHolder) view.getTag();
 		    itemHolder.wordcard = wordcard;
+		    itemHolder.desc = itemHolder.wordcard.desc;
 		    itemHolder.word = IcibaWordXmlParser.parse(itemHolder.desc);
 		    
 			if (mSelectedWords.contains(itemHolder.wordcard.id)) {
@@ -848,9 +848,6 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 			    itemHolder.alarmItem.setBackgroundColor(mBackgroundColor);
 			}
 			
-			itemHolder.iconicToggleButton.setIcon(FontAwesomeIcon.INFO_SIGN);
-            itemHolder.iconicToggleButton.setTextColor(Color.GRAY);
-
             itemHolder.iconicLifeCount.setIcon(FontAwesomeIcon.HEART);
             itemHolder.iconicLifeCount.setTextColor(Color.GRAY);
             itemHolder.idList = itemHolder.wordcard.idList;
@@ -906,7 +903,12 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 			// standard view holder optimization
             final ItemHolder holder = new ItemHolder();
             holder.alarmItem = (LinearLayout) view.findViewById(R.id.alarm_item);
+            holder.iconicLifeCount = (IconicTextView) view.findViewById(R.id.life_sign);
+            holder.textViewLifeCount = (TextView) view.findViewById(R.id.life_count);
+            holder.textViewKeyword = (TextView) view.findViewById(R.id.keyword);
             holder.expandArea = view.findViewById(R.id.expand_area);
+            holder.linearLayoutPhoneticArea = (LinearLayout) view.findViewById(R.id.phonetics_area);
+            holder.linearLayoutDefinitionArea = (LinearLayout) view.findViewById(R.id.definition_area);
             holder.hairLine = view.findViewById(R.id.hairline);
             holder.collapse = (ViewGroup) view.findViewById(R.id.collapse);
             
