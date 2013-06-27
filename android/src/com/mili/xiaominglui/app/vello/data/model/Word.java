@@ -1,7 +1,6 @@
 package com.mili.xiaominglui.app.vello.data.model;
 
 public class Word {
-	public int id;
     public String idCard;
     public String idList;
     public String keyword;

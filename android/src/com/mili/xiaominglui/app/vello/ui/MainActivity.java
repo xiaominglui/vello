@@ -748,24 +748,24 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
     	public class ItemHolder {
     		// views for optimization
     		LinearLayout alarmItem;
-            IconicTextView mIconicToggleButton;
-            IconicTextView mIconicLifeCount;
-            TextView mTextViewLifeCount;
-            TextView mTextViewKeyword;
+            IconicTextView iconicToggleButton;
+            IconicTextView iconicLifeCount;
+            TextView textViewLifeCount;
+            TextView textViewKeyword;
             
             View expandArea;
 
-            LinearLayout mLinearLayoutPhoneticArea;
-            LinearLayout mLinearLayoutDefinitionArea;
+            LinearLayout linearLayoutPhoneticArea;
+            LinearLayout linearLayoutDefinitionArea;
             ViewGroup collapse;
             
             View hairLine;
             
     		// Other states
             WordCard wordcard;
-            String mDesc;
-            String mIdList;
-            CharArrayBuffer mCharArrayBufferKeyword;
+            IcibaWord word;
+            String desc;
+            String idList;
             Phoneticss p;
             Definitions d;
     	}
@@ -839,6 +839,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 		    final WordCard wordcard = new WordCard(cursor);
 		    final ItemHolder itemHolder = (ItemHolder) view.getTag();
 		    itemHolder.wordcard = wordcard;
+		    itemHolder.word = IcibaWordXmlParser.parse(itemHolder.desc);
 		    
 			if (mSelectedWords.contains(itemHolder.wordcard.id)) {
 			    itemHolder.alarmItem.setBackgroundColor(mBackgroundColorSelected);
@@ -846,6 +847,56 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 			} else {
 			    itemHolder.alarmItem.setBackgroundColor(mBackgroundColor);
 			}
+			
+			itemHolder.iconicToggleButton.setIcon(FontAwesomeIcon.INFO_SIGN);
+            itemHolder.iconicToggleButton.setTextColor(Color.GRAY);
+
+            itemHolder.iconicLifeCount.setIcon(FontAwesomeIcon.HEART);
+            itemHolder.iconicLifeCount.setTextColor(Color.GRAY);
+            itemHolder.idList = itemHolder.wordcard.idList;
+            int positionList = AccountUtils.getVocabularyListPosition(mContext,
+            		itemHolder.idList);
+            String lifeString = "N";
+            if (positionList != 0) {
+                lifeString = String.valueOf(8 - positionList + 1);
+            }
+            itemHolder.textViewLifeCount.setText(lifeString);
+            itemHolder.textViewLifeCount.setTextColor(Color.GRAY);
+
+            itemHolder.textViewKeyword.setText(itemHolder.word.keyword);
+
+            itemHolder.p = itemHolder.word.phonetics;
+            itemHolder.linearLayoutPhoneticArea.removeAllViews();
+            for (Phonetics phonetics : itemHolder.p) {
+                View phoneticsView = LayoutInflater.from(mContext).inflate(
+                        R.layout.phonetics_item, null);
+                LinearLayout phoneticsGroup = (LinearLayout) phoneticsView
+                        .findViewById(R.id.phonetics_group);
+                ((TextView) phoneticsView.findViewById(R.id.phonetics_symbol))
+                        .setText("[" + phonetics.symbol + "]");
+                ((IconicTextView) phoneticsView
+                        .findViewById(R.id.phonetics_sound))
+                        .setIcon(FontAwesomeIcon.VOLUME_UP);
+                ((IconicTextView) phoneticsView
+                        .findViewById(R.id.phonetics_sound))
+                        .setTextColor(Color.GRAY);
+                itemHolder.linearLayoutPhoneticArea.addView(phoneticsGroup);
+            }
+
+            itemHolder.d = itemHolder.word.definition;
+            itemHolder.linearLayoutDefinitionArea.removeAllViews();
+            for (Definition definition : itemHolder.d) {
+                View definitionView = LayoutInflater.from(mContext).inflate(
+                        R.layout.definition_item, null);
+                LinearLayout definiitionGroup = (LinearLayout) definitionView
+                        .findViewById(R.id.definition_group);
+                ((TextView) definitionView.findViewById(R.id.pos))
+                        .setText(definition.pos);
+                ((TextView) definitionView.findViewById(R.id.definiens))
+                        .setText(definition.definiens);
+                itemHolder.linearLayoutDefinitionArea.addView(definiitionGroup);
+            }
+			
 		}
 
 		@Override
