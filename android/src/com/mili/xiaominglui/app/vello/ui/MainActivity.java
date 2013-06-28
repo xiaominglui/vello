@@ -827,7 +827,6 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 
 		@Override
 		public void bindView(View view, Context context, Cursor cursor) {
-			// TODO Auto-generated method stub
 		    final WordCard wordcard = new WordCard(cursor);
 		    final ItemHolder itemHolder = (ItemHolder) view.getTag();
 		    itemHolder.wordcard = wordcard;
@@ -854,7 +853,65 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 
             itemHolder.textViewKeyword.setText(itemHolder.wordcard.name);
             
-            itemHolder.p = itemHolder.word.phonetics;
+            itemHolder.expandArea.setVisibility(isWordExpanded(wordcard) ? View.VISIBLE : View.GONE);
+//            itemHolder.expandArea.setOnLongClickListener(mLongClickListener);
+            itemHolder.infoArea.setVisibility(!isWordExpanded(wordcard) ? View.VISIBLE : View.GONE);
+            itemHolder.infoArea.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    expandWord(itemHolder);
+//                    itemHolder.alarmItem.post(mScrollRunnable);
+                }
+            });
+			
+		}
+
+		@Override
+		public View newView(Context context, Cursor cursor, ViewGroup parent) {
+			final View view = mFactory.inflate(R.layout.alarm_time, parent, false);
+			
+			// standard view holder optimization
+            final ItemHolder holder = new ItemHolder();
+            holder.alarmItem = (LinearLayout) view.findViewById(R.id.alarm_item);
+            holder.iconicLifeCount = (IconicTextView) view.findViewById(R.id.life_sign);
+            holder.textViewLifeCount = (TextView) view.findViewById(R.id.life_count);
+            holder.textViewKeyword = (TextView) view.findViewById(R.id.keyword);
+            holder.expandArea = view.findViewById(R.id.expand_area);
+            holder.infoArea = view.findViewById(R.id.info_area);
+            holder.linearLayoutPhoneticArea = (LinearLayout) view.findViewById(R.id.phonetics_area);
+            holder.linearLayoutDefinitionArea = (LinearLayout) view.findViewById(R.id.definition_area);
+            holder.hairLine = view.findViewById(R.id.hairline);
+            holder.collapse = (ViewGroup) view.findViewById(R.id.collapse);
+            
+            view.setTag(holder);
+			return view;
+		}
+		
+		/**
+         * Expands the word for studying.
+         *
+         * @param itemHolder The item holder instance.
+         */
+        private void expandWord(ItemHolder itemHolder) {
+            itemHolder.expandArea.setVisibility(View.VISIBLE);
+            itemHolder.expandArea.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //When action mode is on - simulate long click
+//                    doLongClick(view);
+                }
+            });
+            itemHolder.infoArea.setVisibility(View.GONE);
+
+            mExpanded.add(itemHolder.wordcard.id);
+            bindExpandArea(itemHolder, itemHolder.wordcard);
+            // Scroll the view to make sure it is fully viewed
+            mScrollWordId = itemHolder.wordcard.id;
+        }
+        
+		private void bindExpandArea(final ItemHolder itemHolder, final WordCard wordcard) {
+			// Views in here are not bound until the item is expanded.
+			itemHolder.p = itemHolder.word.phonetics;
             itemHolder.linearLayoutPhoneticArea.removeAllViews();
             for (Phonetics phonetics : itemHolder.p) {
                 View phoneticsView = LayoutInflater.from(mContext).inflate(
@@ -886,33 +943,21 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
                 itemHolder.linearLayoutDefinitionArea.addView(definiitionGroup);
             }
             
-            itemHolder.expandArea.setVisibility(isWordExpanded(wordcard) ? View.VISIBLE : View.GONE);
-//            itemHolder.expandArea.setOnLongClickListener(mLongClickListener);
-            itemHolder.infoArea.setVisibility(!isWordExpanded(wordcard) ? View.VISIBLE : View.GONE);
-			
+            itemHolder.collapse.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //When action mode is on - simulate long click
+//                    if (doLongClick(v)) {
+//                        return;
+//                    }
+                    itemHolder.expandArea.setVisibility(LinearLayout.GONE);
+                    itemHolder.infoArea.setVisibility(View.VISIBLE);
+                    collapseWord(wordcard);
+                }
+            });
+//            itemHolder.collapse.setOnLongClickListener(mLongClickListener);
 		}
 
-		@Override
-		public View newView(Context context, Cursor cursor, ViewGroup parent) {
-			final View view = mFactory.inflate(R.layout.alarm_time, parent, false);
-			
-			// standard view holder optimization
-            final ItemHolder holder = new ItemHolder();
-            holder.alarmItem = (LinearLayout) view.findViewById(R.id.alarm_item);
-            holder.iconicLifeCount = (IconicTextView) view.findViewById(R.id.life_sign);
-            holder.textViewLifeCount = (TextView) view.findViewById(R.id.life_count);
-            holder.textViewKeyword = (TextView) view.findViewById(R.id.keyword);
-            holder.expandArea = view.findViewById(R.id.expand_area);
-            holder.infoArea = view.findViewById(R.id.info_area);
-            holder.linearLayoutPhoneticArea = (LinearLayout) view.findViewById(R.id.phonetics_area);
-            holder.linearLayoutDefinitionArea = (LinearLayout) view.findViewById(R.id.definition_area);
-            holder.hairLine = view.findViewById(R.id.hairline);
-            holder.collapse = (ViewGroup) view.findViewById(R.id.collapse);
-            
-            view.setTag(holder);
-			return view;
-		}
-		
 		public void removeSelectedId(int id) {
 			mSelectedWords.remove(id);
 		}
@@ -921,8 +966,8 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             return mExpanded.contains(wordcard.id);
         }
 
-        private void collapseWord(WordCard alarm) {
-            mExpanded.remove(alarm.id);
+        private void collapseWord(WordCard wordcard) {
+            mExpanded.remove(wordcard.id);
         }
 		
 		private View getViewById(int id) {
