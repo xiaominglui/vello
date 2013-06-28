@@ -750,7 +750,6 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 
             LinearLayout linearLayoutPhoneticArea;
             LinearLayout linearLayoutDefinitionArea;
-            ViewGroup collapse;
             
             View hairLine;
             
@@ -881,7 +880,6 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             holder.linearLayoutPhoneticArea = (LinearLayout) view.findViewById(R.id.phonetics_area);
             holder.linearLayoutDefinitionArea = (LinearLayout) view.findViewById(R.id.definition_area);
             holder.hairLine = view.findViewById(R.id.hairline);
-            holder.collapse = (ViewGroup) view.findViewById(R.id.collapse);
             
             view.setTag(holder);
 			return view;
@@ -942,20 +940,6 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
                         .setText(definition.definiens);
                 itemHolder.linearLayoutDefinitionArea.addView(definiitionGroup);
             }
-            
-            itemHolder.collapse.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //When action mode is on - simulate long click
-//                    if (doLongClick(v)) {
-//                        return;
-//                    }
-                    itemHolder.expandArea.setVisibility(LinearLayout.GONE);
-                    itemHolder.infoArea.setVisibility(View.VISIBLE);
-                    collapseWord(wordcard);
-                }
-            });
-//            itemHolder.collapse.setOnLongClickListener(mLongClickListener);
 		}
 
 		public void removeSelectedId(int id) {
@@ -966,10 +950,6 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             return mExpanded.contains(wordcard.id);
         }
 
-        private void collapseWord(WordCard wordcard) {
-            mExpanded.remove(wordcard.id);
-        }
-		
 		private View getViewById(int id) {
             for (int i = 0; i < mList.getCount(); i++) {
                 View v = mList.getChildAt(i);

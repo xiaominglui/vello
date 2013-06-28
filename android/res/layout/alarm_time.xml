@@ -116,26 +116,5 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
 
-        <View
-            android:id="@+id/hairline"
-            android:layout_height="1dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_width="match_parent"
-            android:background="#28ffffff"/>
-        <FrameLayout
-            android:id="@+id/collapse"
-            android:layout_width="match_parent"
-            android:layout_height="32dp"
-            android:background="@drawable/item_background"
-            android:clickable="true"
-            android:contentDescription="@string/collapse_word"
-            >
-            <ImageView
-                android:layout_width="48dp"
-                android:layout_height="32dp"
-                android:src="@drawable/ic_expand_up"
-                android:layout_gravity="right"/>
-        </FrameLayout>
     </LinearLayout>
 </com.android.deskclock.widget.swipeablelistview.SwipeLayout>
