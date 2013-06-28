@@ -20,6 +20,7 @@ import android.database.CharArrayBuffer;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -71,7 +72,6 @@ import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.service.VelloService;
-import com.mili.xiaominglui.app.vello.ui.MainActivity.WordCardAdapter.ItemHolder;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class MainActivity extends BaseActivity implements RefreshActionListener,
@@ -411,6 +411,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 			public void onSwipe(View view) {
 				final WordCardAdapter.ItemHolder itemHolder = (WordCardAdapter.ItemHolder) view.getTag();
 				mAdapter.removeSelectedId(itemHolder.wordcard.id);
+				asyncMarkDeleteWord(itemHolder.wordcard);
 			}
 		});
     	
@@ -428,7 +429,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             mUndoBar.show(new ActionableToastBar.ActionClickedListener() {
                 @Override
                 public void onActionClicked() {
-                    asyncAddWord(mDeletedWord);
+                    asyncUnmarkDeleteWord(mDeletedWord);
                     mDeletedWord = null;
                     mUndoShowing = false;
                 }
@@ -444,10 +445,34 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
         }
     }
     
-    protected void asyncAddWord(final WordCard wordcard) {
+    private void asyncUnmarkDeleteWord(final WordCard wordcard) {
 		// TODO Auto-generated method stub
 		
 	}
+    
+    private void asyncMarkDeleteWord(final WordCard wordcard) {
+    	final AsyncTask<WordCard, Void, Void> deleteTask = new AsyncTask<WordCard, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(WordCard... wordcards) {
+                for (final WordCard wordcard : wordcards) {
+//                    Alarms.deleteAlarm(AlarmClock.this, wordcard.id);
+                }
+                return null;
+            }
+        };
+        mDeletedWord = wordcard;
+        mUndoShowing = true;
+        deleteTask.execute(wordcard);
+        mUndoBar.show(new ActionableToastBar.ActionClickedListener() {
+            @Override
+            public void onActionClicked() {
+                asyncUnmarkDeleteWord(wordcard);
+                mDeletedWord = null;
+                mUndoShowing = false;
+            }
+        }, 0, getResources().getString(R.string.word_deleted), true, R.string.word_undo, true);
+    }
 
 	private void hideUndoBar(boolean animate, MotionEvent event) {
         if (mUndoBar != null) {
@@ -465,7 +490,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         // TODO
-//        outState.putIntArray(KEY_EXPANDED_IDS, mAdapter.getExpandedArray());
+        outState.putIntArray(KEY_EXPANDED_IDS, mAdapter.getExpandedArray());
         outState.putParcelable(KEY_DELETED_WORD, mDeletedWord);
         outState.putBoolean(KEY_UNDO_SHOWING, mUndoShowing);
     }
@@ -852,16 +877,18 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             itemHolder.textViewKeyword.setText(itemHolder.wordcard.name);
             
             itemHolder.expandArea.setVisibility(isWordExpanded(wordcard) ? View.VISIBLE : View.GONE);
-//            itemHolder.expandArea.setOnLongClickListener(mLongClickListener);
             itemHolder.infoArea.setVisibility(!isWordExpanded(wordcard) ? View.VISIBLE : View.GONE);
             itemHolder.infoArea.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     expandWord(itemHolder);
-//                    itemHolder.alarmItem.post(mScrollRunnable);
+                    itemHolder.alarmItem.post(mScrollRunnable);
                 }
             });
-			
+            
+            if (isWordExpanded(wordcard)) {
+                expandWord(itemHolder);
+            }
 		}
 
 		@Override
@@ -960,6 +987,16 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
                 }
             }
             return null;
+        }
+		
+		public int[] getExpandedArray() {
+            final int[] ids = new int[mExpanded.size()];
+            int index = 0;
+            for (int id : mExpanded) {
+                ids[index] = id;
+                index++;
+            }
+            return ids;
         }
 		
 		private void buildHashSetFromArray(int[] ids, HashSet<Integer> set) {
