@@ -209,8 +209,7 @@ public class SwipeHelper {
                 mCurrView = mCallback.getChildAtPosition(ev);
                 mVelocityTracker.clear();
                 if (mCurrView != null) {
-/*
-                    View button = mCurrView.findViewById(R.id.onoff);
+                    View button = mCurrView.findViewById(R.id.life_hint);
 
                     // Find raw top and left positions for button.
                     int left = button.getLeft();
@@ -247,7 +246,6 @@ public class SwipeHelper {
                     mVelocityTracker.addMovement(ev);
                     mInitialTouchPosX = ev.getX();
                     mInitialTouchPosY = ev.getY();
-                    */
                 }
                 break;
             case MotionEvent.ACTION_MOVE:

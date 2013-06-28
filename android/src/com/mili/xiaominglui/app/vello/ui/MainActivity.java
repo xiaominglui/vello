@@ -409,9 +409,8 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 			
 			@Override
 			public void onSwipe(View view) {
-				final WordCardAdapter.ItemHolder itemHolder = (ItemHolder) view.getTag();
+				final WordCardAdapter.ItemHolder itemHolder = (WordCardAdapter.ItemHolder) view.getTag();
 				mAdapter.removeSelectedId(itemHolder.wordcard.id);
-				
 			}
 		});
     	
