@@ -433,7 +433,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
                     mDeletedWord = null;
                     mUndoShowing = false;
                 }
-            }, 0, getResources().getString(R.string.word_deleted), true, R.string.word_undo,
+            }, 0, getResources().getString(R.string.word_reviewed), true, R.string.word_reviewed_undo,
                     true);
         }
     	
@@ -471,7 +471,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
                 mDeletedWord = null;
                 mUndoShowing = false;
             }
-        }, 0, getResources().getString(R.string.word_deleted), true, R.string.word_undo, true);
+        }, 0, getResources().getString(R.string.word_reviewed), true, R.string.word_reviewed_undo, true);
     }
 
 	private void hideUndoBar(boolean animate, MotionEvent event) {

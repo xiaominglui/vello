@@ -44,7 +44,9 @@ import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.ui.MainActivity;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 
@@ -109,22 +111,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     	doBindService();
     	
     	// query and backup all local items that syncInNext=true or merge locally later
-    	HashMap<String, String> localDirtyWords = new HashMap<String, String>();
+    	HashMap<String, WordCard> localDirtyWords = new HashMap<String, WordCard>();
     	final ContentResolver resolver = mContext.getContentResolver();
     	ProviderCriteria criteria = new ProviderCriteria();
     	criteria.addEq(DbWordCard.Columns.SYNCINNEXT, "true");
     	Cursor c = resolver.query(DbWordCard.CONTENT_URI, DbWordCard.PROJECTION, criteria.getWhereClause(), criteria.getWhereParams(), criteria.getOrderClause());
     	if (c != null) {
     	    while (c.moveToNext()) {
-    	    	String idCard = c.getString(DbWordCard.Columns.ID_CARD.getIndex());
-    	    	String due = c.getString(DbWordCard.Columns.DUE.getIndex());
-    	    	String closed = c.getString(DbWordCard.Columns.CLOSED.getIndex());
-    	    	if (closed.equals("true")) {
-    	    		// close word card
-    	    		sendCloseWordCardMsg(idCard);
-    	    	} else {
-    	    		localDirtyWords.put(idCard, due);
-    	    	}
+    	    	WordCard wc = new WordCard(c);
+    	    	localDirtyWords.put(wc.idCard, wc);
     	    }
     	}
     	
@@ -162,11 +157,36 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			int wordCardListSize = wordCardList.size();
 			if (wordCardListSize > 0) {
 				ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
+				SimpleDateFormat format = new SimpleDateFormat(
+                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 				for (WordCard wordCard : wordCardList) {
 					// merge
 					String idCard = wordCard.idCard;
-					int positionList = AccountUtils.getVocabularyListPosition(mContext, wordCard.idList);
+					
 					if (localDirtyWords.containsKey(idCard)) {
+						// need merging
+						WordCard dirtyWordCard = localDirtyWords.get(idCard);
+						String stringLocalDateLastActivity = dirtyWordCard.dateLastActivity;
+						Date localDateLastActivity = new Date(stringLocalDateLastActivity);
+						String stringRemoteDateLastActivity = wordCard.dateLastActivity;
+						Date remoteDateLastActivity = new Date(stringRemoteDateLastActivity);
+						int compare = remoteDateLastActivity.compareTo(localDateLastActivity);
+						if (compare == 0) {
+							// remote has no commit
+							// TODO commit local due, closed, listId to remote
+							
+						} else if (compare > 0) {
+							// remote has commit
+							// TODO update remote data based on local data
+							WordCard newWordCard = upgradeWordCard(wordCard, dirtyWordCard);
+							upgradeRemoteWordCard(newWordCard);
+							operationList.add(ContentProviderOperation
+									.newInsert(DbWordCard.CONTENT_URI)
+									.withValues(newWordCard.toContentVaalues()).build());
+						} else if (compare < 0) {
+							// it should NOT happen
+						}
+						/*
 						String localDue = localDirtyWords.get(idCard);
 						if (!localDue.equals(wordCard.due)) {
 							// reviewed + 1 remotelly
@@ -183,7 +203,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 									.newInsert(DbWordCard.CONTENT_URI)
 									.withValues(wordCard.toContentVaalues()).build());
 						}
+						*/
 					} else {
+						// fast-forword insert
 						operationList.add(ContentProviderOperation
 								.newInsert(DbWordCard.CONTENT_URI)
 								.withValues(wordCard.toContentVaalues()).build());
@@ -230,7 +252,21 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		doUnbindService();
     }
 
-    private void sendReviewedMessage(String idCard, int positionList) {
+    private WordCard upgradeWordCard(WordCard wordCard, WordCard dirtyWordCard) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+    /**
+     * upgrade trello card with newWordCard
+     * @param newWordCard at present only due, listId, closed be commit to remote at present
+     */
+	private void upgradeRemoteWordCard(WordCard newWordCard) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void sendReviewedMessage(String idCard, int positionList) {
     	try {
             Message msg = Message.obtain(null, VelloService.MSG_REVIEWED_WORDCARD);
             msg.arg1 = positionList;
