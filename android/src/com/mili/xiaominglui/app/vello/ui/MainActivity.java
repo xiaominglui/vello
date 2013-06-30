@@ -4,6 +4,7 @@ package com.mili.xiaominglui.app.vello.ui;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 
 import android.accounts.Account;
@@ -12,6 +13,8 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -20,6 +23,7 @@ import android.database.CharArrayBuffer;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -61,6 +65,7 @@ import com.manuelpeinado.refreshactionitem.RefreshActionItem;
 import com.manuelpeinado.refreshactionitem.RefreshActionItem.RefreshActionListener;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
+import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.factory.IcibaWordXmlParser;
 import com.mili.xiaominglui.app.vello.data.model.Definition;
 import com.mili.xiaominglui.app.vello.data.model.Definitions;
@@ -446,8 +451,14 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
     }
     
     private void asyncUnmarkDeleteWord(final WordCard wordcard) {
-		// TODO Auto-generated method stub
-		
+        ContentValues cv = new ContentValues();
+        cv.put(DbWordCard.Columns.CLOSED.getName(), wordcard.closed);
+        cv.put(DbWordCard.Columns.DUE.getName(), wordcard.due);
+        cv.put(DbWordCard.Columns.ID_LIST.getName(), wordcard.idList);
+        cv.put(DbWordCard.Columns.SYNCINNEXT.getName(), "false");
+        Uri uri = ContentUris
+                .withAppendedId(DbWordCard.CONTENT_URI, wordcard.id);
+        getContentResolver().update(uri, cv, null, null);
 	}
     
     private void asyncMarkDeleteWord(final WordCard wordcard) {
@@ -456,7 +467,34 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             @Override
             protected Void doInBackground(WordCard... wordcards) {
                 for (final WordCard wordcard : wordcards) {
-//                    Alarms.deleteAlarm(AlarmClock.this, wordcard.id);
+                    ContentValues cv = new ContentValues();
+                    int positionList = AccountUtils.getVocabularyListPosition(mContext, wordcard.idList);
+                    if (positionList == VelloConfig.VOCABULARY_LIST_POSITION_8TH) {
+                        cv.put(DbWordCard.Columns.CLOSED.getName(), "true");
+                    } else {
+                        Calendar rightNow = Calendar.getInstance();
+                        long rightNowUnixTime = rightNow.getTimeInMillis();
+                        long delta = VelloConfig.VOCABULARY_LIST_DUE_DELTA[positionList];
+                        long dueUnixTime = rightNowUnixTime + delta;
+
+                        SimpleDateFormat format = new SimpleDateFormat(
+                                "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                        Date dueDate = new Date(dueUnixTime);
+                        String stringDueDate = format.format(dueDate);
+                        cv.put(DbWordCard.Columns.DUE.getName(), stringDueDate);
+                        
+                        Date now = new Date(rightNowUnixTime);
+                        String stringNow = format.format(now);
+                        cv.put(DbWordCard.Columns.DATE_LAST_ACTIVITY.getName(), stringNow);
+
+                        String newIdList = AccountUtils.getVocabularyListId(
+                                mContext, positionList + 1);
+                        cv.put(DbWordCard.Columns.ID_LIST.getName(), newIdList);
+                    }
+                    cv.put(DbWordCard.Columns.SYNCINNEXT.getName(), "true");
+                    Uri uri = ContentUris
+                            .withAppendedId(DbWordCard.CONTENT_URI, wordcard.id);
+                    getContentResolver().update(uri, cv, null, null);
                 }
                 return null;
             }
@@ -613,7 +651,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
                 "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         String now = format.format(rightNow.getTime());
         criteria.addLt(DbWordCard.Columns.DUE, now, true);
-        criteria.addNe(DbWordCard.Columns.SYNCINNEXT, "true");
+        criteria.addNe(DbWordCard.Columns.CLOSED, "true");
 
         return new CursorLoader(this, DbWordCard.CONTENT_URI,
                 DbWordCard.PROJECTION, criteria.getWhereClause(),
