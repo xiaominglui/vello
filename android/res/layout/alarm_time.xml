@@ -78,7 +78,7 @@
         android:layout_height="1dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:background="#28ffffff"/>
+        android:background="#2833b5e5"/>
     <FrameLayout
         android:id="@+id/info_area"
         android:layout_width="match_parent"
