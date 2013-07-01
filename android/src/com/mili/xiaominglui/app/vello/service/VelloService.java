@@ -596,7 +596,7 @@ public class VelloService extends Service implements RequestListener, Connection
                                     if (VelloConfig.DEBUG_SWITCH) {
                                         Log.d(TAG, "re-open existed word card.");
                                     }
-                                    reOpenWordCard(w.idCard);
+                                    reOpenWordCard(w.id);
                                 } else {
                                     if (w.due.equals("null")) {
                                         // the existed word card has not be
@@ -607,7 +607,7 @@ public class VelloService extends Service implements RequestListener, Connection
                                             Log.d(TAG,
                                                     "initialize existed word card.");
                                         }
-                                        initializeWordCard(w.idCard);
+                                        initializeWordCard(w.id);
                                     } else {
                                         // the existed word is in review
                                         // process, do
@@ -640,7 +640,7 @@ public class VelloService extends Service implements RequestListener, Connection
                         // TODO
                         // new WordCardToWordTask().execute(addedWordCard);
                         // at the same time initialize it.
-                        initializeWordCard(addedWordCard.idCard);
+                        initializeWordCard(addedWordCard.id);
                     } else {
                         // add failed
                         // do nothing at present

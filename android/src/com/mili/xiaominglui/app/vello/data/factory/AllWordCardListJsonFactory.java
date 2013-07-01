@@ -26,7 +26,7 @@ public class AllWordCardListJsonFactory {
 			for (int i = 0; i < size; i++) {
 				JSONObject jsonCard = jsonCardArray.getJSONObject(i);
 				WordCard wordCard = new WordCard();
-				wordCard.idCard = jsonCard.getString(JSONTag.CARD_ELEM_ID);
+				wordCard.id = jsonCard.getString(JSONTag.CARD_ELEM_ID);
 				wordCard.name = jsonCard.getString(JSONTag.CARD_ELEM_NAME);
 				wordCard.desc = jsonCard.getString(JSONTag.BOARD_ELEM_DESC);
 				wordCard.due = jsonCard.getString(JSONTag.CARD_ELEM_DUE);

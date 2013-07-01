@@ -48,7 +48,7 @@ public class DueWordCardListJsonFactory {
                     if (dueUnixTime <= rightNowUnixTime) {
                         // it is time to review
                         WordCard wordCard = new WordCard();
-                        wordCard.idCard = jsonCard.getString(JSONTag.CARD_ELEM_ID);
+                        wordCard.id = jsonCard.getString(JSONTag.CARD_ELEM_ID);
                         wordCard.name = jsonCard
                                 .getString(JSONTag.CARD_ELEM_NAME);
                         wordCard.desc = jsonCard

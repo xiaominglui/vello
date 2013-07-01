@@ -415,7 +415,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 			@Override
 			public void onSwipe(View view) {
 				final WordCardAdapter.ItemHolder itemHolder = (WordCardAdapter.ItemHolder) view.getTag();
-				mAdapter.removeSelectedId(itemHolder.wordcard.id);
+				mAdapter.removeSelectedId(itemHolder.wordcard.idColumns);
 				asyncMarkDeleteWord(itemHolder.wordcard);
 			}
 		});
@@ -457,7 +457,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
         cv.put(DbWordCard.Columns.ID_LIST.getName(), wordcard.idList);
         cv.put(DbWordCard.Columns.SYNCINNEXT.getName(), "false");
         Uri uri = ContentUris
-                .withAppendedId(DbWordCard.CONTENT_URI, wordcard.id);
+                .withAppendedId(DbWordCard.CONTENT_URI, wordcard.idColumns);
         getContentResolver().update(uri, cv, null, null);
 	}
     
@@ -493,7 +493,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
                     }
                     cv.put(DbWordCard.Columns.SYNCINNEXT.getName(), "true");
                     Uri uri = ContentUris
-                            .withAppendedId(DbWordCard.CONTENT_URI, wordcard.id);
+                            .withAppendedId(DbWordCard.CONTENT_URI, wordcard.idColumns);
                     getContentResolver().update(uri, cv, null, null);
                 }
                 return null;
@@ -964,10 +964,10 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
             });
             itemHolder.infoArea.setVisibility(View.GONE);
 
-            mExpanded.add(itemHolder.wordcard.id);
+            mExpanded.add(itemHolder.wordcard.idColumns);
             bindExpandArea(itemHolder, itemHolder.wordcard);
             // Scroll the view to make sure it is fully viewed
-            mScrollWordId = itemHolder.wordcard.id;
+            mScrollWordId = itemHolder.wordcard.idColumns;
         }
         
 		private void bindExpandArea(final ItemHolder itemHolder, final WordCard wordcard) {
@@ -1018,7 +1018,7 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
                 View v = mList.getChildAt(i);
                 if (v != null) {
                     ItemHolder h = (ItemHolder)(v.getTag());
-                    if (h != null && h.wordcard.id == id) {
+                    if (h != null && h.wordcard.idColumns == id) {
                         return v;
                     }
                 }

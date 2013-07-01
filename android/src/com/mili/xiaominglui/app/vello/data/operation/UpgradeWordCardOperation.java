@@ -31,7 +31,7 @@ public class UpgradeWordCardOperation implements Operation {
 		String token = AccountUtils.getAuthToken(context);
 		WordCard wordcard = (WordCard) request.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 		String urlString = WSConfig.TRELLO_API_URL
-                + WSConfig.WS_TRELLO_TARGET_CARD + "/" + wordcard.idCard;
+                + WSConfig.WS_TRELLO_TARGET_CARD + "/" + wordcard.id;
 		
 		HashMap<String, String> parameterMap = new HashMap<String, String>();
 		parameterMap.put(WSConfig.WS_TRELLO_PARAM_CLOSED, wordcard.closed);
