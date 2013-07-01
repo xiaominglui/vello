@@ -829,7 +829,6 @@ public class MainActivity extends BaseActivity implements RefreshActionListener,
 
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
 				if (mScrollWordId != -1) {
 					View v = getViewById(mScrollWordId);
                     if (v != null) {

@@ -69,6 +69,7 @@ public class VelloService extends Service implements RequestListener, Connection
     public static final int MSG_REVIEWED_WORDCARD = 102;
     public static final int MSG_REVIEWED_PLUS_WORDCARD = 103;
     public static final int MSG_CLOSE_WORDCARD = 104;
+    public static final int MSG_UPGRADE_WORDCARD = 105;
 
     // Unique Identification Number for the Notification.
     // We use it on Notification start, and to cancel it.
@@ -116,6 +117,10 @@ public class VelloService extends Service implements RequestListener, Connection
                     case MSG_CLOSE_WORDCARD:
                     	String cardId = (String) msg.obj;
                     	service.archiveWordCard(cardId);
+                    	break;
+                    case MSG_UPGRADE_WORDCARD:
+                    	WordCard wordcard = (WordCard) msg.obj;
+                    	service.upgradeWordCard(wordcard);
                     	break;
                     default:
                         super.handleMessage(msg);
@@ -183,6 +188,15 @@ public class VelloService extends Service implements RequestListener, Connection
             VelloContent.DbWordCard.Columns.ID_CARD.getName(),
             VelloContent.DbWordCard.Columns.ID_LIST.getName()
     };
+    
+    private void upgradeWordCard(WordCard wordcard) {
+    	if (VelloConfig.DEBUG_SWITCH) {
+    		Log.d(TAG, "upgradeWordCard start...");
+    	}
+    	Request upgradeWordCard = VelloRequestFactory.upgradeWordCardRequest(wordcard);
+    	mRequestManager.execute(upgradeWordCard, this);
+    	mRequestList.add(upgradeWordCard);
+    }
 
     private void archiveWordCard(String idCard) {
     	if (VelloConfig.DEBUG_SWITCH) {
@@ -689,6 +703,15 @@ public class VelloService extends Service implements RequestListener, Connection
                 		archiveWordCard(idCard);
                 	}
                 	return;
+                	
+                case VelloRequestFactory.REQUEST_TYPE_UPGRADE_WORDCARD:
+                	WordCard upgradedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+                	WordCard oldWordCard = (WordCard) request.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+                	if (upgradedWordCard != null) {
+                		// success, do nothing no
+                	} else {
+                		upgradeWordCard(oldWordCard);
+                	}
                     
                 default:
                     return;

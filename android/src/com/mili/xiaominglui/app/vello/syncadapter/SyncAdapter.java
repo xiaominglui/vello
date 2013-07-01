@@ -11,12 +11,15 @@ import android.content.ComponentName;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.content.ServiceConnection;
 import android.content.SyncResult;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
@@ -46,6 +49,7 @@ import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -173,13 +177,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 						int compare = remoteDateLastActivity.compareTo(localDateLastActivity);
 						if (compare == 0) {
 							// remote has no commit
-							// TODO commit local due, closed, listId to remote
+							// commit local due, closed, listId to remote
+							sendUpgradeRemoteWordCardMessage(dirtyWordCard);
+							if (!dirtyWordCard.closed.equals("true")) {
+								operationList.add(ContentProviderOperation
+										.newInsert(DbWordCard.CONTENT_URI)
+										.withValues(dirtyWordCard.toContentVaalues()).build());
+							}
 							
 						} else if (compare > 0) {
 							// remote has commit
-							// TODO update remote data based on local data
+							// update remote data based on local data
 							WordCard newWordCard = upgradeWordCard(wordCard, dirtyWordCard);
-							upgradeRemoteWordCard(newWordCard);
+							sendUpgradeRemoteWordCardMessage(newWordCard);
 							operationList.add(ContentProviderOperation
 									.newInsert(DbWordCard.CONTENT_URI)
 									.withValues(newWordCard.toContentVaalues()).build());
@@ -224,27 +234,42 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 Intent intent = new Intent(mContext, MainActivity.class);
                 PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
 
-                // Build notification
-                // TODO need refine
-                Notification noti = new Notification.Builder(mContext)
-                        .setContentTitle("You have words need reviewing!")
-                        .setContentText("Click me to begin reviewing!")
-                        .setSmallIcon(R.drawable.ic_launcher)
-                        .setContentIntent(pIntent).build();
+				// Build notification
+				// TODO need rework
+                ProviderCriteria cri = new ProviderCriteria();
+                criteria.addSortOrder(DbWordCard.Columns.DUE, true);
 
-                NotificationManager notificationManager = (NotificationManager)
-                        mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+                Calendar rightNow = Calendar.getInstance();
+                SimpleDateFormat fo = new SimpleDateFormat(
+                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                String now = fo.format(rightNow.getTime());
+                cri.addLt(DbWordCard.Columns.DUE, now, true);
+                cri.addNe(DbWordCard.Columns.CLOSED, "true");
+                Cursor cur = resolver.query(DbWordCard.CONTENT_URI, DbWordCard.PROJECTION, cri.getWhereClause(), cri.getWhereParams(), cri.getOrderClause());
+                if (cur != null) {
+                	int num = cur.getCount();
+                	if (num > 0) {
+						Notification noti = new Notification.Builder(mContext)
+								.setContentTitle(
+										"You have " + num + " words need reviewing!")
+								.setContentText("Click me to begin reviewing!")
+								.setSmallIcon(R.drawable.ic_launcher)
+								.setContentIntent(pIntent).build();
 
-                // Hide the notification after its selected
-                noti.flags |= Notification.FLAG_AUTO_CANCEL;
+						NotificationManager notificationManager = (NotificationManager) mContext
+								.getSystemService(Context.NOTIFICATION_SERVICE);
 
-                notificationManager.notify(0, noti);
+						// Hide the notification after its selected
+						noti.flags |= Notification.FLAG_AUTO_CANCEL;
+
+						notificationManager.notify(0, noti);
+                	}
+                	
+                }
 			}
 		} catch (ConnectionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (DataException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -252,17 +277,24 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		doUnbindService();
     }
 
-    private WordCard upgradeWordCard(WordCard wordCard, WordCard dirtyWordCard) {
-		// TODO Auto-generated method stub
-		return null;
+	private WordCard upgradeWordCard(WordCard wordCard, WordCard dirtyWordCard) {
+		// TODO need a upgrade method
+		return wordCard;
 	}
 
     /**
      * upgrade trello card with newWordCard
      * @param newWordCard at present only due, listId, closed be commit to remote at present
      */
-	private void upgradeRemoteWordCard(WordCard newWordCard) {
+	private void sendUpgradeRemoteWordCardMessage(WordCard newWordCard) {
 		// TODO Auto-generated method stub
+		try {
+			Message msg = Message.obtain(null, VelloService.MSG_UPGRADE_WORDCARD);
+			msg.obj = newWordCard;
+			mService.send(msg);
+		} catch (RemoteException e) {
+			
+		}
 		
 	}
 
