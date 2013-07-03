@@ -17,7 +17,7 @@ import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.service.RequestService.Operation;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.config.WSConfig;
-import com.mili.xiaominglui.app.vello.data.factory.AllWordCardListJsonFactory;
+import com.mili.xiaominglui.app.vello.data.factory.WordCardListJsonFactory;
 import com.mili.xiaominglui.app.vello.data.factory.DueWordCardListJsonFactory;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
@@ -57,7 +57,7 @@ public class GetDueWordCardListOperation implements Operation {
 		ConnectionResult result = networkConnection.execute();
 
 		ArrayList<WordCard> wordCardList = new ArrayList<WordCard>();
-		wordCardList = AllWordCardListJsonFactory.parseResult(result.body);
+		wordCardList = WordCardListJsonFactory.parseResult(result.body);
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "result.body = " + result.body);
 		}

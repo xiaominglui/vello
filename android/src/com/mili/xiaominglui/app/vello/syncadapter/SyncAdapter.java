@@ -36,10 +36,11 @@ import com.foxykeep.datadroid.exception.DataException;
 import com.foxykeep.datadroid.network.NetworkConnection;
 import com.foxykeep.datadroid.network.NetworkConnection.ConnectionResult;
 import com.foxykeep.datadroid.network.NetworkConnection.Method;
+import com.google.gson.Gson;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.config.WSConfig;
-import com.mili.xiaominglui.app.vello.data.factory.AllWordCardListJsonFactory;
+import com.mili.xiaominglui.app.vello.data.factory.WordCardListJsonFactory;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
@@ -113,14 +114,186 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Log.d(TAG, "onPerformSync...");
         }
 
+        // query and backup all local items that syncInNext=true or merge
+        // locally later
+        HashMap<String, WordCard> localDirtyWords = new HashMap<String, WordCard>();
+        final ContentResolver resolver = mContext.getContentResolver();
+        ProviderCriteria criteria = new ProviderCriteria();
+        criteria.addEq(DbWordCard.Columns.SYNCINNEXT, "true");
+        Cursor c = resolver.query(DbWordCard.CONTENT_URI, DbWordCard.PROJECTION,
+                criteria.getWhereClause(), criteria.getWhereParams(), criteria.getOrderClause());
+        if (c != null) {
+            while (c.moveToNext()) {
+                WordCard wc = new WordCard(c);
+                localDirtyWords.put(wc.id, wc);
+            }
+        }
+
+        try {
+            ArrayList<WordCard> preSyncRemoteWordCardList = getOpenWordCards();
+            if (preSyncRemoteWordCardList.size() > 0) {
+                SimpleDateFormat format = new SimpleDateFormat(
+                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                for (WordCard wordCard : preSyncRemoteWordCardList) {
+                    String idCard = wordCard.id;
+                    if (localDirtyWords.containsKey(idCard)) {
+                        // need merging
+                        WordCard dirtyWordCard = localDirtyWords.get(idCard);
+                        String stringLocalDateLastActivity = dirtyWordCard.dateLastActivity;
+                        String stringRemoteDateLastActivity = wordCard.dateLastActivity;
+                        if (stringLocalDateLastActivity.equals(stringRemoteDateLastActivity)) {
+                            // remote has no commit
+                            // commit local due, closed, listId to remote
+                            updateRemoteWordCard(dirtyWordCard);
+                        } else {
+                            // remote has commit
+                            // update remote data based on local data
+                            WordCard newWordCard = upgradeWordCard(wordCard, dirtyWordCard);
+                            updateRemoteWordCard(newWordCard);
+                        }
+                    }
+                }
+            }
+
+            ArrayList<WordCard> postSyncRemoteWordCardList = getOpenWordCards();
+            if (postSyncRemoteWordCardList.size() > 0) {
+                ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
+                for (WordCard wordCard : postSyncRemoteWordCardList) {
+                    operationList.add(ContentProviderOperation
+                            .newInsert(DbWordCard.CONTENT_URI)
+                            .withValues(wordCard.toContentVaalues()).build());
+                }
+
+                mContext.getContentResolver().applyBatch(VelloProvider.AUTHORITY, operationList);
+
+                // Build notification
+                // TODO need rework
+                Intent intent = new Intent(mContext, MainActivity.class);
+                PendingIntent pIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
+
+                ProviderCriteria cri = new ProviderCriteria();
+                cri.addSortOrder(DbWordCard.Columns.DUE, true);
+
+                Calendar rightNow = Calendar.getInstance();
+                SimpleDateFormat fo = new SimpleDateFormat(
+                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                String now = fo.format(rightNow.getTime());
+                cri.addLt(DbWordCard.Columns.DUE, now, true);
+                cri.addNe(DbWordCard.Columns.CLOSED, "true");
+                Cursor cur = mContext.getContentResolver().query(DbWordCard.CONTENT_URI,
+                        DbWordCard.PROJECTION,
+                        cri.getWhereClause(), cri.getWhereParams(), cri.getOrderClause());
+                if (cur != null) {
+                    int num = cur.getCount();
+                    if (num > 0) {
+                        Notification noti = new Notification.Builder(mContext)
+                                .setContentTitle(
+                                        "You have " + num + " words need reviewing!")
+                                .setContentText("Click me to begin reviewing!")
+                                .setSmallIcon(R.drawable.ic_launcher)
+                                .setContentIntent(pIntent).build();
+
+                        NotificationManager notificationManager = (NotificationManager) mContext
+                                .getSystemService(Context.NOTIFICATION_SERVICE);
+
+                        // Hide the notification after its selected
+                        noti.flags |= Notification.FLAG_AUTO_CANCEL;
+
+                        notificationManager.notify(0, noti);
+                    }
+                }
+            }
+
+        } catch (ConnectionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (DataException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (OperationApplicationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
         // bind VelloService
         doBindService();
-        
+
         sendSyncLocalCacheMessage();
 
         doUnbindService();
     }
-    
+
+    /**
+     * retrieve all open card from trello
+     * 
+     * @throws ConnectionException
+     * @throws DataException
+     */
+    private ArrayList<WordCard> getOpenWordCards() throws ConnectionException, DataException {
+        String vocabularyBoardId = AccountUtils.getVocabularyBoardId(mContext);
+        String urlString = WSConfig.TRELLO_API_URL
+                + WSConfig.WS_TRELLO_TARGET_BOARD + "/" + vocabularyBoardId
+                + WSConfig.WS_TRELLO_FIELD_CARDS;
+
+        HashMap<String, String> parameterMap = new HashMap<String, String>();
+        parameterMap.put(WSConfig.WS_TRELLO_PARAM_FILTER, "open");
+        parameterMap.put(WSConfig.WS_TRELLO_PARAM_FIELDS,
+                "name,desc,due,closed,idList,dateLastActivity");
+        parameterMap.put(WSConfig.WS_TRELLO_PARAM_APP_KEY,
+                WSConfig.VELLO_APP_KEY);
+        parameterMap.put(WSConfig.WS_TRELLO_PARAM_ACCESS_TOKEN, mToken);
+
+        NetworkConnection networkConnection = new NetworkConnection(mContext,
+                urlString);
+        networkConnection.setMethod(Method.GET);
+        networkConnection.setParameters(parameterMap);
+        ConnectionResult result = networkConnection.execute();
+        return WordCardListJsonFactory.parseResult(result.body);
+    }
+
+    /**
+     * update trello card due, idList & closed field
+     * 
+     * @param wordCard
+     * @throws ConnectionException
+     */
+    private void updateRemoteWordCard(WordCard wordCard) throws ConnectionException {
+        String vocabularyBoardId = AccountUtils.getVocabularyBoardId(mContext);
+        String urlString = WSConfig.TRELLO_API_URL
+                + WSConfig.WS_TRELLO_TARGET_CARD + "/" + wordCard.id;
+
+        HashMap<String, String> parameterMap = new HashMap<String, String>();
+        parameterMap.put(WSConfig.WS_TRELLO_PARAM_CLOSED, wordCard.closed);
+        parameterMap.put(WSConfig.WS_TRELLO_PARAM_DUE, wordCard.due);
+        parameterMap.put(WSConfig.WS_TRELLO_PARAM_IDLIST, wordCard.idList);
+
+        parameterMap.put(WSConfig.WS_TRELLO_PARAM_APP_KEY,
+                WSConfig.VELLO_APP_KEY);
+        parameterMap.put(WSConfig.WS_TRELLO_PARAM_ACCESS_TOKEN, mToken);
+
+        NetworkConnection networkConnection = new NetworkConnection(mContext,
+                urlString);
+        networkConnection.setMethod(Method.PUT);
+        networkConnection.setParameters(parameterMap);
+        ConnectionResult result = networkConnection.execute();
+
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "result.body = " + result.body);
+        }
+
+        Gson gson = new Gson();
+        WordCard updatedWordCard = gson.fromJson(result.body, WordCard.class);
+        if (updatedWordCard != null) {
+            // update success
+        } else {
+            // update failed
+        }
+
+    }
+
     private ArrayList<WordCard> queryForRemoteOpenWordCardList() {
         String vocabularyBoardId = AccountUtils.getVocabularyBoardId(mContext);
         String urlString = WSConfig.TRELLO_API_URL
@@ -139,23 +312,23 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 urlString);
         networkConnection.setMethod(Method.GET);
         networkConnection.setParameters(parameterMap);
-        
+
         ConnectionResult result;
-		try {
-			result = networkConnection.execute();
-			ArrayList<WordCard> wordCardList = new ArrayList<WordCard>();
-	        wordCardList = AllWordCardListJsonFactory.parseResult(result.body);
-	        return wordCardList;
-		} catch (ConnectionException e) {
-			e.printStackTrace();
-		} catch (DataException e) {
-			e.printStackTrace();
-		}
+        try {
+            result = networkConnection.execute();
+            ArrayList<WordCard> wordCardList = new ArrayList<WordCard>();
+            wordCardList = WordCardListJsonFactory.parseResult(result.body);
+            return wordCardList;
+        } catch (ConnectionException e) {
+            e.printStackTrace();
+        } catch (DataException e) {
+            e.printStackTrace();
+        }
         return null;
     }
-    
+
     private void commitWordCardToRmote(WordCard wordcard) {
-    	String urlString = WSConfig.TRELLO_API_URL
+        String urlString = WSConfig.TRELLO_API_URL
                 + WSConfig.WS_TRELLO_TARGET_CARD + "/" + wordcard.id;
         HashMap<String, String> parameterMap = new HashMap<String, String>();
         parameterMap.put(WSConfig.WS_TRELLO_PARAM_CLOSED, wordcard.closed);
@@ -171,23 +344,23 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         networkConnection.setMethod(Method.PUT);
         networkConnection.setParameters(parameterMap);
         ConnectionResult result;
-		try {
-			result = networkConnection.execute();
-			if (VelloConfig.DEBUG_SWITCH) {
-	            Log.d(TAG, "result.body = " + result.body);
-	        }
-		} catch (ConnectionException e) {
-			e.printStackTrace();
-		}
+        try {
+            result = networkConnection.execute();
+            if (VelloConfig.DEBUG_SWITCH) {
+                Log.d(TAG, "result.body = " + result.body);
+            }
+        } catch (ConnectionException e) {
+            e.printStackTrace();
+        }
     }
 
     private WordCard upgradeWordCard(WordCard wordCard, WordCard dirtyWordCard) {
         // TODO need a upgrade method
         return wordCard;
     }
-    
+
     private void sendSyncLocalCacheMessage() {
-    	try {
+        try {
             Message msg = Message.obtain(null, VelloService.MSG_SYNC_LOCAL_CACHE);
             mService.send(msg);
         } catch (RemoteException e) {

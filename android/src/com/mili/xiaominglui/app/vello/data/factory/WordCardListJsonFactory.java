@@ -12,8 +12,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class AllWordCardListJsonFactory {
-	private static final String TAG = AllWordCardListJsonFactory.class
+public class WordCardListJsonFactory {
+	private static final String TAG = WordCardListJsonFactory.class
 			.getSimpleName();
 
 	public static ArrayList<WordCard> parseResult(String wsResponse)
