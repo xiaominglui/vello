@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashSet;
 
 import android.accounts.Account;
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.SearchManager;
@@ -253,51 +254,6 @@ public class MainActivity extends BaseActivity implements
 		}
 	}
 
-	private LayoutInflater mInflater;
-
-	/*
-	 * private class MyOnDismissCallback implements OnDismissCallback {
-	 * 
-	 * private GoogleCardsCursorAdapter mAdapter;
-	 * 
-	 * public MyOnDismissCallback(GoogleCardsCursorAdapter adapter) { mAdapter =
-	 * adapter; }
-	 * 
-	 * @Override public void onDismiss(ListView listView, int[]
-	 * reverseSortedPositions) { Cursor c = mAdapter.getCursor(); for (int
-	 * position : reverseSortedPositions) { c.moveToPosition(position); int id =
-	 * c.getInt(DbWordCard.Columns.ID.getIndex()); String idList =
-	 * c.getString(DbWordCard.Columns.ID_LIST .getIndex()); int positionList =
-	 * AccountUtils.getVocabularyListPosition( mContext, idList);
-	 * 
-	 * ContentValues cv = new ContentValues(); if (positionList ==
-	 * VelloConfig.VOCABULARY_LIST_POSITION_8TH) {
-	 * cv.put(DbWordCard.Columns.CLOSED.getName(), "true");
-	 * cv.put(DbWordCard.Columns.SYNCINNEXT.getName(), "true");
-	 * 
-	 * } else { Calendar rightNow = Calendar.getInstance(); long
-	 * rightNowUnixTime = rightNow.getTimeInMillis(); long delta =
-	 * VelloConfig.VOCABULARY_LIST_DUE_DELTA[positionList]; long dueUnixTime =
-	 * rightNowUnixTime + delta;
-	 * 
-	 * SimpleDateFormat format = new SimpleDateFormat(
-	 * "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"); Date dueDate = new Date(dueUnixTime);
-	 * String stringDueDate = format.format(dueDate);
-	 * cv.put(DbWordCard.Columns.DUE.getName(), stringDueDate);
-	 * 
-	 * Date now = new Date(rightNowUnixTime); String stringNow =
-	 * format.format(now);
-	 * cv.put(DbWordCard.Columns.DATE_LAST_ACTIVITY.getName(), stringNow);
-	 * 
-	 * String newIdList = AccountUtils.getVocabularyListId( mContext,
-	 * positionList + 1); cv.put(DbWordCard.Columns.ID_LIST.getName(),
-	 * newIdList); cv.put(DbWordCard.Columns.SYNCINNEXT.getName(), "true"); }
-	 * Uri uri = ContentUris .withAppendedId(DbWordCard.CONTENT_URI, id);
-	 * getContentResolver().update(uri, cv, null, null); } } }
-	 */
-
-	private WordCard mSelectedWordCard;
-
 	// Saved status for undo
 	private WordCard mDeletedWord;
 	private boolean mUndoShowing = false;
@@ -320,23 +276,7 @@ public class MainActivity extends BaseActivity implements
 		initialize(savedInstanceState);
 		updateLayout();
 
-		// mGoogleCardsAdapter = new GoogleCardsCursorAdapter(this);
-		// mGoogleCardsAdapter = new GoogleCardsCursorAdapter(this);
-		// SwingBottomInAnimationAdapter swingBottomInAnimationAdapter = new
-		// SwingBottomInAnimationAdapter(
-		// new SwipeDismissAdapter(mGoogleCardsAdapter,
-		// new MyOnDismissCallback(mGoogleCardsAdapter)));
-		// swingBottomInAnimationAdapter.setListView(listView);
-		//
-		// SlideExpandableListAdapter slideExpandableListAdapter = new
-		// SlideExpandableListAdapter(
-		// swingBottomInAnimationAdapter, R.id.expandable_toggle_button,
-		// R.id.expandable);
-		//
-		// listView.setAdapter(slideExpandableListAdapter);
-
 		getSupportLoaderManager().initLoader(0, null, this);
-		mInflater = getLayoutInflater();
 		doBindService();
 	}
 
@@ -348,26 +288,11 @@ public class MainActivity extends BaseActivity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
-
-		// for (int i = 0; i < mRequestList.size(); i++) {
-		// Request request = mRequestList.get(i);
-		//
-		// if (mRequestManager.isRequestInProgress(request)) {
-		// mRequestManager.addRequestListener(this, request);
-		// } else {
-		// mRequestManager.callListenerWithCachedData(this, request);
-		// i--;
-		// mRequestList.remove(request);
-		// }
-		// }
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		// if (!mRequestList.isEmpty()) {
-		// mRequestManager.removeRequestListener(this);
-		// }
 	}
 
 	@Override
@@ -408,7 +333,12 @@ public class MainActivity extends BaseActivity implements
 						final WordCardAdapter.ItemHolder itemHolder = (WordCardAdapter.ItemHolder) view
 								.getTag();
 						mAdapter.removeSelectedId(itemHolder.wordcard.idInLocalDB);
-						asyncMarkDeleteWord(itemHolder.wordcard);
+						if (!mAdapter.isWordExpanded(itemHolder.wordcard)) {
+							asyncMarkDeleteWord(itemHolder.wordcard);
+						} else {
+							// review failed
+							asyncDeleteWordCache(itemHolder.wordcard);
+						}
 					}
 				});
 
@@ -442,6 +372,15 @@ public class MainActivity extends BaseActivity implements
 		}
 	}
 
+	private void asyncDeleteWordCache(WordCard wordcard) {
+		Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI,
+				wordcard.idInLocalDB);
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "uri---" + uri.toString() + " is to be deleted");
+		}
+		getContentResolver().delete(uri, null, null);
+	}
+
 	private void asyncUnmarkDeleteWord(final WordCard wordcard) {
 		ContentValues cv = new ContentValues();
 		cv.put(DbWordCard.Columns.CLOSED.getName(), wordcard.closed);
@@ -453,6 +392,7 @@ public class MainActivity extends BaseActivity implements
 		getContentResolver().update(uri, cv, null, null);
 	}
 
+	@SuppressLint("SimpleDateFormat")
 	private void asyncMarkDeleteWord(final WordCard wordcard) {
 		final AsyncTask<WordCard, Void, Void> deleteTask = new AsyncTask<WordCard, Void, Void>() {
 
@@ -475,11 +415,6 @@ public class MainActivity extends BaseActivity implements
 						Date dueDate = new Date(dueUnixTime);
 						String stringDueDate = format.format(dueDate);
 						cv.put(DbWordCard.Columns.DUE.getName(), stringDueDate);
-
-						// Date now = new Date(rightNowUnixTime);
-						// String stringNow = format.format(now);
-						// cv.put(DbWordCard.Columns.DATE_LAST_ACTIVITY.getName(),
-						// stringNow);
 
 						String newIdList = AccountUtils.getVocabularyListId(
 								mContext, positionList + 1);
@@ -557,15 +492,6 @@ public class MainActivity extends BaseActivity implements
 		searchView.setQueryHint(getResources().getText(
 				R.string.action_query_hint));
 		searchView.setOnQueryTextListener(this);
-		/*
-		 * searchView.setOnSuggestionListener(this); if (mSuggestionsAdapter ==
-		 * null) { MatrixCursor cursor = new MatrixCursor(COLUMNS);
-		 * cursor.addRow(new String[] { "1", "apple" }); cursor.addRow(new
-		 * String[] { "2", "word" }); cursor.addRow(new String[] { "3", "show"
-		 * }); mSuggestionsAdapter = new
-		 * SuggestionsAdapter(getSupportActionBar() .getThemedContext(),
-		 * cursor); } searchView.setSuggestionsAdapter(mSuggestionsAdapter);
-		 */
 
 		boolean isLight = false;
 		menu.add(Menu.NONE, 0, 97, R.string.description_search)
@@ -633,17 +559,19 @@ public class MainActivity extends BaseActivity implements
 		return false;
 	}
 
+	@SuppressLint("SimpleDateFormat")
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+		// show all open WordCards whose due time bigger than mobile local now
+		// time && syncInNext mark not set
 		ProviderCriteria criteria = new ProviderCriteria();
 		criteria.addSortOrder(DbWordCard.Columns.DUE, true);
-
 		Calendar rightNow = Calendar.getInstance();
 		SimpleDateFormat format = new SimpleDateFormat(
 				"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 		String now = format.format(rightNow.getTime());
 		criteria.addLt(DbWordCard.Columns.DUE, now, true);
-		criteria.addNe(DbWordCard.Columns.CLOSED, "true");
+		criteria.addNe(DbWordCard.Columns.SYNCINNEXT, "true");
 
 		return new CursorLoader(this, DbWordCard.CONTENT_URI,
 				DbWordCard.PROJECTION, criteria.getWhereClause(),
@@ -1026,7 +954,7 @@ public class MainActivity extends BaseActivity implements
 		}
 
 		private boolean isWordExpanded(WordCard wordcard) {
-			return mExpanded.contains(wordcard.id);
+			return mExpanded.contains(wordcard.idInLocalDB);
 		}
 
 		private View getViewById(int id) {

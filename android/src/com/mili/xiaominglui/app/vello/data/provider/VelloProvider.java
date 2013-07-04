@@ -25,7 +25,7 @@ public class VelloProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     private enum UriType {
         DB_WORD_CARD(DbWordCard.TABLE_NAME, DbWordCard.TABLE_NAME, DbWordCard.TYPE_ELEM_TYPE),
-        DB_WORD_CARD_ID(DbWordCard.TABLE_NAME + "/#", DbWordCard.TABLE_NAME, DbWordCard.TYPE_DIR_TYPE);
+        DB_WORD_CARD_ID_IN_LOCAL_DB(DbWordCard.TABLE_NAME + "/#", DbWordCard.TABLE_NAME, DbWordCard.TYPE_DIR_TYPE);
         
         private String mTableName;
         private String mType;
@@ -126,7 +126,7 @@ public class VelloProvider extends ContentProvider {
         }
         
         switch (uriType) {
-            case DB_WORD_CARD_ID:
+            case DB_WORD_CARD_ID_IN_LOCAL_DB:
                 id = uri.getPathSegments().get(1);
                 c = db.query(uriType.getTableName(), projection, whereWithId(selection),
                         addIdToSelectionArgs(id, selectionArgs), null, null, sortOrder);
@@ -188,9 +188,10 @@ public class VelloProvider extends ContentProvider {
         
         int result = -1;
         switch (uriType) {
-            case DB_WORD_CARD_ID:
+            case DB_WORD_CARD_ID_IN_LOCAL_DB:
                 id = uri.getPathSegments().get(1);
                 result = db.delete(uriType.getTableName(), whereWithId(selection), addIdToSelectionArgs(id, selectionArgs));
+                break;
             case DB_WORD_CARD:
                 result = db.delete(uriType.getTableName(), selection, selectionArgs);
                 break;
@@ -215,7 +216,7 @@ public class VelloProvider extends ContentProvider {
         int result = -1;
 
         switch (uriType) {
-            case DB_WORD_CARD_ID:
+            case DB_WORD_CARD_ID_IN_LOCAL_DB:
                 String id = uri.getPathSegments().get(1);
                 result = db.update(uriType.getTableName(), values, whereWithId(selection),
                     addIdToSelectionArgs(id, selectionArgs));
