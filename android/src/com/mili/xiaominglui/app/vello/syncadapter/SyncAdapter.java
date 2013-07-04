@@ -281,7 +281,27 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private WordCard upgradeWordCard(WordCard wordCard, WordCard dirtyWordCard) {
-        // TODO need a upgrade method
+    	int localPositionInLists = AccountUtils.getVocabularyListPosition(mContext, dirtyWordCard.idList);
+    	int remotePostionInLists = AccountUtils.getVocabularyListPosition(mContext, wordCard.idList);
+    	int delta = remotePostionInLists - localPositionInLists;
+    	if (delta > 0) {
+    		int compensation = delta + 1;
+    		if (remotePostionInLists + compensation > VelloConfig.VOCABULARY_LIST_POSITION_8TH) {
+    			wordCard.closed = "true";
+    		} else {
+    			int newPostionInLists = remotePostionInLists + compensation;
+    			wordCard.idList = AccountUtils.getVocabularyListId(mContext, newPostionInLists);
+    			Calendar rightNow = Calendar.getInstance();
+    			long rightNowUnixTime = rightNow.getTimeInMillis();
+    			long deltaTime = VelloConfig.VOCABULARY_LIST_DUE_DELTA[newPostionInLists];
+    			long newDueUnixTime = rightNowUnixTime + deltaTime;
+    			SimpleDateFormat format = new SimpleDateFormat(
+                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                Date newDueDate = new Date(newDueUnixTime);
+                String stringNewDueDate = format.format(newDueDate);
+                wordCard.due = stringNewDueDate;
+    		}
+    	}
         return wordCard;
     }
 
