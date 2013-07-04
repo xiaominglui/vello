@@ -195,7 +195,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 										"You have " + num
 												+ " words need reviewing!")
 								.setContentText("Click me to begin reviewing!")
-								.setSmallIcon(R.drawable.ic_launcher)
+								.setSmallIcon(R.drawable.ic_stat_vaa)
 								.setContentIntent(pIntent).build();
 
 						NotificationManager notificationManager = (NotificationManager) mContext
