@@ -58,17 +58,12 @@ import java.util.HashMap;
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private static final String TAG = SyncAdapter.class.getSimpleName();
-    private static final String SYNC_MARKER_KEY = "com.example.android.samplesync.marker";
-    private static final boolean NOTIFY_AUTH_FAILURE = true;
-
-    private final AccountManager mAccountManager;
 
     private final Context mContext;
     String mToken;
 
     Messenger mService = null;
     private boolean mIsBound;
-
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             // This is called when the connection with the service has been
@@ -103,7 +98,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
         mContext = context;
-        mAccountManager = AccountManager.get(context);
         mToken = AccountUtils.getAuthToken(mContext);
     }
 
@@ -217,13 +211,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-        // bind VelloService
-        doBindService();
-
-        sendSyncLocalCacheMessage();
-
-        doUnbindService();
     }
 
     /**
@@ -261,7 +248,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
      * @throws ConnectionException
      */
     private void updateRemoteWordCard(WordCard wordCard) throws ConnectionException {
-        String vocabularyBoardId = AccountUtils.getVocabularyBoardId(mContext);
         String urlString = WSConfig.TRELLO_API_URL
                 + WSConfig.WS_TRELLO_TARGET_CARD + "/" + wordCard.id;
 
@@ -294,148 +280,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     }
 
-    private ArrayList<WordCard> queryForRemoteOpenWordCardList() {
-        String vocabularyBoardId = AccountUtils.getVocabularyBoardId(mContext);
-        String urlString = WSConfig.TRELLO_API_URL
-                + WSConfig.WS_TRELLO_TARGET_BOARD + "/" + vocabularyBoardId
-                + WSConfig.WS_TRELLO_FIELD_CARDS;
-
-        HashMap<String, String> parameterMap = new HashMap<String, String>();
-        parameterMap.put(WSConfig.WS_TRELLO_PARAM_FILTER, "open");
-        parameterMap.put(WSConfig.WS_TRELLO_PARAM_FIELDS,
-                "name,desc,due,closed,idList,dateLastActivity");
-        parameterMap.put(WSConfig.WS_TRELLO_PARAM_APP_KEY,
-                WSConfig.VELLO_APP_KEY);
-        parameterMap.put(WSConfig.WS_TRELLO_PARAM_ACCESS_TOKEN, mToken);
-
-        NetworkConnection networkConnection = new NetworkConnection(mContext,
-                urlString);
-        networkConnection.setMethod(Method.GET);
-        networkConnection.setParameters(parameterMap);
-
-        ConnectionResult result;
-        try {
-            result = networkConnection.execute();
-            ArrayList<WordCard> wordCardList = new ArrayList<WordCard>();
-            wordCardList = WordCardListJsonFactory.parseResult(result.body);
-            return wordCardList;
-        } catch (ConnectionException e) {
-            e.printStackTrace();
-        } catch (DataException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private void commitWordCardToRmote(WordCard wordcard) {
-        String urlString = WSConfig.TRELLO_API_URL
-                + WSConfig.WS_TRELLO_TARGET_CARD + "/" + wordcard.id;
-        HashMap<String, String> parameterMap = new HashMap<String, String>();
-        parameterMap.put(WSConfig.WS_TRELLO_PARAM_CLOSED, wordcard.closed);
-        parameterMap.put(WSConfig.WS_TRELLO_PARAM_DUE, wordcard.due);
-        parameterMap.put(WSConfig.WS_TRELLO_PARAM_IDLIST, wordcard.idList);
-
-        parameterMap.put(WSConfig.WS_TRELLO_PARAM_APP_KEY,
-                WSConfig.VELLO_APP_KEY);
-        parameterMap.put(WSConfig.WS_TRELLO_PARAM_ACCESS_TOKEN, mToken);
-
-        NetworkConnection networkConnection = new NetworkConnection(mContext,
-                urlString);
-        networkConnection.setMethod(Method.PUT);
-        networkConnection.setParameters(parameterMap);
-        ConnectionResult result;
-        try {
-            result = networkConnection.execute();
-            if (VelloConfig.DEBUG_SWITCH) {
-                Log.d(TAG, "result.body = " + result.body);
-            }
-        } catch (ConnectionException e) {
-            e.printStackTrace();
-        }
-    }
-
     private WordCard upgradeWordCard(WordCard wordCard, WordCard dirtyWordCard) {
         // TODO need a upgrade method
         return wordCard;
-    }
-
-    private void sendSyncLocalCacheMessage() {
-        try {
-            Message msg = Message.obtain(null, VelloService.MSG_SYNC_LOCAL_CACHE);
-            mService.send(msg);
-        } catch (RemoteException e) {
-
-        }
-    }
-
-    /**
-     * upgrade trello card with newWordCard
-     * 
-     * @param newWordCard at present only due, listId, closed be commit to
-     *            remote at present
-     */
-    private void sendUpgradeRemoteWordCardMessage(WordCard newWordCard) {
-        try {
-            Message msg = Message.obtain(null, VelloService.MSG_UPGRADE_WORDCARD);
-            msg.obj = newWordCard;
-            mService.send(msg);
-        } catch (RemoteException e) {
-
-        }
-
-    }
-
-    private void sendReviewedMessage(String idCard, int positionList) {
-        try {
-            Message msg = Message.obtain(null, VelloService.MSG_REVIEWED_WORDCARD);
-            msg.arg1 = positionList;
-            msg.obj = idCard;
-            mService.send(msg);
-        } catch (RemoteException e) {
-        }
-    }
-
-    private void sendReviewedPlusMessage(String idCard) {
-        try {
-            Message msg = Message.obtain(null, VelloService.MSG_REVIEWED_PLUS_WORDCARD);
-            msg.obj = idCard;
-            mService.send(msg);
-        } catch (RemoteException e) {
-        }
-    }
-
-    private void sendCloseWordCardMsg(String idCard) {
-        try {
-            Message msg = Message.obtain(null, VelloService.MSG_CLOSE_WORDCARD);
-            msg.obj = idCard;
-            mService.send(msg);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
-     * This helper function fetches the last known high-water-mark we received
-     * from the server - or 0 if we've never synced.
-     * 
-     * @param account the account we're syncing
-     * @return the change high-water-mark
-     */
-    private long getServerSyncMarker(Account account) {
-        String markerString = mAccountManager.getUserData(account, SYNC_MARKER_KEY);
-        if (!TextUtils.isEmpty(markerString)) {
-            return Long.parseLong(markerString);
-        }
-        return 0;
-    }
-
-    /**
-     * Save off the high-water-mark we receive back from the server.
-     * 
-     * @param account The account we're syncing
-     * @param marker The high-water-mark we want to save.
-     */
-    private void setServerSyncMarker(Account account, long marker) {
-        mAccountManager.setUserData(account, SYNC_MARKER_KEY, Long.toString(marker));
     }
 
     void doBindService() {
