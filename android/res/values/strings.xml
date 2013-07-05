@@ -43,6 +43,8 @@
     <string name="collapse_word">Collapse word</string>
     <!-- Description of the down caret in the alarm alert screen to expand the alarm content to edit perspective. [CHAR LIMIT=NONE] -->
     <string name="expand_word">Expand word</string>
+    <string name="notif_content_title"> words need reviewing.</string>
+    <string name="notif_content_text">Touch to review.</string>
     
     
 

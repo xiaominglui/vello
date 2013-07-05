@@ -190,21 +190,19 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 				if (cur != null) {
 					int num = cur.getCount();
 					if (num > 0) {
-						Notification noti = new Notification.Builder(mContext)
-								.setContentTitle(
-										"You have " + num
-												+ " words need reviewing!")
-								.setContentText("Click me to begin reviewing!")
-								.setSmallIcon(R.drawable.ic_stat_vaa)
-								.setContentIntent(pIntent).build();
-
 						NotificationManager notificationManager = (NotificationManager) mContext
 								.getSystemService(Context.NOTIFICATION_SERVICE);
 
-						// Hide the notification after its selected
-						noti.flags |= Notification.FLAG_AUTO_CANCEL;
+						NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+								mContext)
+								.setWhen(rightNow.getTimeInMillis())
+								.setSmallIcon(R.drawable.ic_stat_vaa)
+								.setContentTitle(num + mContext.getString(R.string.notif_content_title))
+								.setContentText(mContext.getText(R.string.notif_content_text))
+								.setContentIntent(pIntent)
+								.setAutoCancel(true);
 
-						notificationManager.notify(0, noti);
+						notificationManager.notify(0, mBuilder.build());
 					}
 				}
 			}
