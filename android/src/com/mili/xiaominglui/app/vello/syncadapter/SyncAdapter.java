@@ -1,32 +1,33 @@
 package com.mili.xiaominglui.app.vello.syncadapter;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+
 import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ComponentName;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.content.ServiceConnection;
 import android.content.SyncResult;
 import android.database.Cursor;
-import android.net.Uri;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
-import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -48,18 +49,13 @@ import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.ui.MainActivity;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 	private static final String TAG = SyncAdapter.class.getSimpleName();
 
 	private final Context mContext;
 	String mToken;
+	private SyncHelper mSyncHelper;
 
 	Messenger mService = null;
 	private boolean mIsBound;
@@ -98,225 +94,24 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	public SyncAdapter(Context context, boolean autoInitialize) {
 		super(context, autoInitialize);
 		mContext = context;
-		mToken = AccountUtils.getAuthToken(mContext);
+		
 	}
 
 	@Override
 	public void onPerformSync(Account account, Bundle extras, String authority,
 			ContentProviderClient provider, SyncResult syncResult) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "onPerformSync...");
-		}
+		
+		// Perform a sync using SyncHelper
+        if (mSyncHelper == null) {
+            mSyncHelper = new SyncHelper(mContext);
+        }
 
-		// query and backup all local items that syncInNext=true or merge
-		// locally later
-		HashMap<String, WordCard> localDirtyWords = new HashMap<String, WordCard>();
-		final ContentResolver resolver = mContext.getContentResolver();
-		ProviderCriteria criteria = new ProviderCriteria();
-		criteria.addEq(DbWordCard.Columns.SYNCINNEXT, "true");
-		Cursor c = resolver.query(DbWordCard.CONTENT_URI,
-				DbWordCard.PROJECTION, criteria.getWhereClause(),
-				criteria.getWhereParams(), criteria.getOrderClause());
-		if (c != null) {
-			while (c.moveToNext()) {
-				WordCard wc = new WordCard(c);
-				localDirtyWords.put(wc.id, wc);
-			}
-		}
+        try {
+            mSyncHelper.performSync(syncResult, SyncHelper.FLAG_SYNC_REMOTE);
 
-		try {
-			ArrayList<WordCard> preSyncRemoteWordCardList = getOpenWordCards();
-			if (preSyncRemoteWordCardList.size() > 0) {
-				SimpleDateFormat format = new SimpleDateFormat(
-						"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-				for (WordCard wordCard : preSyncRemoteWordCardList) {
-					String idCard = wordCard.id;
-					if (localDirtyWords.containsKey(idCard)) {
-						// need merging
-						WordCard dirtyWordCard = localDirtyWords.get(idCard);
-						String stringLocalDateLastActivity = dirtyWordCard.dateLastActivity;
-						String stringRemoteDateLastActivity = wordCard.dateLastActivity;
-						if (stringLocalDateLastActivity
-								.equals(stringRemoteDateLastActivity)) {
-							// remote has no commit
-							// commit local due, closed, listId to remote
-							updateRemoteWordCard(dirtyWordCard);
-						} else {
-							// remote has commit
-							// update remote data based on local data
-							WordCard newWordCard = upgradeWordCard(wordCard,
-									dirtyWordCard);
-							updateRemoteWordCard(newWordCard);
-						}
-					}
-				}
-			}
-
-			// Clear the table
-			mContext.getContentResolver().delete(DbWordCard.CONTENT_URI, null,
-					null);
-
-			ArrayList<WordCard> postSyncRemoteWordCardList = getOpenWordCards();
-			if (postSyncRemoteWordCardList.size() > 0) {
-				ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
-				for (WordCard wordCard : postSyncRemoteWordCardList) {
-					operationList.add(ContentProviderOperation
-							.newInsert(DbWordCard.CONTENT_URI)
-							.withValues(wordCard.toContentVaalues()).build());
-				}
-
-				mContext.getContentResolver().applyBatch(
-						VelloProvider.AUTHORITY, operationList);
-
-				// Build notification
-				// TODO need rework
-				Intent intent = new Intent(mContext, MainActivity.class);
-				PendingIntent pIntent = PendingIntent.getActivity(mContext, 0,
-						intent, 0);
-
-				ProviderCriteria cri = new ProviderCriteria();
-				cri.addSortOrder(DbWordCard.Columns.DUE, true);
-
-				Calendar rightNow = Calendar.getInstance();
-				SimpleDateFormat fo = new SimpleDateFormat(
-						"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-				String now = fo.format(rightNow.getTime());
-				cri.addLt(DbWordCard.Columns.DUE, now, true);
-				cri.addNe(DbWordCard.Columns.CLOSED, "true");
-				Cursor cur = mContext.getContentResolver().query(
-						DbWordCard.CONTENT_URI, DbWordCard.PROJECTION,
-						cri.getWhereClause(), cri.getWhereParams(),
-						cri.getOrderClause());
-				if (cur != null) {
-					int num = cur.getCount();
-					if (num > 0) {
-						NotificationManager notificationManager = (NotificationManager) mContext
-								.getSystemService(Context.NOTIFICATION_SERVICE);
-
-						NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
-								mContext)
-								.setWhen(rightNow.getTimeInMillis())
-								.setSmallIcon(R.drawable.ic_stat_vaa)
-								.setContentTitle(num + mContext.getString(R.string.notif_content_title))
-								.setContentText(mContext.getText(R.string.notif_content_text))
-								.setContentIntent(pIntent)
-								.setAutoCancel(true);
-
-						notificationManager.notify(0, mBuilder.build());
-					}
-				}
-			}
-
-		} catch (ConnectionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (DataException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (OperationApplicationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * retrieve all open card from trello
-	 * 
-	 * @throws ConnectionException
-	 * @throws DataException
-	 */
-	private ArrayList<WordCard> getOpenWordCards() throws ConnectionException,
-			DataException {
-		String vocabularyBoardId = AccountUtils.getVocabularyBoardId(mContext);
-		String urlString = WSConfig.TRELLO_API_URL
-				+ WSConfig.WS_TRELLO_TARGET_BOARD + "/" + vocabularyBoardId
-				+ WSConfig.WS_TRELLO_FIELD_CARDS;
-
-		HashMap<String, String> parameterMap = new HashMap<String, String>();
-		parameterMap.put(WSConfig.WS_TRELLO_PARAM_FILTER, "open");
-		parameterMap.put(WSConfig.WS_TRELLO_PARAM_FIELDS,
-				"name,desc,due,closed,idList,dateLastActivity");
-		parameterMap.put(WSConfig.WS_TRELLO_PARAM_APP_KEY,
-				WSConfig.VELLO_APP_KEY);
-		parameterMap.put(WSConfig.WS_TRELLO_PARAM_ACCESS_TOKEN, mToken);
-
-		NetworkConnection networkConnection = new NetworkConnection(mContext,
-				urlString);
-		networkConnection.setMethod(Method.GET);
-		networkConnection.setParameters(parameterMap);
-		ConnectionResult result = networkConnection.execute();
-		return WordCardListJsonFactory.parseResult(result.body);
-	}
-
-	/**
-	 * update trello card due, idList & closed field
-	 * 
-	 * @param wordCard
-	 * @throws ConnectionException
-	 */
-	private void updateRemoteWordCard(WordCard wordCard)
-			throws ConnectionException {
-		String urlString = WSConfig.TRELLO_API_URL
-				+ WSConfig.WS_TRELLO_TARGET_CARD + "/" + wordCard.id;
-
-		HashMap<String, String> parameterMap = new HashMap<String, String>();
-		parameterMap.put(WSConfig.WS_TRELLO_PARAM_CLOSED, wordCard.closed);
-		parameterMap.put(WSConfig.WS_TRELLO_PARAM_DUE, wordCard.due);
-		parameterMap.put(WSConfig.WS_TRELLO_PARAM_IDLIST, wordCard.idList);
-
-		parameterMap.put(WSConfig.WS_TRELLO_PARAM_APP_KEY,
-				WSConfig.VELLO_APP_KEY);
-		parameterMap.put(WSConfig.WS_TRELLO_PARAM_ACCESS_TOKEN, mToken);
-
-		NetworkConnection networkConnection = new NetworkConnection(mContext,
-				urlString);
-		networkConnection.setMethod(Method.PUT);
-		networkConnection.setParameters(parameterMap);
-		ConnectionResult result = networkConnection.execute();
-
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "result.body = " + result.body);
-		}
-
-		Gson gson = new Gson();
-		WordCard updatedWordCard = gson.fromJson(result.body, WordCard.class);
-		if (updatedWordCard != null) {
-			// update success
-		} else {
-			// update failed
-		}
-
-	}
-
-	private WordCard upgradeWordCard(WordCard wordCard, WordCard dirtyWordCard) {
-		int localPositionInLists = AccountUtils.getVocabularyListPosition(
-				mContext, dirtyWordCard.idList);
-		int remotePostionInLists = AccountUtils.getVocabularyListPosition(
-				mContext, wordCard.idList);
-		int delta = remotePostionInLists - localPositionInLists;
-		if (delta > 0) {
-			int compensation = delta + 1;
-			if (remotePostionInLists + compensation > VelloConfig.VOCABULARY_LIST_POSITION_8TH) {
-				wordCard.closed = "true";
-			} else {
-				int newPostionInLists = remotePostionInLists + compensation;
-				wordCard.idList = AccountUtils.getVocabularyListId(mContext,
-						newPostionInLists);
-				Calendar rightNow = Calendar.getInstance();
-				long rightNowUnixTime = rightNow.getTimeInMillis();
-				long deltaTime = VelloConfig.VOCABULARY_LIST_DUE_DELTA[newPostionInLists];
-				long newDueUnixTime = rightNowUnixTime + deltaTime;
-				SimpleDateFormat format = new SimpleDateFormat(
-						"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-				Date newDueDate = new Date(newDueUnixTime);
-				String stringNewDueDate = format.format(newDueDate);
-				wordCard.due = stringNewDueDate;
-			}
-		}
-		return wordCard;
+        } catch (IOException e) {
+            ++syncResult.stats.numIoExceptions;
+        }
 	}
 
 	void doBindService() {
