@@ -260,14 +260,12 @@ public class MainActivity extends BaseActivity implements
 	private SwipeableListView mWordsList;
 	private WordCardAdapter mAdapter;
 	private ActionableToastBar mUndoBar;
-	private ActionMode mActionMode;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mContext = getApplicationContext();
 		mActivity = this;
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
 		if (isFinishing()) {
 			return;
@@ -362,13 +360,6 @@ public class MainActivity extends BaseActivity implements
 				}
 			}, 0, getResources().getString(R.string.word_reviewed), true,
 					R.string.word_reviewed_undo, true);
-		}
-
-		// Show action mode if needed
-		int selectedNum = mAdapter.getSelectedItemsNum();
-		if (selectedNum > 0) {
-			mActionMode = startActionMode(this);
-			setActionModeTitle(selectedNum);
 		}
 	}
 
@@ -466,8 +457,6 @@ public class MainActivity extends BaseActivity implements
 	private void updateLayout() {
 		final ActionBar actionBar = getActionBar();
 		if (actionBar != null) {
-			actionBar.setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP,
-					ActionBar.DISPLAY_HOME_AS_UP);
 		}
 	}
 
@@ -678,39 +667,6 @@ public class MainActivity extends BaseActivity implements
 				mLinearLayoutDefinitionArea.addView(definiitionGroup);
 			}
 		}
-	}
-
-	/***
-	 * Activate/update/close action mode according to the number of selected
-	 * views.
-	 */
-	private void updateActionMode() {
-		int selectedNum = mAdapter.getSelectedItemsNum();
-		if (mActionMode == null && selectedNum > 0) {
-			// Start the action mode
-			mActionMode = startActionMode(this);
-			setActionModeTitle(selectedNum);
-		} else if (mActionMode != null) {
-			if (selectedNum > 0) {
-				// Update the number of selected items in the title
-				setActionModeTitle(selectedNum);
-			} else {
-				// No selected items. close the action mode
-				mActionMode.finish();
-				mActionMode = null;
-			}
-		}
-	}
-
-	/***
-	 * Display the number of selected items on the action bar in action mode
-	 * 
-	 * @param items
-	 *            - number of selected items
-	 */
-	private void setActionModeTitle(int items) {
-		mActionMode.setTitle(String.format(getString(R.string.words_selected),
-				items));
 	}
 
 	public class WordCardAdapter extends CursorAdapter {
