@@ -135,9 +135,6 @@ public class VelloService extends Service implements RequestListener,
 					WordCard wordcard = (WordCard) msg.obj;
 					service.upgradeWordCard(wordcard);
 					break;
-				case MSG_SYNC_LOCAL_CACHE:
-					service.syncLocalCache();
-					break;
 				default:
 					super.handleMessage(msg);
 				}
@@ -204,15 +201,6 @@ public class VelloService extends Service implements RequestListener,
 			VelloContent.DbWordCard.Columns.ID.getName(),
 			VelloContent.DbWordCard.Columns.ID_CARD.getName(),
 			VelloContent.DbWordCard.Columns.ID_LIST.getName() };
-
-	private void syncLocalCache() {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "syncLocalCache start...");
-		}
-		Request syncLocalCache = VelloRequestFactory.syncLocalCacheRequest();
-		mRequestManager.execute(syncLocalCache, this);
-		mRequestList.add(syncLocalCache);
-	}
 
 	private void upgradeWordCard(WordCard wordcard) {
 		if (VelloConfig.DEBUG_SWITCH) {
@@ -391,61 +379,12 @@ public class VelloService extends Service implements RequestListener,
 		mRequestList.add(reOpenWordCard);
 	}
 	
-	private WordCard upgradeWordCard(WordCard wordCard, WordCard dirtyWordCard) {
-        // TODO need a upgrade method
-        return wordCard;
-    }
-
 	@Override
 	public void onRequestFinished(Request request, Bundle resultData) {
 		if (mRequestList.contains(request)) {
 			mRequestList.remove(request);
 
 			switch (request.getRequestType()) {
-			case VelloRequestFactory.REQUEST_TYPE_SYNC_LOCAL_CACHE:
-				ArrayList<WordCard> preSyncRemoteWordCardList = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST);
-				
-				// query and backup all local items that syncInNext=true or merge
-		        // locally later
-		        HashMap<String, WordCard> localDirtyWords = new HashMap<String, WordCard>();
-		        final ContentResolver resolver = getApplicationContext().getContentResolver();
-		        ProviderCriteria criteria = new ProviderCriteria();
-		        criteria.addEq(DbWordCard.Columns.SYNCINNEXT, "true");
-		        Cursor c = resolver.query(DbWordCard.CONTENT_URI, DbWordCard.PROJECTION,
-		                criteria.getWhereClause(), criteria.getWhereParams(), criteria.getOrderClause());
-		        if (c != null) {
-		            while (c.moveToNext()) {
-		                WordCard wc = new WordCard(c);
-		                localDirtyWords.put(wc.id, wc);
-		            }
-		        }
-		        
-		        if (preSyncRemoteWordCardList.size() > 0) {
-		        	SimpleDateFormat format = new SimpleDateFormat(
-		                    "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-		        	for (WordCard wordCard : preSyncRemoteWordCardList) {
-		        		String idCard = wordCard.id;
-		        		if (localDirtyWords.containsKey(idCard)) {
-		        			// need merging
-		                    WordCard dirtyWordCard = localDirtyWords.get(idCard);
-		                    String stringLocalDateLastActivity = dirtyWordCard.dateLastActivity;
-		                    String stringRemoteDateLastActivity = wordCard.dateLastActivity;
-		                    if (stringLocalDateLastActivity.equals(stringRemoteDateLastActivity)) {
-		                    	// remote has no commit
-		                        // commit local due, closed, listId to remote
-		                    	upgradeWordCard(dirtyWordCard);
-		                    } else {
-		                    	// remote has commit
-		                        // update remote data based on local data
-		                    	WordCard newWordCard = upgradeWordCard(wordCard, dirtyWordCard);
-		                    	upgradeWordCard(newWordCard);
-		                    }
-		        		}
-		        	}
-		        }
-		        getDueWordCardList();
-				return;
-
 			case VelloRequestFactory.REQUEST_TYPE_REVIEWED_WORDCARD:
 				WordCard reviewedWordCard = resultData
 						.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);

@@ -23,7 +23,6 @@ public final class VelloRequestFactory {
     public static final int REQUEST_TYPE_REVIEWED_PLUS_WORDCARD = 13;
     public static final int REQUEST_TYPE_ARCHIVE_WORDCARD = 14;
     public static final int REQUEST_TYPE_UPGRADE_WORDCARD = 15;
-    public static final int REQUEST_TYPE_SYNC_LOCAL_CACHE = 16;
 
     // Response data
     public static final String BUNDLE_EXTRA_TRELLO_BOARD_LIST = "com.mili.xiaominglui.app.vello.extra.boardList";
@@ -47,12 +46,6 @@ public final class VelloRequestFactory {
 
     private VelloRequestFactory() {
         // no public constructor
-    }
-    
-    public static Request syncLocalCacheRequest() {
-    	Request request = new Request(REQUEST_TYPE_SYNC_LOCAL_CACHE);
-    	request.setMemoryCacheEnabled(true);
-    	return request;
     }
 
     public static Request getDueWordCardListRequest() {

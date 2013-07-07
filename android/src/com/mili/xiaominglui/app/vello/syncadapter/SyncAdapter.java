@@ -1,53 +1,24 @@
 package com.mili.xiaominglui.app.vello.syncadapter;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-
 import android.accounts.Account;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ComponentName;
 import android.content.ContentProviderClient;
-import android.content.ContentProviderOperation;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.OperationApplicationException;
 import android.content.ServiceConnection;
 import android.content.SyncResult;
-import android.database.Cursor;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 import android.widget.Toast;
 
-import com.foxykeep.datadroid.exception.ConnectionException;
-import com.foxykeep.datadroid.exception.DataException;
-import com.foxykeep.datadroid.network.NetworkConnection;
-import com.foxykeep.datadroid.network.NetworkConnection.ConnectionResult;
-import com.foxykeep.datadroid.network.NetworkConnection.Method;
-import com.google.gson.Gson;
 import com.mili.xiaominglui.app.vello.R;
-import com.mili.xiaominglui.app.vello.config.VelloConfig;
-import com.mili.xiaominglui.app.vello.config.WSConfig;
-import com.mili.xiaominglui.app.vello.data.factory.WordCardListJsonFactory;
-import com.mili.xiaominglui.app.vello.data.model.WordCard;
-import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
-import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
-import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.service.VelloService;
-import com.mili.xiaominglui.app.vello.ui.MainActivity;
-import com.mili.xiaominglui.app.vello.util.AccountUtils;
+
+import java.io.IOException;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
