@@ -678,10 +678,19 @@ public class MainActivity extends BaseActivity implements
 
 		private final HashSet<Integer> mExpanded = new HashSet<Integer>();
 		private final HashSet<Integer> mSelectedWords = new HashSet<Integer>();
+		private final int[] mWordCardBackgroundColor = {
+				R.color.bg_color_new,
+				R.color.bg_color_1st,
+				R.color.bg_color_2nd,
+				R.color.bg_color_3rd,
+				R.color.bg_color_4th,
+				R.color.bg_color_5th,
+				R.color.bg_color_6th,
+				R.color.bg_color_7th };
 
 		public class ItemHolder {
 			// views for optimization
-			LinearLayout alarmItem;
+			LinearLayout wordCardItem;
 			IconicTextView iconicLifeCount;
 			TextView textViewLifeCount;
 			TextView textViewKeyword;
@@ -777,20 +786,12 @@ public class MainActivity extends BaseActivity implements
 			final ItemHolder itemHolder = (ItemHolder) view.getTag();
 			itemHolder.wordcard = wordcard;
 			itemHolder.word = IcibaWordXmlParser.parse(wordcard.desc);
-
-			if (mSelectedWords.contains(itemHolder.wordcard.id)) {
-				itemHolder.alarmItem
-						.setBackgroundColor(mBackgroundColorSelected);
-				itemHolder.alarmItem.setAlpha(1f);
-			} else {
-				itemHolder.alarmItem.setBackgroundColor(mBackgroundColor);
-			}
-
 			itemHolder.iconicLifeCount.setIcon(FontAwesomeIcon.HEART);
 			itemHolder.iconicLifeCount.setTextColor(Color.GRAY);
 			itemHolder.idList = itemHolder.wordcard.idList;
 			int positionList = AccountUtils.getVocabularyListPosition(mContext,
 					itemHolder.idList);
+			itemHolder.wordCardItem.setBackgroundResource(mWordCardBackgroundColor[positionList]);
 			String lifeString = "N";
 			if (positionList != 0) {
 				lifeString = String.valueOf(8 - positionList + 1);
@@ -810,7 +811,7 @@ public class MainActivity extends BaseActivity implements
 				@Override
 				public void onClick(View view) {
 					expandWord(itemHolder);
-					itemHolder.alarmItem.post(mScrollRunnable);
+					itemHolder.wordCardItem.post(mScrollRunnable);
 				}
 			});
 
@@ -821,13 +822,13 @@ public class MainActivity extends BaseActivity implements
 
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent) {
-			final View view = mFactory.inflate(R.layout.alarm_time, parent,
+			final View view = mFactory.inflate(R.layout.word_card_item, parent,
 					false);
 
 			// standard view holder optimization
 			final ItemHolder holder = new ItemHolder();
-			holder.alarmItem = (LinearLayout) view
-					.findViewById(R.id.alarm_item);
+			holder.wordCardItem = (LinearLayout) view
+					.findViewById(R.id.word_card_item);
 			holder.iconicLifeCount = (IconicTextView) view
 					.findViewById(R.id.life_sign);
 			holder.textViewLifeCount = (TextView) view

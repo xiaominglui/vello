@@ -24,10 +24,13 @@
         android:id="@+id/words_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingTop="9dp"
+        android:paddingLeft="9dp"
+        android:paddingRight="9dp"
         android:clipToPadding="false"
         android:descendantFocusability="beforeDescendants"
         android:divider="@null"
-        android:dividerHeight="6dp"
+        android:dividerHeight="7dp"
         />
 
     <com.android.deskclock.widget.ActionableToastBar

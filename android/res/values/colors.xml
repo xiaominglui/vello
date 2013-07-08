@@ -5,4 +5,12 @@
     <color name="transparent_white">#66ffffff</color>
     <color name="alarm_whiteish">#0cffffff</color>
     <color name="alarm_selected_color">#aa0099cc</color>
+    <color name="bg_color_new">#aaf5f5f5</color>
+    <color name="bg_color_1st">#aaf56545</color>
+    <color name="bg_color_2nd">#aaffbb22</color>
+    <color name="bg_color_3rd">#aaeeee22</color>
+    <color name="bg_color_4th">#aa9aa8a8</color>
+    <color name="bg_color_5th">#aa66ccdd</color>
+    <color name="bg_color_6th">#aa77ddbb</color>
+    <color name="bg_color_7th">#aabbe535</color>
 </resources>

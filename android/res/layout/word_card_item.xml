@@ -16,20 +16,16 @@
 
 <com.android.deskclock.widget.swipeablelistview.SwipeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/alarm_item"
+    android:id="@+id/word_card_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:gravity="center_horizontal|top"
-    android:background="@color/alarm_whiteish">
+    android:gravity="center_horizontal|top">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="12dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
+        android:layout_margin="9dp"
         android:orientation="horizontal">
         <LinearLayout
             android:id="@+id/keyword_area"
