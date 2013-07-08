@@ -672,8 +672,6 @@ public class MainActivity extends BaseActivity implements
 	public class WordCardAdapter extends CursorAdapter {
 		private final Context mContext;
 		private final LayoutInflater mFactory;
-		private final int mBackgroundColorSelected;
-		private final int mBackgroundColor;
 		private final ListView mList;
 
 		private final HashSet<Integer> mExpanded = new HashSet<Integer>();
@@ -686,7 +684,8 @@ public class MainActivity extends BaseActivity implements
 				R.color.bg_color_4th,
 				R.color.bg_color_5th,
 				R.color.bg_color_6th,
-				R.color.bg_color_7th };
+				R.color.bg_color_7th,
+				R.color.bg_color_8th};
 
 		public class ItemHolder {
 			// views for optimization
@@ -738,10 +737,6 @@ public class MainActivity extends BaseActivity implements
 			mList = list;
 
 			Resources res = mContext.getResources();
-
-			mBackgroundColorSelected = res
-					.getColor(R.color.alarm_selected_color);
-			mBackgroundColor = res.getColor(R.color.alarm_whiteish);
 
 			if (expandedIds != null) {
 				buildHashSetFromArray(expandedIds, mExpanded);
