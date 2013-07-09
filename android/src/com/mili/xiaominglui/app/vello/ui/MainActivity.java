@@ -24,6 +24,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -255,6 +256,12 @@ public class MainActivity extends BaseActivity implements OnQueryTextListener, O
 		if (isFinishing()) {
 			return;
 		}
+		
+		Intent intent = getIntent();
+	    if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+	      String query = intent.getStringExtra(SearchManager.QUERY);
+	      Toast.makeText(mContext, query, Toast.LENGTH_SHORT).show();
+	    }
 
 		initialize(savedInstanceState);
 
@@ -447,19 +454,12 @@ public class MainActivity extends BaseActivity implements OnQueryTextListener, O
 		super.onCreateOptionsMenu(menu);
 		getSupportMenuInflater().inflate(R.menu.home, menu);
 
-		SearchView searchView = new SearchView(getSupportActionBar()
-				.getThemedContext());
-		searchView.setQueryHint(getResources().getText(
-				R.string.action_query_hint));
-		searchView.setOnQueryTextListener(this);
-
-		boolean isLight = false;
-		menu.add(Menu.NONE, 0, 97, R.string.description_search)
-				.setIcon(
-						isLight ? R.drawable.ic_search_inverse
-								: R.drawable.abs__ic_search)
-				.setActionView(searchView)
-				.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
+            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+            SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+            searchView.setIconifiedByDefault(true);
+        }
 
 		return true;
 	}
