@@ -8,7 +8,6 @@ import java.util.HashSet;
 
 import android.accounts.Account;
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.ComponentName;
@@ -47,11 +46,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.ActionMode.Callback;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
 import com.actionbarsherlock.widget.SearchView;
 import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
 import com.actionbarsherlock.widget.SearchView.OnSuggestionListener;
@@ -60,9 +57,6 @@ import com.android.deskclock.widget.swipeablelistview.SwipeableListView;
 import com.atermenji.android.iconictextview.IconicTextView;
 import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
 import com.devspark.appmsg.AppMsg;
-import com.manuelpeinado.refreshactionitem.ProgressIndicatorType;
-import com.manuelpeinado.refreshactionitem.RefreshActionItem;
-import com.manuelpeinado.refreshactionitem.RefreshActionItem.RefreshActionListener;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
@@ -79,8 +73,7 @@ import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
-public class MainActivity extends BaseActivity implements
-		RefreshActionListener, OnQueryTextListener, OnSuggestionListener,
+public class MainActivity extends BaseActivity implements OnQueryTextListener, OnSuggestionListener,
 		LoaderCallbacks<Cursor>, Callback {
 	private static final String TAG = MainActivity.class.getSimpleName();
 	private Context mContext;
@@ -104,12 +97,6 @@ public class MainActivity extends BaseActivity implements
 		public void handleMessage(Message msg) {
 			MainActivity theActivity = mActivity.get();
 			switch (msg.what) {
-			case VelloService.MSG_SPINNER_ON:
-				theActivity.mRefreshActionItem.showProgress(true);
-				break;
-			case VelloService.MSG_SPINNER_OFF:
-				theActivity.mRefreshActionItem.showProgress(false);
-				break;
 			case VelloService.MSG_DIALOG_BAD_DATA_ERROR_SHOW:
 				theActivity.showBadDataErrorDialog();
 				break;
@@ -225,8 +212,6 @@ public class MainActivity extends BaseActivity implements
 		}
 	}
 
-	private RefreshActionItem mRefreshActionItem;
-
 	private SuggestionsAdapter mSuggestionsAdapter;
 	private static final String[] COLUMNS = { BaseColumns._ID,
 			SearchManager.SUGGEST_COLUMN_TEXT_1, };
@@ -272,7 +257,6 @@ public class MainActivity extends BaseActivity implements
 		}
 
 		initialize(savedInstanceState);
-		updateLayout();
 
 		getSupportLoaderManager().initLoader(0, null, this);
 		doBindService();
@@ -448,16 +432,9 @@ public class MainActivity extends BaseActivity implements
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		// TODO
 		outState.putIntArray(KEY_EXPANDED_IDS, mAdapter.getExpandedArray());
 		outState.putParcelable(KEY_DELETED_WORD, mDeletedWord);
 		outState.putBoolean(KEY_UNDO_SHOWING, mUndoShowing);
-	}
-
-	private void updateLayout() {
-		final ActionBar actionBar = getActionBar();
-		if (actionBar != null) {
-		}
 	}
 
 	@Override
@@ -469,12 +446,6 @@ public class MainActivity extends BaseActivity implements
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		getSupportMenuInflater().inflate(R.menu.home, menu);
-		MenuItem item = menu.findItem(R.id.refresh_button);
-		mRefreshActionItem = (RefreshActionItem) item.getActionView();
-		mRefreshActionItem.setMenuItem(item);
-		mRefreshActionItem
-				.setProgressIndicatorType(ProgressIndicatorType.INDETERMINATE);
-		mRefreshActionItem.setRefreshActionListener(this);
 
 		SearchView searchView = new SearchView(getSupportActionBar()
 				.getThemedContext());
@@ -505,19 +476,6 @@ public class MainActivity extends BaseActivity implements
 		}
 		return super.onOptionsItemSelected(item);
 	}
-
-	@Override
-	public void onRefreshButtonClick(RefreshActionItem sender) {
-		// sendMessageToService(VelloService.MSG_GET_DUE_WORDCARD_LIST);
-		triggerRefresh();
-	}
-
-	/*
-	 * private void showCurrentBadge() { int num =
-	 * mGoogleCardsAdapter.getCount(); if (num > 0) {
-	 * mRefreshActionItem.showBadge(String.valueOf(num)); } else {
-	 * mRefreshActionItem.hideBadge(); } }
-	 */
 
 	@Override
 	public boolean onSuggestionSelect(int position) {
@@ -569,7 +527,6 @@ public class MainActivity extends BaseActivity implements
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-		// mGoogleCardsAdapter.changeCursor(data);
 		mAdapter.swapCursor(data);
 	}
 
