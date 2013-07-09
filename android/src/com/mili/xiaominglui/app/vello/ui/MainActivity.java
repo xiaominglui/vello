@@ -453,13 +453,10 @@ public class MainActivity extends BaseActivity implements OnQueryTextListener, O
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		getSupportMenuInflater().inflate(R.menu.home, menu);
-
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
-            SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-            SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
-            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-            searchView.setIconifiedByDefault(true);
-        }
+		
+	    SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+	    SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+	    searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 
 		return true;
 	}
