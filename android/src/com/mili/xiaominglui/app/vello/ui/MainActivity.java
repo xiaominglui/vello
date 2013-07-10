@@ -74,8 +74,8 @@ import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
-public class MainActivity extends BaseActivity implements OnQueryTextListener,
-		OnSuggestionListener, LoaderCallbacks<Cursor>, Callback {
+public class MainActivity extends BaseActivity implements
+		LoaderCallbacks<Cursor>, Callback {
 	private static final String TAG = MainActivity.class.getSimpleName();
 	private Context mContext;
 	private Activity mActivity;
@@ -257,16 +257,34 @@ public class MainActivity extends BaseActivity implements OnQueryTextListener,
 			return;
 		}
 
-		Intent intent = getIntent();
-		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-			String query = intent.getStringExtra(SearchManager.QUERY);
-			Toast.makeText(mContext, query, Toast.LENGTH_SHORT).show();
-		}
+		handleIntent(getIntent());
 
 		initialize(savedInstanceState);
 
 		getSupportLoaderManager().initLoader(0, null, this);
 		doBindService();
+	}
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		setIntent(intent);
+		handleIntent(intent);
+	}
+
+	private void handleIntent(Intent intent) {
+		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+			String query = intent.getStringExtra(SearchManager.QUERY);
+			Toast.makeText(mContext, query, Toast.LENGTH_SHORT).show();
+			 doWordSearch(query);
+		}
+	}
+
+	private void doWordSearch(String query) {
+		// TODO
+		// 1. check if the word is in local cache, show if yes, go on if no
+		// 2. check if the word is in remote but closed, show if yes and re-open, go on if no
+		// 3. query dictionary service
+		
 	}
 
 	@Override
@@ -473,35 +491,6 @@ public class MainActivity extends BaseActivity implements OnQueryTextListener,
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
-	}
-
-	@Override
-	public boolean onSuggestionSelect(int position) {
-		return false;
-	}
-
-	@Override
-	public boolean onSuggestionClick(int position) {
-		Cursor c = (Cursor) mSuggestionsAdapter.getItem(position);
-		String query = c.getString(c
-				.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1));
-		Toast.makeText(this, "Suggestion clicked: " + query, Toast.LENGTH_LONG)
-				.show();
-		return true;
-	}
-
-	@Override
-	public boolean onQueryTextSubmit(String query) {
-		if (query != null) {
-			// TODO
-			// lookUpWord(query.trim().toLowerCase());
-		}
-		return true;
-	}
-
-	@Override
-	public boolean onQueryTextChange(String newText) {
-		return false;
 	}
 
 	@SuppressLint("SimpleDateFormat")
