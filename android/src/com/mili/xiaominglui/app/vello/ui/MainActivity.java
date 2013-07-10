@@ -74,8 +74,8 @@ import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
-public class MainActivity extends BaseActivity implements OnQueryTextListener, OnSuggestionListener,
-		LoaderCallbacks<Cursor>, Callback {
+public class MainActivity extends BaseActivity implements OnQueryTextListener,
+		OnSuggestionListener, LoaderCallbacks<Cursor>, Callback {
 	private static final String TAG = MainActivity.class.getSimpleName();
 	private Context mContext;
 	private Activity mActivity;
@@ -256,12 +256,12 @@ public class MainActivity extends BaseActivity implements OnQueryTextListener, O
 		if (isFinishing()) {
 			return;
 		}
-		
+
 		Intent intent = getIntent();
-	    if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-	      String query = intent.getStringExtra(SearchManager.QUERY);
-	      Toast.makeText(mContext, query, Toast.LENGTH_SHORT).show();
-	    }
+		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+			String query = intent.getStringExtra(SearchManager.QUERY);
+			Toast.makeText(mContext, query, Toast.LENGTH_SHORT).show();
+		}
 
 		initialize(savedInstanceState);
 
@@ -451,12 +451,13 @@ public class MainActivity extends BaseActivity implements OnQueryTextListener, O
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
 		getSupportMenuInflater().inflate(R.menu.home, menu);
-		
-	    SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-	    SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
-	    searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
+		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+		SearchView searchView = (SearchView) menu.findItem(R.id.menu_search)
+				.getActionView();
+		searchView.setSearchableInfo(searchManager
+				.getSearchableInfo(getComponentName()));
 
 		return true;
 	}
@@ -630,16 +631,11 @@ public class MainActivity extends BaseActivity implements OnQueryTextListener, O
 
 		private final HashSet<Integer> mExpanded = new HashSet<Integer>();
 		private final HashSet<Integer> mSelectedWords = new HashSet<Integer>();
-		private final int[] mWordCardBackgroundColor = {
-				R.color.bg_color_new,
-				R.color.bg_color_1st,
-				R.color.bg_color_2nd,
-				R.color.bg_color_3rd,
-				R.color.bg_color_4th,
-				R.color.bg_color_5th,
-				R.color.bg_color_6th,
-				R.color.bg_color_7th,
-				R.color.bg_color_8th};
+		private final int[] mWordCardBackgroundColor = { R.color.bg_color_new,
+				R.color.bg_color_1st, R.color.bg_color_2nd,
+				R.color.bg_color_3rd, R.color.bg_color_4th,
+				R.color.bg_color_5th, R.color.bg_color_6th,
+				R.color.bg_color_7th, R.color.bg_color_8th };
 
 		public class ItemHolder {
 			// views for optimization
@@ -740,7 +736,8 @@ public class MainActivity extends BaseActivity implements OnQueryTextListener, O
 			itemHolder.idList = itemHolder.wordcard.idList;
 			int positionList = AccountUtils.getVocabularyListPosition(mContext,
 					itemHolder.idList);
-			itemHolder.wordCardItem.setBackgroundResource(mWordCardBackgroundColor[positionList]);
+			itemHolder.wordCardItem
+					.setBackgroundResource(mWordCardBackgroundColor[positionList]);
 			String lifeString = "N";
 			if (positionList != 0) {
 				lifeString = String.valueOf(8 - positionList + 1);

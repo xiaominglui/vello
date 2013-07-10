@@ -18,17 +18,18 @@
     <item
         android:id="@+id/menu_search"
         android:actionViewClass="com.actionbarsherlock.widget.SearchView"
-        android:icon="@drawable/ic_search"
-        android:showAsAction="ifRoom|collapseActionView"
+        android:icon="@android:drawable/ic_menu_search"
+        android:orderInCategory="1"
+        android:showAsAction="ifRoom"
         android:title="@string/description_search"/>
     <item
         android:id="@+id/menu_about"
-        android:orderInCategory="99"
+        android:orderInCategory="2"
         android:showAsAction="never"
         android:title="@string/description_about"/>
     <item
         android:id="@+id/menu_sign_out"
-        android:orderInCategory="100"
+        android:orderInCategory="3"
         android:showAsAction="never"
         android:title="@string/description_sign_out"/>
 
