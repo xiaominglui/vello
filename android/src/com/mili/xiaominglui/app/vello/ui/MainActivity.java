@@ -24,14 +24,12 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.provider.BaseColumns;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -47,12 +45,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.view.ActionMode.Callback;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.widget.SearchView;
-import com.actionbarsherlock.widget.SearchView.OnQueryTextListener;
-import com.actionbarsherlock.widget.SearchView.OnSuggestionListener;
 import com.android.deskclock.widget.ActionableToastBar;
 import com.android.deskclock.widget.swipeablelistview.SwipeableListView;
 import com.atermenji.android.iconictextview.IconicTextView;
@@ -75,7 +70,7 @@ import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class MainActivity extends BaseActivity implements
-		LoaderCallbacks<Cursor>, Callback {
+		LoaderCallbacks<Cursor> {
 	private static final String TAG = MainActivity.class.getSimpleName();
 	private Context mContext;
 	private Activity mActivity;
@@ -213,33 +208,6 @@ public class MainActivity extends BaseActivity implements
 		}
 	}
 
-	private SuggestionsAdapter mSuggestionsAdapter;
-	private static final String[] COLUMNS = { BaseColumns._ID,
-			SearchManager.SUGGEST_COLUMN_TEXT_1, };
-
-	private class SuggestionsAdapter extends CursorAdapter {
-
-		public SuggestionsAdapter(Context context, Cursor c) {
-			super(context, c, 0);
-		}
-
-		@Override
-		public View newView(Context context, Cursor cursor, ViewGroup parent) {
-			LayoutInflater inflater = LayoutInflater.from(context);
-			View v = inflater.inflate(android.R.layout.simple_list_item_1,
-					parent, false);
-			return v;
-		}
-
-		@Override
-		public void bindView(View view, Context context, Cursor cursor) {
-			TextView tv = (TextView) view;
-			final int textIndex = cursor
-					.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1);
-			tv.setText(cursor.getString(textIndex));
-		}
-	}
-
 	// Saved status for undo
 	private WordCard mDeletedWord;
 	private boolean mUndoShowing = false;
@@ -275,7 +243,7 @@ public class MainActivity extends BaseActivity implements
 		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
 			String query = intent.getStringExtra(SearchManager.QUERY);
 			Toast.makeText(mContext, query, Toast.LENGTH_SHORT).show();
-			 doWordSearch(query);
+			doWordSearch(query);
 		}
 	}
 
@@ -284,7 +252,9 @@ public class MainActivity extends BaseActivity implements
 		// 1. check if the word is in local cache, show if yes, go on if no
 		// 2. check if the word is in remote but closed, show if yes and re-open, go on if no
 		// 3. query dictionary service
-		
+		// 4. show and insert local cache item
+		// 5. sync for ensuring adding to remote successfully
+
 	}
 
 	@Override
@@ -906,32 +876,5 @@ public class MainActivity extends BaseActivity implements
 				new Account(AccountUtils.getChosenAccountName(this),
 						Constants.ACCOUNT_TYPE), VelloProvider.AUTHORITY,
 				extras);
-	}
-
-	@Override
-	public boolean onCreateActionMode(
-			com.actionbarsherlock.view.ActionMode mode, Menu menu) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean onPrepareActionMode(
-			com.actionbarsherlock.view.ActionMode mode, Menu menu) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean onActionItemClicked(
-			com.actionbarsherlock.view.ActionMode mode, MenuItem item) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void onDestroyActionMode(com.actionbarsherlock.view.ActionMode mode) {
-		// TODO Auto-generated method stub
-
 	}
 }
