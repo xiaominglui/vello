@@ -13,6 +13,7 @@ import com.mili.xiaominglui.app.vello.data.operation.CreateVocabularyListOperati
 import com.mili.xiaominglui.app.vello.data.operation.GetDueWordCardListOperation;
 import com.mili.xiaominglui.app.vello.data.operation.InitializeWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.LookUpWordOperation;
+import com.mili.xiaominglui.app.vello.data.operation.QueryInLocalCacheOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ReopenVocabularyListOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ReopenWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ReviewedPlusWordCardOperation;
@@ -62,6 +63,8 @@ public class VelloRequestService extends RequestService {
             	return new ArchiveWordCardOperation();
             case VelloRequestFactory.REQUEST_TYPE_UPGRADE_WORDCARD:
             	return new UpgradeWordCardOperation();
+            case VelloRequestFactory.REQUEST_TYPE_QUERY_IN_LOCAL_CACHE:
+                return new QueryInLocalCacheOperation();
         }
         return null;
     }

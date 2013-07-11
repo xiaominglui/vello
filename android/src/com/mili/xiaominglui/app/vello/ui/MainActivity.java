@@ -125,6 +125,10 @@ public class MainActivity extends BaseActivity implements
 						R.string.toast_not_available_word, AppMsg.STYLE_ALERT)
 						.setLayoutGravity(Gravity.TOP).show();
 				break;
+			case VelloService.MSG_SHOW_RESULT_WORDCARD:
+			    WordCard result = (WordCard) msg.obj;
+			    Toast.makeText(theActivity, result.id, Toast.LENGTH_SHORT).show();
+			    break;
 			}
 		}
 	}
@@ -254,6 +258,17 @@ public class MainActivity extends BaseActivity implements
 		// 3. query dictionary service
 		// 4. show and insert local cache item
 		// 5. sync for ensuring adding to remote successfully
+	    if (mIsBound) {
+	        if (mService != null) {
+	            try {
+                    Message msg = Message.obtain(null, VelloService.MSG_TRIGGER_QUERY_WORD);
+                    msg.obj = query;
+                    msg.replyTo = mMessenger;
+                    mService.send(msg);
+                } catch (RemoteException e) {
+                }
+	        }
+	    }
 
 	}
 

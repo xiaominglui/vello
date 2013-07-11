@@ -73,14 +73,15 @@ public class VelloService extends Service implements RequestListener,
 	public static final int MSG_TOAST_GET_DUE_WORD = 7;
 	public static final int MSG_TOAST_NO_WORD_NOW = 8;
 	public static final int MSG_TOAST_NOT_AVAILABLE_WORD = 9;
+	public static final int MSG_SHOW_RESULT_WORDCARD = 10;
 
 	public static final int MSG_CHECK_VOCABULARY_BOARD = 100;
 	public static final int MSG_GET_DUE_WORDCARD_LIST = 101;
 	public static final int MSG_REVIEWED_WORDCARD = 102;
 	public static final int MSG_REVIEWED_PLUS_WORDCARD = 103;
 	public static final int MSG_CLOSE_WORDCARD = 104;
-	public static final int MSG_UPGRADE_WORDCARD = 105;
 	public static final int MSG_SYNC_LOCAL_CACHE = 106;
+	public static final int MSG_TRIGGER_QUERY_WORD = 107;
 
 	// Unique Identification Number for the Notification.
 	// We use it on Notification start, and to cancel it.
@@ -131,10 +132,11 @@ public class VelloService extends Service implements RequestListener,
 					String cardId = (String) msg.obj;
 					service.archiveWordCard(cardId);
 					break;
-				case MSG_UPGRADE_WORDCARD:
-					WordCard wordcard = (WordCard) msg.obj;
-					service.upgradeWordCard(wordcard);
-					break;
+				case MSG_TRIGGER_QUERY_WORD:
+				    // check if the word is in local cache, show if yes, go on if no
+				    String query = (String) msg.obj;
+				    service.queryInLocalCache(query);
+				    break;
 				default:
 					super.handleMessage(msg);
 				}
@@ -143,10 +145,14 @@ public class VelloService extends Service implements RequestListener,
 		}
 	}
 
-	private void sendMessageToUI(int type) {
+	private void sendMessageToUI(int type, Object obj) {
 		for (int i = mClients.size() - 1; i >= 0; i--) {
 			try {
-				mClients.get(i).send(Message.obtain(null, type));
+			    Message msg = Message.obtain(null, type);
+			    if (obj != null) {
+			        msg.obj = obj;
+			    }
+				mClients.get(i).send(msg);
 			} catch (RemoteException e) {
 				// The client is dead. Remove it from the list; we are going
 				// through the list from back to front so this is safe to do
@@ -156,7 +162,7 @@ public class VelloService extends Service implements RequestListener,
 		}
 	}
 
-	@Override
+    @Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Log.i("LocalService", "Received start id " + startId + ": " + intent);
 		// We want this service to continue running until it is explicitly
@@ -196,20 +202,19 @@ public class VelloService extends Service implements RequestListener,
 
 	protected VelloRequestManager mRequestManager;
 	protected ArrayList<Request> mRequestList;
-
-	private String[] mProjection = {
-			VelloContent.DbWordCard.Columns.ID.getName(),
-			VelloContent.DbWordCard.Columns.ID_CARD.getName(),
-			VelloContent.DbWordCard.Columns.ID_LIST.getName() };
-
-	private void upgradeWordCard(WordCard wordcard) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "upgradeWordCard start...");
-		}
-		Request upgradeWordCard = VelloRequestFactory
-				.upgradeWordCardRequest(wordcard);
-		mRequestManager.execute(upgradeWordCard, this);
-		mRequestList.add(upgradeWordCard);
+	
+	private void queryInLocalCache(String query) {
+	    if (VelloConfig.DEBUG_SWITCH) {
+	        Log.d(TAG, "query in local cache...");
+	    }
+	    Request queryInLocalCache = VelloRequestFactory.queryInLocalCacheRequest(query);
+	    mRequestManager.execute(queryInLocalCache, this);
+	    mRequestList.add(queryInLocalCache);
+        
+    }
+	
+	private void queryInRemoteStorage(String query) {
+	    // TODO
 	}
 
 	private void archiveWordCard(String idCard) {
@@ -246,8 +251,6 @@ public class VelloService extends Service implements RequestListener,
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "checkVocabularyBoard start...");
 		}
-		sendMessageToUI(MSG_SPINNER_ON);
-		sendMessageToUI(VelloService.MSG_TOAST_INIT_VOCABULARY_START);
 
 		Request checkVocabularyBoardRequest = VelloRequestFactory
 				.checkVocabularyBoardRequest();
@@ -310,12 +313,10 @@ public class VelloService extends Service implements RequestListener,
 	}
 
 	private void getDueWordCardList() {
-		sendMessageToUI(VelloService.MSG_SPINNER_ON);
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "getAllWordCardList start ...");
 		}
 
-		sendMessageToUI(VelloService.MSG_TOAST_GET_DUE_WORD);
 		Request getAllWordCardListRequest = VelloRequestFactory
 				.getDueWordCardListRequest();
 		mRequestManager.execute(getAllWordCardListRequest, this);
@@ -324,7 +325,6 @@ public class VelloService extends Service implements RequestListener,
 	}
 
 	private void lookUpWord(String keyword) {
-		sendMessageToUI(VelloService.MSG_SPINNER_ON);
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "look up word start...");
 		}
@@ -336,7 +336,6 @@ public class VelloService extends Service implements RequestListener,
 	}
 
 	private void checkWordCardStatus(String keyword, String wsResult) {
-		sendMessageToUI(VelloService.MSG_SPINNER_ON);
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "checkWordCardStatusRequest start...");
 		}
@@ -347,7 +346,6 @@ public class VelloService extends Service implements RequestListener,
 	}
 
 	private void addWordCard(String keyword, String data) {
-		sendMessageToUI(VelloService.MSG_SPINNER_ON);
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "addWordCard start...");
 		}
@@ -358,7 +356,6 @@ public class VelloService extends Service implements RequestListener,
 	}
 
 	private void initializeWordCard(String idCard) {
-		sendMessageToUI(VelloService.MSG_SPINNER_ON);
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "initializeWordCard start...");
 		}
@@ -369,7 +366,6 @@ public class VelloService extends Service implements RequestListener,
 	}
 
 	private void reOpenWordCard(String idCard) {
-		sendMessageToUI(VelloService.MSG_SPINNER_ON);
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "reOpenWordCard start...");
 		}
@@ -487,8 +483,6 @@ public class VelloService extends Service implements RequestListener,
 									getApplicationContext(), list.id, position);
 							if (AccountUtils
 									.isVocabularyBoardWellFormed(getApplicationContext())) {
-								sendMessageToUI(MSG_TOAST_INIT_VOCABULARY_END);
-								sendMessageToUI(MSG_SPINNER_OFF);
 								// getDueWordCardList();
 							}
 							return;
@@ -519,8 +513,6 @@ public class VelloService extends Service implements RequestListener,
 							id, pos);
 					if (AccountUtils
 							.isVocabularyBoardWellFormed(getApplicationContext())) {
-						sendMessageToUI(MSG_TOAST_INIT_VOCABULARY_END);
-						sendMessageToUI(MSG_SPINNER_OFF);
 						// getDueWordCardList();
 					}
 				} else {
@@ -542,8 +534,6 @@ public class VelloService extends Service implements RequestListener,
 							id, pos);
 					if (AccountUtils
 							.isVocabularyBoardWellFormed(getApplicationContext())) {
-						sendMessageToUI(MSG_TOAST_INIT_VOCABULARY_END);
-						sendMessageToUI(MSG_SPINNER_OFF);
 						// getDueWordCardList();
 					}
 				} else {
@@ -581,7 +571,6 @@ public class VelloService extends Service implements RequestListener,
 
 				} else {
 					// NOT available word, tell user the truth.
-					sendMessageToUI(MSG_TOAST_NOT_AVAILABLE_WORD);
 				}
 
 				if (VelloConfig.DEBUG_SWITCH) {
@@ -708,7 +697,6 @@ public class VelloService extends Service implements RequestListener,
 				return;
 
 			case VelloRequestFactory.REQUEST_TYPE_GET_DUE_WORDCARD_LIST:
-				sendMessageToUI(MSG_SPINNER_OFF);
 				boolean finished = resultData
 						.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_RESULT_STATUS);
 				if (finished) {
@@ -767,17 +755,17 @@ public class VelloService extends Service implements RequestListener,
 					archiveWordCard(idCard);
 				}
 				return;
-
-			case VelloRequestFactory.REQUEST_TYPE_UPGRADE_WORDCARD:
-				WordCard upgradedWordCard = resultData
-						.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
-				WordCard oldWordCard = (WordCard) request
-						.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
-				if (upgradedWordCard != null) {
-					// success, do nothing no
-				} else {
-					upgradeWordCard(oldWordCard);
-				}
+				
+			case VelloRequestFactory.REQUEST_TYPE_QUERY_IN_LOCAL_CACHE:
+			    WordCard localWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+			    if (localWordCard != null) {
+			        // yes, show in UI TODO
+			    } else {
+			        // no, go on query in remote storage TODO
+			        String query = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
+			        queryInRemoteStorage(query);
+			    }
+			    return;
 
 			default:
 				return;
@@ -788,10 +776,8 @@ public class VelloService extends Service implements RequestListener,
 	@Override
 	public void onRequestConnectionError(Request request, int statusCode) {
 		if (mRequestList.contains(request)) {
-			sendMessageToUI(MSG_SPINNER_OFF);
 			mRequestList.remove(request);
 
-			sendMessageToUI(MSG_DIALOG_CONNECTION_ERROR_SHOW);
 		}
 
 	}
@@ -800,10 +786,8 @@ public class VelloService extends Service implements RequestListener,
 	public void onRequestDataError(Request request) {
 		// TODO
 		if (mRequestList.contains(request)) {
-			sendMessageToUI(MSG_SPINNER_OFF);
 			mRequestList.remove(request);
 
-			sendMessageToUI(MSG_DIALOG_BAD_DATA_ERROR_SHOW);
 		}
 
 	}
@@ -816,7 +800,6 @@ public class VelloService extends Service implements RequestListener,
 
 	@Override
 	public void connectionErrorDialogCancel(Request request) {
-		sendMessageToUI(MSG_SPINNER_OFF);
 	}
 
 	@Override
