@@ -14,14 +14,14 @@ import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.service.RequestService.Operation;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.config.WSConfig;
-import com.mili.xiaominglui.app.vello.data.factory.CheckWordCardStatusResponseJsonFactory;
+import com.mili.xiaominglui.app.vello.data.factory.QueryInRemoteStorageResponseJsonFactory;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 import java.util.HashMap;
 
-public class CheckWordCardStatusOperation implements Operation {
-    private static final String TAG = CheckWordCardStatusOperation.class.getSimpleName();
+public class QueryInRemoteStorageOperation implements Operation {
+    private static final String TAG = QueryInRemoteStorageOperation.class.getSimpleName();
 
     @Override
     public Bundle execute(Context context, Request request)
@@ -36,7 +36,7 @@ public class CheckWordCardStatusOperation implements Operation {
 	parameterMap.put(WSConfig.WS_TRELLO_PARAM_QUERY, keyword);
 	parameterMap.put(WSConfig.WS_TRELLO_PARAM_IDBOARDS, vocabularyBoardId);
 	parameterMap.put(WSConfig.WS_TRELLO_PARAM_MODELTYPES, "cards");
-	parameterMap.put(WSConfig.WS_TRELLO_PARAM_CARD_FIELDS, "name,closed,due,desc,idList");
+	parameterMap.put(WSConfig.WS_TRELLO_PARAM_CARD_FIELDS, "name,desc,due,closed,idList,dateLastActivity");
 	parameterMap.put(WSConfig.WS_TRELLO_PARAM_APP_KEY, WSConfig.VELLO_APP_KEY);
 	parameterMap.put(WSConfig.WS_TRELLO_PARAM_ACCESS_TOKEN, token);
 	
@@ -50,7 +50,7 @@ public class CheckWordCardStatusOperation implements Operation {
 	    Log.d(TAG, "result.body = " + result.body);
 	}
 	
-	return CheckWordCardStatusResponseJsonFactory.parseResult(result.body);
+	return QueryInRemoteStorageResponseJsonFactory.parseResult(result.body);
     }
 
 }

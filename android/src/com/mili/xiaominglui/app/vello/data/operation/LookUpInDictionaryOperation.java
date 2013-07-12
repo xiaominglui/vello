@@ -19,8 +19,8 @@ import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 
 import java.util.HashMap;
 
-public class LookUpWordOperation implements Operation {
-    private static final String TAG = LookUpWordOperation.class.getSimpleName();
+public class LookUpInDictionaryOperation implements Operation {
+    private static final String TAG = LookUpInDictionaryOperation.class.getSimpleName();
 
     @Override
     public Bundle execute(Context context, Request request)

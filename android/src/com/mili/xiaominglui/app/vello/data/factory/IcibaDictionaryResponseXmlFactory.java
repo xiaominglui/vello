@@ -6,12 +6,14 @@ import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 
 public class IcibaDictionaryResponseXmlFactory {
 
-    public static Bundle parseResult(String wsResponse) {
-	if (wsResponse != null) {
-	    Bundle bundle = new Bundle();
-	    bundle.putString(VelloRequestFactory.BUNDLE_EXTRA_DICTIONARY_ICIBA_RESPONSE, wsResponse);
-	    return bundle;
+	public static Bundle parseResult(String wsResponse) {
+		Bundle bundle = new Bundle();
+		if (wsResponse != null) {
+
+			bundle.putString(
+					VelloRequestFactory.BUNDLE_EXTRA_DICTIONARY_ICIBA_RESPONSE,
+					wsResponse);
+		}
+		return bundle;
 	}
-	return null;
-    }
 }

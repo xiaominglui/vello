@@ -30,6 +30,7 @@ import com.mili.xiaominglui.app.vello.data.model.List;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.model.WordList;
 import com.mili.xiaominglui.app.vello.data.operation.GetDueWordCardListOperation;
+import com.mili.xiaominglui.app.vello.data.operation.LookUpInDictionaryOperation;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
@@ -133,7 +134,7 @@ public class VelloService extends Service implements RequestListener,
 					service.archiveWordCard(cardId);
 					break;
 				case MSG_TRIGGER_QUERY_WORD:
-				    // check if the word is in local cache, show if yes, go on if no
+				    // firstly, check if the word is in local cache, show if yes, go on if no
 				    String query = (String) msg.obj;
 				    service.queryInLocalCache(query);
 				    break;
@@ -203,20 +204,6 @@ public class VelloService extends Service implements RequestListener,
 	protected VelloRequestManager mRequestManager;
 	protected ArrayList<Request> mRequestList;
 	
-	private void queryInLocalCache(String query) {
-	    if (VelloConfig.DEBUG_SWITCH) {
-	        Log.d(TAG, "query in local cache...");
-	    }
-	    Request queryInLocalCache = VelloRequestFactory.queryInLocalCacheRequest(query);
-	    mRequestManager.execute(queryInLocalCache, this);
-	    mRequestList.add(queryInLocalCache);
-        
-    }
-	
-	private void queryInRemoteStorage(String query) {
-	    // TODO
-	}
-
 	private void archiveWordCard(String idCard) {
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "archiveWordCard start...");
@@ -323,26 +310,34 @@ public class VelloService extends Service implements RequestListener,
 		mRequestList.add(getAllWordCardListRequest);
 
 	}
+	
+	private void queryInLocalCache(String query) {
+	    if (VelloConfig.DEBUG_SWITCH) {
+	        Log.d(TAG, "query in local cache...");
+	    }
+	    Request queryInLocalCache = VelloRequestFactory.queryInLocalCacheRequest(query);
+	    mRequestManager.execute(queryInLocalCache, this);
+	    mRequestList.add(queryInLocalCache);
+        
+    }
 
-	private void lookUpWord(String keyword) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "look up word start...");
-		}
-		Request lookUpWordRequest = VelloRequestFactory
-				.lookUpWordRequest(keyword);
-		mRequestManager.execute(lookUpWordRequest, this);
-		mRequestList.add(lookUpWordRequest);
-
-	}
-
-	private void checkWordCardStatus(String keyword, String wsResult) {
+	private void queryInRemoteStorage(String query) {
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "checkWordCardStatusRequest start...");
 		}
-		Request checkWordCardStatus = VelloRequestFactory
-				.checkWordCardStatusRequest(keyword, wsResult);
-		mRequestManager.execute(checkWordCardStatus, this);
-		mRequestList.add(checkWordCardStatus);
+		Request queryInRemoteStorage = VelloRequestFactory
+				.queryInRemoteStorageRequest(query);
+		mRequestManager.execute(queryInRemoteStorage, this);
+		mRequestList.add(queryInRemoteStorage);
+	}
+	
+	private void lookUpInDictionary(String keyword) {
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "look up in dictionary...");
+		}
+		Request lookUpInDictionary = VelloRequestFactory.lookUpInDictionaryRequest(keyword);
+		mRequestManager.execute(lookUpInDictionary, this);
+		mRequestList.add(lookUpInDictionary);
 	}
 
 	private void addWordCard(String keyword, String data) {
@@ -557,55 +552,36 @@ public class VelloService extends Service implements RequestListener,
 					createVocabularyBoard();
 				}
 				return;
-			case VelloRequestFactory.REQUEST_TYPE_LOOK_UP_WORD:
-				String wsResult = resultData
-						.getString(VelloRequestFactory.BUNDLE_EXTRA_DICTIONARY_ICIBA_RESPONSE);
-				String keyword = request
-						.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
-
-				IcibaWord word = IcibaWordXmlParser.parse(wsResult);
-				if (word.definition.size() > 0) {
-					// response a available word and save to trello
-					// begin save word flow
-					checkWordCardStatus(keyword, wsResult);
-
-				} else {
-					// NOT available word, tell user the truth.
-				}
-
-				if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "look up word end.");
-				}
+			case VelloRequestFactory.REQUEST_TYPE_LOOK_UP_IN_DICTIONARY:
+				String wsResponse = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_DICTIONARY_ICIBA_RESPONSE);
+				// TODO
 
 				return;
 
-			case VelloRequestFactory.REQUEST_TYPE_CHECK_WORDCARD_STATUS:
+			case VelloRequestFactory.REQUEST_TYPE_QUERY_IN_REMOTE_STORAGE:
 				ArrayList<WordCard> existedWordCardList = resultData
 						.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST);
-				String newWord = request
+				String keyword = request
 						.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
-				String newWordResult = request
-						.getString(VelloRequestFactory.PARAM_EXTRA_CHECK_WORDCARD_WS_RESULT);
 				if (existedWordCardList.isEmpty()) {
-					// new word, should add WordCard
+					// not exist in remote storage
 					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "new word, should add WordCard");
+						Log.d(TAG, "not exist in remote storage");
 					}
-					addWordCard(newWord, newWordResult);
+					// query in dictionary service
+					lookUpInDictionary(keyword);
 				} else {
 					// check more to decide
 					// filter to find the right one
 					for (WordCard w : existedWordCardList) {
-						if (w.name.equals(newWord)) {
+						if (w.name.equals(keyword)) {
 							// got the right word card
 							// show with user first
-							// TODO
-							// new WordCardToWordTask().execute(w);
+							sendMessageToUI(MSG_SHOW_RESULT_WORDCARD, w);
 
 							if (w.closed.equals("true")) {
 								// the existed word card has be closed,
-								// re-open
-								// it.
+								// re-open it.
 								if (VelloConfig.DEBUG_SWITCH) {
 									Log.d(TAG, "re-open existed word card.");
 								}
@@ -613,8 +589,7 @@ public class VelloService extends Service implements RequestListener,
 							} else {
 								if (w.due.equals("null")) {
 									// the existed word card has not be
-									// initialized, initialize it. this is
-									// the
+									// initialized, initialize it. this is the
 									// double check
 									if (VelloConfig.DEBUG_SWITCH) {
 										Log.d(TAG,
@@ -631,17 +606,9 @@ public class VelloService extends Service implements RequestListener,
 									}
 								}
 							}
-							if (VelloConfig.DEBUG_SWITCH) {
-								Log.d(TAG, "check wordcard status end.");
-							}
 							return;
 						}
 					}
-
-					addWordCard(newWord, newWordResult);
-				}
-				if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "check wordcard status end.");
 				}
 				return;
 
@@ -759,9 +726,10 @@ public class VelloService extends Service implements RequestListener,
 			case VelloRequestFactory.REQUEST_TYPE_QUERY_IN_LOCAL_CACHE:
 			    WordCard localWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 			    if (localWordCard != null) {
-			        // yes, show in UI TODO
+			        // yes, show in UI
+			    	sendMessageToUI(MSG_SHOW_RESULT_WORDCARD, localWordCard);
 			    } else {
-			        // no, go on query in remote storage TODO
+			        // no, go on query in remote storage
 			        String query = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
 			        queryInRemoteStorage(query);
 			    }
