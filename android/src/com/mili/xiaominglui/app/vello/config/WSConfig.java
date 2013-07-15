@@ -45,4 +45,7 @@ public final class WSConfig {
     // iciba
     public static final String WS_DICTIONARY_ICIBA_API = "http://dict-co.iciba.com/api/dictionary.php";
     public static final String WS_DICTIONARY_ICIBA_PARAM_KEYWORD = "w";
+    
+    // mili dictionary
+    public static final String WS_DICTIONARY_MILI_API = "http://mili.cfapps.io/words/";
 }

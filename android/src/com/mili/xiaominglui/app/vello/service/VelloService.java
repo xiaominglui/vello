@@ -553,7 +553,7 @@ public class VelloService extends Service implements RequestListener,
 				}
 				return;
 			case VelloRequestFactory.REQUEST_TYPE_LOOK_UP_IN_DICTIONARY:
-				String wsResponse = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_DICTIONARY_ICIBA_RESPONSE);
+				String wsResponse = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_DICTIONARY_WS_RESPONSE);
 				// TODO
 
 				return;

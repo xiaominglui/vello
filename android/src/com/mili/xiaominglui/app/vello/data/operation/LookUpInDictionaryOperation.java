@@ -15,6 +15,7 @@ import com.foxykeep.datadroid.service.RequestService.Operation;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.config.WSConfig;
 import com.mili.xiaominglui.app.vello.data.factory.IcibaDictionaryResponseXmlFactory;
+import com.mili.xiaominglui.app.vello.data.factory.MiliDictionaryResponseJsonFactory;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 
 import java.util.HashMap;
@@ -27,21 +28,23 @@ public class LookUpInDictionaryOperation implements Operation {
 	    throws ConnectionException, DataException, CustomRequestException {
 	String keyword = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
 	
-	String urlString = WSConfig.WS_DICTIONARY_ICIBA_API;
+//	String urlString = WSConfig.WS_DICTIONARY_ICIBA_API;
+	String urlString = WSConfig.WS_DICTIONARY_MILI_API + keyword;
 	
-	HashMap<String, String> parameterMap = new HashMap<String, String>();
-	parameterMap.put(WSConfig.WS_DICTIONARY_ICIBA_PARAM_KEYWORD, keyword);
+//	HashMap<String, String> parameterMap = new HashMap<String, String>();
+//	parameterMap.put(WSConfig.WS_DICTIONARY_ICIBA_PARAM_KEYWORD, keyword);
 	
 	NetworkConnection networkConnection = new NetworkConnection(context,
 		urlString);
 	networkConnection.setMethod(Method.GET);
-	networkConnection.setParameters(parameterMap);
+//	networkConnection.setParameters(parameterMap);
 	ConnectionResult result = networkConnection.execute();
 	
 	if (VelloConfig.DEBUG_SWITCH) {
 	    Log.d(TAG, "result.body = " + result.body);
 	}
 	
-	return IcibaDictionaryResponseXmlFactory.parseResult(result.body);
+//	return IcibaDictionaryResponseXmlFactory.parseResult(result.body);
+	return MiliDictionaryResponseJsonFactory.parseResult(result.body);
     }
 }

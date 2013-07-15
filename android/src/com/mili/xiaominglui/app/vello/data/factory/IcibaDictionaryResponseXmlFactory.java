@@ -11,7 +11,7 @@ public class IcibaDictionaryResponseXmlFactory {
 		if (wsResponse != null) {
 
 			bundle.putString(
-					VelloRequestFactory.BUNDLE_EXTRA_DICTIONARY_ICIBA_RESPONSE,
+					VelloRequestFactory.BUNDLE_EXTRA_DICTIONARY_WS_RESPONSE,
 					wsResponse);
 		}
 		return bundle;

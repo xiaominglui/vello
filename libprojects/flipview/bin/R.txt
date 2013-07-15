@@ -1,0 +1,9 @@
+int attr orientation 0x7f010000
+int attr overFlipMode 0x7f010001
+int id glow 0x7f020002
+int id horizontal 0x7f020001
+int id rubber_band 0x7f020003
+int id vertical 0x7f020000
+int[] styleable FlipView { 0x7f010000, 0x7f010001 }
+int styleable FlipView_orientation 0
+int styleable FlipView_overFlipMode 1
