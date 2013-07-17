@@ -149,8 +149,9 @@ public class SyncHelper {
 								mContext)
 								.setWhen(rightNow.getTimeInMillis())
 								.setSmallIcon(R.drawable.ic_stat_vaa)
-								.setContentTitle(num + " " + mContext.getString(R.string.notif_content_title))
+								.setContentTitle(mContext.getString(R.string.notif_content_title))
 								.setContentText(mContext.getText(R.string.notif_content_text))
+								.setContentInfo(String.valueOf(num))
 								.setContentIntent(pIntent)
 								.setAutoCancel(true);
 
