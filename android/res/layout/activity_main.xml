@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2007 The Android Open Source Project
+<!--
+     Copyright (C) 2007 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,33 +15,40 @@
      limitations under the License.
 -->
 
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent" >
 
     <com.android.deskclock.widget.swipeablelistview.SwipeableListView
         android:id="@+id/words_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="9dp"
-        android:paddingLeft="9dp"
-        android:paddingRight="9dp"
         android:clipToPadding="false"
         android:descendantFocusability="beforeDescendants"
         android:divider="@null"
         android:dividerHeight="7dp"
-        />
+        android:paddingLeft="9dp"
+        android:paddingRight="9dp"
+        android:paddingTop="9dp" />
+
+    <TextView
+        android:id="@+id/empty"
+        style="@android:style/TextAppearance.Large"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center"
+        android:text="@string/listview_empty" >
+    </TextView>
 
     <com.android.deskclock.widget.ActionableToastBar
         android:id="@+id/undo_bar"
+        style="@style/ToastBarStyle"
         android:layout_width="match_parent"
         android:layout_height="64dip"
         android:layout_gravity="bottom"
         android:layout_marginBottom="40dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        style="@style/ToastBarStyle"
-        />
+        android:layout_marginRight="8dp" />
+
 </FrameLayout>

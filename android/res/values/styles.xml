@@ -36,5 +36,5 @@
         <item name="android:textAllCaps">true</item>
         <item name="android:fontFamily">sans-serif-condensed</item>
     </style>
-
+    
 </resources>

@@ -40,6 +40,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -341,6 +342,8 @@ public class MainActivity extends BaseActivity implements
 				return false;
 			}
 		});
+		
+		mWordsList.setEmptyView(findViewById(R.id.empty));
 
 		mUndoBar = (ActionableToastBar) findViewById(R.id.undo_bar);
 
