@@ -8,6 +8,7 @@ import java.util.HashSet;
 
 import android.accounts.Account;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.ComponentName;
@@ -24,6 +25,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -69,6 +71,7 @@ import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
+import com.mili.xiaominglui.app.vello.util.UIUtils;
 
 public class MainActivity extends BaseActivity implements
 		LoaderCallbacks<Cursor> {
@@ -457,20 +460,35 @@ public class MainActivity extends BaseActivity implements
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
 		getSupportMenuInflater().inflate(R.menu.home, menu);
 
-		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-		SearchView searchView = (SearchView) menu.findItem(R.id.menu_search)
-				.getActionView();
-		searchView.setSearchableInfo(searchManager
-				.getSearchableInfo(getComponentName()));
+		setupSearchMenuItem(menu);
 
 		return true;
 	}
+	
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private void setupSearchMenuItem(Menu menu) {
+        MenuItem searchItem = menu.findItem(R.id.menu_search);
+        if (searchItem != null && UIUtils.hasHoneycomb()) {
+            SearchView searchView = (SearchView) searchItem.getActionView();
+            if (searchView != null) {
+                SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
+                searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+            }
+        }
+    }
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		case R.id.menu_search:
+			if (!UIUtils.hasHoneycomb()) {
+                startSearch(null, false, Bundle.EMPTY, false);
+                return true;
+            }
+            break;
 		case R.id.menu_about:
 			return true;
 		case R.id.menu_sign_out:

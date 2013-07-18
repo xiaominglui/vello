@@ -1,5 +1,6 @@
 package com.mili.xiaominglui.app.vello.data.provider;
 
+import android.app.SearchManager;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -25,7 +26,8 @@ public class VelloProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     private enum UriType {
         DB_WORD_CARD(DbWordCard.TABLE_NAME, DbWordCard.TABLE_NAME, DbWordCard.TYPE_ELEM_TYPE),
-        DB_WORD_CARD_ID_IN_LOCAL_DB(DbWordCard.TABLE_NAME + "/#", DbWordCard.TABLE_NAME, DbWordCard.TYPE_DIR_TYPE);
+        DB_WORD_CARD_ID_IN_LOCAL_DB(DbWordCard.TABLE_NAME + "/#", DbWordCard.TABLE_NAME, DbWordCard.TYPE_DIR_TYPE),
+        SEARCH_SUGGESTION(SearchManager.SUGGEST_URI_PATH_QUERY + "/*", DbWordCard.TABLE_NAME, DbWordCard.TYPE_DIR_TYPE);
         
         private String mTableName;
         private String mType;
