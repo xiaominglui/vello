@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <string name="app_name">VAA</string>
     <string name="action_settings">Settings</string>
@@ -46,6 +46,7 @@
     <string name="notif_content_title">Words need reviewing.</string>
     <string name="notif_content_text">Touch to review.</string>
     <string name="title_search">Search</string>
+    <string name="title_search_query">Search for \"&lt;b&gt;<xliff:g id="query">%1$s</xliff:g>&lt;b&gt;\"</string>
     <string name="listview_empty">Good Job, No Word Needs Reviewing Now.</string>
     
     
