@@ -1,23 +1,14 @@
 package com.mili.xiaominglui.app.vello.ui;
 
-import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-
 import android.accounts.Account;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.SearchManager;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.res.Resources;
 import android.database.CharArrayBuffer;
 import android.database.Cursor;
@@ -27,26 +18,18 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.RemoteException;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -55,7 +38,6 @@ import com.android.deskclock.widget.ActionableToastBar;
 import com.android.deskclock.widget.swipeablelistview.SwipeableListView;
 import com.atermenji.android.iconictextview.IconicTextView;
 import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
-import com.devspark.appmsg.AppMsg;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
@@ -69,152 +51,26 @@ import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
-import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.mili.xiaominglui.app.vello.util.UIUtils;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
 
 public class MainActivity extends BaseActivity implements
 		LoaderCallbacks<Cursor> {
 	private static final String TAG = MainActivity.class.getSimpleName();
 	private Context mContext;
-	private Activity mActivity;
 
 	private static final String KEY_EXPANDED_IDS = "expandedIds";
 	private static final String KEY_SELECTED_WORDS = "selectedWords";
 	private static final String KEY_DELETED_WORD = "deletedWord";
 	private static final String KEY_UNDO_SHOWING = "undoShowing";
 
-	private MyHandler mUICallback = new MyHandler(this);
 
-	static class MyHandler extends Handler {
-		WeakReference<MainActivity> mActivity;
 
-		MyHandler(MainActivity activity) {
-			mActivity = new WeakReference<MainActivity>(activity);
-		}
-
-		@Override
-		public void handleMessage(Message msg) {
-			MainActivity theActivity = mActivity.get();
-			switch (msg.what) {
-			case VelloService.MSG_DIALOG_BAD_DATA_ERROR_SHOW:
-				theActivity.showBadDataErrorDialog();
-				break;
-			case VelloService.MSG_DIALOG_CONNECTION_ERROR_SHOW:
-				// TODO
-				// ConnectionErrorDialogFragment.show();
-				break;
-			case VelloService.MSG_TOAST_INIT_VOCABULARY_START:
-				AppMsg.makeText(theActivity.mActivity,
-						R.string.toast_init_vocabulary_start, AppMsg.STYLE_INFO)
-						.setLayoutGravity(Gravity.BOTTOM).show();
-				break;
-			case VelloService.MSG_TOAST_GET_DUE_WORD:
-				AppMsg.makeText(theActivity.mActivity,
-						R.string.toast_get_due_word, AppMsg.STYLE_INFO)
-						.setLayoutGravity(Gravity.BOTTOM).show();
-				break;
-			case VelloService.MSG_TOAST_INIT_VOCABULARY_END:
-				AppMsg.makeText(theActivity.mActivity,
-						R.string.toast_init_vocabulary_end, AppMsg.STYLE_INFO)
-						.setLayoutGravity(Gravity.BOTTOM).show();
-				break;
-			case VelloService.MSG_TOAST_NO_WORD_NOW:
-				AppMsg.makeText(theActivity.mActivity,
-						R.string.toast_no_word_now, AppMsg.STYLE_CONFIRM)
-						.setLayoutGravity(Gravity.TOP).show();
-				break;
-			case VelloService.MSG_TOAST_NOT_AVAILABLE_WORD:
-				AppMsg.makeText(theActivity.mActivity,
-						R.string.toast_not_available_word, AppMsg.STYLE_ALERT)
-						.setLayoutGravity(Gravity.TOP).show();
-				break;
-			case VelloService.MSG_SHOW_RESULT_WORDCARD:
-			    WordCard result = (WordCard) msg.obj;
-			    Toast.makeText(theActivity, result.id, Toast.LENGTH_SHORT).show();
-			    break;
-			}
-		}
-	}
-
-	Messenger mService = null;
-	private boolean mIsBound;
-
-	final Messenger mMessenger = new Messenger(mUICallback);
-
-	private ServiceConnection mConnection = new ServiceConnection() {
-		public void onServiceConnected(ComponentName className, IBinder service) {
-			// This is called when the connection with the service has been
-			// established, giving us the service object we can use to
-			// interact with the service. Because we have bound to a explicit
-			// service that we know is running in our own process, we can
-			// cast its IBinder to a concrete class and directly access it.
-			mService = new Messenger(service);
-			// Tell the user about this for our demo.
-			Toast.makeText(getApplicationContext(),
-					R.string.local_service_connected, Toast.LENGTH_SHORT)
-					.show();
-
-			try {
-				Message msg = Message.obtain(null,
-						VelloService.MSG_REGISTER_CLIENT);
-				msg.replyTo = mMessenger;
-				mService.send(msg);
-			} catch (RemoteException e) {
-				// In this case the service has crashed before we could even do
-				// anything with it
-			}
-
-			if (AccountUtils.hasVocabularyBoard(mContext)
-					&& AccountUtils.isVocabularyBoardWellFormed(mContext)) {
-				// all initialized
-				// do nothing now
-			} else {
-				// begin to check vocabulary board
-				sendMessageToService(VelloService.MSG_CHECK_VOCABULARY_BOARD);
-			}
-		}
-
-		public void onServiceDisconnected(ComponentName className) {
-			// This is called when the connection with the service has been
-			// unexpectedly disconnected - process crashed.
-			mService = null;
-			Toast.makeText(getApplicationContext(),
-					R.string.local_service_disconnected, Toast.LENGTH_SHORT)
-					.show();
-		}
-	};
-
-	private void sendMessageToService(int type) {
-		if (mIsBound) {
-			if (mService != null) {
-				try {
-					Message msg = Message.obtain(null, type);
-					msg.replyTo = mMessenger;
-					mService.send(msg);
-				} catch (RemoteException e) {
-				}
-			}
-		}
-	}
-
-	void doBindService() {
-		// Establish a connection with the service. We use an explicit
-		// class name because we want a specific service implementation that
-		// we know will be running in our own process (and thus won't be
-		// supporting component replacement by other applications).
-		bindService(new Intent(this, VelloService.class), mConnection,
-				Context.BIND_AUTO_CREATE);
-		mIsBound = true;
-	}
-
-	void doUnbindService() {
-		if (mIsBound) {
-			// Detach our existing connection.
-			unbindService(mConnection);
-			mIsBound = false;
-		}
-	}
 
 	// Saved status for undo
 	private WordCard mDeletedWord;
@@ -227,54 +83,18 @@ public class MainActivity extends BaseActivity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		mContext = getApplicationContext();
-		mActivity = this;
 
 		if (isFinishing()) {
 			return;
 		}
 
-		handleIntent(getIntent());
 
 		initialize(savedInstanceState);
 
 		getSupportLoaderManager().initLoader(0, null, this);
-		doBindService();
 	}
 
-	@Override
-	protected void onNewIntent(Intent intent) {
-		setIntent(intent);
-		handleIntent(intent);
-	}
 
-	private void handleIntent(Intent intent) {
-		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-			String query = intent.getStringExtra(SearchManager.QUERY);
-			Toast.makeText(mContext, query, Toast.LENGTH_SHORT).show();
-			doWordSearch(query);
-		}
-	}
-
-	private void doWordSearch(String query) {
-		// TODO
-		// 1. check if the word is in local cache, show if yes, go on if no
-		// 2. check if the word is in remote but closed, show if yes and re-open, go on if no
-		// 3. query dictionary service
-		// 4. show and insert local cache item
-		// 5. sync for ensuring adding to remote successfully
-	    if (mIsBound) {
-	        if (mService != null) {
-	            try {
-                    Message msg = Message.obtain(null, VelloService.MSG_TRIGGER_QUERY_WORD);
-                    msg.obj = query;
-                    msg.replyTo = mMessenger;
-                    mService.send(msg);
-                } catch (RemoteException e) {
-                }
-	        }
-	    }
-
-	}
 
 	@Override
 	protected void onStart() {
@@ -299,7 +119,6 @@ public class MainActivity extends BaseActivity implements
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		doUnbindService();
 	}
 
 	private void initialize(Bundle savedState) {
