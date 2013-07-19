@@ -16,7 +16,7 @@ import com.mili.xiaominglui.app.vello.data.operation.LookUpInDictionaryOperation
 import com.mili.xiaominglui.app.vello.data.operation.QueryInLocalCacheOperation;
 import com.mili.xiaominglui.app.vello.data.operation.QueryInRemoteStorageOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ReopenVocabularyListOperation;
-import com.mili.xiaominglui.app.vello.data.operation.ReopenWordCardOperation;
+import com.mili.xiaominglui.app.vello.data.operation.RestartWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ReviewedPlusWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ReviewedWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.UpgradeWordCardOperation;
@@ -50,8 +50,8 @@ public class VelloRequestService extends RequestService {
                 return new QueryInRemoteStorageOperation();
             case VelloRequestFactory.REQUEST_TYPE_ADD_WORDCARD:
                 return new AddWordCardOperation();
-            case VelloRequestFactory.REQUEST_TYPE_REOPEN_WORDCARD:
-                return new ReopenWordCardOperation();
+            case VelloRequestFactory.REQUEST_TYPE_RESTART_WORDCARD:
+                return new RestartWordCardOperation();
             case VelloRequestFactory.REQUEST_TYPE_INITIALIZE_WORDCARD:
                 return new InitializeWordCardOperation();
             case VelloRequestFactory.REQUEST_TYPE_REVIEWED_WORDCARD:

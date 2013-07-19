@@ -16,7 +16,7 @@ public final class VelloRequestFactory {
     public static final int REQUEST_TYPE_CREATE_VOCABULARY_LIST = 6;
     public static final int REQUEST_TYPE_CREATE_VOCABULARY_BOARD = 7;
     public static final int REQUEST_TYPE_ADD_WORDCARD = 8;
-    public static final int REQUEST_TYPE_REOPEN_WORDCARD = 9;
+    public static final int REQUEST_TYPE_RESTART_WORDCARD = 9;
     public static final int REQUEST_TYPE_INITIALIZE_WORDCARD = 10;
     public static final int REQUEST_TYPE_REVIEWED_WORDCARD = 11;
     public static final int REQUEST_TYPE_REVIEWED_PLUS_WORDCARD = 12;
@@ -116,8 +116,8 @@ public final class VelloRequestFactory {
         return request;
     }
 
-    public static Request reOpenWordCardRequest(String idCard) {
-        Request request = new Request(REQUEST_TYPE_REOPEN_WORDCARD);
+    public static Request reStartWordCardRequest(String idCard) {
+        Request request = new Request(REQUEST_TYPE_RESTART_WORDCARD);
         request.put(PARAM_EXTRA_VOCABULARY_CARD_ID, idCard);
         request.setMemoryCacheEnabled(true);
         return request;

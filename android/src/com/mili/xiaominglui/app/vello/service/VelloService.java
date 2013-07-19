@@ -360,14 +360,14 @@ public class VelloService extends Service implements RequestListener,
 		mRequestList.add(initializeWordCard);
 	}
 
-	private void reOpenWordCard(String idCard) {
+	private void reStartWordCard(String idCard) {
 		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "reOpenWordCard start...");
+			Log.d(TAG, "reStartWordCard start...");
 		}
-		Request reOpenWordCard = VelloRequestFactory
-				.reOpenWordCardRequest(idCard);
-		mRequestManager.execute(reOpenWordCard, this);
-		mRequestList.add(reOpenWordCard);
+		Request reStartWordCard = VelloRequestFactory
+				.reStartWordCardRequest(idCard);
+		mRequestManager.execute(reStartWordCard, this);
+		mRequestList.add(reStartWordCard);
 	}
 	
 	@Override
@@ -583,9 +583,9 @@ public class VelloService extends Service implements RequestListener,
 								// the existed word card has be closed,
 								// re-open it.
 								if (VelloConfig.DEBUG_SWITCH) {
-									Log.d(TAG, "re-open existed word card.");
+									Log.d(TAG, "re-start existed word card.");
 								}
-								reOpenWordCard(w.id);
+								reStartWordCard(w.id);
 							} else {
 								if (w.due.equals("null")) {
 									// the existed word card has not be
@@ -632,18 +632,18 @@ public class VelloService extends Service implements RequestListener,
 
 				return;
 
-			case VelloRequestFactory.REQUEST_TYPE_REOPEN_WORDCARD:
-				WordCard reopenedWordCard = resultData
+			case VelloRequestFactory.REQUEST_TYPE_RESTART_WORDCARD:
+				WordCard restartedWordCard = resultData
 						.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
-				if (reopenedWordCard != null) {
-					// reopened
+				if (restartedWordCard != null) {
+					// restarted
 					// do nothing at present.
 				} else {
-					// reopen failed
+					// restart failed
 					// do nothing at present.
 				}
 				if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "reOpenzeWordCard end.");
+					Log.d(TAG, "reStartzeWordCard end.");
 				}
 				return;
 
