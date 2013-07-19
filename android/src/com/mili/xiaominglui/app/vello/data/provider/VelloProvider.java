@@ -27,7 +27,7 @@ public class VelloProvider extends ContentProvider {
     private enum UriType {
         DB_WORD_CARD(DbWordCard.TABLE_NAME, DbWordCard.TABLE_NAME, DbWordCard.TYPE_ELEM_TYPE),
         DB_WORD_CARD_ID_IN_LOCAL_DB(DbWordCard.TABLE_NAME + "/#", DbWordCard.TABLE_NAME, DbWordCard.TYPE_DIR_TYPE),
-        SEARCH_SUGGESTION(SearchManager.SUGGEST_URI_PATH_QUERY + "/*", DbWordCard.TABLE_NAME, DbWordCard.TYPE_DIR_TYPE);
+        SEARCH_SUGGESTION(SearchManager.SUGGEST_URI_PATH_QUERY, DbWordCard.TABLE_NAME, SearchManager.SUGGEST_MIME_TYPE);
         
         private String mTableName;
         private String mType;
@@ -113,37 +113,43 @@ public class VelloProvider extends ContentProvider {
         return true;
     }
 
-    @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
-            String sortOrder) {
-        Cursor c = null;
-        Uri notificationUri = VelloContent.CONTENT_URI;
-        UriType uriType = matchUri(uri);
-        Context context = getContext();
-        SQLiteDatabase db = getDatabase(context);
-        String id;
-        
-        if (VelloConfig.DEBUG_SWITCH) {
-            Log.d(TAG, "query: uri=" + uri + ", match is " + uriType.name());
-        }
-        
-        switch (uriType) {
-            case DB_WORD_CARD_ID_IN_LOCAL_DB:
-                id = uri.getPathSegments().get(1);
-                c = db.query(uriType.getTableName(), projection, whereWithId(selection),
-                        addIdToSelectionArgs(id, selectionArgs), null, null, sortOrder);
-                break;
-            case DB_WORD_CARD:
-                c = db.query(uriType.getTableName(), projection, selection, selectionArgs, null,
-                        null, sortOrder);
-                break;
-        }
-        
-        if ((c != null) && !isTemporary()) {
-            c.setNotificationUri(getContext().getContentResolver(), notificationUri);
-        }
-        return c;
-    }
+	@Override
+	public Cursor query(Uri uri, String[] projection, String selection,
+			String[] selectionArgs, String sortOrder) {
+		Cursor c = null;
+		Uri notificationUri = VelloContent.CONTENT_URI;
+		UriType uriType = matchUri(uri);
+		Context context = getContext();
+		SQLiteDatabase db = getDatabase(context);
+		String id;
+
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "query: uri=" + uri + ", match is " + uriType.name()
+					+ ", selectionArgs is  " + selectionArgs[0]);
+		}
+
+		switch (uriType) {
+		case SEARCH_SUGGESTION:
+			return getSuggestions(selectionArgs[0]);
+		case DB_WORD_CARD_ID_IN_LOCAL_DB:
+			id = uri.getPathSegments().get(1);
+			c = db.query(uriType.getTableName(), projection,
+					whereWithId(selection),
+					addIdToSelectionArgs(id, selectionArgs), null, null,
+					sortOrder);
+			break;
+		case DB_WORD_CARD:
+			c = db.query(uriType.getTableName(), projection, selection,
+					selectionArgs, null, null, sortOrder);
+			break;
+		}
+
+		if ((c != null) && !isTemporary()) {
+			c.setNotificationUri(getContext().getContentResolver(),
+					notificationUri);
+		}
+		return c;
+	}
 
     @Override
     public String getType(Uri uri) {
@@ -255,6 +261,12 @@ public class VelloProvider extends ContentProvider {
         newSelectionArgs[0] = id;
         System.arraycopy(selectionArgs, 0, newSelectionArgs, 1, length);
         return newSelectionArgs;
+    }
+    
+    private Cursor getSuggestions(String query) {
+    	query = query.toLowerCase();
+    	Log.d("mingo.lv", "query == " + query);
+    	return null;
     }
 
 }
