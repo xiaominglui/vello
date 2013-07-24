@@ -42,6 +42,7 @@ public class MainActivity extends BaseActivity {
 	
 	private DictionaryViewFragment mDictionaryViewFragment;
 	private ReviewViewFragment mReviewViewFragment;
+	private TestFragment mTestFragement = new TestFragment();
 	
 	private MainActivityUIHandler mUICallback = new MainActivityUIHandler(this);
 
@@ -91,6 +92,9 @@ public class MainActivity extends BaseActivity {
 			case VelloService.MSG_SHOW_RESULT_WORDCARD:
 			    WordCard result = (WordCard) msg.obj;
 			    Toast.makeText(theActivity, result.id, Toast.LENGTH_SHORT).show();
+//			    FragmentManager fm = theActivity.getSupportFragmentManager();
+//			    fm.beginTransaction().replace(R.id.fragment_container_master, theActivity.mTestFragement).addToBackStack("lookup").commit();
+			    theActivity.startActivity(new Intent(theActivity, DictionaryViewActivity.class));
 			    break;
 			}
 		}
@@ -187,6 +191,10 @@ public class MainActivity extends BaseActivity {
 		if (mReviewViewFragment == null) {
 			mReviewViewFragment = new ReviewViewFragment();
 			fm.beginTransaction().add(R.id.fragment_container_master, mReviewViewFragment).commit();
+		}
+		
+		if (mDictionaryViewFragment == null) {
+			mDictionaryViewFragment = new DictionaryViewFragment();
 		}
 		
 		doBindService();
