@@ -47,9 +47,6 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name=".ui.DictionaryViewActivity" >
-        </activity>
-        <activity
             android:name=".ui.AuthenticatorActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:excludeFromRecents="true"
