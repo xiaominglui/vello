@@ -20,6 +20,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.provider.SearchRecentSuggestions;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
@@ -40,7 +41,6 @@ public class MainActivity extends BaseActivity {
 	private static final String TAG = MainActivity.class.getSimpleName();
 	private Activity mActivity;
 	
-	private DictionaryViewFragment mDictionaryViewFragment;
 	private ReviewViewFragment mReviewViewFragment;
 	
 	private MainActivityUIHandler mUICallback = new MainActivityUIHandler(this);
@@ -228,7 +228,6 @@ public class MainActivity extends BaseActivity {
 	protected void onNewIntent(Intent intent) {
 		setIntent(intent);
 		handleIntent(intent);
-//        setTitle(Html.fromHtml(getString(R.string.title_search_query, query)));
 	}
 	
 	private void handleIntent(Intent intent) {
@@ -283,6 +282,20 @@ public class MainActivity extends BaseActivity {
         MenuItem searchItem = menu.findItem(R.id.menu_search);
         if (searchItem != null && UIUtils.hasHoneycomb()) {
             SearchView searchView = (SearchView) searchItem.getActionView();
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+				
+				@Override
+				public boolean onQueryTextSubmit(String query) {
+					// TODO Auto-generated method stub
+					return true;
+				}
+				
+				@Override
+				public boolean onQueryTextChange(String newText) {
+					mReviewViewFragment.onQueryTextChange(newText);
+					return true;
+				}
+			});
             if (searchView != null) {
                 SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
                 searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));

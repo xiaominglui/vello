@@ -20,6 +20,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -58,29 +59,29 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	private WordCard mDeletedWord;
 	private boolean mUndoShowing = false;
 	private ActionableToastBar mUndoBar;
+	private int[] mExpandedIds = null;
+	private int[] mSelectedWords = null;
 
 	private SwipeableListView mWordsList;
 	private WordCardAdapter mAdapter;
 	private ViewGroup mRootView;
 
+	private String mCurFilter = "";
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		int[] expandedIds = null;
-		int[] selectedWords = null;
+		
 
 		if (savedInstanceState != null) {
-			expandedIds = savedInstanceState.getIntArray(KEY_EXPANDED_IDS);
+			mExpandedIds = savedInstanceState.getIntArray(KEY_EXPANDED_IDS);
 			mDeletedWord = savedInstanceState.getParcelable(KEY_DELETED_WORD);
 			mUndoShowing = savedInstanceState.getBoolean(KEY_UNDO_SHOWING);
-			selectedWords = savedInstanceState.getIntArray(KEY_SELECTED_WORDS);
+			mSelectedWords = savedInstanceState.getIntArray(KEY_SELECTED_WORDS);
 		}
 		
-		mAdapter = new WordCardAdapter(getActivity(), expandedIds, selectedWords,
-				mWordsList);
 		
-		getLoaderManager().initLoader(0, null, this);
 		
 	}
 	
@@ -98,6 +99,8 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		mRootView = (ViewGroup) inflater.inflate(R.layout.fragment_review, null);
 		
 		mWordsList = (SwipeableListView) mRootView.findViewById(R.id.words_list);
+		mAdapter = new WordCardAdapter(getActivity(), mExpandedIds, mSelectedWords,
+				mWordsList);
 		mWordsList.setAdapter(mAdapter);
 		mWordsList.setVerticalScrollBarEnabled(true);
 		mWordsList.enableSwipe(true);
@@ -143,6 +146,12 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 					R.string.word_reviewed_undo, true);
 		}
 		return mRootView;
+	}
+	
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		getLoaderManager().initLoader(0, null, this);
 	}
 	
 	public class WordCardAdapter extends CursorAdapter {
@@ -206,8 +215,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			mContext = context;
 			mFactory = LayoutInflater.from(context);
 			mList = list;
-
-			Resources res = mContext.getResources();
 
 			if (expandedIds != null) {
 				buildHashSetFromArray(expandedIds, mExpanded);
@@ -421,13 +428,20 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		// show all open WordCards whose due time bigger than mobile local now
 		// time && syncInNext mark not set
 		ProviderCriteria criteria = new ProviderCriteria();
-		criteria.addSortOrder(DbWordCard.Columns.DUE, true);
-		Calendar rightNow = Calendar.getInstance();
-		SimpleDateFormat format = new SimpleDateFormat(
-				"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-		String now = format.format(rightNow.getTime());
-		criteria.addLt(DbWordCard.Columns.DUE, now, true);
-		criteria.addNe(DbWordCard.Columns.SYNCINNEXT, "true");
+		if (TextUtils.isEmpty(mCurFilter)) {
+			criteria.addSortOrder(DbWordCard.Columns.DUE, true);
+			Calendar rightNow = Calendar.getInstance();
+			SimpleDateFormat format = new SimpleDateFormat(
+					"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			String now = format.format(rightNow.getTime());
+			criteria.addLt(DbWordCard.Columns.DUE, now, true);
+			criteria.addNe(DbWordCard.Columns.SYNCINNEXT, "true");
+		} else {
+			criteria.addStartWith(DbWordCard.Columns.NAME, mCurFilter);
+		}
+		Log.d("mingo.lv", "getWhereClause" + criteria.getWhereClause());
+		Log.d("mingo.lv", "getWhereParams" + criteria.getWhereParams()[0]);
+		Log.d("mingo.lv", "getOrderClause" + criteria.getOrderClause());
 
 		return new CursorLoader(getActivity(), DbWordCard.CONTENT_URI,
 				DbWordCard.PROJECTION, criteria.getWhereClause(),
@@ -524,5 +538,11 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		}
 		mDeletedWord = null;
 		mUndoShowing = false;
+	}
+	
+	void onQueryTextChange(String newText) {
+		Log.d("mingo.lv", "newText=" + newText);
+		mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;
+		getLoaderManager().restartLoader(0, null, this);
 	}
 }

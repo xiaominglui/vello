@@ -265,7 +265,6 @@ public class VelloProvider extends ContentProvider {
     
     private Cursor getSuggestions(String query) {
     	query = query.toLowerCase();
-    	Log.d("mingo.lv", "query == " + query);
     	return null;
     }
 
