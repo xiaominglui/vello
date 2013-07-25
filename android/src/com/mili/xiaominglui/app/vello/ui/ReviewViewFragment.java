@@ -67,6 +67,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	private ViewGroup mRootView;
 
 	private String mCurFilter = "";
+	private boolean mIsSearching = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -429,6 +430,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		// time && syncInNext mark not set
 		ProviderCriteria criteria = new ProviderCriteria();
 		if (TextUtils.isEmpty(mCurFilter)) {
+		    mIsSearching = false;
 			criteria.addSortOrder(DbWordCard.Columns.DUE, true);
 			Calendar rightNow = Calendar.getInstance();
 			SimpleDateFormat format = new SimpleDateFormat(
@@ -437,6 +439,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			criteria.addLt(DbWordCard.Columns.DUE, now, true);
 			criteria.addNe(DbWordCard.Columns.SYNCINNEXT, "true");
 		} else {
+		    mIsSearching = true;
 			criteria.addStartWith(DbWordCard.Columns.NAME, mCurFilter);
 		}
 		Log.d("mingo.lv", "getWhereClause" + criteria.getWhereClause());

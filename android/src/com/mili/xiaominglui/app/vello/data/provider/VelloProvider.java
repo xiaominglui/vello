@@ -1,6 +1,5 @@
 package com.mili.xiaominglui.app.vello.data.provider;
 
-import android.app.SearchManager;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -26,8 +25,7 @@ public class VelloProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     private enum UriType {
         DB_WORD_CARD(DbWordCard.TABLE_NAME, DbWordCard.TABLE_NAME, DbWordCard.TYPE_ELEM_TYPE),
-        DB_WORD_CARD_ID_IN_LOCAL_DB(DbWordCard.TABLE_NAME + "/#", DbWordCard.TABLE_NAME, DbWordCard.TYPE_DIR_TYPE),
-        SEARCH_SUGGESTION(SearchManager.SUGGEST_URI_PATH_QUERY, DbWordCard.TABLE_NAME, SearchManager.SUGGEST_MIME_TYPE);
+        DB_WORD_CARD_ID_IN_LOCAL_DB(DbWordCard.TABLE_NAME + "/#", DbWordCard.TABLE_NAME, DbWordCard.TYPE_DIR_TYPE);
         
         private String mTableName;
         private String mType;
@@ -129,8 +127,6 @@ public class VelloProvider extends ContentProvider {
 		}
 
 		switch (uriType) {
-		case SEARCH_SUGGESTION:
-			return getSuggestions(selectionArgs[0]);
 		case DB_WORD_CARD_ID_IN_LOCAL_DB:
 			id = uri.getPathSegments().get(1);
 			c = db.query(uriType.getTableName(), projection,
@@ -262,10 +258,4 @@ public class VelloProvider extends ContentProvider {
         System.arraycopy(selectionArgs, 0, newSelectionArgs, 1, length);
         return newSelectionArgs;
     }
-    
-    private Cursor getSuggestions(String query) {
-    	query = query.toLowerCase();
-    	return null;
-    }
-
 }
