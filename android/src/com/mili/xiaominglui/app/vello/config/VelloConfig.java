@@ -25,6 +25,9 @@ public class VelloConfig {
 	15 * 24 * 60 * 60 * 1000,
 	-1 };
     
+    public static int DICTIONARY_MODE_ACTION_BAR_COLOR = 0xFF3F9FE0;
+    public static int REVIEW_MODE_ACTION_BAR_COLOR = 0xFFF4842D;
+    
     // ACRA related
     public static final String CRASH_LOGGER_CARD_ID_SHORTLINK = "https://trello.com/c/pamv10IM";
 

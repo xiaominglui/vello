@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashSet;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -65,9 +66,24 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	private SwipeableListView mWordsList;
 	private WordCardAdapter mAdapter;
 	private ViewGroup mRootView;
+	private onStatusChangedListener mListener;
 
 	private String mCurFilter = "";
 	private boolean mIsSearching = false;
+	
+	public interface onStatusChangedListener {
+		public void onModeChanged(int modeColor);
+	}
+	
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		try {
+			mListener = (onStatusChangedListener) activity;
+		} catch (ClassCastException e) {
+			throw new ClassCastException(activity.toString() + " must implement onStatusChangedListener");
+		}
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -104,7 +120,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 				mWordsList);
 		mWordsList.setAdapter(mAdapter);
 		mWordsList.setVerticalScrollBarEnabled(true);
-		mWordsList.enableSwipe(true);
 		mWordsList.setOnCreateContextMenuListener(this);
 		mWordsList
 				.setOnItemSwipeListener(new SwipeableListView.OnItemSwipeListener() {
@@ -430,7 +445,10 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		// time && syncInNext mark not set
 		ProviderCriteria criteria = new ProviderCriteria();
 		if (TextUtils.isEmpty(mCurFilter)) {
+			// Review Mode
 		    mIsSearching = false;
+		    mListener.onModeChanged(VelloConfig.REVIEW_MODE_ACTION_BAR_COLOR);
+		    mWordsList.enableSwipe(true);
 			criteria.addSortOrder(DbWordCard.Columns.DUE, true);
 			Calendar rightNow = Calendar.getInstance();
 			SimpleDateFormat format = new SimpleDateFormat(
@@ -439,7 +457,10 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			criteria.addLt(DbWordCard.Columns.DUE, now, true);
 			criteria.addNe(DbWordCard.Columns.SYNCINNEXT, "true");
 		} else {
+			// Dictionary Mode
 		    mIsSearching = true;
+		    mListener.onModeChanged(VelloConfig.DICTIONARY_MODE_ACTION_BAR_COLOR);
+		    mWordsList.enableSwipe(false);
 			criteria.addStartWith(DbWordCard.Columns.NAME, mCurFilter);
 		}
 		Log.d("mingo.lv", "getWhereClause" + criteria.getWhereClause());

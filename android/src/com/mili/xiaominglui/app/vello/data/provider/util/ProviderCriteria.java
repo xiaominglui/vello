@@ -212,7 +212,7 @@ public class ProviderCriteria {
                 mWhereSb.append(" like ?");
                 break;
             case TYPE_START_WITH:
-            	mWhereSb.append(" like ?");
+            	mWhereSb.append(" like ?"); // TODO
             	break;
             case TYPE_IN:
                 mWhereSb.append(" in (?)");
