@@ -185,8 +185,13 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-		
+
+        if (isFinishing()) {
+            return;
+        }
+
+        setContentView(R.layout.activity_main);
+
 		handleIntent(getIntent());
 		
 		FragmentManager fm = getSupportFragmentManager();
