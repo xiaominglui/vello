@@ -134,9 +134,8 @@ public class VelloService extends Service implements RequestListener,
 					service.archiveWordCard(cardId);
 					break;
 				case MSG_TRIGGER_QUERY_WORD:
-				    // firstly, check if the word is in local cache, show if yes, go on if no
 				    String query = (String) msg.obj;
-				    service.queryInLocalCache(query);
+				    service.queryInRemoteStorage(query);
 				    break;
 				default:
 					super.handleMessage(msg);

@@ -293,7 +293,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				
 				@Override
 				public boolean onQueryTextSubmit(String query) {
-					// TODO Auto-generated method stub
+				    doWordSearch(query);
 					return true;
 				}
 				
