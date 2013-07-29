@@ -42,6 +42,7 @@ public final class VelloRequestFactory {
     public static final String PARAM_EXTRA_VOCABULARY_LIST_ID = "com.mili.xiaominglui.app.vello.extra.listId";
     public static final String PARAM_EXTRA_VOCABULARY_CARD_ID = "com.mili.xiaominglui.app.vello.extra.cardId";
     public static final String PARAM_EXTRA_QUERY_WORD_KEYWORD = "com.mili.xiaominglui.app.vello.extra.keyword";
+    public static final String PARAM_EXTRA_DICTIONARY_WS_RESULT = "com.mili.xiaominglui.app.vello.extra.ws.result";
     public static final String PARAM_EXTRA_DATE_LAST_ACTIVITY = "com.mili.xiaominglui.app.vello.extra.dateLastActivity";
 
     private VelloRequestFactory() {
@@ -111,7 +112,7 @@ public final class VelloRequestFactory {
     public static Request addWordCardRequest(String keyword, String wsResult) {
         Request request = new Request(REQUEST_TYPE_ADD_WORDCARD);
         request.put(PARAM_EXTRA_QUERY_WORD_KEYWORD, keyword);
-//        request.put(PARAM_EXTRA_CHECK_WORDCARD_WS_RESULT, wsResult);
+        request.put(PARAM_EXTRA_DICTIONARY_WS_RESULT, wsResult);
         request.setMemoryCacheEnabled(true);
         return request;
     }

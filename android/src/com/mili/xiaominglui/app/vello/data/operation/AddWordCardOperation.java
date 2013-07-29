@@ -29,14 +29,14 @@ public class AddWordCardOperation implements Operation {
 	    throws ConnectionException, DataException, CustomRequestException {
 	String token = AccountUtils.getAuthToken(context);
 	String keyword = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
-//	String data = request.getString(VelloRequestFactory.PARAM_EXTRA_CHECK_WORDCARD_WS_RESULT);
+	String data = request.getString(VelloRequestFactory.PARAM_EXTRA_DICTIONARY_WS_RESULT);
 	String idList = AccountUtils.getVocabularyListId(context, VelloConfig.VOCABULARY_LIST_POSITION_NEW);
 	
 	String urlString = WSConfig.TRELLO_API_URL + WSConfig.WS_TRELLO_TARGET_CARD;
 	
 	HashMap<String, String> parameterMap = new HashMap<String, String>();
 	parameterMap.put(WSConfig.WS_TRELLO_PARAM_NAME, keyword);
-//	parameterMap.put(WSConfig.WS_TRELLO_PARAM_DESC, data);
+	parameterMap.put(WSConfig.WS_TRELLO_PARAM_DESC, data);
 	parameterMap.put(WSConfig.WS_TRELLO_PARAM_IDLIST, idList);
 	parameterMap.put(WSConfig.WS_TRELLO_PARAM_APP_KEY, WSConfig.VELLO_APP_KEY);
 	parameterMap.put(WSConfig.WS_TRELLO_PARAM_ACCESS_TOKEN, token);

@@ -552,9 +552,15 @@ public class VelloService extends Service implements RequestListener,
 				}
 				return;
 			case VelloRequestFactory.REQUEST_TYPE_LOOK_UP_IN_DICTIONARY:
+			    String keywordInQuery = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
 				String wsResponse = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_DICTIONARY_WS_RESPONSE);
-				// TODO
-
+				if (!wsResponse.equals("null\n")) {
+				    addWordCard(keywordInQuery, wsResponse);
+				} else {
+				    // no result in dictionary server. TODO
+				    Toast.makeText(getApplicationContext(), "no result", Toast.LENGTH_SHORT).show();
+				}
+				
 				return;
 
 			case VelloRequestFactory.REQUEST_TYPE_QUERY_IN_REMOTE_STORAGE:
@@ -612,6 +618,8 @@ public class VelloService extends Service implements RequestListener,
 				return;
 
 			case VelloRequestFactory.REQUEST_TYPE_ADD_WORDCARD:
+			    String keywordInAddWordCard = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
+			    String wsResult = request.getString(VelloRequestFactory.PARAM_EXTRA_DICTIONARY_WS_RESULT);
 				WordCard addedWordCard = resultData
 						.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 				if (addedWordCard != null) {
@@ -621,8 +629,8 @@ public class VelloService extends Service implements RequestListener,
 					// at the same time initialize it.
 					initializeWordCard(addedWordCard.id);
 				} else {
-					// add failed
-					// do nothing at present
+					// add failed, add again
+				    addWordCard(keywordInAddWordCard, wsResult);
 				}
 
 				if (VelloConfig.DEBUG_SWITCH) {

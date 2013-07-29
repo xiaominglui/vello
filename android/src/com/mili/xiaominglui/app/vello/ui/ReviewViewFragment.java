@@ -33,6 +33,7 @@ import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.factory.IcibaWordXmlParser;
+import com.mili.xiaominglui.app.vello.data.factory.MiliDictionaryJsonParser;
 import com.mili.xiaominglui.app.vello.data.model.Definition;
 import com.mili.xiaominglui.app.vello.data.model.Definitions;
 import com.mili.xiaominglui.app.vello.data.model.IcibaWord;
@@ -70,6 +71,31 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	private String mCurFilter = "";
 	private boolean mIsSearching = false;
 	
+	private SwipeableListView.OnItemSwipeListener mReviewSwipeListener = new SwipeableListView.OnItemSwipeListener() {
+        
+        @Override
+        public void onSwipe(View view) {
+            final WordCardAdapter.ItemHolder itemHolder = (WordCardAdapter.ItemHolder) view
+                    .getTag();
+            mAdapter.removeSelectedId(itemHolder.wordcard.idInLocalDB);
+            if (!mAdapter.isWordExpanded(itemHolder.wordcard)) {
+                asyncMarkDeleteWord(itemHolder.wordcard);
+            } else {
+                // review failed
+                asyncDeleteWordCache(itemHolder.wordcard);
+            }
+            
+        }
+    };
+    
+    private SwipeableListView.OnItemSwipeListener mDictionarySwipeListener = new SwipeableListView.OnItemSwipeListener() {
+        
+        @Override
+        public void onSwipe(View view) {
+            // TODO Auto-generated method stub
+            
+        }
+    };
 	public interface onStatusChangedListener {
 		public void onModeChanged(int modeColor);
 	}
@@ -120,22 +146,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		mWordsList.setAdapter(mAdapter);
 		mWordsList.setVerticalScrollBarEnabled(true);
 		mWordsList.setOnCreateContextMenuListener(this);
-		mWordsList
-				.setOnItemSwipeListener(new SwipeableListView.OnItemSwipeListener() {
-
-					@Override
-					public void onSwipe(View view) {
-						final WordCardAdapter.ItemHolder itemHolder = (WordCardAdapter.ItemHolder) view
-								.getTag();
-						mAdapter.removeSelectedId(itemHolder.wordcard.idInLocalDB);
-						if (!mAdapter.isWordExpanded(itemHolder.wordcard)) {
-							asyncMarkDeleteWord(itemHolder.wordcard);
-						} else {
-							// review failed
-							asyncDeleteWordCache(itemHolder.wordcard);
-						}
-					}
-				});
 
 		mWordsList.setOnTouchListener(new View.OnTouchListener() {
 			@Override
@@ -274,6 +284,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			final ItemHolder itemHolder = (ItemHolder) view.getTag();
 			itemHolder.wordcard = wordcard;
 			itemHolder.word = IcibaWordXmlParser.parse(wordcard.desc);
+//			itemHolder.word = MiliDictionaryJsonParser.parse(wordcard.desc);
 			itemHolder.iconicLifeCount.setIcon(FontAwesomeIcon.HEART);
 			itemHolder.iconicLifeCount.setTextColor(Color.GRAY);
 			itemHolder.idList = itemHolder.wordcard.idList;
@@ -448,6 +459,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		    mIsSearching = false;
 		    mListener.onModeChanged(VelloConfig.REVIEW_MODE_ACTION_BAR_COLOR);
 		    mWordsList.enableSwipe(true);
+		    mWordsList.setOnItemSwipeListener(mReviewSwipeListener);
 			criteria.addSortOrder(DbWordCard.Columns.DUE, true);
 			Calendar rightNow = Calendar.getInstance();
 			SimpleDateFormat format = new SimpleDateFormat(
@@ -460,11 +472,12 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		    mIsSearching = true;
 		    mListener.onModeChanged(VelloConfig.DICTIONARY_MODE_ACTION_BAR_COLOR);
 		    mWordsList.enableSwipe(false);
+		    mWordsList.setOnItemSwipeListener(null);
 			criteria.addStartWith(DbWordCard.Columns.NAME, mCurFilter);
 		}
-		Log.d("mingo.lv", "getWhereClause" + criteria.getWhereClause());
-		Log.d("mingo.lv", "getWhereParams" + criteria.getWhereParams()[0]);
-		Log.d("mingo.lv", "getOrderClause" + criteria.getOrderClause());
+		Log.d("mingo.lv", "getWhereClause " + criteria.getWhereClause());
+		Log.d("mingo.lv", "getWhereParams " + criteria.getWhereParams()[0]);
+		Log.d("mingo.lv", "getOrderClause " + criteria.getOrderClause());
 
 		return new CursorLoader(getActivity(), DbWordCard.CONTENT_URI,
 				DbWordCard.PROJECTION, criteria.getWhereClause(),
