@@ -17,7 +17,6 @@ public class ProviderCriteria {
     private static final int TYPE_GTOE = 6;
     private static final int TYPE_LIKE = 7;
     private static final int TYPE_IN = 8;
-    private static final int TYPE_START_WITH = 9;
 
     private StringBuilder mWhereSb = new StringBuilder();
     private List<String> mWhereParamList = new ArrayList<String>();
@@ -116,12 +115,6 @@ public class ProviderCriteria {
         addCriteria(metadata.getName(), value, TYPE_LIKE);
         return this;
     }
-    
-    public ProviderCriteria addStartWith(final ColumnMetadata metadata, final String value) {
-    	addOperand();
-    	addCriteria(metadata.getName(), value, TYPE_START_WITH);
-    	return this;
-    }
 
     public ProviderCriteria addLt(final ColumnMetadata metadata, final int value,
             final boolean orEqual) {
@@ -211,9 +204,6 @@ public class ProviderCriteria {
             case TYPE_LIKE:
                 mWhereSb.append(" like ?");
                 break;
-            case TYPE_START_WITH:
-            	mWhereSb.append(" like ?"); // TODO
-            	break;
             case TYPE_IN:
                 mWhereSb.append(" in (?)");
                 break;

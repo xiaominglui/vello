@@ -283,8 +283,8 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			final WordCard wordcard = new WordCard(cursor);
 			final ItemHolder itemHolder = (ItemHolder) view.getTag();
 			itemHolder.wordcard = wordcard;
-			itemHolder.word = IcibaWordXmlParser.parse(wordcard.desc);
-//			itemHolder.word = MiliDictionaryJsonParser.parse(wordcard.desc);
+//			itemHolder.word = IcibaWordXmlParser.parse(wordcard.desc);
+			itemHolder.word = MiliDictionaryJsonParser.parse(wordcard.desc);
 			itemHolder.iconicLifeCount.setIcon(FontAwesomeIcon.HEART);
 			itemHolder.iconicLifeCount.setTextColor(Color.GRAY);
 			itemHolder.idList = itemHolder.wordcard.idList;
@@ -473,12 +473,8 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		    mListener.onModeChanged(VelloConfig.DICTIONARY_MODE_ACTION_BAR_COLOR);
 		    mWordsList.enableSwipe(false);
 		    mWordsList.setOnItemSwipeListener(null);
-			criteria.addStartWith(DbWordCard.Columns.NAME, mCurFilter);
+		    criteria.addLike(DbWordCard.Columns.NAME, mCurFilter + "%");
 		}
-		Log.d("mingo.lv", "getWhereClause " + criteria.getWhereClause());
-		Log.d("mingo.lv", "getWhereParams " + criteria.getWhereParams()[0]);
-		Log.d("mingo.lv", "getOrderClause " + criteria.getOrderClause());
-
 		return new CursorLoader(getActivity(), DbWordCard.CONTENT_URI,
 				DbWordCard.PROJECTION, criteria.getWhereClause(),
 				criteria.getWhereParams(), criteria.getOrderClause());
