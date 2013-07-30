@@ -114,16 +114,12 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		
-
 		if (savedInstanceState != null) {
 			mExpandedIds = savedInstanceState.getIntArray(KEY_EXPANDED_IDS);
 			mDeletedWord = savedInstanceState.getParcelable(KEY_DELETED_WORD);
 			mUndoShowing = savedInstanceState.getBoolean(KEY_UNDO_SHOWING);
 			mSelectedWords = savedInstanceState.getIntArray(KEY_SELECTED_WORDS);
 		}
-		
-		
 		
 	}
 	

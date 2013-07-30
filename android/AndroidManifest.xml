@@ -79,10 +79,6 @@
             android:name=".data.provider.VelloProvider"
             android:authorities="com.mili.xiaominglui.app.vello.provider.VelloProvider"
             android:exported="false" />
-        <provider
-            android:name=".data.provider.MySuggestionProvider"
-            android:authorities="com.mili.xiaominglui.app.vello.provider.MySuggestionProvider"
-            android:exported="false" />
 
         <service
             android:name=".syncadapter.SyncService"

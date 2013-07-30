@@ -1,7 +1,5 @@
 package com.mili.xiaominglui.app.vello.ui;
 
-import java.lang.ref.WeakReference;
-
 import android.accounts.Account;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -22,7 +20,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.provider.SearchRecentSuggestions;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.Gravity;
@@ -35,11 +32,12 @@ import com.devspark.appmsg.AppMsg;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
-import com.mili.xiaominglui.app.vello.data.provider.MySuggestionProvider;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.mili.xiaominglui.app.vello.util.UIUtils;
+
+import java.lang.ref.WeakReference;
 
 public class MainActivity extends BaseActivity implements ReviewViewFragment.onStatusChangedListener {
 	private static final String TAG = MainActivity.class.getSimpleName();
@@ -243,14 +241,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	}
 	
 	private void handleIntent(Intent intent) {
-		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-			String query = intent.getStringExtra(SearchManager.QUERY);
-			SearchRecentSuggestions suggestions = new SearchRecentSuggestions(
-					this, MySuggestionProvider.AUTHORITY,
-					MySuggestionProvider.MODE);
-			suggestions.saveRecentQuery(query, null);
-			doWordSearch(query);
-		}
+
 	}
 	
 	private void doWordSearch(String query) {
