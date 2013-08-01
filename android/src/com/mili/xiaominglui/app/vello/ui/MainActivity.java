@@ -69,14 +69,15 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				// ConnectionErrorDialogFragment.show();
 				break;
 			case VelloService.MSG_TOAST_INIT_VOCABULARY_START:
-				AppMsg.makeText(theActivity.mActivity,
-						R.string.toast_init_vocabulary_start, AppMsg.STYLE_INFO)
-						.setLayoutGravity(Gravity.BOTTOM).show();
+//				superActivityToast = new SuperActivityToast(theActivity.getApplicationContext(), SuperToast.Type.STANDARD);
+//				AppMsg.makeText(theActivity.mActivity,
+//						R.string.toast_init_vocabulary_start, AppMsg.STYLE_INFO)
+//						.setLayoutGravity(Gravity.BOTTOM).show();
 				break;
 			case VelloService.MSG_TOAST_GET_DUE_WORD:
-				AppMsg.makeText(theActivity.mActivity,
-						R.string.toast_get_due_word, AppMsg.STYLE_INFO)
-						.setLayoutGravity(Gravity.BOTTOM).show();
+//				AppMsg.makeText(theActivity.mActivity,
+//						R.string.toast_get_due_word, AppMsg.STYLE_INFO)
+//						.setLayoutGravity(Gravity.BOTTOM).show();
 				break;
 			case VelloService.MSG_TOAST_INIT_VOCABULARY_END:
 				AppMsg.makeText(theActivity.mActivity,
@@ -84,14 +85,17 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 						.setLayoutGravity(Gravity.BOTTOM).show();
 				break;
 			case VelloService.MSG_TOAST_NO_WORD_NOW:
-				AppMsg.makeText(theActivity.mActivity,
-						R.string.toast_no_word_now, AppMsg.STYLE_CONFIRM)
-						.setLayoutGravity(Gravity.TOP).show();
+//				AppMsg.makeText(theActivity.mActivity,
+//						R.string.toast_no_word_now, AppMsg.STYLE_CONFIRM)
+//						.setLayoutGravity(Gravity.TOP).show();
 				break;
 			case VelloService.MSG_TOAST_NOT_AVAILABLE_WORD:
-				AppMsg.makeText(theActivity.mActivity,
-						R.string.toast_not_available_word, AppMsg.STYLE_ALERT)
-						.setLayoutGravity(Gravity.TOP).show();
+//				AppMsg.makeText(theActivity.mActivity,
+//						R.string.toast_not_available_word, AppMsg.STYLE_ALERT)
+//						.setLayoutGravity(Gravity.TOP).show();
+				break;
+			case VelloService.MSG_TOAST_WORD_REVIEWED_COUNT_PLUS:
+				theActivity.reviewedCountPlusToastShow();
 				break;
 			case VelloService.MSG_SHOW_RESULT_WORDCARD:
 			    WordCard result = (WordCard) msg.obj;
@@ -160,6 +164,11 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				}
 			}
 		}
+	}
+
+	public void reviewedCountPlusToastShow() {
+		AppMsg.makeText(this, "+1", AppMsg.STYLE_INFO)
+				.setLayoutGravity(Gravity.TOP).show();
 	}
 
 	void doBindService() {
@@ -246,11 +255,10 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	
 	private void doWordSearch(String query) {
 		// TODO
-		// 1. check if the word is in local cache, show if yes, go on if no
-		// 2. check if the word is in remote but closed, show if yes and re-open, go on if no
-		// 3. query dictionary service
-		// 4. show and insert local cache item
-		// 5. sync for ensuring adding to remote successfully
+		// 1. check if the word is in remote but closed, show if yes and re-open, go on if no
+		// 2. query dictionary service
+		// 3. show and insert local cache item
+		// 4. sync for ensuring adding to remote successfully
 		if (mIsBound) {
 			if (mService != null) {
 				try {
@@ -399,5 +407,15 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	@Override
 	public void onModeChanged(int modeColor) {
 		changeColor(modeColor);
+	}
+
+	@Override
+	public void onAllReviewed() {
+		triggerRefresh();
+	}
+
+	@Override
+	public void onWordReviewed() {
+//		reviewedCountPlusToastShow();
 	}
 }

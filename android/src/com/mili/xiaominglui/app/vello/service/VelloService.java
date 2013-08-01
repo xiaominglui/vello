@@ -74,7 +74,8 @@ public class VelloService extends Service implements RequestListener,
 	public static final int MSG_TOAST_GET_DUE_WORD = 7;
 	public static final int MSG_TOAST_NO_WORD_NOW = 8;
 	public static final int MSG_TOAST_NOT_AVAILABLE_WORD = 9;
-	public static final int MSG_SHOW_RESULT_WORDCARD = 10;
+	public static final int MSG_TOAST_WORD_REVIEWED_COUNT_PLUS = 10;
+	public static final int MSG_SHOW_RESULT_WORDCARD = 11;
 
 	public static final int MSG_CHECK_VOCABULARY_BOARD = 100;
 	public static final int MSG_GET_DUE_WORDCARD_LIST = 101;

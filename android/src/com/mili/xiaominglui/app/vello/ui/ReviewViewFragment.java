@@ -80,6 +80,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
             mAdapter.removeSelectedId(itemHolder.wordcard.idInLocalDB);
             if (!mAdapter.isWordExpanded(itemHolder.wordcard)) {
                 asyncMarkDeleteWord(itemHolder.wordcard);
+                mListener.onWordReviewed();
             } else {
                 // review failed
                 asyncDeleteWordCache(itemHolder.wordcard);
@@ -98,6 +99,8 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
     };
 	public interface onStatusChangedListener {
 		public void onModeChanged(int modeColor);
+		public void onAllReviewed();
+		public void onWordReviewed();
 	}
 	
 	@Override
@@ -150,8 +153,16 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 				return false;
 			}
 		});
-		
-		mWordsList.setEmptyView(mRootView.findViewById(R.id.empty));
+		View empty = mRootView.findViewById(R.id.empty);
+		empty.setOnTouchListener(new View.OnTouchListener() {
+
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				mListener.onAllReviewed();
+				return true;
+			}
+		});
+		mWordsList.setEmptyView(empty);
 
 		mUndoBar = (ActionableToastBar) mRootView.findViewById(R.id.undo_bar);
 

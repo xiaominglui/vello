@@ -34,7 +34,7 @@
     <string name="local_service_disconnected">LOCAL_SERVICE_DISCONNECTED</string>
     
     <!-- Toast content when an alarm was reviewed  -->
-    <string name="word_reviewed">Word reviewed.</string>
+    <string name="word_reviewed">Reviewed +1</string>
     <!-- Displays the number of alarms selected from the list of alarms. -->
     <string name="words_selected">selected</string>
     <!-- Description of the button to undo change to alarm -->
@@ -47,7 +47,7 @@
     <string name="notif_content_text">Touch to review.</string>
     <string name="title_search">Search</string>
     <string name="title_search_query">Search for \"&lt;b&gt;<xliff:g id="query">%1$s</xliff:g>&lt;b&gt;\"</string>
-    <string name="listview_empty">Good Job, All Reviewed.</string>
+    <string name="listview_empty">Good Job, All Reviewed!!! Tap to sync now.</string>
     
     
 
