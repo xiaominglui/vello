@@ -286,6 +286,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			itemHolder.word = MiliDictionaryJsonParser.parse(wordcard.desc);
 			itemHolder.iconicLifeCount.setIcon(FontAwesomeIcon.CHECK);
 			itemHolder.iconicLifeCount.setTextColor(Color.GRAY);
+			itemHolder.iconicLifeCount.setVisibility(mIsSearching ? View.GONE : View.VISIBLE);
 			itemHolder.idList = itemHolder.wordcard.idList;
 			int positionList = AccountUtils.getVocabularyListPosition(mContext,
 					itemHolder.idList);
@@ -293,6 +294,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 					.setBackgroundResource(mWordCardBackgroundColor[positionList]);
 			itemHolder.textViewLifeCount.setText(String.valueOf(positionList) + "/9");
 			itemHolder.textViewLifeCount.setTextColor(Color.GRAY);
+			itemHolder.textViewLifeCount.setVisibility(mIsSearching ? View.GONE : View.VISIBLE);
 
 			itemHolder.textViewKeyword.setText(itemHolder.wordcard.name);
 
@@ -300,7 +302,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 					.setVisibility(isWordExpanded(wordcard) ? View.VISIBLE
 							: View.GONE);
 			itemHolder.infoArea
-					.setVisibility(!isWordExpanded(wordcard) ? View.VISIBLE
+					.setVisibility(!isWordExpanded(wordcard) || mIsSearching ? View.VISIBLE
 							: View.GONE);
 			itemHolder.infoArea.setOnClickListener(new View.OnClickListener() {
 				@Override
@@ -310,7 +312,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 				}
 			});
 
-			if (isWordExpanded(wordcard)) {
+			if (isWordExpanded(wordcard) && !mIsSearching) {
 				expandWord(itemHolder);
 			}
 		}
@@ -359,7 +361,10 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 					});
 			itemHolder.infoArea.setVisibility(View.GONE);
 
-			mExpanded.add(itemHolder.wordcard.idInLocalDB);
+			if (!mIsSearching) {
+				mExpanded.add(itemHolder.wordcard.idInLocalDB);
+			}
+
 			bindExpandArea(itemHolder, itemHolder.wordcard);
 			// Scroll the view to make sure it is fully viewed
 			mScrollWordId = itemHolder.wordcard.idInLocalDB;
@@ -568,7 +573,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	}
 	
 	void onQueryTextChange(String newText) {
-		Log.d("mingo.lv", "newText=" + newText);
 		mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;
 		getLoaderManager().restartLoader(0, null, this);
 	}
