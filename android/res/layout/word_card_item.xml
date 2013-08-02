@@ -48,12 +48,14 @@
             android:id="@+id/life_hint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="top"
             android:orientation="horizontal" >
 
             <com.atermenji.android.iconictextview.IconicTextView
                 android:id="@+id/life_sign"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
                 android:layout_marginRight="1dp"
                 android:textSize="15sp" />
 
@@ -61,6 +63,7 @@
                 android:id="@+id/life_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
                 android:textIsSelectable="false"
                 android:textSize="15sp" />
         </LinearLayout>
