@@ -89,14 +89,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
         }
     };
     
-    private SwipeableListView.OnItemSwipeListener mDictionarySwipeListener = new SwipeableListView.OnItemSwipeListener() {
-        
-        @Override
-        public void onSwipe(View view) {
-            // TODO Auto-generated method stub
-            
-        }
-    };
 	public interface onStatusChangedListener {
 		public void onModeChanged(int modeColor);
 		public void onAllReviewed();
@@ -292,18 +284,14 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			itemHolder.wordcard = wordcard;
 //			itemHolder.word = IcibaWordXmlParser.parse(wordcard.desc);
 			itemHolder.word = MiliDictionaryJsonParser.parse(wordcard.desc);
-			itemHolder.iconicLifeCount.setIcon(FontAwesomeIcon.HEART);
+			itemHolder.iconicLifeCount.setIcon(FontAwesomeIcon.CHECK);
 			itemHolder.iconicLifeCount.setTextColor(Color.GRAY);
 			itemHolder.idList = itemHolder.wordcard.idList;
 			int positionList = AccountUtils.getVocabularyListPosition(mContext,
 					itemHolder.idList);
 			itemHolder.wordCardItem
 					.setBackgroundResource(mWordCardBackgroundColor[positionList]);
-			String lifeString = "N";
-			if (positionList != 0) {
-				lifeString = String.valueOf(8 - positionList + 1);
-			}
-			itemHolder.textViewLifeCount.setText(lifeString);
+			itemHolder.textViewLifeCount.setText(String.valueOf(positionList) + "/9");
 			itemHolder.textViewLifeCount.setTextColor(Color.GRAY);
 
 			itemHolder.textViewKeyword.setText(itemHolder.wordcard.name);
