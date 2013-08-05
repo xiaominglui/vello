@@ -87,8 +87,6 @@ public class VelloContent {
                     + ", " + Columns.DATE_LAST_ACTIVITY.getName() + " "
                     + Columns.DATE_LAST_ACTIVITY.getType() + ", PRIMARY KEY ("
                     + Columns.ID.getName() + ")" + ");");
-            // db.execSQL("CREATE UNIQUE INDEX card_id on " + TABLE_NAME + "(" +
-            // Columns.ID_CARD.getName() + ");");
         }
 
         public static void upgradeTable(SQLiteDatabase db, int oldVersion,
