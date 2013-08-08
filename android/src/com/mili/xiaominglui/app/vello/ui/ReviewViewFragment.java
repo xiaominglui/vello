@@ -64,6 +64,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	private WordCardAdapter mAdapter;
 	private ViewGroup mRootView;
 	private onStatusChangedListener mListener;
+	private View mReviewedEmpty;
 
 	private String mCurFilter = "";
 	private boolean mIsSearching = false;
@@ -138,8 +139,8 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 				return false;
 			}
 		});
-		View reviewedEmpty = mRootView.findViewById(R.id.reviewed_empty);
-		reviewedEmpty.setOnTouchListener(new View.OnTouchListener() {
+		mReviewedEmpty = mRootView.findViewById(R.id.reviewed_empty);
+		mReviewedEmpty.setOnTouchListener(new View.OnTouchListener() {
 
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -148,7 +149,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 				return true;
 			}
 		});
-		mWordsList.setEmptyView(reviewedEmpty);
 
 		mUndoBar = (ActionableToastBar) mRootView.findViewById(R.id.undo_bar);
 
@@ -440,6 +440,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		    mListener.onModeChanged(VelloConfig.REVIEW_MODE_ACTION_BAR_COLOR);
 		    mWordsList.enableSwipe(true);
 		    mWordsList.setOnItemSwipeListener(mReviewSwipeListener);
+		    mWordsList.setEmptyView(mReviewedEmpty);
 			criteria.addSortOrder(DbWordCard.Columns.DUE, true);
 			Calendar rightNow = Calendar.getInstance();
 			SimpleDateFormat format = new SimpleDateFormat(
@@ -453,6 +454,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		    mListener.onModeChanged(VelloConfig.DICTIONARY_MODE_ACTION_BAR_COLOR);
 		    mWordsList.enableSwipe(false);
 		    mWordsList.setOnItemSwipeListener(null);
+		    mWordsList.setEmptyView(null);
 		    criteria.addLike(DbWordCard.Columns.NAME, mCurFilter + "%");
 		}
 		return new CursorLoader(getActivity(), DbWordCard.CONTENT_URI,
