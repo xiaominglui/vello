@@ -39,7 +39,8 @@
         android:layout_height="fill_parent"
         android:padding="15dp"
         android:gravity="center_vertical"
-        android:text="@string/listview_empty" />
+        android:text="@string/listview_empty"
+        android:visibility="gone" />
 
     <com.android.deskclock.widget.ActionableToastBar
         android:id="@+id/undo_bar"

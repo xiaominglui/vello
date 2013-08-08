@@ -458,6 +458,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		    mListener.onModeChanged(VelloConfig.DICTIONARY_MODE_ACTION_BAR_COLOR);
 		    mWordsList.enableSwipe(false);
 		    mWordsList.setOnItemSwipeListener(null);
+		    mReviewedEmpty.setVisibility(View.GONE);
 		    mWordsList.setEmptyView(null);
 		    criteria.addLike(DbWordCard.Columns.NAME, mCurFilter + "%");
 		}
