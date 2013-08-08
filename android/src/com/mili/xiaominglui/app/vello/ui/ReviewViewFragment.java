@@ -278,8 +278,12 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			itemHolder.idList = itemHolder.wordcard.idList;
 			int positionList = AccountUtils.getVocabularyListPosition(mContext,
 					itemHolder.idList);
-			itemHolder.wordCardItem
-					.setBackgroundResource(mWordCardBackgroundColor[positionList]);
+			if (mIsSearching) {
+				itemHolder.wordCardItem.setBackgroundResource(R.color.bg_dictionary_mode);
+			} else {
+				itemHolder.wordCardItem.setBackgroundResource(mWordCardBackgroundColor[positionList]);
+			}
+
 			itemHolder.textViewLifeCount.setText(String.valueOf(positionList) + "/9");
 			itemHolder.textViewLifeCount.setTextColor(Color.GRAY);
 			itemHolder.textViewLifeCount.setVisibility(mIsSearching ? View.GONE : View.VISIBLE);

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="expandable_background">#FFFFCC</color>
+    <color name="expandable_background">#ffffcc</color>
     <color name="transparent">#00000000</color>
     <color name="transparent_white">#66ffffff</color>
     <color name="bg_color_new">#aa6666ff</color>
@@ -12,4 +12,5 @@
     <color name="bg_color_6th">#aaccffcc</color>
     <color name="bg_color_7th">#aaccff99</color>
     <color name="bg_color_8th">#aaccff66</color>
+    <color name="bg_dictionary_mode">#aaeeeeee</color>
 </resources>
