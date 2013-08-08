@@ -36,6 +36,7 @@ import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
+import com.mili.xiaominglui.app.vello.util.HelpUtils;
 import com.mili.xiaominglui.app.vello.util.UIUtils;
 
 import java.lang.ref.WeakReference;
@@ -323,10 +324,18 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 		case R.id.menu_search:
 			if (!UIUtils.hasHoneycomb()) {
                 startSearch(null, false, Bundle.EMPTY, false);
+                return true;
             }
-			return true;
+			break;
+			
 		case R.id.menu_about:
+			HelpUtils.showAbout(this);
 			return true;
+			
+		case R.id.menu_settings:
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+            
 		case R.id.menu_sign_out:
 			AccountUtils.signOut(this);
 			finish();
