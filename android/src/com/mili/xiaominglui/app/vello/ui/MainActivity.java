@@ -23,6 +23,7 @@ import android.os.RemoteException;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
@@ -297,7 +298,9 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				
 				@Override
 				public boolean onQueryTextSubmit(String query) {
-				    doWordSearch(query);
+				    doWordSearch(query); // only for debug
+				    InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+					inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
 					return true;
 				}
 				
@@ -320,9 +323,8 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 		case R.id.menu_search:
 			if (!UIUtils.hasHoneycomb()) {
                 startSearch(null, false, Bundle.EMPTY, false);
-                return true;
             }
-            break;
+			return true;
 		case R.id.menu_about:
 			return true;
 		case R.id.menu_sign_out:

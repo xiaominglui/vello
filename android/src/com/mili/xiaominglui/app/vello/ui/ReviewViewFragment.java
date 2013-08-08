@@ -32,7 +32,6 @@ import com.atermenji.android.iconictextview.IconicTextView;
 import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
-import com.mili.xiaominglui.app.vello.data.factory.IcibaWordXmlParser;
 import com.mili.xiaominglui.app.vello.data.factory.MiliDictionaryJsonParser;
 import com.mili.xiaominglui.app.vello.data.model.Definition;
 import com.mili.xiaominglui.app.vello.data.model.Definitions;
@@ -53,7 +52,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	private static final String TAG = ReviewViewFragment.class.getSimpleName();
 	
 	private static final String KEY_EXPANDED_IDS = "expandedIds";
-	private static final String KEY_SELECTED_WORDS = "selectedWords";
 	private static final String KEY_DELETED_WORD = "deletedWord";
 	private static final String KEY_UNDO_SHOWING = "undoShowing";
 	
@@ -61,7 +59,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	private boolean mUndoShowing = false;
 	private ActionableToastBar mUndoBar;
 	private int[] mExpandedIds = null;
-	private int[] mSelectedWords = null;
 
 	private SwipeableListView mWordsList;
 	private WordCardAdapter mAdapter;
@@ -75,9 +72,8 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
         
         @Override
         public void onSwipe(View view) {
-            final WordCardAdapter.ItemHolder itemHolder = (WordCardAdapter.ItemHolder) view
-                    .getTag();
-            mAdapter.removeSelectedId(itemHolder.wordcard.idInLocalDB);
+            final WordCardAdapter.ItemHolder itemHolder = (WordCardAdapter.ItemHolder) view.getTag();
+            // if wordcard expanded, do NOT mark reviewed plus
             if (!mAdapter.isWordExpanded(itemHolder.wordcard)) {
                 asyncMarkDeleteWord(itemHolder.wordcard);
                 mListener.onWordReviewed();
@@ -85,7 +81,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
                 // review failed
                 asyncDeleteWordCache(itemHolder.wordcard);
             }
-            
         }
     };
     
@@ -113,7 +108,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			mExpandedIds = savedInstanceState.getIntArray(KEY_EXPANDED_IDS);
 			mDeletedWord = savedInstanceState.getParcelable(KEY_DELETED_WORD);
 			mUndoShowing = savedInstanceState.getBoolean(KEY_UNDO_SHOWING);
-			mSelectedWords = savedInstanceState.getIntArray(KEY_SELECTED_WORDS);
 		}
 		
 	}
@@ -132,8 +126,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		mRootView = (ViewGroup) inflater.inflate(R.layout.fragment_review, null);
 		
 		mWordsList = (SwipeableListView) mRootView.findViewById(R.id.words_list);
-		mAdapter = new WordCardAdapter(getActivity(), mExpandedIds, mSelectedWords,
-				mWordsList);
+		mAdapter = new WordCardAdapter(getActivity(), mExpandedIds, mWordsList);
 		mWordsList.setAdapter(mAdapter);
 		mWordsList.setVerticalScrollBarEnabled(true);
 		mWordsList.setOnCreateContextMenuListener(this);
@@ -145,16 +138,17 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 				return false;
 			}
 		});
-		View empty = mRootView.findViewById(R.id.empty);
-		empty.setOnTouchListener(new View.OnTouchListener() {
+		View reviewedEmpty = mRootView.findViewById(R.id.reviewed_empty);
+		reviewedEmpty.setOnTouchListener(new View.OnTouchListener() {
 
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
+				hideUndoBar(true, event);
 				mListener.onAllReviewed();
 				return true;
 			}
 		});
-		mWordsList.setEmptyView(empty);
+		mWordsList.setEmptyView(reviewedEmpty);
 
 		mUndoBar = (ActionableToastBar) mRootView.findViewById(R.id.undo_bar);
 
@@ -184,7 +178,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		private final ListView mList;
 
 		private final HashSet<Integer> mExpanded = new HashSet<Integer>();
-		private final HashSet<Integer> mSelectedWords = new HashSet<Integer>();
 		private final int[] mWordCardBackgroundColor = { R.color.bg_color_new,
 				R.color.bg_color_1st, R.color.bg_color_2nd,
 				R.color.bg_color_3rd, R.color.bg_color_4th,
@@ -233,8 +226,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			}
 		};
 
-		public WordCardAdapter(Context context, int[] expandedIds,
-				int[] selectedWords, ListView list) {
+		public WordCardAdapter(Context context, int[] expandedIds, ListView list) {
 			super(context, null, 0);
 			mContext = context;
 			mFactory = LayoutInflater.from(context);
@@ -242,10 +234,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 
 			if (expandedIds != null) {
 				buildHashSetFromArray(expandedIds, mExpanded);
-			}
-
-			if (selectedWords != null) {
-				buildHashSetFromArray(selectedWords, mSelectedWords);
 			}
 		}
 
@@ -406,10 +394,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			}
 		}
 
-		public void removeSelectedId(int id) {
-			mSelectedWords.remove(id);
-		}
-
 		private boolean isWordExpanded(WordCard wordcard) {
 			return mExpanded.contains(wordcard.idInLocalDB);
 		}
@@ -441,10 +425,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			for (int id : ids) {
 				set.add(id);
 			}
-		}
-
-		public int getSelectedItemsNum() {
-			return mSelectedWords.size();
 		}
 	}
 
@@ -491,8 +471,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	}
 	
 	private void asyncDeleteWordCache(WordCard wordcard) {
-		Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI,
-				wordcard.idInLocalDB);
+		Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI, wordcard.idInLocalDB);
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "uri---" + uri.toString() + " is to be deleted");
 		}

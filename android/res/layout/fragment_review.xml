@@ -33,7 +33,7 @@
         android:paddingTop="9dp" />
 
     <TextView
-        android:id="@+id/empty"
+        android:id="@+id/reviewed_empty"
         style="@android:style/TextAppearance.Large"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
