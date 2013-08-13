@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.TimeZone;
 
 public class RestartWordCardOperation implements Operation {
     private static final String TAG = RestartWordCardOperation.class.getSimpleName();
@@ -35,8 +36,9 @@ public class RestartWordCardOperation implements Operation {
 	
 	Calendar rightNow = Calendar.getInstance();
     long rightNowUnixTime = rightNow.getTimeInMillis();
+    long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
     long delta = VelloConfig.VOCABULARY_LIST_DUE_DELTA[VelloConfig.VOCABULARY_LIST_POSITION_NEW];
-    long dueUnixTime = rightNowUnixTime + delta;
+    long dueUnixTime = rightNowUnixTimeGMT + delta;
     
     SimpleDateFormat format = new SimpleDateFormat(
             "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");

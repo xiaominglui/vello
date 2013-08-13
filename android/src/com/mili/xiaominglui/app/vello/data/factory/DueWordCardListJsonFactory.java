@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class DueWordCardListJsonFactory {
     private static final String TAG = DueWordCardListJsonFactory.class
@@ -32,6 +33,7 @@ public class DueWordCardListJsonFactory {
         ArrayList<WordCard> wordCardList = new ArrayList<WordCard>();
         Calendar rightNow = Calendar.getInstance();
         long rightNowUnixTime = rightNow.getTimeInMillis();
+        long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
 
         try {
             JSONArray jsonCardArray = new JSONArray(wsResponse);
@@ -45,7 +47,7 @@ public class DueWordCardListJsonFactory {
 
                     Date date = format.parse(dueString);
                     long dueUnixTime = date.getTime();
-                    if (dueUnixTime <= rightNowUnixTime) {
+                    if (dueUnixTime <= rightNowUnixTimeGMT) {
                         // it is time to review
                         WordCard wordCard = new WordCard();
                         wordCard.id = jsonCard.getString(JSONTag.CARD_ELEM_ID);

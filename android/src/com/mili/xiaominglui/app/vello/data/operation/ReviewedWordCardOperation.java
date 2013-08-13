@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.TimeZone;
 
 public class ReviewedWordCardOperation implements Operation {
     private static final String TAG = ReviewedWordCardOperation.class
@@ -52,8 +53,9 @@ public class ReviewedWordCardOperation implements Operation {
         } else {
             Calendar rightNow = Calendar.getInstance();
             long rightNowUnixTime = rightNow.getTimeInMillis();
+            long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
             long delta = VelloConfig.VOCABULARY_LIST_DUE_DELTA[position];
-            long dueUnixTime = rightNowUnixTime + delta;
+            long dueUnixTime = rightNowUnixTimeGMT + delta;
 
             SimpleDateFormat format = new SimpleDateFormat(
                     "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");

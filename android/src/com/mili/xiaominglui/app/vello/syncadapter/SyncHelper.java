@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.TimeZone;
 
 import com.foxykeep.datadroid.exception.ConnectionException;
 import com.foxykeep.datadroid.exception.DataException;
@@ -130,9 +131,11 @@ public class SyncHelper {
 				cri.addSortOrder(DbWordCard.Columns.DUE, true);
 
 				Calendar rightNow = Calendar.getInstance();
+				long rightNowUnixTime = rightNow.getTimeInMillis();
+				long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
 				SimpleDateFormat fo = new SimpleDateFormat(
 						"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-				String now = fo.format(rightNow.getTime());
+				String now = fo.format(new Date(rightNowUnixTimeGMT));
 				cri.addLt(DbWordCard.Columns.DUE, now, true);
 				cri.addNe(DbWordCard.Columns.CLOSED, "true");
 				Cursor cur = mContext.getContentResolver().query(
@@ -265,8 +268,9 @@ public class SyncHelper {
 						newPostionInLists);
 				Calendar rightNow = Calendar.getInstance();
 				long rightNowUnixTime = rightNow.getTimeInMillis();
+				long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
 				long deltaTime = VelloConfig.VOCABULARY_LIST_DUE_DELTA[newPostionInLists];
-				long newDueUnixTime = rightNowUnixTime + deltaTime;
+				long newDueUnixTime = rightNowUnixTimeGMT + deltaTime;
 				SimpleDateFormat format = new SimpleDateFormat(
 						"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 				Date newDueDate = new Date(newDueUnixTime);

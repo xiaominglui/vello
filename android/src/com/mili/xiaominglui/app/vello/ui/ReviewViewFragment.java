@@ -47,6 +47,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.TimeZone;
 
 public class ReviewViewFragment extends SherlockFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 	private static final String TAG = ReviewViewFragment.class.getSimpleName();
@@ -447,9 +448,12 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		    mWordsList.setEmptyView(mReviewedEmpty);
 			criteria.addSortOrder(DbWordCard.Columns.DUE, true);
 			Calendar rightNow = Calendar.getInstance();
+
 			SimpleDateFormat format = new SimpleDateFormat(
 					"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-			String now = format.format(rightNow.getTime());
+			long rightNowUnixTime = rightNow.getTimeInMillis();
+			long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
+			String now = format.format(new Date(rightNowUnixTimeGMT));
 			criteria.addLt(DbWordCard.Columns.DUE, now, true);
 			criteria.addNe(DbWordCard.Columns.SYNCINNEXT, "true");
 		} else {
@@ -511,8 +515,9 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 					} else {
 						Calendar rightNow = Calendar.getInstance();
 						long rightNowUnixTime = rightNow.getTimeInMillis();
+						long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
 						long delta = VelloConfig.VOCABULARY_LIST_DUE_DELTA[positionList];
-						long dueUnixTime = rightNowUnixTime + delta;
+						long dueUnixTime = rightNowUnixTimeGMT + delta;
 
 						SimpleDateFormat format = new SimpleDateFormat(
 								"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
