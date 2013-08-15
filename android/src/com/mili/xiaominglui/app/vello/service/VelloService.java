@@ -49,6 +49,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
+import org.apache.http.HttpStatus;
+
 public class VelloService extends Service implements RequestListener,
 		ConnectionErrorDialogListener {
 	private static final String TAG = VelloService.class.getSimpleName();
@@ -752,10 +754,16 @@ public class VelloService extends Service implements RequestListener,
 	@Override
 	public void onRequestConnectionError(Request request, int statusCode) {
 		if (mRequestList.contains(request)) {
+			if (statusCode == HttpStatus.SC_UNAUTHORIZED && request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_CONFIGURE_VOCABULARY_BOARD) {
+				String boardId = request.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_BOARD_ID);
+				AccountUtils.setVocabularyBoardId(getApplicationContext(), boardId);
+				Log.d(TAG, "get a board without ownership, skip configuration! vocabulary board id = " + boardId);
+
+				// continue to check vocabulary list if not well formed
+				checkVocabularyLists();
+			}
 			mRequestList.remove(request);
-
 		}
-
 	}
 
 	@Override
