@@ -52,14 +52,12 @@ import java.util.TimeZone;
 public class ReviewViewFragment extends SherlockFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 	private static final String TAG = ReviewViewFragment.class.getSimpleName();
 	
-	private static final String KEY_EXPANDED_IDS = "expandedIds";
 	private static final String KEY_DELETED_WORD = "deletedWord";
 	private static final String KEY_UNDO_SHOWING = "undoShowing";
 	
 	private WordCard mDeletedWord;
 	private boolean mUndoShowing = false;
 	private ActionableToastBar mUndoBar;
-	private int[] mExpandedIds = null;
 
 	private SwipeableListView mWordsList;
 	private WordCardAdapter mAdapter;
@@ -107,7 +105,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		super.onCreate(savedInstanceState);
 		
 		if (savedInstanceState != null) {
-			mExpandedIds = savedInstanceState.getIntArray(KEY_EXPANDED_IDS);
 			mDeletedWord = savedInstanceState.getParcelable(KEY_DELETED_WORD);
 			mUndoShowing = savedInstanceState.getBoolean(KEY_UNDO_SHOWING);
 		}
@@ -117,7 +114,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putIntArray(KEY_EXPANDED_IDS, mAdapter.getExpandedArray());
 		outState.putParcelable(KEY_DELETED_WORD, mDeletedWord);
 		outState.putBoolean(KEY_UNDO_SHOWING, mUndoShowing);
 	}
@@ -128,7 +124,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		mRootView = (ViewGroup) inflater.inflate(R.layout.fragment_review, null);
 		
 		mWordsList = (SwipeableListView) mRootView.findViewById(R.id.words_list);
-		mAdapter = new WordCardAdapter(getActivity(), mExpandedIds, mWordsList);
+		mAdapter = new WordCardAdapter(getActivity(), null, mWordsList);
 		mWordsList.setAdapter(mAdapter);
 		mWordsList.setVerticalScrollBarEnabled(true);
 		mWordsList.setOnCreateContextMenuListener(this);
@@ -426,6 +422,10 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			return ids;
 		}
 
+        public void clearExpandedArray() {
+            mExpanded.clear();
+        }
+
 		private void buildHashSetFromArray(int[] ids, HashSet<Integer> set) {
 			for (int id : ids) {
 				set.add(id);
@@ -473,6 +473,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+	    mAdapter.clearExpandedArray();
 		mAdapter.swapCursor(data);
 	}
 
