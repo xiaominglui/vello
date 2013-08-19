@@ -40,15 +40,11 @@
                 android:textIsSelectable="true"
                 android:textSize="35sp" />
         </LinearLayout>
-        <Space
-            android:layout_height="match_parent"
-            android:layout_width="0dip"
-            android:layout_weight="1"/>
         <LinearLayout
             android:id="@+id/life_hint"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="top"
+            android:gravity="top|right"
             android:orientation="horizontal" >
 
             <com.atermenji.android.iconictextview.IconicTextView
@@ -72,8 +68,9 @@
         android:id="@+id/hairline"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginLeft="9dp"
+        android:layout_marginRight="9dp"
+        android:layout_marginBottom="3dp"
         android:background="#aac7c7c7"/>
     <FrameLayout
         android:id="@+id/info_area"
@@ -98,6 +95,8 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:visibility="gone">
         
         <LinearLayout
