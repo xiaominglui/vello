@@ -41,6 +41,9 @@ import com.mili.xiaominglui.app.vello.util.UIUtils;
 
 import java.lang.ref.WeakReference;
 
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
+
+
 public class MainActivity extends BaseActivity implements ReviewViewFragment.onStatusChangedListener {
 	private static final String TAG = MainActivity.class.getSimpleName();
 	private Activity mActivity;
@@ -49,7 +52,9 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	private int currentColor = 0xFF666666;
 	private final Handler handler = new Handler();
 	private ReviewViewFragment mReviewViewFragment;
-	
+
+	private PullToRefreshAttacher mPullToRefreshAttacher;
+
 	private MainActivityUIHandler mUICallback = new MainActivityUIHandler(this);
 
 	static class MainActivityUIHandler extends Handler {
@@ -190,7 +195,11 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			mIsBound = false;
 		}
 	}
-	
+
+	PullToRefreshAttacher getPullToRefreshAttacher() {
+		return mPullToRefreshAttacher;
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -199,7 +208,9 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
             return;
         }
 
-        setContentView(R.layout.activity_main);
+		setContentView(R.layout.activity_main);
+		// The attacher should always be created in the Activity's onCreate
+		mPullToRefreshAttacher = PullToRefreshAttacher.get(this);
 
 		handleIntent(getIntent());
 		
@@ -418,11 +429,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	@Override
 	public void onModeChanged(int modeColor) {
 		changeColor(modeColor);
-	}
-
-	@Override
-	public void onAllReviewed() {
-		triggerRefresh();
 	}
 
 	@Override
