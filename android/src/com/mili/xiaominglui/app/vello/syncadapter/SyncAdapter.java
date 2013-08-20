@@ -84,7 +84,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 						mContext.getText(R.string.notif_sync_content_title))
 				.setTicker(mContext.getText(R.string.notif_sync_ticker))
 				.setProgress(0, 0, true).setOngoing(true).setAutoCancel(false);
-		notificationManager.notify(0, builder.build());
+		notificationManager.notify(1, builder.build());
 		// Perform a sync using SyncHelper
 		if (mSyncHelper == null) {
 			mSyncHelper = new SyncHelper(mContext);
@@ -97,7 +97,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			++syncResult.stats.numIoExceptions;
 		}
 
-		notificationManager.cancel(0);
+		notificationManager.cancel(1);
 	}
 
 	void doBindService() {
