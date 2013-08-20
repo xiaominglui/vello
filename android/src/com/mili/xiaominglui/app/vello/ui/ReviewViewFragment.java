@@ -23,7 +23,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
@@ -50,9 +49,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.TimeZone;
 
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshAttacher;
-
-public class ReviewViewFragment extends SherlockFragment implements LoaderManager.LoaderCallbacks<Cursor>, PullToRefreshAttacher.OnRefreshListener {
+public class ReviewViewFragment extends SherlockFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 	private static final String TAG = ReviewViewFragment.class.getSimpleName();
 	
 	private static final String KEY_DELETED_WORD = "deletedWord";
@@ -66,13 +63,11 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	private WordCardAdapter mAdapter;
 	private ViewGroup mRootView;
 	private onStatusChangedListener mListener;
+	private View mReviewedEmpty;
 
 	private String mCurFilter = "";
 	private boolean mIsSearching = false;
-
-	private PullToRefreshAttacher mPullToRefreshAttacher;
-	public static final int SIMULATED_REFRESH_LENGTH = 5000;
-
+	
 	private SwipeableListView.OnItemSwipeListener mReviewSwipeListener = new SwipeableListView.OnItemSwipeListener() {
         
         @Override
@@ -91,6 +86,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
     
 	public interface onStatusChangedListener {
 		public void onModeChanged(int modeColor);
+		public void onAllReviewed();
 		public void onWordReviewed();
 	}
 	
@@ -126,7 +122,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		mRootView = (ViewGroup) inflater.inflate(R.layout.fragment_review, null);
-		// The ScrollView is what we'll be listening to for refresh starts
+		
 		mWordsList = (SwipeableListView) mRootView.findViewById(R.id.words_list);
 		mAdapter = new WordCardAdapter(getActivity(), null, mWordsList);
 		mWordsList.setAdapter(mAdapter);
@@ -138,6 +134,16 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			public boolean onTouch(View view, MotionEvent event) {
 				hideUndoBar(true, event);
 				return false;
+			}
+		});
+		mReviewedEmpty = mRootView.findViewById(R.id.reviewed_empty);
+		mReviewedEmpty.setOnTouchListener(new View.OnTouchListener() {
+
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				hideUndoBar(true, event);
+				mListener.onAllReviewed();
+				return true;
 			}
 		});
 
@@ -154,13 +160,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			}, 0, getResources().getString(R.string.word_reviewed), true,
 					R.string.word_reviewed_undo, true);
 		}
-
-		// Now get the PullToRefresh attacher from the Activity. An exercise to the reader
-		// is to create an implicit interface instead of casting to the concrete
-		// Activity
-		mPullToRefreshAttacher = ((MainActivity) getActivity())
-				.getPullToRefreshAttacher();
-		mPullToRefreshAttacher.addRefreshableView(mWordsList, this);
 		return mRootView;
 	}
 	
@@ -446,6 +445,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		    mListener.onModeChanged(VelloConfig.REVIEW_MODE_ACTION_BAR_COLOR);
 		    mWordsList.enableSwipe(true);
 		    mWordsList.setOnItemSwipeListener(mReviewSwipeListener);
+		    mWordsList.setEmptyView(mReviewedEmpty);
 			criteria.addSortOrder(DbWordCard.Columns.DUE, true);
 			Calendar rightNow = Calendar.getInstance();
 
@@ -462,6 +462,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		    mListener.onModeChanged(VelloConfig.DICTIONARY_MODE_ACTION_BAR_COLOR);
 		    mWordsList.enableSwipe(false);
 		    mWordsList.setOnItemSwipeListener(null);
+		    mReviewedEmpty.setVisibility(View.GONE);
 		    mWordsList.setEmptyView(null);
 		    criteria.addLike(DbWordCard.Columns.NAME, mCurFilter + "%");
 		}
@@ -566,32 +567,5 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	void onQueryTextChange(String newText) {
 		mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;
 		getLoaderManager().restartLoader(0, null, this);
-	}
-
-	@Override
-	public void onRefreshStarted(View view) {
-		/**
-         * Simulate Refresh with 4 seconds sleep
-         */
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(Void... params) {
-                try {
-                    Thread.sleep(SIMULATED_REFRESH_LENGTH);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void result) {
-                super.onPostExecute(result);
-
-                // Notify PullToRefreshAttacher that the refresh has finished
-                mPullToRefreshAttacher.setRefreshComplete();
-            }
-        }.execute();
 	}
 }

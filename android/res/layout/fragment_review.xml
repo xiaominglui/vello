@@ -32,6 +32,16 @@
         android:paddingRight="9dp"
         android:paddingTop="9dp" />
 
+    <TextView
+        android:id="@+id/reviewed_empty"
+        style="@android:style/TextAppearance.Large"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:padding="15dp"
+        android:gravity="center_vertical"
+        android:text="@string/listview_empty"
+        android:visibility="gone" />
+
     <com.android.deskclock.widget.ActionableToastBar
         android:id="@+id/undo_bar"
         style="@style/ToastBarStyle"

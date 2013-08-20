@@ -168,7 +168,7 @@ public class AccountActivity extends SherlockFragmentActivity implements
          ContentResolver.setIsSyncable(mMyTrelloAccount,
          VelloProvider.AUTHORITY, 1);
          ContentResolver.setSyncAutomatically(mMyTrelloAccount, VelloProvider.AUTHORITY, true);
-//         ContentResolver.addPeriodicSync(mMyTrelloAccount, VelloProvider.AUTHORITY, new Bundle(), SYNC_PERIOD);
+         ContentResolver.addPeriodicSync(mMyTrelloAccount, VelloProvider.AUTHORITY, new Bundle(), SYNC_PERIOD);
 
         if (mFinishIntent != null) {
             mFinishIntent.addCategory(Intent.CATEGORY_LAUNCHER);
