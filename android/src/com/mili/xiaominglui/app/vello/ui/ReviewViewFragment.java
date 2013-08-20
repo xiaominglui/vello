@@ -136,16 +136,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 				return false;
 			}
 		});
-		mReviewedEmpty = mRootView.findViewById(R.id.reviewed_empty);
-		mReviewedEmpty.setOnTouchListener(new View.OnTouchListener() {
-
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				hideUndoBar(true, event);
-				mListener.onAllReviewed();
-				return true;
-			}
-		});
 
 		mUndoBar = (ActionableToastBar) mRootView.findViewById(R.id.undo_bar);
 

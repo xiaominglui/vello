@@ -148,17 +148,17 @@ public class SyncHelper {
 						NotificationManager notificationManager = (NotificationManager) mContext
 								.getSystemService(Context.NOTIFICATION_SERVICE);
 
-						NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+						NotificationCompat.Builder builder = new NotificationCompat.Builder(
 								mContext)
 								.setWhen(rightNow.getTimeInMillis())
 								.setSmallIcon(R.drawable.ic_stat_vaa)
-								.setContentTitle(mContext.getString(R.string.notif_content_title))
+								.setContentTitle(mContext.getText(R.string.notif_content_title))
 								.setContentText(mContext.getText(R.string.notif_content_text))
 								.setContentInfo(String.valueOf(num))
 								.setContentIntent(pIntent)
 								.setAutoCancel(true);
 
-						notificationManager.notify(0, mBuilder.build());
+						notificationManager.notify(0, builder.build());
 					}
 				}
 			}

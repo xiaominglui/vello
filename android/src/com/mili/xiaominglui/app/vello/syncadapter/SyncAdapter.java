@@ -1,6 +1,7 @@
 package com.mili.xiaominglui.app.vello.syncadapter;
 
 import android.accounts.Account;
+import android.app.NotificationManager;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ComponentName;
 import android.content.ContentProviderClient;
@@ -13,6 +14,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.mili.xiaominglui.app.vello.R;
@@ -71,18 +73,31 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	@Override
 	public void onPerformSync(Account account, Bundle extras, String authority,
 			ContentProviderClient provider, SyncResult syncResult) {
-		
+
+		// sync notification
+		NotificationManager notificationManager = (NotificationManager) mContext
+				.getSystemService(Context.NOTIFICATION_SERVICE);
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(
+				mContext)
+				.setSmallIcon(R.drawable.ic_stat_vaa)
+				.setContentTitle(
+						mContext.getText(R.string.notif_sync_content_title))
+				.setTicker(mContext.getText(R.string.notif_sync_ticker))
+				.setProgress(0, 0, true).setOngoing(true).setAutoCancel(false);
+		notificationManager.notify(0, builder.build());
 		// Perform a sync using SyncHelper
-        if (mSyncHelper == null) {
-            mSyncHelper = new SyncHelper(mContext);
-        }
+		if (mSyncHelper == null) {
+			mSyncHelper = new SyncHelper(mContext);
+		}
 
-        try {
-            mSyncHelper.performSync(syncResult, SyncHelper.FLAG_SYNC_REMOTE);
+		try {
+			mSyncHelper.performSync(syncResult, SyncHelper.FLAG_SYNC_REMOTE);
 
-        } catch (IOException e) {
-            ++syncResult.stats.numIoExceptions;
-        }
+		} catch (IOException e) {
+			++syncResult.stats.numIoExceptions;
+		}
+
+		notificationManager.cancel(0);
 	}
 
 	void doBindService() {

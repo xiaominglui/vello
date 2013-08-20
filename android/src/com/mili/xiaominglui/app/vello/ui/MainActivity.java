@@ -327,6 +327,9 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
                 return true;
             }
 			break;
+		case R.id.menu_sync:
+			triggerRefresh();
+			return true;
 			
 		case R.id.menu_about:
 			HelpUtils.showAbout(this);

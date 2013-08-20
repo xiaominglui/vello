@@ -23,6 +23,12 @@
         android:showAsAction="collapseActionView|ifRoom"
         android:title="@string/description_search"/>
     <item
+        android:id="@+id/menu_sync"
+        android:title="@string/description_sync"
+        android:icon="@drawable/ic_menu_refresh"
+        android:orderInCategory="1"
+        android:showAsAction="ifRoom" />
+    <item
         android:id="@+id/menu_settings"
         android:title="@string/description_settings"
         android:orderInCategory="98"
