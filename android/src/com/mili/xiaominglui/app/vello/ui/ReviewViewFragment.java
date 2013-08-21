@@ -63,7 +63,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	private WordCardAdapter mAdapter;
 	private ViewGroup mRootView;
 	private onStatusChangedListener mListener;
-	private View mReviewedEmpty;
 
 	private String mCurFilter = "";
 	private boolean mIsSearching = false;
@@ -435,7 +434,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		    mListener.onModeChanged(VelloConfig.REVIEW_MODE_ACTION_BAR_COLOR);
 		    mWordsList.enableSwipe(true);
 		    mWordsList.setOnItemSwipeListener(mReviewSwipeListener);
-		    mWordsList.setEmptyView(mReviewedEmpty);
 			criteria.addSortOrder(DbWordCard.Columns.DUE, true);
 			Calendar rightNow = Calendar.getInstance();
 
@@ -452,7 +450,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		    mListener.onModeChanged(VelloConfig.DICTIONARY_MODE_ACTION_BAR_COLOR);
 		    mWordsList.enableSwipe(false);
 		    mWordsList.setOnItemSwipeListener(null);
-		    mReviewedEmpty.setVisibility(View.GONE);
 		    mWordsList.setEmptyView(null);
 		    criteria.addLike(DbWordCard.Columns.NAME, mCurFilter + "%");
 		}
