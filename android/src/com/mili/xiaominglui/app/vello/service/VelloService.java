@@ -372,6 +372,15 @@ public class VelloService extends Service implements RequestListener,
 		mRequestList.add(reStartWordCard);
 	}
 	
+	private void createWebHooks() {
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "createWebHooks start...");
+		}
+		Request createWebHooks = VelloRequestFactory.createWebHooks();
+		mRequestManager.execute(createWebHooks, this);
+		mRequestList.add(createWebHooks);
+	}
+	
 	@Override
 	public void onRequestFinished(Request request, Bundle resultData) {
 		if (mRequestList.contains(request)) {
@@ -480,7 +489,7 @@ public class VelloService extends Service implements RequestListener,
 									getApplicationContext(), list.id, position);
 							if (AccountUtils
 									.isVocabularyBoardWellFormed(getApplicationContext())) {
-								// getDueWordCardList();
+								createWebHooks();
 							}
 							return;
 						}
@@ -510,7 +519,7 @@ public class VelloService extends Service implements RequestListener,
 							id, pos);
 					if (AccountUtils
 							.isVocabularyBoardWellFormed(getApplicationContext())) {
-						// getDueWordCardList();
+						createWebHooks();
 					}
 				} else {
 					// reopen failed, try again
@@ -531,7 +540,7 @@ public class VelloService extends Service implements RequestListener,
 							id, pos);
 					if (AccountUtils
 							.isVocabularyBoardWellFormed(getApplicationContext())) {
-						// getDueWordCardList();
+						createWebHooks();
 					}
 				} else {
 					// create list failed, try again
@@ -745,6 +754,18 @@ public class VelloService extends Service implements RequestListener,
 			    }
 			    return;
 
+			case VelloRequestFactory.REQUEST_TYPE_CREATE_WEB_HOOKS:
+				String hookId = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_WEB_HOOK_ID);
+				if (hookId != null) {
+					// hook created, save it
+					AccountUtils.setVocabularyBoardWebHookId(getApplicationContext(), hookId);
+					// need trigge sync? TODO
+				} else {
+					// to create again
+					createWebHooks();
+				}
+				return;
+				
 			default:
 				return;
 			}

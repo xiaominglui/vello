@@ -135,8 +135,9 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				// anything with it
 			}
 
-			if (AccountUtils.hasVocabularyBoard(getApplicationContext())
-					&& AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
+			if (AccountUtils.hasVocabularyBoard(getApplicationContext()) &&
+					AccountUtils.isVocabularyBoardWellFormed(getApplicationContext()) &&
+					AccountUtils.isWebHooksCreated(getApplicationContext())) {
 				// all initialized
 				// do nothing now
 			} else {

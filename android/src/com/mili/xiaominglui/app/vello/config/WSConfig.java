@@ -17,6 +17,7 @@ public final class WSConfig {
     public static final String WS_TRELLO_TARGET_LIST = "/lists";
     public static final String WS_TRELLO_TARGET_SEARCH = "/search";
     public static final String WS_TRELLO_TARGET_CARD ="/cards";
+    public static final String WS_TRELLO_TARGET_TOKEN = "/tokens";
     
     public static final String WS_TRELLO_PARAM_FILTER = "filter";
     public static final String WS_TRELLO_PARAM_APP_KEY = "key";
@@ -34,6 +35,10 @@ public final class WSConfig {
     public static final String WS_TRELLO_PARAM_IDLIST = "idList";
     public static final String WS_TRELLO_PARAM_DUE = "due";
     public static final String WS_TRELLO_PARAM_TEXT = "text";
+    public static final String WS_TRELLO_PARAM_WEBHOOK_DESCRIPTION = "description";
+    public static final String WS_TRELLO_PARAM_WEBHOOK_CALLBACK_URL = "callbackURL";
+    public static final String WS_TRELLO_PARAM_WEBHOOK_ID_MODEL = "idModel";
+    
     
     
     public static final String WS_TRELLO_FIELD_LISTS = "/lists";
@@ -48,4 +53,7 @@ public final class WSConfig {
     
     // mili dictionary
     public static final String WS_DICTIONARY_MILI_API = "http://mili.cfapps.io/words/";
+    
+    // avos cloud
+    public static final String WS_AVELLO_TRELISTENER_URL = "http://dev.vaa.avosapps.com/trelistener";
 }

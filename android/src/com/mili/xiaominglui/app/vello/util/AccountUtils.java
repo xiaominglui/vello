@@ -26,6 +26,7 @@ public class AccountUtils {
     private static final String PREF_CHOSEN_ACCOUNT = "chosen_account";
     private static final String PREF_AUTH_TOKEN = "auth_token";
     private static final String PREF_VOCABULARY_BOARD_ID = "board_id";
+    private static final String PREF_VOCABULARY_BOARD_WEB_HOOK_ID = "board_hook_id";
     private static final String PREF_VOCABULARY_BOARD_NAME = "board_name";
     private static final String PREF_VOCABULARY_BOARD_NAME_DEFAULT = "MyWords";
     private static final String PREF_VOCABULARY_BOARD_VERIFICATION_STRING = "TrelloDB";
@@ -47,6 +48,10 @@ public class AccountUtils {
             }
         }
         return true;
+    }
+    
+    public static boolean isWebHooksCreated(final Context context) {
+    	return !TextUtils.isEmpty(getVocabularyBoardWebHookId(context));
     }
 
     public static boolean isAuthenticated(final Context context) {
@@ -123,6 +128,18 @@ public class AccountUtils {
                 }
             }
         };
+    }
+    
+    public static String getVocabularyBoardWebHookId(final Context context) {
+    	SharedPreferences sp = PreferenceManager
+                .getDefaultSharedPreferences(context);
+    	return sp.getString(PREF_VOCABULARY_BOARD_WEB_HOOK_ID, null);
+    }
+    
+    public static void setVocabularyBoardWebHookId(final Context context, String hookId) {
+    	SharedPreferences sp = PreferenceManager
+                .getDefaultSharedPreferences(context);
+    	sp.edit().putString(PREF_VOCABULARY_BOARD_WEB_HOOK_ID, hookId).commit();
     }
 
     public static String getVocabularyBoardId(final Context context) {

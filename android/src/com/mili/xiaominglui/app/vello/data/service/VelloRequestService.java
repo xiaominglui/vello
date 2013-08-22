@@ -66,6 +66,8 @@ public class VelloRequestService extends RequestService {
                 return new QueryInLocalCacheOperation();
             case VelloRequestFactory.REQUEST_TYPE_LOOK_UP_IN_DICTIONARY:
             	return new LookUpInDictionaryOperation();
+            case VelloRequestFactory.REQUEST_TYPE_CREATE_WEB_HOOKS:
+            	return new CreateWebHooksOperation();
         }
         return null;
     }

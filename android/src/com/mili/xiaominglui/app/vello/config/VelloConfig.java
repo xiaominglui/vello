@@ -31,4 +31,6 @@ public class VelloConfig {
     // ACRA related
     public static final String CRASH_LOGGER_CARD_ID_SHORTLINK = "https://trello.com/c/pamv10IM";
 
+    // Trello Web Hook related
+    public static final String DEFAULT_VOCABULARY_BOARD_HOOK_DESCRIPTION = "Vocabulary Sync Trigger";
 }
