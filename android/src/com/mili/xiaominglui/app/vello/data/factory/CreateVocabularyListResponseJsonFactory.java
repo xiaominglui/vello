@@ -7,20 +7,22 @@ import com.mili.xiaominglui.app.vello.data.model.List;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 
 public class CreateVocabularyListResponseJsonFactory {
-    
-    private CreateVocabularyListResponseJsonFactory() {
-	// No public constructor
-    }
 
-    public static Bundle parseResult(String wsResponse) {
-	Gson gson = new Gson();
-	List list = gson.fromJson(wsResponse, List.class);
-	
-	if (list != null) {
-	    Bundle bundle = new Bundle();
-	    bundle.putString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_ID, list.id);
-	    return bundle;
+	private CreateVocabularyListResponseJsonFactory() {
+		// No public constructor
 	}
-	return null;
-    }
+
+	public static Bundle parseResult(String wsResponse) {
+		Gson gson = new Gson();
+		List list = gson.fromJson(wsResponse, List.class);
+
+		if (list != null) {
+			Bundle bundle = new Bundle();
+			bundle.putString(
+					VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_ID,
+					list.id);
+			return bundle;
+		}
+		return null;
+	}
 }

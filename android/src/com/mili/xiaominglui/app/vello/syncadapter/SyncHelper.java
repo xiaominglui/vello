@@ -25,6 +25,7 @@ import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.ui.MainActivity;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
+import android.accounts.Account;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ContentProviderOperation;
@@ -35,6 +36,7 @@ import android.content.OperationApplicationException;
 import android.content.SyncResult;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -51,6 +53,14 @@ public class SyncHelper {
 	public SyncHelper(Context context) {
         mContext = context;
         mAuthToken = AccountUtils.getAuthToken(mContext);
+    }
+	
+	public static void requestManualSync(Account mChosenAccount) {
+        Bundle b = new Bundle();
+        b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        ContentResolver.requestSync(
+                mChosenAccount,
+                VelloProvider.AUTHORITY, b);
     }
 	
 	public void performSync(SyncResult syncResult, int flags) throws IOException {

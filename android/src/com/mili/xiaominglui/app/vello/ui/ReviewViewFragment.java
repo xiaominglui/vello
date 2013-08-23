@@ -158,6 +158,13 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		getLoaderManager().initLoader(0, null, this);
 	}
 	
+	
+	@Override
+	public void onDestroyView() {
+		mAdapter.swapCursor(null);
+		super.onDestroyView();
+	}
+	
 	public class WordCardAdapter extends CursorAdapter {
 		private final Context mContext;
 		private final LayoutInflater mFactory;

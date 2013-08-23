@@ -1,10 +1,14 @@
 
 package com.mili.xiaominglui.app.vello.util;
 
+import java.io.IOException;
+
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -18,6 +22,10 @@ import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
+import com.mili.xiaominglui.app.vello.data.model.WordCard;
+import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
+import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
+import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.ui.AccountActivity;
 
 public class AccountUtils {
@@ -118,14 +126,18 @@ public class AccountUtils {
                                 .getString(AccountManager.KEY_PASSWORD);
                         addAccount(context, name, type, token);
                         setAuthToken(context, token);
-                        setChosenAccountName(context, account.name);
+                        setChosenAccountName(context, name);
                         if (callback != null) {
                             callback.onAuthTokenAvailable(token);
                         }
                     }
-                } catch (Exception e) {
-                    Log.e(TAG, "Authentication error" + e);
-                }
+                } catch (OperationCanceledException e) {
+                    Log.e(TAG, "Authentication error " + e);
+                } catch (AuthenticatorException e) {
+                	Log.e(TAG, "Authentication error " + e);
+				} catch (IOException e) {
+					Log.e(TAG, "Authentication error " + e);
+				}
             }
         };
     }
@@ -133,7 +145,7 @@ public class AccountUtils {
     public static String getVocabularyBoardWebHookId(final Context context) {
     	SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(context);
-    	return sp.getString(PREF_VOCABULARY_BOARD_WEB_HOOK_ID, null);
+    	return sp.getString(PREF_VOCABULARY_BOARD_WEB_HOOK_ID, "");
     }
     
     public static void setVocabularyBoardWebHookId(final Context context, String hookId) {
@@ -145,7 +157,7 @@ public class AccountUtils {
     public static String getVocabularyBoardId(final Context context) {
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(context);
-        return sp.getString(PREF_VOCABULARY_BOARD_ID, null);
+        return sp.getString(PREF_VOCABULARY_BOARD_ID, "");
     }
 
     public static void setVocabularyBoardId(final Context context, final String id) {
@@ -167,13 +179,13 @@ public class AccountUtils {
     public static String getChosenAccountName(final Context context) {
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(context);
-        return sp.getString(PREF_CHOSEN_ACCOUNT, null);
+        return sp.getString(PREF_CHOSEN_ACCOUNT, "");
     }
 
     public static String getVocabularyListId(final Context context, final int position) {
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(context);
-        return sp.getString(VOCABULARY_LISTS_TITLE_ID[position], null);
+        return sp.getString(VOCABULARY_LISTS_TITLE_ID[position], "");
     }
 
     public static void setVocabularyListId(final Context context, final String id,
@@ -193,7 +205,7 @@ public class AccountUtils {
                 return i;
             }
         }
-        return -1;
+        return 0;
     }
 
     private static void setChosenAccountName(final Context context,
@@ -216,7 +228,7 @@ public class AccountUtils {
     public static String getAuthToken(final Context context) {
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(context);
-        return sp.getString(PREF_AUTH_TOKEN, null);
+        return sp.getString(PREF_AUTH_TOKEN, "");
     }
 
     private static void setAuthToken(final Context context,
@@ -235,14 +247,16 @@ public class AccountUtils {
 
     public static void signOut(final Context context) {
         invalidateAuthToken(context);
+        
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(context);
         sp.edit().clear().commit();
+        
         CookieSyncManager.createInstance(context);
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.removeAllCookie();
 
-        // context.getContentResolver().delete(
-        // VelloProviderContract.BASE_CONTENT_URI, null, null);
+		context.getContentResolver().delete(
+				VelloContent.CONTENT_URI, null, null);
     }
 }

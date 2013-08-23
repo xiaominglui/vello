@@ -6,6 +6,7 @@ import com.mili.xiaominglui.app.vello.data.operation.AddWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ArchiveWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CheckVocabularyBoardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CheckVocabularyListOperation;
+import com.mili.xiaominglui.app.vello.data.operation.CreateWebHooksOperation;
 import com.mili.xiaominglui.app.vello.data.operation.QueryInRemoteStorageOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ConfigureVocabularyBoardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CreateVocabularyBoardOperation;

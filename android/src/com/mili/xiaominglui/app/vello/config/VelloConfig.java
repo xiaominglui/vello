@@ -28,6 +28,8 @@ public class VelloConfig {
     public static int DICTIONARY_MODE_ACTION_BAR_COLOR = 0xFF3F9FE0;
     public static int REVIEW_MODE_ACTION_BAR_COLOR = 0xFF222222;
     
+    public static final String TRELLO_DEFAULT_ACCOUNT_NAME = "me";
+    
     // ACRA related
     public static final String CRASH_LOGGER_CARD_ID_SHORTLINK = "https://trello.com/c/pamv10IM";
 

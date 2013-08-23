@@ -21,6 +21,7 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.adapter.TestFragmentAdapter;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
+import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.mili.xiaominglui.app.vello.util.AccountUtils.AuthenticateCallback;
@@ -34,7 +35,6 @@ public class AccountActivity extends SherlockFragmentActivity implements
     public static final String EXTRA_FINISH_INTENT = "com.mili.xiaominglui.app.vello.extra.FINISH_INTENT";
 
     private static final int REQUEST_AUTHENTICATE = 100;
-    private static final String ME = "me";
     private Account mMyTrelloAccount;
     private Intent mFinishIntent;
     private boolean mCancelAuth = false;
@@ -89,12 +89,12 @@ public class AccountActivity extends SherlockFragmentActivity implements
         int id = v.getId();
         switch (id) {
             case R.id.log_in:
-                mMyTrelloAccount = new Account(ME, Constants.ACCOUNT_TYPE);
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment_container,
-                                new AuthProgressFragment(), "loading")
-                        .addToBackStack("log_in").commit();
+                mMyTrelloAccount = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
+//                getSupportFragmentManager()
+//                        .beginTransaction()
+//                        .replace(R.id.fragment_container,
+//                                new AuthProgressFragment(), "loading")
+//                        .addToBackStack("log_in").commit();
                 tryAuthenticate();
                 break;
             case R.id.sign_up:
@@ -165,19 +165,13 @@ public class AccountActivity extends SherlockFragmentActivity implements
 
     @Override
     public void onAuthTokenAvailable(String authToken) {
-         ContentResolver.setIsSyncable(mMyTrelloAccount,
-         VelloProvider.AUTHORITY, 1);
-         ContentResolver.setSyncAutomatically(mMyTrelloAccount, VelloProvider.AUTHORITY, true);
-         ContentResolver.addPeriodicSync(mMyTrelloAccount, VelloProvider.AUTHORITY, new Bundle(), SYNC_PERIOD);
-
-        if (mFinishIntent != null) {
-            mFinishIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-            mFinishIntent.setAction(Intent.ACTION_MAIN);
-            mFinishIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(mFinishIntent);
-        }
-
-        finish();
+		if (mFinishIntent != null) {
+			mFinishIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+			mFinishIntent.setAction(Intent.ACTION_MAIN);
+			mFinishIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+					| Intent.FLAG_ACTIVITY_CLEAR_TASK);
+			startActivity(mFinishIntent);
+		}
+		finish();
     }
 }

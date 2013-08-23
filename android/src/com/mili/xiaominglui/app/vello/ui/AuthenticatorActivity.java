@@ -8,6 +8,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -15,6 +16,7 @@ import android.webkit.WebViewClient;
 
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
+import com.mili.xiaominglui.app.vello.config.VelloConfig;
 
 /**
  * Activity which displays login screen to the user.
@@ -37,26 +39,40 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 
     private WebView mWebView;
 
-    private String mUsername = "me";
 
-    private class MyWebViewClient extends WebViewClient {
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+	private class MyWebViewClient extends WebViewClient {
+		@Override
+		public boolean shouldOverrideUrlLoading(WebView view, String url) {
+			if (VelloConfig.DEBUG_SWITCH) {
+				Log.d(TAG, "trello url = " + url);
+			}
+			if (url.contains("#token=")) {
+				String token = (url.split("#token="))[1];
+				if (token != null
+						&& token.length() == Constants.AUTHTOKEN_LENGTH) {
+					finishAuthenticated(token);
+				} else {
+					if (VelloConfig.DEBUG_SWITCH) {
+						Log.i(TAG, "trello not response token");
+					}
+					finishFailure();
+				}
+				view.clearCache(true);
+				return true;
+			} else if (url.equals("https://trello.com/")) {
+				// user touch the Deny button
+				if (VelloConfig.DEBUG_SWITCH) {
+					Log.i(TAG, "user deny auth");
+				}
+				finishFailure();
+				return true;
+			} else {
+				view.loadUrl(url);
+				return true;
+			}
+		}
 
-            if (url.contains("#token=")) {
-                String token = (url.split("#token="))[1];
-                if (token != null && token.length() == Constants.AUTHTOKEN_LENGTH) {
-                    finishLogin(token);
-                } else {
-                }
-                return true;
-            } else {
-                view.loadUrl(url);
-                return true;
-            }
-        }
-
-    }
+	}
 
     /**
      * {@inheritDoc}
@@ -74,20 +90,22 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        webSettings.setDomStorageEnabled(true);
+//        webSettings.setDomStorageEnabled(true);
 
         mWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView view, int progress) {
-                // TODO Auto-generated method stub
                 progressDialog.show();
+                mWebView.setVisibility(View.INVISIBLE);
                 progressDialog.setProgress(0);
                 activity.setProgress(progress * 1000);
 
                 progressDialog.incrementProgressBy(progress);
 
-                if (progress == 100 && progressDialog.isShowing())
-                    progressDialog.dismiss();
+                if (progress == 100 && progressDialog.isShowing()) {
+                	progressDialog.dismiss();
+                	mWebView.setVisibility(View.VISIBLE);
+                }
             }
         });
 
@@ -95,7 +113,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         mWebView.loadUrl("file:///android_asset/connect.html");
 
     }
-
+    
     /**
      * Called when response is received from the server for authentication
      * request. See onAuthenticationResult(). Sets the
@@ -105,13 +123,21 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
      * 
      * @param result the confirmCredentials result.
      */
-    private void finishLogin(String authToken) {
+    private void finishAuthenticated(String authToken) {
 
-        Log.i(TAG, "finishLogin()");
+        Log.i(TAG, "finishAuthenticated()");
         final Intent intent = new Intent();
-        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, mUsername);
+        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME);
         intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, Constants.ACCOUNT_TYPE);
         intent.putExtra(AccountManager.KEY_PASSWORD, authToken);
+        setAccountAuthenticatorResult(intent.getExtras());
+        finish();
+    }
+    
+    private void finishFailure() {
+    	Log.i(TAG, "finishFailure()");
+        final Intent intent = new Intent();
+        intent.putExtra(AccountManager.KEY_ERROR_CODE, AccountManager.ERROR_CODE_REMOTE_EXCEPTION);
         setAccountAuthenticatorResult(intent.getExtras());
         finish();
     }

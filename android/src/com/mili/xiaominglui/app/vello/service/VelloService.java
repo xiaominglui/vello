@@ -1,5 +1,6 @@
 package com.mili.xiaominglui.app.vello.service;
 
+import android.accounts.Account;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
 import com.mili.xiaominglui.app.vello.R;
+import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.factory.IcibaWordXmlParser;
 import com.mili.xiaominglui.app.vello.data.model.Board;
@@ -38,6 +40,7 @@ import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestManager;
 import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment.ConnectionErrorDialogListener;
+import com.mili.xiaominglui.app.vello.syncadapter.SyncHelper;
 import com.mili.xiaominglui.app.vello.ui.MainActivity;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
@@ -534,7 +537,7 @@ public class VelloService extends Service implements RequestListener,
 					// create list successfully
 					String id = resultData
 							.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_ID);
-					int pos = resultData
+					int pos = request
 							.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
 					AccountUtils.setVocabularyListId(getApplicationContext(),
 							id, pos);
@@ -760,6 +763,13 @@ public class VelloService extends Service implements RequestListener,
 					// hook created, save it
 					AccountUtils.setVocabularyBoardWebHookId(getApplicationContext(), hookId);
 					// need trigge sync? TODO
+					// FIXME set sync should be moved to after vocabulary board init ok
+					Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
+					ContentResolver.setIsSyncable(account,
+							VelloProvider.AUTHORITY, 1);
+					ContentResolver.setSyncAutomatically(account,
+							VelloProvider.AUTHORITY, true);
+					SyncHelper.requestManualSync(account);
 				} else {
 					// to create again
 					createWebHooks();

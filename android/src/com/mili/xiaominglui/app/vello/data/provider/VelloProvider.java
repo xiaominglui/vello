@@ -25,7 +25,8 @@ public class VelloProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     private enum UriType {
         DB_WORD_CARD(DbWordCard.TABLE_NAME, DbWordCard.TABLE_NAME, DbWordCard.TYPE_ELEM_TYPE),
-        DB_WORD_CARD_ID_IN_LOCAL_DB(DbWordCard.TABLE_NAME + "/#", DbWordCard.TABLE_NAME, DbWordCard.TYPE_DIR_TYPE);
+        DB_WORD_CARD_ID_IN_LOCAL_DB(DbWordCard.TABLE_NAME + "/#", DbWordCard.TABLE_NAME, DbWordCard.TYPE_DIR_TYPE),
+        DB_ALL(null, null, DbWordCard.TYPE_DIR_TYPE);
         
         private String mTableName;
         private String mType;
@@ -181,15 +182,18 @@ public class VelloProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         UriType uriType = matchUri(uri);
-        Context context = getContext();
-        
-        SQLiteDatabase db = getDatabase(context);
-        String id;
         
         if (VelloConfig.DEBUG_SWITCH) {
             Log.d(TAG, "delete: uri=" + uri + ", match is " + uriType.name());
         }
+        if (uri == VelloContent.CONTENT_URI) {
+        	deleteDatabase();
+        	return 1;
+        }
         
+        Context context = getContext();
+        SQLiteDatabase db = getDatabase(context);
+        String id;
         int result = -1;
         switch (uriType) {
             case DB_WORD_CARD_ID_IN_LOCAL_DB:
@@ -199,10 +203,12 @@ public class VelloProvider extends ContentProvider {
             case DB_WORD_CARD:
                 result = db.delete(uriType.getTableName(), selection, selectionArgs);
                 break;
+            case DB_ALL:
+            	break;
         }
         
-        getContext().getContentResolver().notifyChange(uri, null);
-        return result;
+		getContext().getContentResolver().notifyChange(uri, null);
+		return result;
     }
 
     @Override
@@ -232,6 +238,10 @@ public class VelloProvider extends ContentProvider {
 
         getContext().getContentResolver().notifyChange(uri, null);
         return result;
+    }
+    
+    private void deleteDatabase() {
+    	getContext().deleteDatabase(DATABASE_NAME);
     }
     
     private String whereWithId(String selection) {

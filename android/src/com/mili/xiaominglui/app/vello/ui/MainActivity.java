@@ -210,7 +210,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			mReviewViewFragment = new ReviewViewFragment();
 			fm.beginTransaction().add(R.id.fragment_container_master, mReviewViewFragment).commit();
 		}
-		
 		doBindService();
 	}
 
