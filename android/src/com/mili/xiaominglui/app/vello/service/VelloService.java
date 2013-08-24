@@ -20,6 +20,8 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.avos.avoscloud.ParseInstallation;
+import com.avos.avoscloud.PushService;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
 import com.mili.xiaominglui.app.vello.R;
@@ -770,6 +772,9 @@ public class VelloService extends Service implements RequestListener,
 					ContentResolver.setSyncAutomatically(account,
 							VelloProvider.AUTHORITY, true);
 					SyncHelper.requestManualSync(account);
+					// save Installation for push
+					ParseInstallation.getCurrentInstallation().saveInBackground();
+					PushService.subscribe(this, "sync", MainActivity.class);
 				} else {
 					// to create again
 					createWebHooks();

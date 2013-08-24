@@ -21,6 +21,8 @@ import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
+import com.avos.avoscloud.ParseInstallation;
+import com.avos.avoscloud.PushService;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
@@ -258,5 +260,9 @@ public class AccountUtils {
 
 		context.getContentResolver().delete(
 				VelloContent.CONTENT_URI, null, null);
+		
+		PushService.unsubscribe(context, "sync");
+		// 退订之后需要重新保存Installation
+		ParseInstallation.getCurrentInstallation().saveInBackground();
     }
 }

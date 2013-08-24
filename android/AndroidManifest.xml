@@ -67,6 +67,15 @@
                 someone who explicitly knows the class name
             -->
         </activity>
+        
+        <receiver android:name=".receiver.AVOSPushReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="com.avos.UPDATE_STATUS" />
+            </intent-filter>
+        </receiver>
 
         <!-- The authenticator service -->
         <service
