@@ -260,9 +260,5 @@ public class AccountUtils {
 
 		context.getContentResolver().delete(
 				VelloContent.CONTENT_URI, null, null);
-		
-		PushService.unsubscribe(context, "sync");
-		// 退订之后需要重新保存Installation
-		ParseInstallation.getCurrentInstallation().saveInBackground();
     }
 }

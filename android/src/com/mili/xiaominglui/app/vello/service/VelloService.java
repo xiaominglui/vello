@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.avos.avoscloud.ParseInstallation;
 import com.avos.avoscloud.PushService;
+import com.avos.avoscloud.SaveCallback;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
 import com.mili.xiaominglui.app.vello.R;
@@ -59,7 +60,6 @@ import org.apache.http.HttpStatus;
 public class VelloService extends Service implements RequestListener,
 		ConnectionErrorDialogListener {
 	private static final String TAG = VelloService.class.getSimpleName();
-	private NotificationManager mNM;
 
 	private static boolean isRunning = false;
 	ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track
@@ -186,13 +186,25 @@ public class VelloService extends Service implements RequestListener,
 	public void onCreate() {
 		super.onCreate();
 		Log.i(TAG, "VelloService Started.");
-		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		mRequestManager = VelloRequestManager.from(this);
 		mRequestList = new ArrayList<Request>();
 
 		// Display a notification about us starting. We put an icon in the
 		// status bar.
 		// showNotification();
+		
+		// save Installation for push
+		PushService.subscribe(this, "sync", MainActivity.class);
+		PushService.subscribe(this, "protected", MainActivity.class);
+		ParseInstallation.getCurrentInstallation().saveInBackground(new SaveCallback() {
+
+			@Override
+			public void done(com.avos.avoscloud.ParseException e) {
+				PushService.unsubscribe(getApplicationContext(), "protected");
+                ParseInstallation.getCurrentInstallation().saveInBackground();
+			}
+		});
+		
 		isRunning = true;
 	}
 
@@ -201,11 +213,9 @@ public class VelloService extends Service implements RequestListener,
 		// Cancel the persistent notification.
 		Log.i(TAG, "VelloService Stopped.");
 		isRunning = false;
-		mNM.cancel(NOTIFICATION);
 
 		// Tell the user we stopped.
-		Toast.makeText(this, R.string.local_service_stopped, Toast.LENGTH_LONG)
-				.show();
+		Toast.makeText(this, R.string.local_service_stopped, Toast.LENGTH_LONG).show();
 	}
 
 	protected VelloRequestManager mRequestManager;
@@ -769,12 +779,9 @@ public class VelloService extends Service implements RequestListener,
 					Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
 					ContentResolver.setIsSyncable(account,
 							VelloProvider.AUTHORITY, 1);
-					ContentResolver.setSyncAutomatically(account,
-							VelloProvider.AUTHORITY, true);
-					SyncHelper.requestManualSync(account);
-					// save Installation for push
-					ParseInstallation.getCurrentInstallation().saveInBackground();
-					PushService.subscribe(this, "sync", MainActivity.class);
+//					ContentResolver.setSyncAutomatically(account,
+//							VelloProvider.AUTHORITY, true);
+//					SyncHelper.requestManualSync(account);
 				} else {
 					// to create again
 					createWebHooks();

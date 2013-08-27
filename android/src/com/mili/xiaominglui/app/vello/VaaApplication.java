@@ -25,13 +25,9 @@ public class VaaApplication extends Application {
         ACRA.getErrorReporter().setReportSender(trelloSender);
         
         super.onCreate();
-        Parse.initialize(this, "ycvs6d1qc9jdi752mayrvte0dq6nhs1e2kub1hrf3pkmhds2", "rixsj1ev775x0e3sd6h7s1o6cydgcgets0q6keb4ihk9t2x2");
+        
         Parse.useAVCloudCN();
+        Parse.initialize(this, "ycvs6d1qc9jdi752mayrvte0dq6nhs1e2kub1hrf3pkmhds2", "rixsj1ev775x0e3sd6h7s1o6cydgcgets0q6keb4ihk9t2x2");
 
-        ParseUser.enableAutomaticUser();
-        ParseACL defaultACL = new ParseACL();
-        // Optionally enable public read access.
-        // defaultACL.setPublicReadAccess(true);
-        ParseACL.setDefaultACL(defaultACL, true);
     }
 }
