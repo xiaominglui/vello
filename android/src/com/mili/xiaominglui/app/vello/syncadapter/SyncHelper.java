@@ -116,7 +116,7 @@ public class SyncHelper {
 			}
 
 			// Clear the table
-//			mContext.getContentResolver().delete(DbWordCard.CONTENT_URI, null, null);
+			mContext.getContentResolver().delete(DbWordCard.CONTENT_URI, null, null);
 
 			ArrayList<WordCard> postSyncRemoteWordCardList = getOpenWordCards();
 			if (postSyncRemoteWordCardList.size() > 0) {

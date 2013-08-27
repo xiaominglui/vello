@@ -186,8 +186,11 @@ public class VelloProvider extends ContentProvider {
         if (VelloConfig.DEBUG_SWITCH) {
             Log.d(TAG, "delete: uri=" + uri + ", match is " + uriType.name());
         }
+        
         if (uri == VelloContent.CONTENT_URI) {
-        	deleteDatabase();
+        	if (mDatabase != null && mDatabase.isOpen()) {
+        		deleteDatabase();
+        	}
         	return 1;
         }
         
