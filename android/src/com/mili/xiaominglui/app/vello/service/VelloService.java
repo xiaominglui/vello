@@ -194,6 +194,7 @@ public class VelloService extends Service implements RequestListener,
 		// showNotification();
 		
 		// save Installation for push
+		PushService.setDefaultPushCallback(this, MainActivity.class);
 		PushService.subscribe(this, "sync", MainActivity.class);
 		PushService.subscribe(this, "protected", MainActivity.class);
 		ParseInstallation.getCurrentInstallation().saveInBackground(new SaveCallback() {

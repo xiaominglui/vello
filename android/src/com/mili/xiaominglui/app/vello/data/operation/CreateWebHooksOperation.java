@@ -32,7 +32,7 @@ public class CreateWebHooksOperation implements Operation {
 		String vocabularyBoardId = AccountUtils.getVocabularyBoardId(context);
 		
 		String urlString = WSConfig.TRELLO_API_URL + WSConfig.WS_TRELLO_TARGET_TOKEN + "/" + token + "/webhooks/";
-		String myCallback = WSConfig.WS_AVELLO_TRELISTENER_URL + "?iid=" + ParseInstallation.getCurrentInstallation().getInstallationId();
+		String myCallback = WSConfig.WS_AVELLO_TRELISTENER_URL + "?oid=" + ParseInstallation.getCurrentInstallation().getObjectId();
 		
 		HashMap<String, String> parameterMap = new HashMap<String, String>();
 		parameterMap.put(WSConfig.WS_TRELLO_PARAM_APP_KEY, WSConfig.VELLO_APP_KEY);

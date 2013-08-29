@@ -93,6 +93,8 @@
         <service
             android:name=".data.service.VelloRequestService"
             android:exported="false" />
+        
+        <service android:name="com.avos.avoscloud.PushService" />
 
         <provider
             android:name=".data.provider.VelloProvider"

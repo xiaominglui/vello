@@ -15,7 +15,12 @@ public class AVOSPushReceiver extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		Log.d(TAG, "AVOSPushReceiver Get Broadcat, action is " + intent.getAction());
+		String action = intent.getAction();
+		if (action.equals("com.avos.UPDATE_STATUS")) {
+			Log.d(TAG, "xxxxx");
+		}
+//		Log.d(TAG, "AVOSPushReceiver Get Broadcat, action is " + intent.getAction());
+		
 		
 //        try {
 //            String action = intent.getAction();
