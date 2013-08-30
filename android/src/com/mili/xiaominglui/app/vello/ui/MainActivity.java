@@ -103,6 +103,9 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			    WordCard result = (WordCard) msg.obj;
 			    Toast.makeText(theActivity, result.id, Toast.LENGTH_SHORT).show();
 			    break;
+			case VelloService.MSG_AUTH_TOKEN_REVOKED:
+				theActivity.postAuthTokenRevoked();
+				break;
 			}
 		}
 	}
@@ -340,8 +343,9 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
             return true;
             
 		case R.id.menu_sign_out:
-			AccountUtils.signOut(this);
-			finish();
+			sendMessageToService(VelloService.MSG_REVOKE_AUTH_TOKEN);
+//			AccountUtils.signOut(this);
+//			finish();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -399,6 +403,11 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 
 		currentColor = newColor;
 
+	}
+	
+	private void postAuthTokenRevoked() {
+		AccountUtils.signOut(this);
+		finish();
 	}
 	
 	private Drawable.Callback drawableCallback = new Drawable.Callback() {

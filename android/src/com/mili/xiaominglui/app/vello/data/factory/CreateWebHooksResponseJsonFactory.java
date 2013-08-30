@@ -9,7 +9,6 @@ import android.os.Bundle;
 public class CreateWebHooksResponseJsonFactory {
 
 	public static Bundle parseResult(String wsResponse) {
-		// TODO Auto-generated method stub
 		Gson gson = new Gson();
 		WebHook wh = gson.fromJson(wsResponse, WebHook.class);
 		

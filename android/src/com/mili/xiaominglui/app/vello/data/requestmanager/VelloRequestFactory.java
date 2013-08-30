@@ -25,6 +25,7 @@ public final class VelloRequestFactory {
     public static final int REQUEST_TYPE_QUERY_IN_LOCAL_CACHE = 15;
     public static final int REQUEST_TYPE_LOOK_UP_IN_DICTIONARY = 16;
     public static final int REQUEST_TYPE_CREATE_WEB_HOOKS = 17;
+    public static final int REQUEST_TYPE_REVOKE_AUTH_TOKEN = 18;
 
     // Response data
     public static final String BUNDLE_EXTRA_TRELLO_BOARD_LIST = "com.mili.xiaominglui.app.vello.extra.boardList";
@@ -37,6 +38,7 @@ public final class VelloRequestFactory {
     public static final String BUNDLE_EXTRA_DICTIONARY_WS_RESPONSE = "com.mili.xiaominglui.app.vello.extra.ws.dictionary";
     public static final String BUNDLE_EXTRA_RESULT_STATUS = "com.mili.xiaominglui.app.vello.extra.status";
     public static final String BUNDLE_EXTRA_WEB_HOOK_ID = "com.mili.xiaominglui.app.vello.extra.webhook.id";
+    public static final String BUNDLE_EXTRA_HAS_AUTH_TOKEN_REVOKED = "com.mili.xiaominglui.app.vello.extra.token_revoked";
 
     // Parameter data
     public static final String PARAM_EXTRA_VOCABULARY_BOARD_ID = "com.mili.xiaominglui.app.vello.extra.boardId";
@@ -165,6 +167,12 @@ public final class VelloRequestFactory {
 	public static Request createWebHooks() {
 		Request request = new Request(REQUEST_TYPE_CREATE_WEB_HOOKS);
 		request.setMemoryCacheEnabled(true);
+		return request;
+	}
+	
+	public static Request revokeAuthToken() {
+		Request request = new Request(REQUEST_TYPE_REVOKE_AUTH_TOKEN);
+		request.setMemoryCacheEnabled(false);
 		return request;
 	}
 }

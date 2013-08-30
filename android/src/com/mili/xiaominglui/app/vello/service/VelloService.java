@@ -83,6 +83,7 @@ public class VelloService extends Service implements RequestListener,
 	public static final int MSG_TOAST_NOT_AVAILABLE_WORD = 9;
 	public static final int MSG_TOAST_WORD_REVIEWED_COUNT_PLUS = 10;
 	public static final int MSG_SHOW_RESULT_WORDCARD = 11;
+	public static final int MSG_AUTH_TOKEN_REVOKED = 12;
 
 	public static final int MSG_CHECK_VOCABULARY_BOARD = 100;
 	public static final int MSG_GET_DUE_WORDCARD_LIST = 101;
@@ -91,6 +92,7 @@ public class VelloService extends Service implements RequestListener,
 	public static final int MSG_CLOSE_WORDCARD = 104;
 	public static final int MSG_SYNC_LOCAL_CACHE = 106;
 	public static final int MSG_TRIGGER_QUERY_WORD = 107;
+	public static final int MSG_REVOKE_AUTH_TOKEN = 108;
 
 	// Unique Identification Number for the Notification.
 	// We use it on Notification start, and to cancel it.
@@ -145,6 +147,9 @@ public class VelloService extends Service implements RequestListener,
 				    String query = (String) msg.obj;
 				    service.queryInRemoteStorage(query);
 				    break;
+				case MSG_REVOKE_AUTH_TOKEN:
+					service.revokeAuthToken();
+					break;
 				default:
 					super.handleMessage(msg);
 				}
@@ -395,6 +400,15 @@ public class VelloService extends Service implements RequestListener,
 		Request createWebHooks = VelloRequestFactory.createWebHooks();
 		mRequestManager.execute(createWebHooks, this);
 		mRequestList.add(createWebHooks);
+	}
+	
+	private void revokeAuthToken() {
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "revokeAuthToken start...");
+		}
+		Request revokeAuthToken = VelloRequestFactory.revokeAuthToken();
+		mRequestManager.execute(revokeAuthToken, this);
+		mRequestList.add(revokeAuthToken);
 	}
 	
 	@Override
@@ -789,6 +803,15 @@ public class VelloService extends Service implements RequestListener,
 				}
 				return;
 				
+			case VelloRequestFactory.REQUEST_TYPE_REVOKE_AUTH_TOKEN:
+				boolean hasRevoked = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_HAS_AUTH_TOKEN_REVOKED);
+				if (hasRevoked) {
+					// revoked
+					sendMessageToUI(VelloService.MSG_AUTH_TOKEN_REVOKED, null);
+				} else {
+					// TODO
+				}
+				return;
 			default:
 				return;
 			}
