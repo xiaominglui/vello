@@ -79,7 +79,7 @@
         with Google\'s privacy policy.
     ]]></string>
     <string name="ok">OK</string>
-    
+    <string name="label_provider_wordcard">Words</string>
     
 
 </resources>

@@ -126,9 +126,9 @@ public class AccountUtils {
                                 .getString(AccountManager.KEY_ACCOUNT_TYPE);
                         final String token = bundle
                                 .getString(AccountManager.KEY_PASSWORD);
-                        addAccount(context, name, type, token);
-                        setAuthToken(context, token);
-                        setChosenAccountName(context, name);
+//                        addAccount(context, name, type, token);
+//                        setAuthToken(context, token);
+//                        setChosenAccountName(context, name);
                         if (callback != null) {
                             callback.onAuthTokenAvailable(token);
                         }
@@ -210,21 +210,18 @@ public class AccountUtils {
         return 0;
     }
 
-    private static void setChosenAccountName(final Context context,
+    public static void setChosenAccountName(final Context context,
             final String accountName) {
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(context);
         sp.edit().putString(PREF_CHOSEN_ACCOUNT, accountName).commit();
     }
 
-    private static void addAccount(final Context context, final String name,
+    public static void addAccount(final Context context, final String name,
             final String type, final String token) {
         AccountManager am = AccountManager.get(context);
         final Account account = new Account(name, type);
         am.addAccountExplicitly(account, token, null);
-        // Tells the content provider that it can sync this account.
-        ContentResolver.setIsSyncable(account, "com.trello", 1);
-        ContentResolver.setSyncAutomatically(account, "com.trello", true);
     }
 
     public static String getAuthToken(final Context context) {
@@ -233,7 +230,7 @@ public class AccountUtils {
         return sp.getString(PREF_AUTH_TOKEN, "");
     }
 
-    private static void setAuthToken(final Context context,
+    public static void setAuthToken(final Context context,
             final String authToken) {
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(context);

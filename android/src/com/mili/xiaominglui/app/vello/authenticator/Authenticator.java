@@ -12,7 +12,6 @@ import android.util.Log;
 
 import com.mili.xiaominglui.app.vello.ui.AuthenticatorActivity;
 
-
 /**
  * This class is an implementation of AbstractAccountAuthenticator for
  * authenticating accounts in the com.example.android.samplesync domain. The
@@ -33,97 +32,107 @@ import com.mili.xiaominglui.app.vello.ui.AuthenticatorActivity;
 
 class Authenticator extends AbstractAccountAuthenticator {
 
-    /** The tag used to log to adb console. **/
-    private static final String TAG = "Authenticator";
+	/** The tag used to log to adb console. **/
+	private static final String TAG = "Authenticator";
 
-    // Authentication Service context
-    private final Context mContext;
+	// Authentication Service context
+	private final Context mContext;
 
-    public Authenticator(Context context) {
-	super(context);
-	mContext = context;
-    }
-
-    @Override
-    public Bundle addAccount(AccountAuthenticatorResponse response,
-	    String accountType, String authTokenType,
-	    String[] requiredFeatures, Bundle options) {
-	Log.v(TAG, "addAccount()");
-	final Intent intent = new Intent(mContext, AuthenticatorActivity.class);
-	intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE,
-		response);
-	final Bundle bundle = new Bundle();
-	bundle.putParcelable(AccountManager.KEY_INTENT, intent);
-	return bundle;
-    }
-
-    @Override
-    public Bundle getAuthToken(AccountAuthenticatorResponse response,
-	    Account account, String authTokenType, Bundle loginOptions)
-	    throws NetworkErrorException {
-	Log.v(TAG, "getAuthToken()");
-
-	// If the caller requested an authToken type we don't support, then
-	// return an error
-	if (!authTokenType.equals(Constants.AUTHTOKEN_TYPE)) {
-	    final Bundle result = new Bundle();
-	    result.putString(AccountManager.KEY_ERROR_MESSAGE,
-		    "invalid authTokenType");
-	    return result;
+	public Authenticator(Context context) {
+		super(context);
+		mContext = context;
 	}
 
-	// creating an intent to display our AuthenticatorActivity for get
-	// the OAuth token.
-	final Bundle bundle = new Bundle();
+	@Override
+	public Bundle addAccount(AccountAuthenticatorResponse response,
+			String accountType, String authTokenType,
+			String[] requiredFeatures, Bundle options) {
+		Log.v(TAG, "addAccount()");
+		final Intent intent = new Intent(mContext, AuthenticatorActivity.class);
+		intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE,
+				response);
+		final Bundle bundle = new Bundle();
+		bundle.putParcelable(AccountManager.KEY_INTENT, intent);
+		return bundle;
+	}
 
-	final Intent intent = new Intent(mContext, AuthenticatorActivity.class);
-	intent.putExtra(AuthenticatorActivity.PARAM_USERNAME, account.name);
-	intent.putExtra(AuthenticatorActivity.PARAM_AUTHTOKEN_TYPE,
-		authTokenType);
-	intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE,
-		response);
+	@Override
+	public Bundle getAuthToken(AccountAuthenticatorResponse response,
+			Account account, String authTokenType, Bundle loginOptions)
+			throws NetworkErrorException {
+		Log.v(TAG, "getAuthToken()");
 
-	bundle.putParcelable(AccountManager.KEY_INTENT, intent);
+		// If the caller requested an authToken type we don't support, then
+		// return an error
+		if (!authTokenType.equals(Constants.AUTHTOKEN_TYPE)) {
+			final Bundle result = new Bundle();
+			result.putString(AccountManager.KEY_ERROR_MESSAGE,
+					"invalid authTokenType");
+			return result;
+		}
 
-	return bundle;
-    }
+		// creating an intent to display our AuthenticatorActivity for get
+		// the OAuth token.
+		final Bundle bundle = new Bundle();
 
-    @Override
-    public Bundle hasFeatures(AccountAuthenticatorResponse response,
-	    Account account, String[] features) {
-	// This call is used to query whether the Authenticator supports
-	// specific features. We don't expect to get called, so we always
-	// return false (no) for any queries.
-	Log.v(TAG, "hasFeatures()");
-	final Bundle result = new Bundle();
-	result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, false);
-	return result;
-    }
+		final Intent intent = new Intent(mContext, AuthenticatorActivity.class);
+		intent.putExtra(AuthenticatorActivity.PARAM_USERNAME, account.name);
+		intent.putExtra(AuthenticatorActivity.PARAM_AUTHTOKEN_TYPE,
+				authTokenType);
+		intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE,
+				response);
 
-    @Override
-    public Bundle updateCredentials(AccountAuthenticatorResponse response,
-	    Account account, String authTokenType, Bundle loginOptions) {
-	Log.v(TAG, "updateCredentials()");
-	return null;
-    }
+		bundle.putParcelable(AccountManager.KEY_INTENT, intent);
 
-    @Override
-    public Bundle confirmCredentials(AccountAuthenticatorResponse response,
-	    Account account, Bundle options) throws NetworkErrorException {
-	// TODO Auto-generated method stub
-	return null;
-    }
+		return bundle;
+	}
 
-    @Override
-    public Bundle editProperties(AccountAuthenticatorResponse response,
-	    String accountType) {
-	// TODO Auto-generated method stub
-	return null;
-    }
+	@Override
+	public Bundle hasFeatures(AccountAuthenticatorResponse response,
+			Account account, String[] features) {
+		// This call is used to query whether the Authenticator supports
+		// specific features. We don't expect to get called, so we always
+		// return false (no) for any queries.
+		Log.v(TAG, "hasFeatures()");
+		final Bundle result = new Bundle();
+		result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, false);
+		return result;
+	}
 
-    @Override
-    public String getAuthTokenLabel(String authTokenType) {
-	// TODO Auto-generated method stub
-	return null;
-    }
+	@Override
+	public Bundle updateCredentials(AccountAuthenticatorResponse response,
+			Account account, String authTokenType, Bundle loginOptions) {
+		Log.v(TAG, "updateCredentials()");
+		return null;
+	}
+
+	@Override
+	public Bundle confirmCredentials(AccountAuthenticatorResponse response,
+			Account account, Bundle options) throws NetworkErrorException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Bundle editProperties(AccountAuthenticatorResponse response,
+			String accountType) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getAuthTokenLabel(String authTokenType) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Bundle getAccountRemovalAllowed(
+			AccountAuthenticatorResponse response, Account account)
+			throws NetworkErrorException {
+		Bundle result = new Bundle();
+		boolean allowed = false; // or whatever logic you want here
+		result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, allowed);
+		return result;
+	}
 }

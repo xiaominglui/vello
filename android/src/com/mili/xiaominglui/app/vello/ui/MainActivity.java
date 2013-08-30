@@ -344,8 +344,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
             
 		case R.id.menu_sign_out:
 			sendMessageToService(VelloService.MSG_REVOKE_AUTH_TOKEN);
-//			AccountUtils.signOut(this);
-//			finish();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

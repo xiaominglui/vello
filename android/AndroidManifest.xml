@@ -98,7 +98,9 @@
 
         <provider
             android:name=".data.provider.VelloProvider"
+            android:label="@string/label_provider_wordcard"
             android:authorities="com.mili.xiaominglui.app.vello.provider.VelloProvider"
+            android:syncable="true"
             android:exported="false" />
 
         <service

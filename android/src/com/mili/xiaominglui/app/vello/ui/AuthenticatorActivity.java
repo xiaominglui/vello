@@ -17,6 +17,7 @@ import android.webkit.WebViewClient;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
+import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 /**
  * Activity which displays login screen to the user.
@@ -126,6 +127,9 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
     private void finishAuthenticated(String authToken) {
 
         Log.i(TAG, "finishAuthenticated()");
+        AccountUtils.addAccount(getApplicationContext(), VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE, authToken);
+        AccountUtils.setAuthToken(getApplicationContext(), authToken);
+        AccountUtils.setChosenAccountName(getApplicationContext(), VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME);
         final Intent intent = new Intent();
         intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME);
         intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, Constants.ACCOUNT_TYPE);
