@@ -821,13 +821,23 @@ public class VelloService extends Service implements RequestListener,
 	@Override
 	public void onRequestConnectionError(Request request, int statusCode) {
 		if (mRequestList.contains(request)) {
-			if (statusCode == HttpStatus.SC_UNAUTHORIZED && request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_CONFIGURE_VOCABULARY_BOARD) {
-				String boardId = request.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_BOARD_ID);
-				AccountUtils.setVocabularyBoardId(getApplicationContext(), boardId);
-				Log.d(TAG, "get a board without ownership, skip configuration! vocabulary board id = " + boardId);
+			if (statusCode == HttpStatus.SC_UNAUTHORIZED
+					&& request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_CONFIGURE_VOCABULARY_BOARD) {
+				String boardId = request
+						.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_BOARD_ID);
+				AccountUtils.setVocabularyBoardId(getApplicationContext(),
+						boardId);
+				Log.d(TAG,
+						"get a board without ownership, skip configuration! vocabulary board id = "
+								+ boardId);
 
 				// continue to check vocabulary list if not well formed
 				checkVocabularyLists();
+			} else if (statusCode == HttpStatus.SC_NOT_FOUND
+					&& request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_REVOKE_AUTH_TOKEN) {
+				// token has been revoked via trello web app
+				Log.d(TAG, "token has been revoked via trello web app.");
+				sendMessageToUI(VelloService.MSG_AUTH_TOKEN_REVOKED, null);
 			}
 			mRequestList.remove(request);
 		}

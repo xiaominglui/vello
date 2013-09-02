@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ComponentName;
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -15,16 +16,21 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.service.VelloService;
+import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 	private static final String TAG = SyncAdapter.class.getSimpleName();
+	private static final Pattern sSanitizeAccountNamePattern = Pattern.compile("(.).*?(.?)@");
 
 	private final Context mContext;
 	String mToken;
@@ -74,6 +80,20 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	public void onPerformSync(Account account, Bundle extras, String authority,
 			ContentProviderClient provider, SyncResult syncResult) {
 
+		final String logSanitizedAccountName = sSanitizeAccountNamePattern
+                .matcher(account.name).replaceAll("$1...$2@");
+		String chosenAccountName = AccountUtils.getChosenAccountName(mContext);
+		boolean isAccountSet = !TextUtils.isEmpty(chosenAccountName);
+		boolean isChosenAccount = isAccountSet && chosenAccountName.equals(account.name);
+		if (isAccountSet) {
+            ContentResolver.setIsSyncable(account, authority, isChosenAccount ? 1 : 0);
+        }
+		if (!isChosenAccount) {
+            Log.d(TAG, "Tried to sync account " + logSanitizedAccountName + " but the chosen " +
+                    "account is actually " + chosenAccountName);
+            ++syncResult.stats.numAuthExceptions;
+            return;
+        }
 		// sync notification
 		NotificationManager notificationManager = (NotificationManager) mContext
 				.getSystemService(Context.NOTIFICATION_SERVICE);

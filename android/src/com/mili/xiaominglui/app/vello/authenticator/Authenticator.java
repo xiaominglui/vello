@@ -125,14 +125,4 @@ class Authenticator extends AbstractAccountAuthenticator {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	@Override
-	public Bundle getAccountRemovalAllowed(
-			AccountAuthenticatorResponse response, Account account)
-			throws NetworkErrorException {
-		Bundle result = new Bundle();
-		boolean allowed = false; // or whatever logic you want here
-		result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, allowed);
-		return result;
-	}
 }
