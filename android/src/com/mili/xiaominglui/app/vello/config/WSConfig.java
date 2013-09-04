@@ -47,6 +47,9 @@ public final class WSConfig {
     
     public static final String WS_TRELLO_ACTION_COMMENTS = "/actions/comments";
     
+    public static final String WS_TRELLO_ACTION_TYPE_UPDATECARD = "updateCard";
+    public static final String WS_TRELLO_ACTION_TYPE_CREATECARD = "createCard";
+    
     // iciba
     public static final String WS_DICTIONARY_ICIBA_API = "http://dict-co.iciba.com/api/dictionary.php";
     public static final String WS_DICTIONARY_ICIBA_PARAM_KEYWORD = "w";
