@@ -38,6 +38,7 @@ public final class JSONTag {
 	public static final String ACTION_ELEM_ACTION = "action";
 	public static final String ACTION_ELEM_ID = "id";
 	public static final String ACTION_ELEM_DATA = "data";
+	public static final String ACTION_ELEM_DATA_OLD = "old";
 	public static final String ACTION_ELEM_TYPE = "type";
 
 	// Mili Dictionary tags

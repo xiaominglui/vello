@@ -44,7 +44,19 @@ public class AVOSPushReceiver extends BroadcastReceiver {
 						
 					} else if (actionType.equals(WSConfig.WS_TRELLO_ACTION_TYPE_UPDATECARD)) {
 						// updateCard action
-						// TODO
+						// distinguish sub-type
+						JSONObject jsonActionData = jsonAction.getJSONObject(JSONTag.ACTION_ELEM_DATA);
+						JSONObject jsonActionDataOld = jsonActionData.getJSONObject(JSONTag.ACTION_ELEM_DATA_OLD);
+						if (jsonActionDataOld.has(JSONTag.CARD_ELEM_IDLIST)) {
+							// sub-type: move list
+						} else if (jsonActionDataOld.has(JSONTag.CARD_ELEM_DUE)) {
+							// sub-type: change due
+						} else if (jsonActionDataOld.has(JSONTag.CARD_ELEM_CLOSED)) {
+							// sub-type: change closed
+						} else {
+							Log.i(TAG, "unknow sub-type of UPDATECARD");
+						}
+						
 						
 					} else {
 						if (VelloConfig.DEBUG_SWITCH) {
