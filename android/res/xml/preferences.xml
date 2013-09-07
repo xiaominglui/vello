@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     
+    <PreferenceCategory android:title="@string/pref_sync_title" >
+        <ListPreference
+            android:key="pref_sync_frequency"
+            android:entries="@array/syncFrequency"
+            android:entryValues="@array/syncFrequencyValues"
+            android:summary="@string/pref_sync_frequency_summary"
+            android:title="@string/pref_sync_frequency" />
+        
+        <CheckBoxPreference
+            android:key="pref_sync_wifi_only"
+            android:title="@string/pref_sync_wifi_only" />
+    </PreferenceCategory>
 
 </PreferenceScreen>

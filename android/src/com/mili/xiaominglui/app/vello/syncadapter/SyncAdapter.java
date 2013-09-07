@@ -1,31 +1,34 @@
 package com.mili.xiaominglui.app.vello.syncadapter;
 
+import java.io.IOException;
+import java.util.regex.Pattern;
+
 import android.accounts.Account;
-import android.app.NotificationManager;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ComponentName;
 import android.content.ContentProviderClient;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SyncResult;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
-import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.mili.xiaominglui.app.vello.R;
+import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
-
-import java.io.IOException;
-import java.util.regex.Pattern;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
@@ -33,7 +36,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	private static final Pattern sSanitizeAccountNamePattern = Pattern.compile("(.).*?(.?)@");
 
 	private final Context mContext;
-	String mToken;
+	private ConnectivityManager mConnManager = null;
 	private SyncHelper mSyncHelper;
 
 	Messenger mService = null;
@@ -80,44 +83,93 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	public void onPerformSync(Account account, Bundle extras, String authority,
 			ContentProviderClient provider, SyncResult syncResult) {
 
-		final String logSanitizedAccountName = sSanitizeAccountNamePattern
-                .matcher(account.name).replaceAll("$1...$2@");
-		String chosenAccountName = AccountUtils.getChosenAccountName(mContext);
-		boolean isAccountSet = !TextUtils.isEmpty(chosenAccountName);
-		boolean isChosenAccount = isAccountSet && chosenAccountName.equals(account.name);
-		if (isAccountSet) {
-            ContentResolver.setIsSyncable(account, authority, isChosenAccount ? 1 : 0);
-        }
-		if (!isChosenAccount) {
-            Log.d(TAG, "Tried to sync account " + logSanitizedAccountName + " but the chosen " +
-                    "account is actually " + chosenAccountName);
-            ++syncResult.stats.numAuthExceptions;
-            return;
-        }
-		// sync notification
-		NotificationManager notificationManager = (NotificationManager) mContext
-				.getSystemService(Context.NOTIFICATION_SERVICE);
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(
-				mContext)
-				.setSmallIcon(R.drawable.ic_stat_vaa)
-				.setContentTitle(
-						mContext.getText(R.string.notif_sync_content_title))
-				.setTicker(mContext.getText(R.string.notif_sync_ticker))
-				.setProgress(0, 0, true).setOngoing(true).setAutoCancel(false);
-		notificationManager.notify(1, builder.build());
-		// Perform a sync using SyncHelper
-		if (mSyncHelper == null) {
-			mSyncHelper = new SyncHelper(mContext);
-		}
+		WifiManager.WifiLock wifiLock = null;
+		WakeLock wakeLock = null;
 
 		try {
+			boolean wifiNetwork = false;
+
+			boolean isScheduleSyncTrigger = extras.getBoolean(SyncConstants.SYNC_BUNDLE_KEY_SCHEDULE_SYNC_TRIGGER, false);
+			if (isScheduleSyncTrigger && !isLocalDataChanged(provider)) {
+				if (VelloConfig.DEBUG_SWITCH) {
+	                Log.v(TAG, "sync is trigged by schedule Sync and local has not changed, so refuse Continuing sync");
+	            }
+	            return;
+			}
+			
+			
+			if(mConnManager == null) {
+				mConnManager =  (ConnectivityManager)getContext().getSystemService(
+			            Context.CONNECTIVITY_SERVICE);
+			}
+			NetworkInfo netInfo = mConnManager.getActiveNetworkInfo();
+			if (netInfo != null && netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+				wifiNetwork = true;
+			}
+			
+			if (VelloConfig.DEBUG_SWITCH) {
+				Log.d(TAG, authority + ": do not auto sync without WiFi!");
+				syncResult.stats.numIoExceptions++;
+				return;
+			}
+			
+			final String logSanitizedAccountName = sSanitizeAccountNamePattern.matcher(account.name).replaceAll("$1...$2@");
+			String chosenAccountName = AccountUtils.getChosenAccountName(mContext);
+			boolean isAccountSet = !TextUtils.isEmpty(chosenAccountName);
+			boolean isChosenAccount = isAccountSet && chosenAccountName.equals(account.name);
+			
+			if (!isAccountSet || !isChosenAccount) {
+				if (VelloConfig.DEBUG_SWITCH) {
+					Log.d(TAG, "Tried to sync account " + logSanitizedAccountName + " but the chosen " +
+		                    "account is actually " + chosenAccountName);
+				}
+				++syncResult.stats.numAuthExceptions;
+				return;
+			}
+			
+			String token = AccountUtils.getAuthToken(mContext);
+			if (token.equals("")) {
+				syncResult.stats.numAuthExceptions++;
+				// TODO auth failed now, what to do.
+			} else {
+				WifiManager wifiManager = 
+		            	(WifiManager)this.getContext().getSystemService(Context.WIFI_SERVICE);
+		        wifiLock = wifiManager.createWifiLock(TAG);
+	            PowerManager pm = (PowerManager) this.getContext().getSystemService(Context.POWER_SERVICE);
+	            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+	            wakeLock.acquire();
+		        wifiLock.acquire();
+//		        this.performSync(account, token, provider, syncResult);
+			}
+			// sync notification
+			/*
+			NotificationManager notificationManager = (NotificationManager) mContext
+					.getSystemService(Context.NOTIFICATION_SERVICE);
+			NotificationCompat.Builder builder = new NotificationCompat.Builder(
+					mContext)
+					.setSmallIcon(R.drawable.ic_stat_vaa)
+					.setContentTitle(
+							mContext.getText(R.string.notif_sync_content_title))
+					.setTicker(mContext.getText(R.string.notif_sync_ticker))
+					.setProgress(0, 0, true).setOngoing(true).setAutoCancel(false);
+			notificationManager.notify(1, builder.build()); */
+			// Perform a sync using SyncHelper
+			if (mSyncHelper == null) {
+				mSyncHelper = new SyncHelper(mContext);
+			}
+			
 			mSyncHelper.performSync(syncResult, SyncHelper.FLAG_SYNC_REMOTE);
 
 		} catch (IOException e) {
 			++syncResult.stats.numIoExceptions;
+		} finally {
+            if(wakeLock != null) {
+                wakeLock.release();
+            }
+            if(wifiLock != null) {
+                wifiLock.release();
+            }
 		}
-
-		notificationManager.cancel(1);
 	}
 
 	void doBindService() {
@@ -136,5 +188,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			mContext.unbindService(mConnection);
 			mIsBound = false;
 		}
+	}
+	
+	/**
+	 * check if local data has changed
+	 * @param provider
+	 * @return true if changed, false not.
+	 */
+	private boolean isLocalDataChanged(ContentProviderClient provider) {
+		return false;
 	}
 }
