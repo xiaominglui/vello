@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string-array name="syncFrequency">
         <item name="0">Auto (PUSH)</item>
-        <item name="1">Every hour</item>
+        <item name="1">Every half day</item>
         <item name="2">Every day</item>
-        <item name="-1">Never (Update maually)</item>
-        
     </string-array>
     <string-array name="syncFrequencyValues">
         <item name="0">0</item>
-        <item name="1">7</item>
-        <item name="2">30</item>
-        <item name="-1">-1</item>
+        <item name="1">12</item>
+        <item name="2">24</item>
     </string-array>
+
 </resources>

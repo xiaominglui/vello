@@ -16,7 +16,7 @@
     <!-- required for setIsSyncable -->
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.READ_LOGS" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name="VaaApplication"
@@ -47,15 +47,20 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-        
         <activity
             android:name=".ui.SettingsActivity"
             android:label="@string/title_settings"
-            android:parentActivityName=".ui.HomeActivity">
-            <meta-data android:name="android.support.PARENT_ACTIVITY"
+            android:parentActivityName=".ui.HomeActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.HomeActivity" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
-        
         <activity
             android:name=".ui.AuthenticatorActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -68,8 +73,8 @@
                 someone who explicitly knows the class name
             -->
         </activity>
-        
-        <receiver android:name=".receiver.AVOSPushReceiver">
+
+        <receiver android:name=".receiver.AVOSPushReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.USER_PRESENT" />
@@ -93,15 +98,14 @@
         <service
             android:name=".data.service.VelloRequestService"
             android:exported="false" />
-        
         <service android:name="com.avos.avoscloud.PushService" />
 
         <provider
             android:name=".data.provider.VelloProvider"
-            android:label="@string/label_provider_wordcard"
             android:authorities="com.mili.xiaominglui.app.vello.provider.VelloProvider"
-            android:syncable="true"
-            android:exported="false" />
+            android:exported="false"
+            android:label="@string/label_provider_wordcard"
+            android:syncable="true" />
 
         <service
             android:name=".syncadapter.SyncService"
