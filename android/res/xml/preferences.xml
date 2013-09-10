@@ -4,10 +4,9 @@
     <PreferenceCategory android:title="@string/pref_sync_title" >
         <ListPreference
             android:key="pref_sync_frequency"
-            android:defaultValue="0"
             android:entries="@array/syncFrequency"
             android:entryValues="@array/syncFrequencyValues"
-            android:summary="@string/pref_sync_frequency_summary"
+            android:defaultValue="0"
             android:title="@string/pref_sync_frequency" />
         
         <CheckBoxPreference
