@@ -34,6 +34,7 @@ import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
+import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.mili.xiaominglui.app.vello.util.HelpUtils;
@@ -68,7 +69,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				break;
 			case VelloService.MSG_DIALOG_CONNECTION_ERROR_SHOW:
 				// TODO
-				// ConnectionErrorDialogFragment.show();
+//				 ConnectionErrorDialogFragment.show();
 				break;
 			case VelloService.MSG_TOAST_INIT_VOCABULARY_START:
 //				superActivityToast = new SuperActivityToast(theActivity.getApplicationContext(), SuperToast.Type.STANDARD);
