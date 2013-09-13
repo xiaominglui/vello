@@ -21,9 +21,12 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
 import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
@@ -46,6 +49,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	private static final String TAG = MainActivity.class.getSimpleName();
 	private Activity mActivity;
 	
+	private static final int CONTENT_VIEW_ID = 666;
 	private Drawable oldBackground = null;
 	private int currentColor = 0xFF666666;
 	private final Handler handler = new Handler();
@@ -203,17 +207,29 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
             return;
         }
 
-        setContentView(R.layout.activity_main);
+        FrameLayout frame = new FrameLayout(this);
+        frame.setId(CONTENT_VIEW_ID);
+        setContentView(frame, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        
+        if (savedInstanceState == null) {
+			setInitialFragment();
+		}
 
 		handleIntent(getIntent());
 		
-		FragmentManager fm = getSupportFragmentManager();
-		mReviewViewFragment = (ReviewViewFragment) fm.findFragmentById(R.id.fragment_container_master);
-		if (mReviewViewFragment == null) {
-			mReviewViewFragment = new ReviewViewFragment();
-			fm.beginTransaction().add(R.id.fragment_container_master, mReviewViewFragment).commit();
-		}
+//		FragmentManager fm = getSupportFragmentManager();
+//		mReviewViewFragment = (ReviewViewFragment) fm.findFragmentById(R.id.fragment_container_master);
+//		if (mReviewViewFragment == null) {
+//			mReviewViewFragment = new ReviewViewFragment();
+//			fm.beginTransaction().add(R.id.fragment_container_master, mReviewViewFragment).commit();
+//		}
 		doBindService();
+	}
+	
+	private void setInitialFragment() {
+		FragmentManager fragmentManager = getSupportFragmentManager();
+		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+		fragmentTransaction.add(CONTENT_VIEW_ID, ReviewViewFragment.newInstance()).commit();
 	}
 
 	@Override

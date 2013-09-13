@@ -11,21 +11,29 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.CursorAdapter;
+import android.support.v4.widget.DrawerLayout;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.MenuItem;
 import com.android.deskclock.widget.ActionableToastBar;
 import com.android.deskclock.widget.swipeablelistview.SwipeableListView;
 import com.atermenji.android.iconictextview.IconicTextView;
@@ -42,6 +50,7 @@ import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
+import com.sherlock.navigationdrawer.compat.SherlockActionBarDrawerToggle;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -66,6 +75,16 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 
 	private String mCurFilter = "";
 	private boolean mIsSearching = false;
+	
+	private DrawerLayout mDrawerLayout;
+	private ListView listView;
+	private SherlockActionBarDrawerToggle mDrawerToggle;
+	private ActionBarHelper mActionBar;
+	
+	public static Fragment newInstance() {
+		Fragment f = new ReviewViewFragment();
+		return f;
+	}
 	
 	private SwipeableListView.OnItemSwipeListener mReviewSwipeListener = new SwipeableListView.OnItemSwipeListener() {
         
@@ -102,6 +121,8 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setRetainInstance(true);
+		setHasOptionsMenu(true);
 		
 		if (savedInstanceState != null) {
 			mDeletedWord = savedInstanceState.getParcelable(KEY_DELETED_WORD);
@@ -117,10 +138,72 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		outState.putBoolean(KEY_UNDO_SHOWING, mUndoShowing);
 	}
 	
+	/**
+	 * This list item click listener implements very simple view switching by
+	 * changing the primary content text. The drawer is closed when a selection
+	 * is made.
+	 */
+	private class DrawerItemClickListener implements ListView.OnItemClickListener {
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//			mContent.setText(Shakespeare.DIALOGUE[position]);
+//			mActionBar.setTitle(Shakespeare.TITLES[position]);
+			mDrawerLayout.closeDrawer(listView);
+		}
+	}
+	
+	/**
+	 * A drawer listener can be used to respond to drawer events such as
+	 * becoming fully opened or closed. You should always prefer to perform
+	 * expensive operations such as drastic relayout when no animation is
+	 * currently in progress, either before or after the drawer animates.
+	 * 
+	 * When using ActionBarDrawerToggle, all DrawerLayout listener methods
+	 * should be forwarded if the ActionBarDrawerToggle is not used as the
+	 * DrawerLayout listener directly.
+	 */
+	private class DemoDrawerListener implements DrawerLayout.DrawerListener {
+		@Override
+		public void onDrawerOpened(View drawerView) {
+			mDrawerToggle.onDrawerOpened(drawerView);
+			mActionBar.onDrawerOpened();
+		}
+
+		@Override
+		public void onDrawerClosed(View drawerView) {
+			mDrawerToggle.onDrawerClosed(drawerView);
+			mActionBar.onDrawerClosed();
+		}
+
+		@Override
+		public void onDrawerSlide(View drawerView, float slideOffset) {
+			mDrawerToggle.onDrawerSlide(drawerView, slideOffset);
+		}
+
+		@Override
+		public void onDrawerStateChanged(int newState) {
+			mDrawerToggle.onDrawerStateChanged(newState);
+		}
+	}
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		mRootView = (ViewGroup) inflater.inflate(R.layout.fragment_review, null);
+		
+		mDrawerLayout = (DrawerLayout) mRootView.findViewById(R.id.drawer_layout);
+		listView = (ListView) mRootView.findViewById(R.id.left_drawer);
+		
+		mDrawerLayout.setDrawerListener(new DemoDrawerListener());
+		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+
+		listView.setAdapter(new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, Shakespeare.TITLES));
+		listView.setOnItemClickListener(new DrawerItemClickListener());
+		listView.setCacheColorHint(0);
+		listView.setScrollingCacheEnabled(false);
+		listView.setScrollContainer(false);
+		listView.setFastScrollEnabled(true);
+		listView.setSmoothScrollbarEnabled(true);
 		
 		mWordsList = (SwipeableListView) mRootView.findViewById(R.id.words_list);
 		mAdapter = new WordCardAdapter(getActivity(), null, mWordsList);
@@ -149,7 +232,31 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			}, 0, getResources().getString(R.string.word_reviewed), true,
 					R.string.word_reviewed_undo, true);
 		}
+		
+		mActionBar = createActionBarHelper();
+		mActionBar.init();
+		
+		// ActionBarDrawerToggle provides convenient helpers for tying together
+		// the
+		// prescribed interactions between a top-level sliding drawer and the
+		// action bar.
+		mDrawerToggle = new SherlockActionBarDrawerToggle(this.getActivity(),
+				mDrawerLayout, R.drawable.ic_drawer_light,
+				R.string.drawer_open, R.string.drawer_close);
+		mDrawerToggle.syncState();
 		return mRootView;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		/*
+		 * The action bar home/up action should open or close the drawer.
+		 * mDrawerToggle will take care of this.
+		 */
+		if (mDrawerToggle.onOptionsItemSelected(item)) {
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 	
 	@Override
@@ -561,5 +668,51 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	void onQueryTextChange(String newText) {
 		mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;
 		getLoaderManager().restartLoader(0, null, this);
+	}
+	
+	/**
+	 * Create a compatible helper that will manipulate the action bar if
+	 * available.
+	 */
+	private ActionBarHelper createActionBarHelper() {
+		return new ActionBarHelper();
+	}
+	
+	private class ActionBarHelper {
+		private final ActionBar mActionBar;
+		private CharSequence mDrawerTitle;
+		private CharSequence mTitle;
+
+		private ActionBarHelper() {
+			mActionBar = ((SherlockFragmentActivity) getActivity()).getSupportActionBar();
+		}
+
+		public void init() {
+			mActionBar.setDisplayHomeAsUpEnabled(true);
+			mActionBar.setHomeButtonEnabled(true);
+			mTitle = mDrawerTitle = getActivity().getTitle();
+		}
+
+		/**
+		 * When the drawer is closed we restore the action bar state reflecting
+		 * the specific contents in view.
+		 */
+		public void onDrawerClosed() {
+			mActionBar.setTitle(mTitle);
+		}
+
+		/**
+		 * When the drawer is open we set the action bar to a generic title. The
+		 * action bar should only contain data relevant at the top level of the
+		 * nav hierarchy represented by the drawer, as the rest of your content
+		 * will be dimmed down and non-interactive.
+		 */
+		public void onDrawerOpened() {
+			mActionBar.setTitle(mDrawerTitle);
+		}
+
+		public void setTitle(CharSequence title) {
+			mTitle = title;
+		}
 	}
 }

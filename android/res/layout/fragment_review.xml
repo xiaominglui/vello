@@ -15,8 +15,8 @@
      limitations under the License.
 -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/main"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
@@ -42,4 +42,11 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp" />
 
-</FrameLayout>
+    <ListView
+        android:id="@+id/left_drawer"
+        android:layout_width="300dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="left"
+        android:background="@android:color/white" />
+
+</android.support.v4.widget.DrawerLayout>
