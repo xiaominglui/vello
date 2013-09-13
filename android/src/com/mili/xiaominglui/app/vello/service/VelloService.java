@@ -84,6 +84,9 @@ public class VelloService extends Service implements RequestListener,
 	public static final int MSG_TOAST_WORD_REVIEWED_COUNT_PLUS = 10;
 	public static final int MSG_SHOW_RESULT_WORDCARD = 11;
 	public static final int MSG_AUTH_TOKEN_REVOKED = 12;
+	
+	public static final int MSG_STATUS_INIT_ACCOUNT_BEGIN = 50;
+	public static final int MSG_STATUS_INIT_ACCOUNT_END = 51;
 
 	public static final int MSG_CHECK_VOCABULARY_BOARD = 100;
 	public static final int MSG_GET_DUE_WORDCARD_LIST = 101;
@@ -96,7 +99,6 @@ public class VelloService extends Service implements RequestListener,
 
 	// Unique Identification Number for the Notification.
 	// We use it on Notification start, and to cancel it.
-	private int NOTIFICATION = R.string.local_service_started;
 
 	final Messenger mMessenger = new Messenger(new IncomingHandler(this));
 
@@ -219,9 +221,6 @@ public class VelloService extends Service implements RequestListener,
 		// Cancel the persistent notification.
 		Log.i(TAG, "VelloService Stopped.");
 		isRunning = false;
-
-		// Tell the user we stopped.
-		Toast.makeText(this, R.string.local_service_stopped, Toast.LENGTH_LONG).show();
 	}
 
 	protected VelloRequestManager mRequestManager;
@@ -261,6 +260,7 @@ public class VelloService extends Service implements RequestListener,
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "checkVocabularyBoard start...");
 		}
+		sendMessageToUI(VelloService.MSG_STATUS_INIT_ACCOUNT_BEGIN, null);
 
 		Request checkVocabularyBoardRequest = VelloRequestFactory
 				.checkVocabularyBoardRequest();
@@ -789,6 +789,7 @@ public class VelloService extends Service implements RequestListener,
 				if (hookId != null) {
 					// hook created, save it
 					AccountUtils.setVocabularyBoardWebHookId(getApplicationContext(), hookId);
+					sendMessageToUI(VelloService.MSG_STATUS_INIT_ACCOUNT_END, null);
 					// need trigge sync? TODO
 					// FIXME set sync should be moved to after vocabulary board init ok
 					Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);

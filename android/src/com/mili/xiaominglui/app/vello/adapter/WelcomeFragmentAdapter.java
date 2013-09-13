@@ -4,20 +4,20 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
-import com.mili.xiaominglui.app.vello.ui.TestFragment;
+import com.mili.xiaominglui.app.vello.ui.WelcomeFragment;
 
-public class TestFragmentAdapter extends FragmentPagerAdapter {
+public class WelcomeFragmentAdapter extends FragmentPagerAdapter {
     protected static final String[] CONTENT = new String[] { "This", "Is", "A", "Test", };
 
     private int mCount = CONTENT.length;
 
-    public TestFragmentAdapter(FragmentManager fm) {
+    public WelcomeFragmentAdapter(FragmentManager fm) {
         super(fm);
     }
 
     @Override
     public Fragment getItem(int position) {
-        return TestFragment.newInstance(CONTENT[position % CONTENT.length]);
+        return WelcomeFragment.newInstance(CONTENT[position % CONTENT.length]);
     }
 
     @Override
@@ -27,7 +27,7 @@ public class TestFragmentAdapter extends FragmentPagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-      return TestFragmentAdapter.CONTENT[position % CONTENT.length];
+      return WelcomeFragmentAdapter.CONTENT[position % CONTENT.length];
     }
 
     public void setCount(int count) {

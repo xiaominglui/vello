@@ -10,13 +10,13 @@ import android.widget.Button;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.mili.xiaominglui.app.vello.R;
-import com.mili.xiaominglui.app.vello.adapter.TestFragmentAdapter;
+import com.mili.xiaominglui.app.vello.adapter.WelcomeFragmentAdapter;
 import com.viewpagerindicator.PageIndicator;
 import com.viewpagerindicator.UnderlinePageIndicator;
 
 public class LoginFragment extends SherlockFragment implements View.OnClickListener {
 	onButtonClickedListener mListener;
-	TestFragmentAdapter mAdapter;
+	WelcomeFragmentAdapter mAdapter;
     ViewPager mPager;
     PageIndicator mIndicator;
 
@@ -45,7 +45,7 @@ public class LoginFragment extends SherlockFragment implements View.OnClickListe
 			Bundle savedInstanceState) {
 		ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_login, container, false);
 		
-		mAdapter = new TestFragmentAdapter(getActivity().getSupportFragmentManager());
+		mAdapter = new WelcomeFragmentAdapter(getActivity().getSupportFragmentManager());
 
         mPager = (ViewPager) rootView.findViewById(R.id.pager);
         mPager.setAdapter(mAdapter);

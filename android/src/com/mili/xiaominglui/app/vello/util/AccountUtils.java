@@ -223,7 +223,7 @@ public class AccountUtils {
         final Account account = new Account(name, type);
         am.addAccountExplicitly(account, token, null);
     }
-
+    
     public static String getAuthToken(final Context context) {
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(context);

@@ -29,11 +29,8 @@
     <string name="dialog_button_retry">Retry</string>
     <string name="dialog_error_data_error_title">Incorrect data</string>
     <string name="dialog_error_data_error_message">Received data is invalid.</string>
-    
-    <string name="local_service_started">LOCAL_SERVICE_STARTED</string>
-    <string name="local_service_stopped">LOCAL_SERVICE_STOPPED</string>
-    <string name="local_service_connected">LOCAL_SERVICE_CONNECTED</string>
-    <string name="local_service_disconnected">LOCAL_SERVICE_DISCONNECTED</string>
+    <string name="button_signup_title">Sign Up</string>
+    <string name="button_login_title">Log In</string>
     
     <!-- Toast content when an alarm was reviewed  -->
     <string name="word_reviewed">Reviewed +1</string>

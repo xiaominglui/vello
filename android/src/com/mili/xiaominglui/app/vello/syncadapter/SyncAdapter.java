@@ -49,9 +49,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			// service that we know is running in our own process, we can
 			// cast its IBinder to a concrete class and directly access it.
 			mService = new Messenger(service);
-			// Tell the user about this for our demo.
-			Toast.makeText(mContext, R.string.local_service_connected,
-					Toast.LENGTH_SHORT).show();
 
 			try {
 				Message msg = Message.obtain(null,
@@ -68,8 +65,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			// This is called when the connection with the service has been
 			// unexpectedly disconnected - process crashed.
 			mService = null;
-			Toast.makeText(mContext, R.string.local_service_disconnected,
-					Toast.LENGTH_SHORT).show();
 		}
 	};
 

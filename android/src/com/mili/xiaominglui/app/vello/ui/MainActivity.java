@@ -107,6 +107,12 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			case VelloService.MSG_AUTH_TOKEN_REVOKED:
 				theActivity.postAuthTokenRevoked();
 				break;
+			case VelloService.MSG_STATUS_INIT_ACCOUNT_BEGIN:
+				theActivity.preInitAccount();
+				break;
+			case VelloService.MSG_STATUS_INIT_ACCOUNT_END:
+				theActivity.postInitAccount();
+				break;
 			}
 		}
 	}
@@ -124,10 +130,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			// service that we know is running in our own process, we can
 			// cast its IBinder to a concrete class and directly access it.
 			mService = new Messenger(service);
-			// Tell the user about this for our demo.
-			Toast.makeText(getApplicationContext(),
-					R.string.local_service_connected, Toast.LENGTH_SHORT)
-					.show();
 
 			try {
 				Message msg = Message.obtain(null,
@@ -154,9 +156,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			// This is called when the connection with the service has been
 			// unexpectedly disconnected - process crashed.
 			mService = null;
-			Toast.makeText(getApplicationContext(),
-					R.string.local_service_disconnected, Toast.LENGTH_SHORT)
-					.show();
 		}
 	};
 
@@ -402,6 +401,15 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 
 		currentColor = newColor;
 
+	}
+	private void preInitAccount() {
+		FragmentManager fm = getSupportFragmentManager();
+		fm.beginTransaction().replace(R.id.fragment_container_master, new ProgressFragment()).commit();
+	}
+	
+	private void postInitAccount() {
+		FragmentManager fm = getSupportFragmentManager();
+		fm.beginTransaction().replace(R.id.fragment_container_master, mReviewViewFragment).commit();
 	}
 	
 	private void postAuthTokenRevoked() {
