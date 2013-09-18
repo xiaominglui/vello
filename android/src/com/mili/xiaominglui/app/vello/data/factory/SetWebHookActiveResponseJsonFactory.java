@@ -6,17 +6,17 @@ import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 
 import android.os.Bundle;
 
-public class CreateWebHooksResponseJsonFactory {
+public class SetWebHookActiveResponseJsonFactory {
 
 	public static Bundle parseResult(String wsResponse) {
 		Gson gson = new Gson();
 		WebHook wh = gson.fromJson(wsResponse, WebHook.class);
-		
 		if (wh != null) {
 			Bundle bundle = new Bundle();
-			bundle.putString(VelloRequestFactory.BUNDLE_EXTRA_WEB_HOOK_ID, wh.id);
+			bundle.putBoolean(VelloRequestFactory.BUNDLE_EXTRA_WEBHOOK_ACTIVE, Boolean.valueOf(wh.active));
 			return bundle;
 		}
 		return null;
 	}
+
 }

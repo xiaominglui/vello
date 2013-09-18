@@ -24,8 +24,9 @@ public final class VelloRequestFactory {
     public static final int REQUEST_TYPE_UPGRADE_WORDCARD = 14;
     public static final int REQUEST_TYPE_QUERY_IN_LOCAL_CACHE = 15;
     public static final int REQUEST_TYPE_LOOK_UP_IN_DICTIONARY = 16;
-    public static final int REQUEST_TYPE_CREATE_WEB_HOOKS = 17;
+    public static final int REQUEST_TYPE_CREATE_WEBHOOK = 17;
     public static final int REQUEST_TYPE_REVOKE_AUTH_TOKEN = 18;
+    public static final int REQUEST_TYPE_SET_WEBHOOK_ACTIVE = 19;
 
     // Response data
     public static final String BUNDLE_EXTRA_TRELLO_BOARD_LIST = "com.mili.xiaominglui.app.vello.extra.boardList";
@@ -37,7 +38,8 @@ public final class VelloRequestFactory {
     public static final String BUNDLE_EXTRA_VOCABULARY_LIST_ID = "com.mili.xiaominglui.app.vello.extra.listId";
     public static final String BUNDLE_EXTRA_DICTIONARY_WS_RESPONSE = "com.mili.xiaominglui.app.vello.extra.ws.dictionary";
     public static final String BUNDLE_EXTRA_RESULT_STATUS = "com.mili.xiaominglui.app.vello.extra.status";
-    public static final String BUNDLE_EXTRA_WEB_HOOK_ID = "com.mili.xiaominglui.app.vello.extra.webhook.id";
+    public static final String BUNDLE_EXTRA_WEBHOOK_ID = "com.mili.xiaominglui.app.vello.extra.webhook.id";
+    public static final String BUNDLE_EXTRA_WEBHOOK_ACTIVE = "com.mili.xiaominglui.app.vello.extra.webhook.active";
     public static final String BUNDLE_EXTRA_HAS_AUTH_TOKEN_REVOKED = "com.mili.xiaominglui.app.vello.extra.token_revoked";
 
     // Parameter data
@@ -48,6 +50,7 @@ public final class VelloRequestFactory {
     public static final String PARAM_EXTRA_QUERY_WORD_KEYWORD = "com.mili.xiaominglui.app.vello.extra.keyword";
     public static final String PARAM_EXTRA_DICTIONARY_WS_RESULT = "com.mili.xiaominglui.app.vello.extra.ws.result";
     public static final String PARAM_EXTRA_DATE_LAST_ACTIVITY = "com.mili.xiaominglui.app.vello.extra.dateLastActivity";
+    public static final String PARAM_EXTRA_WEBHOOK_ACTIVE = "com.mili.xiaominglui.app.vello.extra.webhook.active";
 
     private VelloRequestFactory() {
         // no public constructor
@@ -164,8 +167,15 @@ public final class VelloRequestFactory {
 	    return request;
 	}
 
-	public static Request createWebHooks() {
-		Request request = new Request(REQUEST_TYPE_CREATE_WEB_HOOKS);
+	public static Request createWebHook() {
+		Request request = new Request(REQUEST_TYPE_CREATE_WEBHOOK);
+		request.setMemoryCacheEnabled(true);
+		return request;
+	}
+	
+	public static Request setWebHookActive(boolean isActive) {
+		Request request = new Request(REQUEST_TYPE_SET_WEBHOOK_ACTIVE);
+		request.put(PARAM_EXTRA_WEBHOOK_ACTIVE, isActive);
 		request.setMemoryCacheEnabled(true);
 		return request;
 	}

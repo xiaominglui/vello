@@ -85,17 +85,18 @@ public class VelloService extends Service implements RequestListener,
 	public static final int MSG_SHOW_RESULT_WORDCARD = 11;
 	public static final int MSG_AUTH_TOKEN_REVOKED = 12;
 	
+	public static final int MSG_STATUS_WEBHOOK_ACTIVED = 13;
+	public static final int MSG_STATUS_WEBHOOK_DEACTIVED = 14;
 	public static final int MSG_STATUS_INIT_ACCOUNT_BEGIN = 50;
 	public static final int MSG_STATUS_INIT_ACCOUNT_END = 51;
 
 	public static final int MSG_CHECK_VOCABULARY_BOARD = 100;
 	public static final int MSG_GET_DUE_WORDCARD_LIST = 101;
-	public static final int MSG_REVIEWED_WORDCARD = 102;
-	public static final int MSG_REVIEWED_PLUS_WORDCARD = 103;
 	public static final int MSG_CLOSE_WORDCARD = 104;
 	public static final int MSG_SYNC_LOCAL_CACHE = 106;
 	public static final int MSG_TRIGGER_QUERY_WORD = 107;
 	public static final int MSG_REVOKE_AUTH_TOKEN = 108;
+	public static final int MSG_SET_WEBHOOK_ACTIVE_STATUS = 109;
 
 	// Unique Identification Number for the Notification.
 	// We use it on Notification start, and to cancel it.
@@ -132,25 +133,16 @@ public class VelloService extends Service implements RequestListener,
 				case MSG_GET_DUE_WORDCARD_LIST:
 					service.getDueWordCardList();
 					break;
-				case MSG_REVIEWED_WORDCARD:
-					String cardID = (String) msg.obj;
-					int listPosition = msg.arg1;
-					service.reviewedWordCard(cardID, listPosition);
-					break;
-				case MSG_REVIEWED_PLUS_WORDCARD:
-					String plusCardID = (String) msg.obj;
-					service.reviewedPlusWordCard(plusCardID);
-					break;
-				case MSG_CLOSE_WORDCARD:
-					String cardId = (String) msg.obj;
-					service.archiveWordCard(cardId);
-					break;
 				case MSG_TRIGGER_QUERY_WORD:
 				    String query = (String) msg.obj;
 				    service.queryInRemoteStorage(query);
 				    break;
 				case MSG_REVOKE_AUTH_TOKEN:
 					service.revokeAuthToken();
+					break;
+				case MSG_SET_WEBHOOK_ACTIVE_STATUS:
+					boolean isActive = (Boolean) msg.obj;
+					service.setWebHookActive(isActive);
 					break;
 				default:
 					super.handleMessage(msg);
@@ -393,13 +385,22 @@ public class VelloService extends Service implements RequestListener,
 		mRequestList.add(reStartWordCard);
 	}
 	
-	private void createWebHooks() {
+	private void createWebHook() {
 		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "createWebHooks start...");
+			Log.d(TAG, "createWebHook start...");
 		}
-		Request createWebHooks = VelloRequestFactory.createWebHooks();
-		mRequestManager.execute(createWebHooks, this);
-		mRequestList.add(createWebHooks);
+		Request createWebHook = VelloRequestFactory.createWebHook();
+		mRequestManager.execute(createWebHook, this);
+		mRequestList.add(createWebHook);
+	}
+	
+	private void setWebHookActive(boolean isActive) {
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "setWebHookActive start...");
+		}
+		Request setWebHookActive = VelloRequestFactory.setWebHookActive(isActive);
+		mRequestManager.execute(setWebHookActive, this);
+		mRequestList.add(setWebHookActive);
 	}
 	
 	private void revokeAuthToken() {
@@ -519,7 +520,7 @@ public class VelloService extends Service implements RequestListener,
 									getApplicationContext(), list.id, position);
 							if (AccountUtils
 									.isVocabularyBoardWellFormed(getApplicationContext())) {
-								createWebHooks();
+								createWebHook();
 							}
 							return;
 						}
@@ -549,7 +550,7 @@ public class VelloService extends Service implements RequestListener,
 							id, pos);
 					if (AccountUtils
 							.isVocabularyBoardWellFormed(getApplicationContext())) {
-						createWebHooks();
+						createWebHook();
 					}
 				} else {
 					// reopen failed, try again
@@ -570,7 +571,7 @@ public class VelloService extends Service implements RequestListener,
 							id, pos);
 					if (AccountUtils
 							.isVocabularyBoardWellFormed(getApplicationContext())) {
-						createWebHooks();
+						createWebHook();
 					}
 				} else {
 					// create list failed, try again
@@ -784,8 +785,8 @@ public class VelloService extends Service implements RequestListener,
 			    }
 			    return;
 
-			case VelloRequestFactory.REQUEST_TYPE_CREATE_WEB_HOOKS:
-				String hookId = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_WEB_HOOK_ID);
+			case VelloRequestFactory.REQUEST_TYPE_CREATE_WEBHOOK:
+				String hookId = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_WEBHOOK_ID);
 				if (hookId != null) {
 					// hook created, save it
 					AccountUtils.setVocabularyBoardWebHookId(getApplicationContext(), hookId);
@@ -800,7 +801,31 @@ public class VelloService extends Service implements RequestListener,
 //					SyncHelper.requestManualSync(account);
 				} else {
 					// to create again
-					createWebHooks();
+					createWebHook();
+				}
+				return;
+				
+			case VelloRequestFactory.REQUEST_TYPE_SET_WEBHOOK_ACTIVE:
+				boolean requestActive = request.getBoolean(VelloRequestFactory.PARAM_EXTRA_WEBHOOK_ACTIVE);
+				if (resultData != null) {
+					boolean currentActive = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_WEBHOOK_ACTIVE);
+					
+					if (currentActive == requestActive) {
+						// request success
+						if (currentActive) {
+							// PUSH
+							sendMessageToUI(MSG_STATUS_WEBHOOK_ACTIVED, null);
+						} else {
+							// schedule sync
+							sendMessageToUI(MSG_STATUS_WEBHOOK_DEACTIVED, null);
+						}
+					}
+				} else {
+					// request fail, try again
+					setWebHookActive(requestActive);
+				}
+				if (VelloConfig.DEBUG_SWITCH) {
+					Log.d(TAG, "setWebHookActive end...");
 				}
 				return;
 				

@@ -155,7 +155,7 @@ public class AccountUtils {
                 .getDefaultSharedPreferences(context);
     	sp.edit().putString(PREF_VOCABULARY_BOARD_WEB_HOOK_ID, hookId).commit();
     }
-
+    
     public static String getVocabularyBoardId(final Context context) {
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(context);

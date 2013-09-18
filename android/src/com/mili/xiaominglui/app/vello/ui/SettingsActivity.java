@@ -34,6 +34,7 @@ import android.util.Log;
 public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	public static final String KEY_PREF_SYNC_FREQ = "pref_sync_frequency";
 	
+	private String mNewSyncValue = "0";
 	private ListPreference mListPreference;
 	private SettingsActivityUIHandler mUICallback = new SettingsActivityUIHandler(this);
 	private class SettingsActivityUIHandler extends Handler {
@@ -45,8 +46,15 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 		
 		@Override
 		public void handleMessage(Message msg) {
-			// TODO Auto-generated method stub
-			super.handleMessage(msg);
+			SettingsActivity theActivity = mActivity.get();
+			switch (msg.what) {
+			case VelloService.MSG_STATUS_WEBHOOK_ACTIVED:
+				theActivity.postActiveWebhook();
+				break;
+			case VelloService.MSG_STATUS_WEBHOOK_DEACTIVED:
+				theActivity.postDeactiveWebhook();
+				break;
+			}
 		}
 	}
 	Messenger mService = null;
@@ -81,11 +89,14 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 		}
 	};
 
-	private void sendMessageToService(int type) {
+	private void sendMessageToService(int type, Object obj) {
 		if (mIsBound) {
 			if (mService != null) {
 				try {
 					Message msg = Message.obtain(null, type);
+					if (obj != null) {
+						msg.obj = obj;
+					}
 					msg.replyTo = mMessenger;
 					mService.send(msg);
 				} catch (RemoteException e) {
@@ -157,19 +168,36 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 		if (key.equals(KEY_PREF_SYNC_FREQ)) {
+			Log.d("mingo.lv", "onSharedPreferenceChanged");
+			// TODO need handle the network issue
 			ListPreference syncFreqPref = (ListPreference) findPreference(key);
 			syncFreqPref.setSummary(syncFreqPref.getEntry());
-			String newValue = syncFreqPref.getValue();
-			if (newValue.equals("0")) {
-				// TODO choose PUSH
+			mNewSyncValue = syncFreqPref.getValue();
+			syncFreqPref.setEnabled(false);
+			if (mNewSyncValue.equals("0")) {
+				// choose PUSH
+				// active PUSH
+				sendMessageToService(VelloService.MSG_SET_WEBHOOK_ACTIVE_STATUS, true);
 			} else {
 				// choose schedule sync
-				Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
-				Bundle extras = new Bundle();
-				ContentResolver.removePeriodicSync(account, VelloProvider.AUTHORITY, extras);
-				int pollFrequency = Integer.valueOf(newValue) * 60 * 60;
-				ContentResolver.addPeriodicSync(account, VelloProvider.AUTHORITY, extras, pollFrequency);
+				// deactive PUSH
+				sendMessageToService(VelloService.MSG_SET_WEBHOOK_ACTIVE_STATUS, false);
 			}
 		}
+	}
+	
+	private void postActiveWebhook() {
+		Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
+		Bundle extras = new Bundle();
+		ContentResolver.removePeriodicSync(account, VelloProvider.AUTHORITY, extras);
+		mListPreference.setEnabled(true);
+	}
+	
+	private void postDeactiveWebhook() {
+		Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
+		Bundle extras = new Bundle();
+		int pollFrequency = Integer.valueOf(mNewSyncValue) * 60 * 60;
+		ContentResolver.addPeriodicSync(account, VelloProvider.AUTHORITY, extras, pollFrequency);
+		mListPreference.setEnabled(true);
 	}
 }

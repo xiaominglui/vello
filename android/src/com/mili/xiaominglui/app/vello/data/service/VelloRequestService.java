@@ -2,11 +2,12 @@
 package com.mili.xiaominglui.app.vello.data.service;
 
 import com.foxykeep.datadroid.service.RequestService;
+import com.mili.xiaominglui.app.vello.data.operation.SetWebHookActiveOperation;
 import com.mili.xiaominglui.app.vello.data.operation.AddWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ArchiveWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CheckVocabularyBoardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CheckVocabularyListOperation;
-import com.mili.xiaominglui.app.vello.data.operation.CreateWebHooksOperation;
+import com.mili.xiaominglui.app.vello.data.operation.CreateWebHookOperation;
 import com.mili.xiaominglui.app.vello.data.operation.QueryInRemoteStorageOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ConfigureVocabularyBoardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CreateVocabularyBoardOperation;
@@ -15,7 +16,6 @@ import com.mili.xiaominglui.app.vello.data.operation.GetDueWordCardListOperation
 import com.mili.xiaominglui.app.vello.data.operation.InitializeWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.LookUpInDictionaryOperation;
 import com.mili.xiaominglui.app.vello.data.operation.QueryInLocalCacheOperation;
-import com.mili.xiaominglui.app.vello.data.operation.QueryInRemoteStorageOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ReopenVocabularyListOperation;
 import com.mili.xiaominglui.app.vello.data.operation.RestartWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ReviewedPlusWordCardOperation;
@@ -68,8 +68,10 @@ public class VelloRequestService extends RequestService {
                 return new QueryInLocalCacheOperation();
             case VelloRequestFactory.REQUEST_TYPE_LOOK_UP_IN_DICTIONARY:
             	return new LookUpInDictionaryOperation();
-            case VelloRequestFactory.REQUEST_TYPE_CREATE_WEB_HOOKS:
-            	return new CreateWebHooksOperation();
+            case VelloRequestFactory.REQUEST_TYPE_CREATE_WEBHOOK:
+            	return new CreateWebHookOperation();
+            case VelloRequestFactory.REQUEST_TYPE_SET_WEBHOOK_ACTIVE:
+            	return new SetWebHookActiveOperation();
             case VelloRequestFactory.REQUEST_TYPE_REVOKE_AUTH_TOKEN:
             	return new RevokeAuthTokenOperation();
         }

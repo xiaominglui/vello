@@ -18,6 +18,7 @@ public final class WSConfig {
     public static final String WS_TRELLO_TARGET_SEARCH = "/search";
     public static final String WS_TRELLO_TARGET_CARD ="/cards";
     public static final String WS_TRELLO_TARGET_TOKEN = "/tokens";
+    public static final String WS_TRELLO_TARGET_WEBHOOKS = "/webhooks";
     
     public static final String WS_TRELLO_PARAM_FILTER = "filter";
     public static final String WS_TRELLO_PARAM_APP_KEY = "key";
@@ -38,6 +39,7 @@ public final class WSConfig {
     public static final String WS_TRELLO_PARAM_WEBHOOK_DESCRIPTION = "description";
     public static final String WS_TRELLO_PARAM_WEBHOOK_CALLBACK_URL = "callbackURL";
     public static final String WS_TRELLO_PARAM_WEBHOOK_ID_MODEL = "idModel";
+    public static final String WS_TRELLO_PARAM_WEBHOOK_ACTIVE = "active";
     
     
     
