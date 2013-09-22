@@ -34,6 +34,7 @@ import android.util.Log;
 
 public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	public static final String KEY_PREF_SYNC_FREQ = "pref_sync_frequency";
+	public static final String KEY_PREF_SYNC_WIFI_ONLY = "pref_sync_wifi_only";
 	
 	private String mNewSyncValue = "0";
 	private ListPreference mListPreference;

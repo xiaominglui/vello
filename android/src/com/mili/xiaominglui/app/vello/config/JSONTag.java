@@ -40,6 +40,9 @@ public final class JSONTag {
 	public static final String ACTION_ELEM_DATA = "data";
 	public static final String ACTION_ELEM_DATA_OLD = "old";
 	public static final String ACTION_ELEM_TYPE = "type";
+	
+	// AVOS tags
+	public static final String AVOS_INFORMATION = "infomation";
 
 	// Mili Dictionary tags
 	public static final String MILI_DICTIONARY_SPELL = "spell";

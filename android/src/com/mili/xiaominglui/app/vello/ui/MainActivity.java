@@ -20,6 +20,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
@@ -53,7 +54,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	private Drawable oldBackground = null;
 	private int currentColor = 0xFF666666;
 	private final Handler handler = new Handler();
-	private ReviewViewFragment mReviewViewFragment;
+	private Fragment mReviewViewFragment;
 	
 	private MainActivityUIHandler mUICallback = new MainActivityUIHandler(this);
 
@@ -227,9 +228,10 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	}
 	
 	private void setInitialFragment() {
+		mReviewViewFragment = ReviewViewFragment.newInstance();
 		FragmentManager fragmentManager = getSupportFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-		fragmentTransaction.add(CONTENT_VIEW_ID, ReviewViewFragment.newInstance()).commit();
+		fragmentTransaction.add(CONTENT_VIEW_ID, mReviewViewFragment).commit();
 	}
 
 	@Override
@@ -304,7 +306,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 		super.onCreateOptionsMenu(menu);
 		getSupportMenuInflater().inflate(R.menu.home, menu);
 
-		setupSearchMenuItem(menu);
+//		setupSearchMenuItem(menu);
 
 		return true;
 	}
@@ -326,7 +328,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				
 				@Override
 				public boolean onQueryTextChange(String newText) {
-					mReviewViewFragment.onQueryTextChange(newText);
+//					mReviewViewFragment.onQueryTextChange(newText);
 					return true;
 				}
 			});
@@ -420,12 +422,12 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	}
 	private void preInitAccount() {
 		FragmentManager fm = getSupportFragmentManager();
-		fm.beginTransaction().replace(R.id.fragment_container_master, new ProgressFragment()).commit();
+		fm.beginTransaction().replace(CONTENT_VIEW_ID, new ProgressFragment()).commit();
 	}
 	
 	private void postInitAccount() {
 		FragmentManager fm = getSupportFragmentManager();
-		fm.beginTransaction().replace(R.id.fragment_container_master, mReviewViewFragment).commit();
+		fm.beginTransaction().replace(CONTENT_VIEW_ID, mReviewViewFragment).commit();
 	}
 	
 	private void postAuthTokenRevoked() {

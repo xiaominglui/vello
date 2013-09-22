@@ -10,6 +10,7 @@ import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.SyncResult;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -21,13 +22,16 @@ import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
+import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.service.VelloService;
+import com.mili.xiaominglui.app.vello.ui.SettingsActivity;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
@@ -77,9 +81,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 	@Override
 	public void onPerformSync(Account account, Bundle extras, String authority,
 			ContentProviderClient provider, SyncResult syncResult) {
+		
+		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
+		boolean wifiOnly = sharedPref.getBoolean(SettingsActivity.KEY_PREF_SYNC_WIFI_ONLY, true);
 
 		WifiManager.WifiLock wifiLock = null;
 		WakeLock wakeLock = null;
+		
+		String syncType = extras.getString(DbWordCard.SYNC_TYPE);
+		Log.d("mingo.lv", "syncType=" + syncType);
 
 		try {
 			boolean wifiNetwork = false;
@@ -102,8 +112,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 				wifiNetwork = true;
 			}
 			
-			if (VelloConfig.DEBUG_SWITCH) {
-				Log.d(TAG, authority + ": do not auto sync without WiFi!");
+			if (wifiOnly && !wifiNetwork) {
+				Log.i(TAG, authority + ": do not auto sync without WiFi!");
 				syncResult.stats.numIoExceptions++;
 				return;
 			}
@@ -127,14 +137,27 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 				syncResult.stats.numAuthExceptions++;
 				// TODO auth failed now, what to do.
 			} else {
-				WifiManager wifiManager = 
-		            	(WifiManager)this.getContext().getSystemService(Context.WIFI_SERVICE);
-		        wifiLock = wifiManager.createWifiLock(TAG);
+				if (wifiOnly) {
+					WifiManager wifiManager = 
+			            	(WifiManager)this.getContext().getSystemService(Context.WIFI_SERVICE);
+			        wifiLock = wifiManager.createWifiLock(TAG);
+			        wifiLock.acquire();
+				}
+				
 	            PowerManager pm = (PowerManager) this.getContext().getSystemService(Context.POWER_SERVICE);
 	            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 	            wakeLock.acquire();
-		        wifiLock.acquire();
-//		        this.performSync(account, token, provider, syncResult);
+		        
+		        
+		        // handle sync task below
+		        
+		        if (true) {
+		        	if (mSyncHelper == null) {
+						mSyncHelper = new SyncHelper(mContext);
+					}
+					
+					mSyncHelper.performSync(syncResult, SyncHelper.FLAG_SYNC_REMOTE);
+		        }
 			}
 			// sync notification
 			/*
@@ -149,11 +172,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 					.setProgress(0, 0, true).setOngoing(true).setAutoCancel(false);
 			notificationManager.notify(1, builder.build()); */
 			// Perform a sync using SyncHelper
-			if (mSyncHelper == null) {
-				mSyncHelper = new SyncHelper(mContext);
-			}
-			
-			mSyncHelper.performSync(syncResult, SyncHelper.FLAG_SYNC_REMOTE);
 
 		} catch (IOException e) {
 			++syncResult.stats.numIoExceptions;

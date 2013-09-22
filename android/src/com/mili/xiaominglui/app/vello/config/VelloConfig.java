@@ -35,4 +35,5 @@ public class VelloConfig {
 
     // Trello Web Hook related
     public static final String DEFAULT_VOCABULARY_BOARD_HOOK_DESCRIPTION = "Vocabulary Sync Trigger";
+    
 }
