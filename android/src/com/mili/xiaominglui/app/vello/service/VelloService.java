@@ -84,9 +84,12 @@ public class VelloService extends Service implements RequestListener,
 	public static final int MSG_TOAST_WORD_REVIEWED_COUNT_PLUS = 10;
 	public static final int MSG_SHOW_RESULT_WORDCARD = 11;
 	public static final int MSG_AUTH_TOKEN_REVOKED = 12;
+	public static final int MSG_VALID_TRELLO_CONNECTION = 13;
+	public static final int MSG_INVALID_TRELLO_CONNECTION = 14;
 	
-	public static final int MSG_STATUS_WEBHOOK_ACTIVED = 13;
-	public static final int MSG_STATUS_WEBHOOK_DEACTIVED = 14;
+	public static final int MSG_STATUS_WEBHOOK_ACTIVED = 15;
+	public static final int MSG_STATUS_WEBHOOK_DEACTIVED = 16;
+	
 	public static final int MSG_STATUS_INIT_ACCOUNT_BEGIN = 50;
 	public static final int MSG_STATUS_INIT_ACCOUNT_END = 51;
 
@@ -97,6 +100,7 @@ public class VelloService extends Service implements RequestListener,
 	public static final int MSG_TRIGGER_QUERY_WORD = 107;
 	public static final int MSG_REVOKE_AUTH_TOKEN = 108;
 	public static final int MSG_SET_WEBHOOK_ACTIVE_STATUS = 109;
+	public static final int MSG_CHECK_TRELLO_CONNECTION = 110;
 
 	// Unique Identification Number for the Notification.
 	// We use it on Notification start, and to cancel it.
@@ -143,6 +147,9 @@ public class VelloService extends Service implements RequestListener,
 				case MSG_SET_WEBHOOK_ACTIVE_STATUS:
 					boolean isActive = (Boolean) msg.obj;
 					service.setWebHookActive(isActive);
+					break;
+				case MSG_CHECK_TRELLO_CONNECTION:
+					service.checkTrelloConnection();
 					break;
 				default:
 					super.handleMessage(msg);
@@ -410,6 +417,15 @@ public class VelloService extends Service implements RequestListener,
 		Request revokeAuthToken = VelloRequestFactory.revokeAuthToken();
 		mRequestManager.execute(revokeAuthToken, this);
 		mRequestList.add(revokeAuthToken);
+	}
+	
+	private void checkTrelloConnection() {
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "checkTrelloConnection start...");
+		}
+		Request checkTrelloConnection = VelloRequestFactory.checkTrelloConnection();
+		mRequestManager.execute(checkTrelloConnection, this);
+		mRequestList.add(checkTrelloConnection);
 	}
 	
 	@Override
@@ -838,6 +854,20 @@ public class VelloService extends Service implements RequestListener,
 					// TODO
 				}
 				return;
+				
+			case VelloRequestFactory.REQUEST_TYPE_CHECK_TRELLO_CONNECTION:
+				boolean hasTrelloConnection = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_CONNECTION);
+				if (hasTrelloConnection) {
+					// valid connection
+					sendMessageToUI(VelloService.MSG_VALID_TRELLO_CONNECTION, null);
+				} else {
+					// invalid connection
+					sendMessageToUI(VelloService.MSG_INVALID_TRELLO_CONNECTION, null);
+				}
+				if (VelloConfig.DEBUG_SWITCH) {
+					Log.d(TAG, "CheckTrelloConnection end...");
+				}
+				return;
 			default:
 				return;
 			}
@@ -864,6 +894,11 @@ public class VelloService extends Service implements RequestListener,
 				// token has been revoked via trello web app
 				Log.d(TAG, "token has been revoked via trello web app.");
 				sendMessageToUI(VelloService.MSG_AUTH_TOKEN_REVOKED, null);
+			} else if (statusCode == -1 && request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_CHECK_TRELLO_CONNECTION) {
+				sendMessageToUI(VelloService.MSG_INVALID_TRELLO_CONNECTION, null);
+				if (VelloConfig.DEBUG_SWITCH) {
+					Log.d(TAG, "CheckTrelloConnection end...");
+				}
 			}
 			mRequestList.remove(request);
 		}

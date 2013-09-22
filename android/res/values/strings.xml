@@ -80,6 +80,9 @@
     <string name="pref_sync_title">SYNC</string>
     <string name="pref_sync_frequency">Sync frequency</string>
     <string name="pref_sync_wifi_only">Sync only on WiFi</string>
+    <string name="pref_sync_frequency_summary_no_network">You don\'t have a network connection.</string>
+    <string name="pref_sync_frequency_summary_no_reliable_network">Can\'t establish a reliable connection to the server.</string>
+    <string name="pref_sync_frequency_summary_retrieving_setting">Retrieving settings&#8230;</string>
     
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>

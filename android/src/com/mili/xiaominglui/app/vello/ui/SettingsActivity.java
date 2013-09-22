@@ -8,6 +8,7 @@ import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
+import com.mili.xiaominglui.app.vello.util.NetworkUtil;
 
 import android.accounts.Account;
 import android.content.ComponentName;
@@ -54,6 +55,12 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 			case VelloService.MSG_STATUS_WEBHOOK_DEACTIVED:
 				theActivity.postDeactiveWebhook();
 				break;
+			case VelloService.MSG_VALID_TRELLO_CONNECTION:
+				theActivity.withValidTrelloConnection();
+				break;
+			case VelloService.MSG_INVALID_TRELLO_CONNECTION:
+				theActivity.withInvalidTrelloConnection();
+				break;
 			}
 		}
 	}
@@ -80,6 +87,8 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 				// In this case the service has crashed before we could even do
 				// anything with it
 			}
+			
+			sendMessageToService(VelloService.MSG_CHECK_TRELLO_CONNECTION, null);
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
@@ -137,7 +146,14 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	protected void onResume() {
 		super.onResume();
 		// setup the initial value
-		mListPreference.setSummary(mListPreference.getEntry());
+		mListPreference.setEnabled(false);
+		mListPreference.setSummary(R.string.pref_sync_frequency_summary_retrieving_setting);
+		if (NetworkUtil.isOnline(getApplicationContext())) {
+			
+		} else {
+			mListPreference.setSummary(R.string.pref_sync_frequency_summary_no_network);
+		}
+		
 		getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 	}
 	
@@ -199,5 +215,15 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 		int pollFrequency = Integer.valueOf(mNewSyncValue) * 60 * 60;
 		ContentResolver.addPeriodicSync(account, VelloProvider.AUTHORITY, extras, pollFrequency);
 		mListPreference.setEnabled(true);
+	}
+	
+	private void withValidTrelloConnection() {
+		mListPreference.setEnabled(true);
+		mListPreference.setSummary(mListPreference.getEntry());
+	}
+	
+	private void withInvalidTrelloConnection() {
+		mListPreference.setSummary(R.string.pref_sync_frequency_summary_no_reliable_network);
+		mListPreference.setEnabled(false);
 	}
 }
