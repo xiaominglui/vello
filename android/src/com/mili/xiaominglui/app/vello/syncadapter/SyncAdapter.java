@@ -88,9 +88,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		WifiManager.WifiLock wifiLock = null;
 		WakeLock wakeLock = null;
 		
-		String syncType = extras.getString(DbWordCard.SYNC_TYPE);
-		Log.d("mingo.lv", "syncType=" + syncType);
-
 		try {
 			boolean wifiNetwork = false;
 

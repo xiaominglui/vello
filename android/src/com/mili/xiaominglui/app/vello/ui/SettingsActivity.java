@@ -2,14 +2,6 @@ package com.mili.xiaominglui.app.vello.ui;
 
 import java.lang.ref.WeakReference;
 
-import com.mili.xiaominglui.app.vello.R;
-import com.mili.xiaominglui.app.vello.authenticator.Constants;
-import com.mili.xiaominglui.app.vello.config.VelloConfig;
-import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
-import com.mili.xiaominglui.app.vello.service.VelloService;
-import com.mili.xiaominglui.app.vello.util.AccountUtils;
-import com.mili.xiaominglui.app.vello.util.NetworkUtil;
-
 import android.accounts.Account;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -26,11 +18,14 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.ListPreference;
-import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
-import android.util.Log;
+
+import com.mili.xiaominglui.app.vello.R;
+import com.mili.xiaominglui.app.vello.authenticator.Constants;
+import com.mili.xiaominglui.app.vello.config.VelloConfig;
+import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
+import com.mili.xiaominglui.app.vello.service.VelloService;
+import com.mili.xiaominglui.app.vello.util.NetworkUtil;
 
 public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	public static final String KEY_PREF_SYNC_FREQ = "pref_sync_frequency";
@@ -185,8 +180,6 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 		if (key.equals(KEY_PREF_SYNC_FREQ)) {
-			Log.d("mingo.lv", "onSharedPreferenceChanged");
-			// TODO need handle the network issue
 			ListPreference syncFreqPref = (ListPreference) findPreference(key);
 			syncFreqPref.setSummary(syncFreqPref.getEntry());
 			mNewSyncValue = syncFreqPref.getValue();

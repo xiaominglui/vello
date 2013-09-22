@@ -43,12 +43,9 @@ public class AVOSPushReceiver extends BroadcastReceiver {
 					// verified push data
 					JSONObject jsonAction = jsonInformation.getJSONObject(JSONTag.ACTION_ELEM_ACTION);
 					String actionType = jsonAction.getString(JSONTag.ACTION_ELEM_TYPE);
-					Bundle extras = new Bundle();
 					if (actionType.equals(WSConfig.WS_TRELLO_ACTION_TYPE_CREATECARD)) {
 						// createCard action
 						// query and insert a card
-						extras.putString(DbWordCard.SYNC_TYPE, "insert_card");
-						ContentResolver.requestSync(new Account(AccountUtils.getChosenAccountName(context), Constants.ACCOUNT_TYPE), VelloProvider.AUTHORITY, extras);
 						
 					} else if (actionType.equals(WSConfig.WS_TRELLO_ACTION_TYPE_UPDATECARD)) {
 						// updateCard action
@@ -57,17 +54,10 @@ public class AVOSPushReceiver extends BroadcastReceiver {
 						JSONObject jsonActionDataOld = jsonActionData.getJSONObject(JSONTag.ACTION_ELEM_DATA_OLD);
 						if (jsonActionDataOld.has(JSONTag.CARD_ELEM_IDLIST)) {
 							// sub-type: move list
-							
-							extras.putString(DbWordCard.SYNC_TYPE, "move_list");
-							ContentResolver.requestSync(new Account(AccountUtils.getChosenAccountName(context), Constants.ACCOUNT_TYPE), VelloProvider.AUTHORITY, extras);
 						} else if (jsonActionDataOld.has(JSONTag.CARD_ELEM_DUE)) {
 							// sub-type: change due
-							extras.putString(DbWordCard.SYNC_TYPE, "change_due");
-							ContentResolver.requestSync(new Account(AccountUtils.getChosenAccountName(context), Constants.ACCOUNT_TYPE), VelloProvider.AUTHORITY, extras);
 						} else if (jsonActionDataOld.has(JSONTag.CARD_ELEM_CLOSED)) {
 							// sub-type: change closed
-							extras.putString(DbWordCard.SYNC_TYPE, "change_closed");
-							ContentResolver.requestSync(new Account(AccountUtils.getChosenAccountName(context), Constants.ACCOUNT_TYPE), VelloProvider.AUTHORITY, extras);
 						} else {
 							Log.i(TAG, "unknow sub-type of UPDATECARD, data = " + jsonActionData.toString());
 						}

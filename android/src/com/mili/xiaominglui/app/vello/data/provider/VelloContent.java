@@ -24,8 +24,6 @@ public class VelloContent {
         public static final String TYPE_ELEM_TYPE = "vnd.androd.cursor.item/vello-dbwordcard";
         public static final String TYPE_DIR_TYPE = "vnd.android.cursor.dir/vello-dbwordcard";
         
-        public static final String SYNC_TYPE = "sync_type";
-        
         public static final Uri CONTENT_URI = Uri
                 .parse(VelloContent.CONTENT_URI + "/" + TABLE_NAME);
 
