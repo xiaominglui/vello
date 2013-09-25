@@ -6,7 +6,7 @@
             android:key="pref_sync_frequency"
             android:entries="@array/syncFrequency"
             android:entryValues="@array/syncFrequencyValues"
-            android:defaultValue="0"
+            android:defaultValue="12"
             android:title="@string/pref_sync_frequency" />
         
         <CheckBoxPreference

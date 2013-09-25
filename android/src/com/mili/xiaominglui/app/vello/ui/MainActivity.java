@@ -36,10 +36,12 @@ import com.actionbarsherlock.widget.SearchView;
 import com.devspark.appmsg.AppMsg;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
+import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment;
 import com.mili.xiaominglui.app.vello.service.VelloService;
+import com.mili.xiaominglui.app.vello.syncadapter.SyncHelper;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.mili.xiaominglui.app.vello.util.HelpUtils;
 import com.mili.xiaominglui.app.vello.util.UIUtils;
@@ -147,8 +149,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			}
 
 			if (AccountUtils.hasVocabularyBoard(getApplicationContext()) &&
-					AccountUtils.isVocabularyBoardWellFormed(getApplicationContext()) &&
-					AccountUtils.isWebHooksCreated(getApplicationContext())) {
+					AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
 				// all initialized
 				// do nothing now
 			} else {
@@ -368,12 +369,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	}
 
 	private void triggerRefresh() {
-		Bundle extras = new Bundle();
-		extras.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-		ContentResolver.requestSync(
-				new Account(AccountUtils.getChosenAccountName(this),
-						Constants.ACCOUNT_TYPE), VelloProvider.AUTHORITY,
-				extras);
+		SyncHelper.requestManualSync(new Account(AccountUtils.getChosenAccountName(this), Constants.ACCOUNT_TYPE));
 	}
 	
 	private void changeColor(int newColor) {
@@ -426,6 +422,11 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	}
 	
 	private void postInitAccount() {
+		Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
+		ContentResolver.setIsSyncable(account,
+				VelloProvider.AUTHORITY, 1);
+		ContentResolver.setSyncAutomatically(account,
+				VelloProvider.AUTHORITY, true);
 		FragmentManager fm = getSupportFragmentManager();
 		fm.beginTransaction().replace(CONTENT_VIEW_ID, mReviewViewFragment).commit();
 	}
@@ -459,7 +460,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 
 	@Override
 	public void onAllReviewed() {
-		triggerRefresh();
 	}
 
 	@Override

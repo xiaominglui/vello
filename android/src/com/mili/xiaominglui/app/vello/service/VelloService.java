@@ -392,6 +392,7 @@ public class VelloService extends Service implements RequestListener,
 		mRequestList.add(reStartWordCard);
 	}
 	
+	@Deprecated
 	private void createWebHook() {
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "createWebHook start...");
@@ -534,15 +535,13 @@ public class VelloService extends Service implements RequestListener,
 							// list[position]'s status ok, save listId
 							AccountUtils.setVocabularyListId(
 									getApplicationContext(), list.id, position);
-							if (AccountUtils
-									.isVocabularyBoardWellFormed(getApplicationContext())) {
-								createWebHook();
+							
+							if (AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
+								sendMessageToUI(VelloService.MSG_STATUS_INIT_ACCOUNT_END, null);
 							}
 							return;
 						}
-
 					}
-
 				}
 				// no vocabulary list found
 				createVocabularyList(position);
@@ -564,9 +563,9 @@ public class VelloService extends Service implements RequestListener,
 							.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
 					AccountUtils.setVocabularyListId(getApplicationContext(),
 							id, pos);
-					if (AccountUtils
-							.isVocabularyBoardWellFormed(getApplicationContext())) {
-						createWebHook();
+					
+					if (AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
+						sendMessageToUI(VelloService.MSG_STATUS_INIT_ACCOUNT_END, null);
 					}
 				} else {
 					// reopen failed, try again
@@ -585,9 +584,9 @@ public class VelloService extends Service implements RequestListener,
 							.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
 					AccountUtils.setVocabularyListId(getApplicationContext(),
 							id, pos);
-					if (AccountUtils
-							.isVocabularyBoardWellFormed(getApplicationContext())) {
-						createWebHook();
+					
+					if (AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
+						sendMessageToUI(VelloService.MSG_STATUS_INIT_ACCOUNT_END, null);
 					}
 				} else {
 					// create list failed, try again
@@ -806,15 +805,7 @@ public class VelloService extends Service implements RequestListener,
 				if (hookId != null) {
 					// hook created, save it
 					AccountUtils.setVocabularyBoardWebHookId(getApplicationContext(), hookId);
-					sendMessageToUI(VelloService.MSG_STATUS_INIT_ACCOUNT_END, null);
-					// need trigge sync? TODO
-					// FIXME set sync should be moved to after vocabulary board init ok
-					Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
-					ContentResolver.setIsSyncable(account,
-							VelloProvider.AUTHORITY, 1);
-//					ContentResolver.setSyncAutomatically(account,
-//							VelloProvider.AUTHORITY, true);
-//					SyncHelper.requestManualSync(account);
+					
 				} else {
 					// to create again
 					createWebHook();
