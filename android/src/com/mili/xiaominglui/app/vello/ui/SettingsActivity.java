@@ -45,12 +45,6 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 		public void handleMessage(Message msg) {
 			SettingsActivity theActivity = mActivity.get();
 			switch (msg.what) {
-			case VelloService.MSG_STATUS_WEBHOOK_ACTIVED:
-				theActivity.postActiveWebhook();
-				break;
-			case VelloService.MSG_STATUS_WEBHOOK_DEACTIVED:
-				theActivity.postDeactiveWebhook();
-				break;
 			case VelloService.MSG_VALID_TRELLO_CONNECTION:
 				theActivity.withValidTrelloConnection();
 				break;
@@ -180,35 +174,17 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 		if (key.equals(KEY_PREF_SYNC_FREQ)) {
+			Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
+			Bundle extras = new Bundle();
+			ContentResolver.removePeriodicSync(account, VelloProvider.AUTHORITY, extras);
+			
 			ListPreference syncFreqPref = (ListPreference) findPreference(key);
 			syncFreqPref.setSummary(syncFreqPref.getEntry());
 			mNewSyncValue = syncFreqPref.getValue();
-			syncFreqPref.setEnabled(false);
-			if (mNewSyncValue.equals("0")) {
-				// choose PUSH
-				// active PUSH
-				sendMessageToService(VelloService.MSG_SET_WEBHOOK_ACTIVE_STATUS, true);
-			} else {
-				// choose schedule sync
-				// deactive PUSH
-				sendMessageToService(VelloService.MSG_SET_WEBHOOK_ACTIVE_STATUS, false);
-			}
+			
+			int pollFrequency = Integer.valueOf(mNewSyncValue) * 60 * 60;
+			ContentResolver.addPeriodicSync(account, VelloProvider.AUTHORITY, extras, pollFrequency);
 		}
-	}
-	
-	private void postActiveWebhook() {
-		Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
-		Bundle extras = new Bundle();
-		ContentResolver.removePeriodicSync(account, VelloProvider.AUTHORITY, extras);
-		mListPreference.setEnabled(true);
-	}
-	
-	private void postDeactiveWebhook() {
-		Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
-		Bundle extras = new Bundle();
-		int pollFrequency = Integer.valueOf(mNewSyncValue) * 60 * 60;
-		ContentResolver.addPeriodicSync(account, VelloProvider.AUTHORITY, extras, pollFrequency);
-		mListPreference.setEnabled(true);
 	}
 	
 	private void withValidTrelloConnection() {

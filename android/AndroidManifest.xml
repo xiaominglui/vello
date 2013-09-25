@@ -51,10 +51,10 @@
         <activity
             android:name=".ui.SettingsActivity"
             android:label="@string/title_settings"
-            android:parentActivityName=".ui.HomeActivity" >
+            android:parentActivityName=".ui.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.HomeActivity" />
+                android:value=".ui.MainActivity" />
 
             <intent-filter>
                 <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
