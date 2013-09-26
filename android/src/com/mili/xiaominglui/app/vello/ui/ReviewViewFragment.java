@@ -297,8 +297,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			LinearLayout linearLayoutPhoneticArea;
 			LinearLayout linearLayoutDefinitionArea;
 
-			View hairLine;
-
 			// Other states
 			WordCard wordcard;
 			IcibaWord word;
@@ -381,7 +379,8 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			if (mIsSearching) {
 				itemHolder.wordCardItem.setBackgroundResource(R.color.bg_dictionary_mode);
 			} else {
-				itemHolder.wordCardItem.setBackgroundResource(mWordCardBackgroundColor[positionList]);
+//				itemHolder.wordCardItem.setBackgroundResource(mWordCardBackgroundColor[positionList]);
+				itemHolder.wordCardItem.setBackgroundResource(R.color.bg_dictionary_mode);
 			}
 
 			itemHolder.textViewLifeCount.setText(String.valueOf(positionList) + "/9");
@@ -429,7 +428,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 					.findViewById(R.id.phonetics_area);
 			holder.linearLayoutDefinitionArea = (LinearLayout) view
 					.findViewById(R.id.definition_area);
-			holder.hairLine = view.findViewById(R.id.hairline);
 
 			view.setTag(holder);
 			return view;
@@ -473,7 +471,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 				LinearLayout phoneticsGroup = (LinearLayout) phoneticsView
 						.findViewById(R.id.phonetics_group);
 				((TextView) phoneticsView.findViewById(R.id.phonetics_symbol))
-						.setText("[" + phonetics.symbol + "]");
+						.setText("/" + phonetics.symbol + "/");
 				((IconicTextView) phoneticsView
 						.findViewById(R.id.phonetics_sound))
 						.setIcon(FontAwesomeIcon.VOLUME_UP);

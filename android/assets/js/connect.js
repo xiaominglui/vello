@@ -15,7 +15,7 @@ jQuery(function($) {
 	if (!Trello.authorized()) {
 		Trello.authorize({
 			expiration: "never",
-			name: "VAA for Android",
+			name: "Vello",
 			success: onAuthorize,
 			scope: {
             read: true,

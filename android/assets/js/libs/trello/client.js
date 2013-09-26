@@ -70,7 +70,7 @@
           type: "redirect",
           persist: true,
           interactive: true,
-          name: "Unknown Application",
+          name: "Unknown Application1",
           scope: {
             read: true,
             write: false,

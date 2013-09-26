@@ -147,12 +147,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		        
 		        
 		        // handle sync task below
-		        
 		        if (true) {
 		        	if (mSyncHelper == null) {
 						mSyncHelper = new SyncHelper(mContext);
 					}
-					
 					mSyncHelper.performSync(syncResult, SyncHelper.FLAG_SYNC_REMOTE);
 		        }
 			}

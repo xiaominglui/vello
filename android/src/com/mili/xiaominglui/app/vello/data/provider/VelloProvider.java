@@ -175,7 +175,7 @@ public class VelloProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
-        getContext().getContentResolver().notifyChange(uri, null);
+        getContext().getContentResolver().notifyChange(uri, null, false);
         return resultUri;
     }
 
@@ -210,7 +210,7 @@ public class VelloProvider extends ContentProvider {
             	break;
         }
         
-		getContext().getContentResolver().notifyChange(uri, null);
+		getContext().getContentResolver().notifyChange(uri, null, false);
 		return result;
     }
 
@@ -239,7 +239,7 @@ public class VelloProvider extends ContentProvider {
                 break;
         }
 
-        getContext().getContentResolver().notifyChange(uri, null);
+        getContext().getContentResolver().notifyChange(uri, null, false);
         return result;
     }
     

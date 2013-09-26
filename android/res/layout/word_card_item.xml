@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2008 The Android Open Source Project
+<!--
+     Copyright (C) 2008 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,19 +15,20 @@
      limitations under the License.
 -->
 
-<com.android.deskclock.widget.swipeablelistview.SwipeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.deskclock.widget.swipeablelistview.SwipeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/word_card_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:gravity="center_horizontal|top"
     android:orientation="vertical"
-    android:gravity="center_horizontal|top">
+    android:paddingLeft="9dp"
+    android:paddingRight="9dp" >
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal" >
+
         <LinearLayout
             android:id="@+id/keyword_area"
             android:layout_width="wrap_content"
@@ -38,8 +40,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textIsSelectable="true"
-                android:textSize="35sp" />
+                android:textColor="#9b9b9b"
+                android:textSize="32sp" />
         </LinearLayout>
+
         <LinearLayout
             android:id="@+id/life_hint"
             android:layout_width="match_parent"
@@ -52,7 +56,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
-                android:layout_marginRight="1dp"
                 android:textSize="15sp" />
 
             <TextView
@@ -64,52 +67,44 @@
                 android:textSize="15sp" />
         </LinearLayout>
     </LinearLayout>
-    <View
-        android:id="@+id/hairline"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginLeft="9dp"
-        android:layout_marginRight="9dp"
-        android:layout_marginBottom="3dp"
-        android:background="#aac7c7c7"/>
+
     <FrameLayout
         android:id="@+id/info_area"
         android:layout_width="match_parent"
         android:layout_height="32dp"
-        android:paddingLeft="16dp"
-        android:gravity="center_vertical"
+        android:background="@drawable/item_background"
         android:clickable="true"
-        android:background="@drawable/item_background">
+        android:gravity="center_vertical"
+        android:paddingLeft="16dp" >
 
         <ImageView
             android:id="@+id/expand"
-            android:layout_width="48dp"
+            android:layout_width="32dp"
             android:layout_height="32dp"
-            android:contentDescription="@string/expand_word"
-            android:src="@drawable/ic_expand_down"
             android:layout_gravity="right"
-            />
+            android:contentDescription="@string/expand_word"
+            android:src="@drawable/ic_expand_down" />
     </FrameLayout>
+
     <LinearLayout
         android:id="@+id/expand_area"
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:visibility="gone">
-        
-        <LinearLayout
-                android:id="@+id/phonetics_area"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" />
+        android:layout_marginTop="-6dp"
+        android:orientation="vertical"
+        android:visibility="gone" >
 
         <LinearLayout
-                android:id="@+id/definition_area"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
+            android:id="@+id/phonetics_area"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
 
+        <LinearLayout
+            android:id="@+id/definition_area"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
     </LinearLayout>
+
 </com.android.deskclock.widget.swipeablelistview.SwipeLayout>
