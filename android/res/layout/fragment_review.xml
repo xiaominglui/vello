@@ -27,10 +27,8 @@
         android:clipToPadding="false"
         android:descendantFocusability="beforeDescendants"
         android:divider="@null"
-        android:dividerHeight="7dp"
-        android:paddingLeft="9dp"
-        android:paddingRight="9dp"
-        android:paddingTop="9dp" />
+        android:dividerHeight="12dp"
+        android:padding="12dp" />
 
     <com.android.deskclock.widget.ActionableToastBar
         android:id="@+id/undo_bar"

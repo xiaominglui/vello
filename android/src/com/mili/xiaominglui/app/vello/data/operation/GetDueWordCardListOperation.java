@@ -73,7 +73,7 @@ public class GetDueWordCardListOperation implements Operation {
 			for (WordCard wordCard : wordCardList) {
 				operationList.add(ContentProviderOperation
 						.newInsert(DbWordCard.CONTENT_URI)
-						.withValues(wordCard.toContentVaalues()).build());
+						.withValues(wordCard.toContentValues()).build());
 			}
 
 			try {

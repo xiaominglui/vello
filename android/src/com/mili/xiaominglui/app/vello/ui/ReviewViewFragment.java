@@ -147,7 +147,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //			mContent.setText(Shakespeare.DIALOGUE[position]);
-//			mActionBar.setTitle(Shakespeare.TITLES[position]);
+			mActionBar.setTitle(VelloConfig.DRAWER_MENU_TITLES[position]);
 			mDrawerLayout.closeDrawer(listView);
 		}
 	}
@@ -197,7 +197,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		mDrawerLayout.setDrawerListener(new DemoDrawerListener());
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
-		listView.setAdapter(new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, Shakespeare.TITLES));
+		listView.setAdapter(new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, VelloConfig.DRAWER_MENU_TITLES));
 		listView.setOnItemClickListener(new DrawerItemClickListener());
 		listView.setCacheColorHint(0);
 		listView.setScrollingCacheEnabled(false);
@@ -555,7 +555,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
 			String now = format.format(new Date(rightNowUnixTimeGMT));
 			criteria.addLt(DbWordCard.Columns.DUE, now, true);
-			criteria.addNe(DbWordCard.Columns.SYNCINNEXT, "true");
 		} else {
 			// Dictionary Mode
 		    mIsSearching = true;
@@ -593,8 +592,9 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		ContentValues cv = new ContentValues();
 		cv.put(DbWordCard.Columns.CLOSED.getName(), wordcard.closed);
 		cv.put(DbWordCard.Columns.DUE.getName(), wordcard.due);
-		cv.put(DbWordCard.Columns.ID_LIST.getName(), wordcard.idList);
-		cv.put(DbWordCard.Columns.SYNCINNEXT.getName(), "false");
+		cv.put(DbWordCard.Columns.LIST_ID.getName(), wordcard.idList);
+//		cv.putNull(DbWordCard.Columns.DATE_LAST_OPERATION.getName());
+		cv.remove(DbWordCard.Columns.DATE_LAST_OPERATION.getName());
 		Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI,
 				wordcard.idInLocalDB);
 		getActivity().getContentResolver().update(uri, cv, null, null);
@@ -610,26 +610,29 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 					ContentValues cv = new ContentValues();
 					int positionList = AccountUtils.getVocabularyListPosition(
 							getActivity(), wordcard.idList);
+					SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+					Calendar rightNow = Calendar.getInstance();
+					long rightNowUnixTime = rightNow.getTimeInMillis();
+					
 					if (positionList == VelloConfig.VOCABULARY_LIST_POSITION_8TH) {
 						cv.put(DbWordCard.Columns.CLOSED.getName(), "true");
 					} else {
-						Calendar rightNow = Calendar.getInstance();
-						long rightNowUnixTime = rightNow.getTimeInMillis();
 						long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
 						long delta = VelloConfig.VOCABULARY_LIST_DUE_DELTA[positionList];
 						long dueUnixTime = rightNowUnixTimeGMT + delta;
 
-						SimpleDateFormat format = new SimpleDateFormat(
-								"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+						
 						Date dueDate = new Date(dueUnixTime);
 						String stringDueDate = format.format(dueDate);
 						cv.put(DbWordCard.Columns.DUE.getName(), stringDueDate);
 
 						String newIdList = AccountUtils.getVocabularyListId(
 								getActivity(), positionList + 1);
-						cv.put(DbWordCard.Columns.ID_LIST.getName(), newIdList);
+						cv.put(DbWordCard.Columns.LIST_ID.getName(), newIdList);
 					}
-					cv.put(DbWordCard.Columns.SYNCINNEXT.getName(), "true");
+					Date rightNowDate = new Date(rightNowUnixTime);
+					String stringRightNow = format.format(rightNowDate);
+					cv.put(DbWordCard.Columns.DATE_LAST_OPERATION.getName(), stringRightNow);
 					Uri uri = ContentUris.withAppendedId(
 							DbWordCard.CONTENT_URI, wordcard.idInLocalDB);
 					getActivity().getContentResolver().update(uri, cv, null, null);

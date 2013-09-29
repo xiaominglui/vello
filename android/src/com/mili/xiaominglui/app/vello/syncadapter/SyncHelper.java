@@ -76,7 +76,7 @@ public class SyncHelper {
 		HashMap<String, WordCard> localDirtyWords = new HashMap<String, WordCard>();
 		final ContentResolver resolver = mContext.getContentResolver();
 		ProviderCriteria criteria = new ProviderCriteria();
-		criteria.addEq(DbWordCard.Columns.SYNCINNEXT, "true");
+		criteria.addNe(DbWordCard.Columns.DATE_LAST_OPERATION, null);
 		Cursor c = resolver.query(DbWordCard.CONTENT_URI,
 				DbWordCard.PROJECTION, criteria.getWhereClause(),
 				criteria.getWhereParams(), criteria.getOrderClause());
@@ -124,7 +124,7 @@ public class SyncHelper {
 				for (WordCard wordCard : postSyncRemoteWordCardList) {
 					operationList.add(ContentProviderOperation
 							.newInsert(DbWordCard.CONTENT_URI)
-							.withValues(wordCard.toContentVaalues()).build());
+							.withValues(wordCard.toContentValues()).build());
 				}
 
 				mContext.getContentResolver().applyBatch(

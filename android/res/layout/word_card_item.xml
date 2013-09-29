@@ -104,6 +104,8 @@
             android:id="@+id/definition_area"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingTop="9dp"
+            android:paddingBottom="9dp"
             android:orientation="vertical" />
     </LinearLayout>
 

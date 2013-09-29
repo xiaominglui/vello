@@ -32,45 +32,45 @@ public class ProviderCriteria {
         mOperandStack.push(true);
     }
 
-    public ProviderCriteria(final ColumnMetadata metadata, final int value) {
+    public ProviderCriteria(final ColumnMetaData metadata, final int value) {
         this();
         addEq(metadata, value);
     }
 
-    public ProviderCriteria(final ColumnMetadata metadata, final long value) {
+    public ProviderCriteria(final ColumnMetaData metadata, final long value) {
         this();
         addEq(metadata, value);
     }
 
-    public ProviderCriteria(final ColumnMetadata metadata, final String value) {
+    public ProviderCriteria(final ColumnMetaData metadata, final String value) {
         this();
         addEq(metadata, value);
     }
 
-    public ProviderCriteria(final ColumnMetadata metadata, final boolean value) {
+    public ProviderCriteria(final ColumnMetaData metadata, final boolean value) {
         this();
         addEq(metadata, value);
     }
 
-    public ProviderCriteria addEq(final ColumnMetadata metadata, final int value) {
+    public ProviderCriteria addEq(final ColumnMetaData metadata, final int value) {
         addOperand();
         addCriteria(metadata.getName(), value, TYPE_EQ);
         return this;
     }
 
-    public ProviderCriteria addEq(final ColumnMetadata metadata, final long value) {
+    public ProviderCriteria addEq(final ColumnMetaData metadata, final long value) {
         addOperand();
         addCriteria(metadata.getName(), value, TYPE_EQ);
         return this;
     }
 
-    public ProviderCriteria addEq(final ColumnMetadata metadata, final String value) {
+    public ProviderCriteria addEq(final ColumnMetaData metadata, final String value) {
         addOperand();
         addCriteria(metadata.getName(), value, TYPE_EQ);
         return this;
     }
 
-    public ProviderCriteria addEq(final ColumnMetadata metadata, final boolean value) {
+    public ProviderCriteria addEq(final ColumnMetaData metadata, final boolean value) {
         addOperand();
         addCriteria(metadata.getName(), value ? 1 : 0, TYPE_EQ);
         return this;
@@ -81,7 +81,7 @@ public class ProviderCriteria {
      * @param idList comma separated String of the values
      * @return
      */
-    public <T extends Object> ProviderCriteria addInList(final ColumnMetadata metadata,
+    public <T extends Object> ProviderCriteria addInList(final ColumnMetaData metadata,
             final List<T> objectList) {
         addOperand();
         final StringBuilder sb = new StringBuilder();
@@ -98,46 +98,46 @@ public class ProviderCriteria {
         return this;
     }
 
-    public ProviderCriteria addNe(final ColumnMetadata metadata, final int value) {
+    public ProviderCriteria addNe(final ColumnMetaData metadata, final int value) {
         addOperand();
         addCriteria(metadata.getName(), value, TYPE_NE);
         return this;
     }
 
-    public ProviderCriteria addNe(final ColumnMetadata metadata, final String value) {
+    public ProviderCriteria addNe(final ColumnMetaData metadata, final String value) {
         addOperand();
         addCriteria(metadata.getName(), value, TYPE_NE);
         return this;
     }
 
-    public ProviderCriteria addLike(final ColumnMetadata metadata, final String value) {
+    public ProviderCriteria addLike(final ColumnMetaData metadata, final String value) {
         addOperand();
         addCriteria(metadata.getName(), value, TYPE_LIKE);
         return this;
     }
 
-    public ProviderCriteria addLt(final ColumnMetadata metadata, final int value,
+    public ProviderCriteria addLt(final ColumnMetaData metadata, final int value,
             final boolean orEqual) {
         addOperand();
         addCriteria(metadata.getName(), value, orEqual ? TYPE_LTOE : TYPE_LT);
         return this;
     }
     
-    public ProviderCriteria addLt(final ColumnMetadata metadata, final String value,
+    public ProviderCriteria addLt(final ColumnMetaData metadata, final String value,
             final boolean orEqual) {
         addOperand();
         addCriteria(metadata.getName(), value, orEqual ? TYPE_LTOE : TYPE_LT);
         return this;
     }
 
-    public ProviderCriteria addGt(final ColumnMetadata metadata, final int value,
+    public ProviderCriteria addGt(final ColumnMetaData metadata, final int value,
             final boolean orEqual) {
         addOperand();
         addCriteria(metadata.getName(), value, orEqual ? TYPE_GTOE : TYPE_GT);
         return this;
     }
     
-    public ProviderCriteria addGt(final ColumnMetadata metadata, final String value,
+    public ProviderCriteria addGt(final ColumnMetaData metadata, final String value,
             final boolean orEqual) {
         addOperand();
         addCriteria(metadata.getName(), value, orEqual ? TYPE_GTOE : TYPE_GT);
@@ -171,7 +171,7 @@ public class ProviderCriteria {
         return this;
     }
 
-    public ProviderCriteria addSortOrder(final ColumnMetadata metadata, final boolean isAscendant) {
+    public ProviderCriteria addSortOrder(final ColumnMetaData metadata, final boolean isAscendant) {
         if (mIsOrderFirstElement) {
             mIsOrderFirstElement = false;
         } else {
