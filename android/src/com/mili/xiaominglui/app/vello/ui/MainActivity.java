@@ -1,5 +1,7 @@
 package com.mili.xiaominglui.app.vello.ui;
 
+import java.lang.ref.WeakReference;
+
 import android.accounts.Account;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -23,8 +25,6 @@ import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
@@ -33,20 +33,16 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.widget.SearchView;
-import com.devspark.appmsg.AppMsg;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
-import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.syncadapter.SyncHelper;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.mili.xiaominglui.app.vello.util.HelpUtils;
 import com.mili.xiaominglui.app.vello.util.UIUtils;
-
-import java.lang.ref.WeakReference;
 
 public class MainActivity extends BaseActivity implements ReviewViewFragment.onStatusChangedListener {
 	private static final String TAG = MainActivity.class.getSimpleName();
@@ -90,9 +86,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 //						.setLayoutGravity(Gravity.BOTTOM).show();
 				break;
 			case VelloService.MSG_TOAST_INIT_VOCABULARY_END:
-				AppMsg.makeText(theActivity.mActivity,
-						R.string.toast_init_vocabulary_end, AppMsg.STYLE_INFO)
-						.setLayoutGravity(Gravity.BOTTOM).show();
 				break;
 			case VelloService.MSG_TOAST_NO_WORD_NOW:
 //				AppMsg.makeText(theActivity.mActivity,
@@ -105,7 +98,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 //						.setLayoutGravity(Gravity.TOP).show();
 				break;
 			case VelloService.MSG_TOAST_WORD_REVIEWED_COUNT_PLUS:
-				theActivity.reviewedCountPlusToastShow();
 				break;
 			case VelloService.MSG_SHOW_RESULT_WORDCARD:
 			    WordCard result = (WordCard) msg.obj;
@@ -176,11 +168,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				}
 			}
 		}
-	}
-
-	public void reviewedCountPlusToastShow() {
-		AppMsg.makeText(this, "+1", AppMsg.STYLE_INFO)
-				.setLayoutGravity(Gravity.TOP).show();
 	}
 
 	void doBindService() {

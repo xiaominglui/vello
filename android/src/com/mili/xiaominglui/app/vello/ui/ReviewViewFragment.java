@@ -34,7 +34,6 @@ import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
-import com.android.deskclock.widget.ActionableToastBar;
 import com.android.deskclock.widget.swipeablelistview.SwipeableListView;
 import com.atermenji.android.iconictextview.IconicTextView;
 import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
@@ -66,7 +65,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	
 	private WordCard mDeletedWord;
 	private boolean mUndoShowing = false;
-	private ActionableToastBar mUndoBar;
 
 	private SwipeableListView mWordsList;
 	private WordCardAdapter mAdapter;
@@ -214,23 +212,22 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		mWordsList.setOnTouchListener(new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View view, MotionEvent event) {
-				hideUndoBar(true, event);
+//				hideUndoBar(true, event);
 				return false;
 			}
 		});
 
-		mUndoBar = (ActionableToastBar) mRootView.findViewById(R.id.undo_bar);
 
 		if (mUndoShowing) {
-			mUndoBar.show(new ActionableToastBar.ActionClickedListener() {
-				@Override
-				public void onActionClicked() {
-					asyncUnmarkDeleteWord(mDeletedWord);
-					mDeletedWord = null;
-					mUndoShowing = false;
-				}
-			}, 0, getResources().getString(R.string.word_reviewed), true,
-					R.string.word_reviewed_undo, true);
+//			mUndoBar.show(new ActionableToastBar.ActionClickedListener() {
+//				@Override
+//				public void onActionClicked() {
+//					asyncUnmarkDeleteWord(mDeletedWord);
+//					mDeletedWord = null;
+//					mUndoShowing = false;
+//				}
+//			}, 0, getResources().getString(R.string.word_reviewed), true,
+//					R.string.word_reviewed_undo, true);
 		}
 		
 		mActionBar = createActionBarHelper();
@@ -643,28 +640,28 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		mDeletedWord = wordcard;
 		mUndoShowing = true;
 		deleteTask.execute(wordcard);
-		mUndoBar.show(new ActionableToastBar.ActionClickedListener() {
-			@Override
-			public void onActionClicked() {
-				asyncUnmarkDeleteWord(wordcard);
-				mDeletedWord = null;
-				mUndoShowing = false;
-			}
-		}, 0, getResources().getString(R.string.word_reviewed), true,
-				R.string.word_reviewed_undo, true);
+//		mUndoBar.show(new ActionableToastBar.ActionClickedListener() {
+//			@Override
+//			public void onActionClicked() {
+//				asyncUnmarkDeleteWord(wordcard);
+//				mDeletedWord = null;
+//				mUndoShowing = false;
+//			}
+//		}, 0, getResources().getString(R.string.word_reviewed), true,
+//				R.string.word_reviewed_undo, true);
 	}
 
-	private void hideUndoBar(boolean animate, MotionEvent event) {
-		if (mUndoBar != null) {
-			if (event != null && mUndoBar.isEventInToastBar(event)) {
-				// Avoid touches inside the undo bar.
-				return;
-			}
-			mUndoBar.hide(animate);
-		}
-		mDeletedWord = null;
-		mUndoShowing = false;
-	}
+//	private void hideUndoBar(boolean animate, MotionEvent event) {
+//		if (mUndoBar != null) {
+//			if (event != null && mUndoBar.isEventInToastBar(event)) {
+//				// Avoid touches inside the undo bar.
+//				return;
+//			}
+//			mUndoBar.hide(animate);
+//		}
+//		mDeletedWord = null;
+//		mUndoShowing = false;
+//	}
 	
 	void onQueryTextChange(String newText) {
 		mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;
