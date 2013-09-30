@@ -25,26 +25,61 @@ public class VelloContent {
 		public static final Uri CONTENT_URI = Uri.parse(VelloContent.CONTENT_URI + "/" + TABLE_NAME);
 		
 		public static enum Columns implements ColumnMetaData {
-			;
+			ID(BaseColumns._ID, "INTEGER"),
+			SPELL("spell", "VARCHAR"),
+			PIC("pic", "VARCHAR"),
+			FREQUENCY("frequency", "VARCHAR"),
+			CREATED_AT("created_at", "VARCHAR"),
+			UPDATED_AT("updated_at", "VARCHAR");
 
+			private final String mName;
+			private final String mType;
+			
+			private Columns(String name, String type) {
+				mName = name;
+				mType = type;
+			}
 			@Override
 			public int getIndex() {
-				// TODO Auto-generated method stub
-				return 0;
+				return ordinal();
 			}
 
 			@Override
 			public String getName() {
-				// TODO Auto-generated method stub
-				return null;
+				return mName;
 			}
 
 			@Override
 			public String getType() {
-				// TODO Auto-generated method stub
-				return null;
+				return mType;
 			}
-			
+		}
+		
+		public static final String[] PROJECTION = new String[] {
+			Columns.ID.getName(),
+			Columns.SPELL.getName(),
+			Columns.PIC.getName(),
+			Columns.FREQUENCY.getName(),
+			Columns.CREATED_AT.getName(),
+			Columns.UPDATED_AT.getName() };
+		
+		private DbDictCard() {
+		}
+		
+		public static void createTable(SQLiteDatabase db) {
+			db.execSQL("CREATE TABLE " + TABLE_NAME + " ("
+					+ Columns.ID.getName() + " " + Columns.ID.getType() + ", "
+					+ Columns.SPELL.getName() + " " + Columns.SPELL.getType() + ", "
+					+ Columns.PIC.getName() + " " + Columns.PIC.getType() + ", "
+					+ Columns.FREQUENCY.getName() + " " + Columns.FREQUENCY.getType() + ", "
+					+ Columns.CREATED_AT.getName() + " " + Columns.CREATED_AT.getType()
+					+ Columns.UPDATED_AT.getName() + " " + Columns.UPDATED_AT.getType() + ", "
+					+ ", PRIMARY KEY (" + Columns.ID.getName() + ")" + ");");
+		}
+
+		public static void upgradeTable(SQLiteDatabase db, int oldVersion,
+				int newVersion) {
+			// TODO
 		}
 	}
 
@@ -96,9 +131,12 @@ public class VelloContent {
 		}
 
 		public static final String[] PROJECTION = new String[] {
-				Columns.ID.getName(), Columns.CARD_ID.getName(),
-				Columns.NAME.getName(), Columns.DESC.getName(),
-				Columns.DUE.getName(), Columns.CLOSED.getName(),
+				Columns.ID.getName(),
+				Columns.CARD_ID.getName(),
+				Columns.NAME.getName(),
+				Columns.DESC.getName(),
+				Columns.DUE.getName(),
+				Columns.CLOSED.getName(),
 				Columns.LIST_ID.getName(),
 				Columns.DATE_LAST_ACTIVITY.getName(),
 				Columns.DATE_LAST_OPERATION.getName() };

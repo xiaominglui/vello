@@ -17,6 +17,8 @@ import com.google.gson.Gson;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.config.WSConfig;
+import com.mili.xiaominglui.app.vello.data.factory.DictCardsHandler;
+import com.mili.xiaominglui.app.vello.data.factory.JSONHandler;
 import com.mili.xiaominglui.app.vello.data.factory.WordCardListJsonFactory;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
@@ -33,11 +35,13 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.OperationApplicationException;
+import android.content.SharedPreferences;
 import android.content.SyncResult;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -46,6 +50,8 @@ public class SyncHelper {
 	
 	public static final int FLAG_SYNC_LOCAL = 0x1;
     public static final int FLAG_SYNC_REMOTE = 0x2;
+    
+    private static final int LOCAL_VERSION_CURRENT = 25;
 	
 	private Context mContext;
     private String mAuthToken;
@@ -64,17 +70,41 @@ public class SyncHelper {
     }
 	
 	public void performSync(SyncResult syncResult, int flags) throws IOException {
+		final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        final int localVersion = prefs.getInt("local_data_version", 0);
+        
+		// Bulk of sync work, performed by executing several fetches from
+		// local and online sources.
+		final ContentResolver resolver = mContext.getContentResolver();
+		ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
+        
 		if (!isOnline()) {
 			return;
 		}
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "onPerformSync...");
 		}
+		
+		if ((flags & FLAG_SYNC_LOCAL) != 0) {
+			final long startLocal = System.currentTimeMillis();
+			final boolean localParse = localVersion < LOCAL_VERSION_CURRENT;
+			Log.i(TAG, "found localVersion=" + localVersion + " and LOCAL_VERSION_CURRENT="
+                    + LOCAL_VERSION_CURRENT);
+			// Only run local sync if there's a newer version of data available
+            // than what was last locally-sync'd.
+			if (localParse) {
+				// Load static local data
+				Log.i(TAG, "Local syncing dictionary data");
+				batch.addAll(new DictCardsHandler(mContext).parse(
+                        JSONHandler.parseResource(mContext, R.raw.dict)));
+			}
+			Log.i(TAG, "Local sync took " + (System.currentTimeMillis() - startLocal) + "ms");
+		}
+		
 
 		// query and backup all local items that syncInNext=true or merge
 		// locally later
 		HashMap<String, WordCard> localDirtyWords = new HashMap<String, WordCard>();
-		final ContentResolver resolver = mContext.getContentResolver();
 		ProviderCriteria criteria = new ProviderCriteria();
 		criteria.addNe(DbWordCard.Columns.DATE_LAST_OPERATION, null);
 		Cursor c = resolver.query(DbWordCard.CONTENT_URI,

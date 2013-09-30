@@ -5,6 +5,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ClipboardManager;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -211,6 +212,10 @@ public class VelloService extends Service implements RequestListener,
                 ParseInstallation.getCurrentInstallation().saveInBackground();
 			}
 		});
+		
+//		ClipboardManager clipBoard = (ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+//		clipBoard.addPrimaryClipChangedListener( new ClipboardListener() );
+		// https://code.google.com/p/android/issues/detail?id=58043
 		
 		isRunning = true;
 	}
@@ -919,5 +924,14 @@ public class VelloService extends Service implements RequestListener,
 	public void connectionErrorDialogRetry(Request request) {
 		mRequestManager.execute(request, this);
 		mRequestList.add(request);
+	}
+	
+	class ClipboardListener implements
+			ClipboardManager.OnPrimaryClipChangedListener {
+		public void onPrimaryClipChanged() {
+			// do something useful here with the clipboard
+			// use getText() method
+			Toast.makeText(getApplicationContext(), "clipboard changed", Toast.LENGTH_SHORT).show();
+		}
 	}
 }

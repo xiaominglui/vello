@@ -36,6 +36,6 @@ public class VelloConfig {
     // Trello Web Hook related
     public static final String DEFAULT_VOCABULARY_BOARD_HOOK_DESCRIPTION = "Vocabulary Sync Trigger";
     
-	public static final String[] DRAWER_MENU_TITLES = { "Memorizing", "Memorized"};
+	public static final String[] DRAWER_MENU_TITLES = { "Reviewing", "Mastered"};
     
 }
