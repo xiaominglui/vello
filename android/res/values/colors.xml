@@ -13,4 +13,5 @@
     <color name="bg_color_7th">#aaccff99</color>
     <color name="bg_color_8th">#aaccff66</color>
     <color name="bg_dictionary_mode">#ffffff</color>
+    <color name="card_selected_color">#aa0099cc</color>
 </resources>

@@ -20,6 +20,7 @@ import com.mili.xiaominglui.app.vello.config.WSConfig;
 import com.mili.xiaominglui.app.vello.data.factory.DictCardsHandler;
 import com.mili.xiaominglui.app.vello.data.factory.JSONHandler;
 import com.mili.xiaominglui.app.vello.data.factory.WordCardListJsonFactory;
+import com.mili.xiaominglui.app.vello.data.model.AuthTokenRevokedOrCardDeletedResponse;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
@@ -106,7 +107,7 @@ public class SyncHelper {
 		// locally later
 		HashMap<String, WordCard> localDirtyWords = new HashMap<String, WordCard>();
 		ProviderCriteria criteria = new ProviderCriteria();
-		criteria.addNe(DbWordCard.Columns.DATE_LAST_OPERATION, null);
+		criteria.addNe(DbWordCard.Columns.DATE_LAST_OPERATION, "");
 		Cursor c = resolver.query(DbWordCard.CONTENT_URI,
 				DbWordCard.PROJECTION, criteria.getWhereClause(),
 				criteria.getWhereParams(), criteria.getOrderClause());
@@ -128,8 +129,13 @@ public class SyncHelper {
 						// need merging
 						WordCard dirtyWordCard = localDirtyWords.get(idCard);
 						String stringLocalDateLastActivity = dirtyWordCard.dateLastActivity;
+						String markDeleted = dirtyWordCard.markDeleted;
 						String stringRemoteDateLastActivity = wordCard.dateLastActivity;
-						if (stringLocalDateLastActivity
+						
+						if (markDeleted.equals("true")) {
+							// delete word remotely
+							deleteRemoteWordCard(dirtyWordCard);
+						} else if (stringLocalDateLastActivity
 								.equals(stringRemoteDateLastActivity)) {
 							// remote has no commit
 							// commit local due, closed, listId to remote
@@ -279,9 +285,35 @@ public class SyncHelper {
 		Gson gson = new Gson();
 		WordCard updatedWordCard = gson.fromJson(result.body, WordCard.class);
 		if (updatedWordCard != null) {
-			// update success
+			// TODO update success
 		} else {
-			// update failed
+			// TODO update failed
+		}
+	}
+	
+	private void deleteRemoteWordCard(WordCard wordCard) throws ConnectionException {
+		String urlString = WSConfig.TRELLO_API_URL + WSConfig.WS_TRELLO_TARGET_CARD + "/" + wordCard.id;
+		
+		HashMap<String, String> parameterMap = new HashMap<String, String>();
+		parameterMap.put(WSConfig.WS_TRELLO_PARAM_APP_KEY, WSConfig.VELLO_APP_KEY);
+		parameterMap.put(WSConfig.WS_TRELLO_PARAM_ACCESS_TOKEN, mAuthToken);
+		
+		NetworkConnection networkConnection = new NetworkConnection(mContext,
+				urlString);
+		networkConnection.setMethod(Method.DELETE);
+		networkConnection.setParameters(parameterMap);
+		ConnectionResult result = networkConnection.execute();
+
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "result.body = " + result.body);
+		}
+
+		Gson gson = new Gson();
+		AuthTokenRevokedOrCardDeletedResponse deleted = gson.fromJson(result.body, AuthTokenRevokedOrCardDeletedResponse.class);
+		if (deleted != null && deleted._value == null) {
+			// TODO deleted
+		} else {
+			// TODO failed when deleting card
 		}
 	}
 	
@@ -319,7 +351,7 @@ public class SyncHelper {
 		}
 		return wordCard;
 	}
-
+	
 	private boolean isOnline() {
 		ConnectivityManager cm = (ConnectivityManager) mContext
 				.getSystemService(Context.CONNECTIVITY_SERVICE);

@@ -2,15 +2,19 @@ package com.mili.xiaominglui.app.vello.ui;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -23,6 +27,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -33,6 +38,10 @@ import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.ActionMode;
+import com.actionbarsherlock.view.ActionMode.Callback;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.android.deskclock.widget.swipeablelistview.SwipeableListView;
 import com.atermenji.android.iconictextview.IconicTextView;
@@ -48,6 +57,7 @@ import com.mili.xiaominglui.app.vello.data.model.Phoneticss;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
+import com.mili.xiaominglui.app.vello.dialogs.WordsDeleteConfirmationDialog;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.sherlock.navigationdrawer.compat.SherlockActionBarDrawerToggle;
 
@@ -57,14 +67,16 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.TimeZone;
 
-public class ReviewViewFragment extends SherlockFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ReviewViewFragment extends SherlockFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnLongClickListener, Callback, DialogInterface.OnClickListener {
 	private static final String TAG = ReviewViewFragment.class.getSimpleName();
 	
 	private static final String KEY_DELETED_WORD = "deletedWord";
 	private static final String KEY_UNDO_SHOWING = "undoShowing";
+	private static final String KEY_SELECTED_WORD_CARDS = "selectedWordCards";
 	
 	private WordCard mDeletedWord;
 	private boolean mUndoShowing = false;
+	private boolean mInDeleteConfirmation = false;
 
 	private SwipeableListView mWordsList;
 	private WordCardAdapter mAdapter;
@@ -78,6 +90,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	private ListView listView;
 	private SherlockActionBarDrawerToggle mDrawerToggle;
 	private ActionBarHelper mActionBar;
+	private ActionMode mActionMode;
 	
 	public static Fragment newInstance() {
 		Fragment f = new ReviewViewFragment();
@@ -91,7 +104,8 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
             final WordCardAdapter.ItemHolder itemHolder = (WordCardAdapter.ItemHolder) view.getTag();
             // if wordcard expanded, do NOT mark reviewed plus
             if (!mAdapter.isWordExpanded(itemHolder.wordcard)) {
-                asyncMarkDeleteWord(itemHolder.wordcard);
+            	updateActionMode();
+                asyncMarkRecalledWord(itemHolder.wordcard);
                 mListener.onWordReviewed();
             } else {
                 // review failed
@@ -121,12 +135,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		super.onCreate(savedInstanceState);
 		setRetainInstance(true);
 		setHasOptionsMenu(true);
-		
-		if (savedInstanceState != null) {
-			mDeletedWord = savedInstanceState.getParcelable(KEY_DELETED_WORD);
-			mUndoShowing = savedInstanceState.getBoolean(KEY_UNDO_SHOWING);
-		}
-		
 	}
 	
 	@Override
@@ -134,6 +142,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		super.onSaveInstanceState(outState);
 		outState.putParcelable(KEY_DELETED_WORD, mDeletedWord);
 		outState.putBoolean(KEY_UNDO_SHOWING, mUndoShowing);
+		outState.putIntArray(KEY_SELECTED_WORD_CARDS, mAdapter.getSelectedWordCardsArray());
 	}
 	
 	/**
@@ -187,6 +196,14 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		int[] selectedWordCards = null;
+		
+		if (savedInstanceState != null) {
+			mDeletedWord = savedInstanceState.getParcelable(KEY_DELETED_WORD);
+			mUndoShowing = savedInstanceState.getBoolean(KEY_UNDO_SHOWING);
+			selectedWordCards = savedInstanceState.getIntArray(KEY_SELECTED_WORD_CARDS);
+		}
+		
 		mRootView = (ViewGroup) inflater.inflate(R.layout.fragment_review, null);
 		
 		mDrawerLayout = (DrawerLayout) mRootView.findViewById(R.id.drawer_layout);
@@ -204,7 +221,8 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		listView.setSmoothScrollbarEnabled(true);
 		
 		mWordsList = (SwipeableListView) mRootView.findViewById(R.id.words_list);
-		mAdapter = new WordCardAdapter(getActivity(), null, mWordsList);
+		mAdapter = new WordCardAdapter(getActivity(), null, selectedWordCards, mWordsList);
+		mAdapter.setLongClickListener(this);
 		mWordsList.setAdapter(mAdapter);
 		mWordsList.setVerticalScrollBarEnabled(true);
 		mWordsList.setOnCreateContextMenuListener(this);
@@ -241,6 +259,14 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 				mDrawerLayout, R.drawable.ic_drawer_light,
 				R.string.drawer_open, R.string.drawer_close);
 		mDrawerToggle.syncState();
+		
+		// Show action mode if needed
+        int selectedNum = mAdapter.getSelectedItemsNum();
+        if (selectedNum > 0) {
+            mActionMode = getSherlockActivity().startActionMode(this);
+            setActionModeTitle(selectedNum);
+        }
+        
 		return mRootView;
 	}
 	
@@ -269,17 +295,49 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		super.onDestroyView();
 	}
 	
+	/***
+     * Activate/update/close action mode according to the number of selected views.
+     */
+    private void updateActionMode() {
+        int selectedNum = mAdapter.getSelectedItemsNum();
+        if (mActionMode == null && selectedNum > 0) {
+            // Start the action mode
+            mActionMode = getSherlockActivity().startActionMode(this);
+            setActionModeTitle(selectedNum);
+        } else if (mActionMode != null) {
+            if (selectedNum > 0) {
+                // Update the number of selected items in the title
+                setActionModeTitle(selectedNum);
+            } else {
+                // No selected items. close the action mode
+                mActionMode.finish();
+                mActionMode = null;
+            }
+        }
+    }
+	
+	/***
+     * Display the number of selected items on the action bar in action mode
+     * @param items - number of selected items
+     */
+    private void setActionModeTitle(int items) {
+        mActionMode.setTitle(String.format(getString(R.string.word_cards_selected), items));
+    }
+	
 	public class WordCardAdapter extends CursorAdapter {
 		private final Context mContext;
 		private final LayoutInflater mFactory;
 		private final ListView mList;
+		private OnLongClickListener mLongClickListener;
 
 		private final HashSet<Integer> mExpanded = new HashSet<Integer>();
+		private final HashSet<Integer> mSelectedWordCards = new HashSet<Integer>();
 		private final int[] mWordCardBackgroundColor = { R.color.bg_color_new,
 				R.color.bg_color_1st, R.color.bg_color_2nd,
 				R.color.bg_color_3rd, R.color.bg_color_4th,
 				R.color.bg_color_5th, R.color.bg_color_6th,
 				R.color.bg_color_7th, R.color.bg_color_8th };
+		private final int mBackgroundColorSelected;
 
 		public class ItemHolder {
 			// views for optimization
@@ -321,16 +379,26 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			}
 		};
 
-		public WordCardAdapter(Context context, int[] expandedIds, ListView list) {
+		public WordCardAdapter(Context context, int[] expandedIds, int[] selectedWordCards, ListView list) {
 			super(context, null, 0);
 			mContext = context;
 			mFactory = LayoutInflater.from(context);
 			mList = list;
+			Resources res = mContext.getResources();
+			mBackgroundColorSelected = res.getColor(R.color.card_selected_color);
 
 			if (expandedIds != null) {
 				buildHashSetFromArray(expandedIds, mExpanded);
 			}
+			
+			if (selectedWordCards != null) {
+                buildHashSetFromArray(selectedWordCards, mSelectedWordCards);
+            }
 		}
+		
+		public void setLongClickListener(OnLongClickListener l) {
+            mLongClickListener = l;
+        }
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
@@ -375,6 +443,9 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 					itemHolder.idList);
 			if (mIsSearching) {
 				itemHolder.wordCardItem.setBackgroundResource(R.color.bg_dictionary_mode);
+			} else if (mSelectedWordCards.contains(itemHolder.wordcard.idInLocalDB)){
+				itemHolder.wordCardItem.setBackgroundColor(mBackgroundColorSelected);
+                setItemAlpha(itemHolder, true);
 			} else {
 //				itemHolder.wordCardItem.setBackgroundResource(mWordCardBackgroundColor[positionList]);
 				itemHolder.wordCardItem.setBackgroundResource(R.color.bg_dictionary_mode);
@@ -386,23 +457,33 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 
 			itemHolder.textViewKeyword.setText(itemHolder.wordcard.name);
 
-			itemHolder.expandArea
-					.setVisibility(isWordExpanded(wordcard) ? View.VISIBLE
-							: View.GONE);
-			itemHolder.infoArea
-					.setVisibility(!isWordExpanded(wordcard) || mIsSearching ? View.VISIBLE
-							: View.GONE);
+			itemHolder.expandArea.setVisibility(isWordExpanded(wordcard) ? View.VISIBLE : View.GONE);
+			itemHolder.expandArea.setOnLongClickListener(mLongClickListener);
+			itemHolder.infoArea.setVisibility(!isWordExpanded(wordcard) || mIsSearching ? View.VISIBLE : View.GONE);
 			itemHolder.infoArea.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View view) {
+					//When action mode is on - simulate long click
+                    if (doLongClick(view)) {
+                        return;
+                    }
 					expandWord(itemHolder);
 					itemHolder.wordCardItem.post(mScrollRunnable);
 				}
 			});
+			itemHolder.infoArea.setOnLongClickListener(mLongClickListener);
 
 			if (isWordExpanded(wordcard) && !mIsSearching) {
 				expandWord(itemHolder);
 			}
+			view.setOnLongClickListener(mLongClickListener);
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    //When action mode is on - simulate long click
+                    doLongClick(view);
+                }
+            });
 		}
 
 		@Override
@@ -429,6 +510,14 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			view.setTag(holder);
 			return view;
 		}
+		
+		// Sets the alpha of the item except the on/off switch. This gives a visual effect
+        // for enabled/disabled alarm while leaving the on/off switch more visible
+        private void setItemAlpha(ItemHolder holder, boolean enabled) {
+            float alpha = enabled ? 1f : 0.5f;
+            holder.infoArea.setAlpha(alpha);
+            holder.expandArea.setAlpha(alpha);
+        }
 
 		/**
 		 * Expands the word for studying.
@@ -443,7 +532,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 						@Override
 						public void onClick(View view) {
 							// When action mode is on - simulate long click
-							// doLongClick(view);
+							doLongClick(view);
 						}
 					});
 			itemHolder.infoArea.setVisibility(View.GONE);
@@ -519,6 +608,20 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			}
 			return ids;
 		}
+		
+		public int[] getSelectedWordCardsArray() {
+            final int[] ids = new int[mSelectedWordCards.size()];
+            int index = 0;
+            for (int id : mSelectedWordCards) {
+                ids[index] = id;
+                index++;
+            }
+            return ids;
+        }
+		
+		public int getSelectedItemsNum() {
+            return mSelectedWordCards.size();
+        }
 
         public void clearExpandedArray() {
             mExpanded.clear();
@@ -529,6 +632,59 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 				set.add(id);
 			}
 		}
+		
+		/***
+         * Simulate a long click to override clicks on view when ActionMode is on
+         * Returns true if handled a long click, false if not
+         */
+        private boolean doLongClick(View v) {
+            if (mActionMode == null) {
+                return false;
+            }
+            v = getTopParent(v);
+            if (v != null) {
+                toggleSelectState(v);
+                notifyDataSetChanged();
+                updateActionMode();
+            }
+            return true;
+        }
+		
+		public void toggleSelectState(View v) {
+            // long press could be on the parent view or one of its childs, so find the parent view
+            v = getTopParent(v);
+            if (v != null) {
+                int id = ((ItemHolder)v.getTag()).wordcard.idInLocalDB;
+                if (mSelectedWordCards.contains(id)) {
+                    mSelectedWordCards.remove(id);
+                } else {
+                    mSelectedWordCards.add(id);
+                }
+            }
+        }
+		
+		private View getTopParent(View v) {
+            while (v != null && v.getId() != R.id.word_card_item) {
+                v = (View) v.getParent();
+            }
+            return v;
+        }
+		
+		public void deleteSelectedWordCards() {
+            Integer ids [] = new Integer[mSelectedWordCards.size()];
+            int index = 0;
+            for (int id : mSelectedWordCards) {
+                ids[index] = id;
+                index ++;
+            }
+            asyncMarkDeleteWordRemotely(ids);
+            clearSelectedAlarms();
+        }
+		
+		public void clearSelectedAlarms() {
+            mSelectedWordCards.clear();
+            notifyDataSetChanged();
+        }
 	}
 
 	@SuppressLint("SimpleDateFormat")
@@ -551,6 +707,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			long rightNowUnixTime = rightNow.getTimeInMillis();
 			long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
 			String now = format.format(new Date(rightNowUnixTimeGMT));
+			criteria.addEq(DbWordCard.Columns.MARKDELETED, "false");
 			criteria.addLt(DbWordCard.Columns.DUE, now, true);
 		} else {
 			// Dictionary Mode
@@ -585,20 +742,42 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		getActivity().getContentResolver().delete(uri, null, null);
 	}
 	
-	private void asyncUnmarkDeleteWord(final WordCard wordcard) {
+	private void asyncMarkDeleteWordRemotely(final Integer [] wordIds) {
+		final AsyncTask<Integer, Void, Void> deleteTask = new AsyncTask<Integer, Void, Void>() {
+            @Override
+            protected Void doInBackground(Integer... ids) {
+            	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                for (final int id : ids) {
+					Calendar rightNow = Calendar.getInstance();
+					long rightNowUnixTime = rightNow.getTimeInMillis();
+                	Date rightNowDate = new Date(rightNowUnixTime);
+					String stringRightNow = format.format(rightNowDate);
+                	ContentValues cv = new ContentValues();
+                	cv.put(DbWordCard.Columns.MARKDELETED.getName(), "true");
+                	cv.put(DbWordCard.Columns.DATE_LAST_OPERATION.getName(), stringRightNow);
+                	Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI, id);
+					getActivity().getContentResolver().update(uri, cv, null, null);
+                }
+                return null;
+            }
+        };
+        deleteTask.execute(wordIds);
+	}
+	
+	private void asyncUnmarkRecalledWord(final WordCard wordcard) {
 		ContentValues cv = new ContentValues();
 		cv.put(DbWordCard.Columns.CLOSED.getName(), wordcard.closed);
 		cv.put(DbWordCard.Columns.DUE.getName(), wordcard.due);
 		cv.put(DbWordCard.Columns.LIST_ID.getName(), wordcard.idList);
 //		cv.putNull(DbWordCard.Columns.DATE_LAST_OPERATION.getName());
-		cv.remove(DbWordCard.Columns.DATE_LAST_OPERATION.getName());
-		Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI,
-				wordcard.idInLocalDB);
+//		cv.remove(DbWordCard.Columns.DATE_LAST_OPERATION.getName());
+		cv.put(DbWordCard.Columns.DATE_LAST_OPERATION.getName(), "");
+		Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI, wordcard.idInLocalDB);
 		getActivity().getContentResolver().update(uri, cv, null, null);
 	}
 
 	@SuppressLint("SimpleDateFormat")
-	private void asyncMarkDeleteWord(final WordCard wordcard) {
+	private void asyncMarkRecalledWord(final WordCard wordcard) {
 		final AsyncTask<WordCard, Void, Void> deleteTask = new AsyncTask<WordCard, Void, Void>() {
 
 			@Override
@@ -630,8 +809,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 					Date rightNowDate = new Date(rightNowUnixTime);
 					String stringRightNow = format.format(rightNowDate);
 					cv.put(DbWordCard.Columns.DATE_LAST_OPERATION.getName(), stringRightNow);
-					Uri uri = ContentUris.withAppendedId(
-							DbWordCard.CONTENT_URI, wordcard.idInLocalDB);
+					Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI, wordcard.idInLocalDB);
 					getActivity().getContentResolver().update(uri, cv, null, null);
 				}
 				return null;
@@ -712,5 +890,73 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		public void setTitle(CharSequence title) {
 			mTitle = title;
 		}
+	}
+	
+	/***
+     * Handle the delete word cards confirmation dialog
+     */
+
+    private void showConfirmationDialog() {
+        Resources res = getResources();
+        String msg = String.format(res.getQuantityText(R.plurals.word_card_delete_confirmation, mAdapter.getSelectedItemsNum()).toString());
+        
+        DialogFragment frag = WordsDeleteConfirmationDialog.newInstance(msg);
+        frag.setTargetFragment(this, 0);
+        frag.show(getFragmentManager(), msg);
+        mInDeleteConfirmation = true;
+    }
+
+	@Override
+	public void onClick(DialogInterface dialog, int which) {
+		if (which == -1) {
+            if (mAdapter != null) {
+                mAdapter.deleteSelectedWordCards();
+                mActionMode.finish();
+            }
+        }
+        dialog.dismiss();
+        mInDeleteConfirmation = false;
+	}
+
+	@Override
+	public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+//		getActivity().getMenuInflater().inflate(R.menu.word_card_cab_menu, menu);
+		MenuInflater inflater = mode.getMenuInflater();
+		inflater.inflate(R.menu.word_card_cab_menu, menu);
+        return true;
+	}
+
+	@Override
+	public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+		return false;
+	}
+
+	@Override
+	public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+		switch (item.getItemId()) {
+		// Delete selected items and close CAB.
+		case R.id.menu_item_delete_word_card:
+			showConfirmationDialog();
+			break;
+		default:
+			break;
+		}
+		return false;
+	}
+
+	@Override
+	public void onDestroyActionMode(ActionMode mode) {
+		if(mAdapter != null) {
+            mAdapter.clearSelectedAlarms();
+        }
+        mActionMode = null;
+	}
+
+	@Override
+	public boolean onLongClick(View v) {
+		mAdapter.toggleSelectState(v);
+        mAdapter.notifyDataSetChanged();
+        updateActionMode();
+        return false;
 	}
 }

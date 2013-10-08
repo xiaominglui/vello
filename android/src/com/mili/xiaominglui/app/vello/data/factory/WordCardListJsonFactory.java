@@ -34,6 +34,8 @@ public class WordCardListJsonFactory {
 				wordCard.idList = jsonCard.getString(JSONTag.CARD_ELEM_IDLIST);
 				wordCard.dateLastActivity = jsonCard
 						.getString(JSONTag.CARD_ELEM_DATELASTACTIVITY);
+				wordCard.markDeleted = "false";
+				wordCard.dateLastOperation = "";
 				wordCardList.add(wordCard);
 			}
 		} catch (JSONException e) {

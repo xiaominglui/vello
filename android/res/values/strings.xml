@@ -35,7 +35,7 @@
     <!-- Toast content when an alarm was reviewed  -->
     <string name="word_reviewed">Reviewed +1</string>
     <!-- Displays the number of alarms selected from the list of alarms. -->
-    <string name="words_selected">selected</string>
+    <string name="word_cards_selected"><xliff:g id="word_cards">%d</xliff:g> selected</string>
     <!-- Description of the button to undo change to alarm -->
     <string name="word_reviewed_undo">undo</string>
     <!-- Description of the up caret in the alarm alert screen to collapse the alarm content to summary perspective. [CHAR LIMIT=NONE] -->
@@ -86,6 +86,16 @@
     
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
+    
+    <string name="delete_word_card">Delete word</string>
+    
+    <!-- Alarm deletion confirmation message-->
+    <plurals name="word_card_delete_confirmation">
+        <!-- Confirmation for one alarm -->
+        <item quantity="one">Delete selected word?</item>
+        <!-- Confirmation more than one alarm  -->
+        <item quantity="other">Delete selected words?</item>
+    </plurals>
     
     
 

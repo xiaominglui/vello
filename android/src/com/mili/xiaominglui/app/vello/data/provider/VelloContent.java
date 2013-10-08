@@ -104,6 +104,7 @@ public class VelloContent {
 			CLOSED("closed", "SMALLINT"), // closed in trello card
 			LIST_ID("list_id", "VARCHAR"), // list_id in trello card
 			DATE_LAST_ACTIVITY("dateLastActivity", "VARCHAR"), // dateLastActivity in trello card
+			MARKDELETED("deletedInLocal", "SMALLINT"), // flag indicate if marked deleted in vello
 			DATE_LAST_OPERATION("dateLastOperation", "VARCHAR"); // date Last Operation in vello
 
 			private final String mName;
@@ -139,6 +140,7 @@ public class VelloContent {
 				Columns.CLOSED.getName(),
 				Columns.LIST_ID.getName(),
 				Columns.DATE_LAST_ACTIVITY.getName(),
+				Columns.MARKDELETED.getName(),
 				Columns.DATE_LAST_OPERATION.getName() };
 
 		private DbWordCard() {
@@ -154,7 +156,8 @@ public class VelloContent {
 					+ Columns.CLOSED.getName() + " " + Columns.CLOSED.getType() + ", "
 					+ Columns.DATE_LAST_OPERATION.getName() + " " + Columns.DATE_LAST_OPERATION.getType() + ", "
 					+ Columns.LIST_ID.getName() + " " + Columns.LIST_ID.mType + ", "
-					+ Columns.DATE_LAST_ACTIVITY.getName() + " " + Columns.DATE_LAST_ACTIVITY.getType()
+					+ Columns.DATE_LAST_ACTIVITY.getName() + " " + Columns.DATE_LAST_ACTIVITY.getType() + ", "
+					+ Columns.MARKDELETED.getName() + " " + Columns.MARKDELETED.getType()
 					+ ", PRIMARY KEY (" + Columns.ID.getName() + ")" + ");");
 		}
 
