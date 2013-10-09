@@ -33,7 +33,7 @@ public class MiliDictionaryJsonParser {
 				JSONObject jsonPhonetics = jsonPhoneticss.getJSONObject(i);
 				p.sound = jsonPhonetics
 						.getString(JSONTag.MILI_DICTIONARY_PRON_LINK);
-				p.style = jsonPhonetics
+				p.type = jsonPhonetics
 						.getString(JSONTag.MILI_DICTIONARY_PRON_TYPE);
 				p.symbol = jsonPhonetics
 						.getString(JSONTag.MILI_DICTIONARY_PRON_PS);

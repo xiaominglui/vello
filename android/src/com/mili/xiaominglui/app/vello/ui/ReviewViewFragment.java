@@ -556,14 +556,14 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 						R.layout.phonetics_item, null);
 				LinearLayout phoneticsGroup = (LinearLayout) phoneticsView
 						.findViewById(R.id.phonetics_group);
+				((TextView) phoneticsView.findViewById(R.id.phonetics_type)).setText(phonetics.type);
 				((TextView) phoneticsView.findViewById(R.id.phonetics_symbol))
-						.setText("/" + phonetics.symbol + "/");
-				((IconicTextView) phoneticsView
-						.findViewById(R.id.phonetics_sound))
-						.setIcon(FontAwesomeIcon.VOLUME_UP);
-				((IconicTextView) phoneticsView
-						.findViewById(R.id.phonetics_sound))
-						.setTextColor(Color.GRAY);
+						.setText("[" + phonetics.symbol + "]");
+				/*
+				 * remove sound icon in word card at present
+				((IconicTextView) phoneticsView.findViewById(R.id.phonetics_sound)).setIcon(FontAwesomeIcon.VOLUME_UP);
+				((IconicTextView) phoneticsView.findViewById(R.id.phonetics_sound)).setTextColor(Color.GRAY);
+				*/
 				itemHolder.linearLayoutPhoneticArea.addView(phoneticsGroup);
 			}
 
