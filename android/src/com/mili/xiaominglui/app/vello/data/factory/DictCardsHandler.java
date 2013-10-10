@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 import com.google.gson.Gson;
 import com.mili.xiaominglui.app.vello.data.model.DictCard;
-import com.mili.xiaominglui.app.vello.data.model.DictCards;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbDictCard;
 import com.mili.xiaominglui.app.vello.util.Lists;
 
@@ -22,10 +21,10 @@ public class DictCardsHandler extends JSONHandler {
 	@Override
 	public ArrayList<ContentProviderOperation> parse(String json) throws IOException {
         final ArrayList<ContentProviderOperation> batch = Lists.newArrayList();
-        DictCards dictCardsJson = new Gson().fromJson(json, DictCards.class);
-        int noOfDictCards = dictCardsJson.dictCards.length;
+        DictCard[] dictCards = new Gson().fromJson(json, DictCard[].class);
+        int noOfDictCards = dictCards.length;
         for (int i = 0; i < noOfDictCards; i++) {
-            parseDictCard(dictCardsJson.dictCards[i], batch);
+            parseDictCard(dictCards[i], batch);
         }
         return batch;
     }
@@ -33,10 +32,7 @@ public class DictCardsHandler extends JSONHandler {
     private static void parseDictCard(DictCard dictCard, ArrayList<ContentProviderOperation> batch) {
         ContentProviderOperation.Builder builder = ContentProviderOperation
                 .newInsert(DbDictCard.CONTENT_URI);
-        // TODO
-        builder.withValue(DbDictCard.Columns.ID.getName(), dictCard._id.$oid);
-        builder.withValue(DbDictCard.Columns.SPELL.getName(), dictCard.spell);
-        builder.withValue(DbDictCard.Columns.PIC.getName(), dictCard.pic);
+        builder.withValues(dictCard.toContentValues());
         batch.add(builder.build());
     }
 

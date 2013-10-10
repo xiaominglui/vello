@@ -1,18 +1,22 @@
 package com.mili.xiaominglui.app.vello.data.model;
 
+import android.content.ContentValues;
+
+import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbDictCard;
+
 
 public class DictCard {
 	public id _id;
 	public String spell;
-	public Pronunciation[] pron;
-	public Accettation[] accettation;
+//	public Pronunciation[] pron;
+//	public Accettation[] accettation;
 	public String pic;
 	public String frequency;
-	public Example[] examples;
+//	public Example[] examples;
 	public String created_at;
 	public String updated_at;
 	
-	public static class id {
+	static class id {
 		public String $oid;
 		
 		public id() {
@@ -42,5 +46,17 @@ public class DictCard {
 		
 		public Example() {
 		}
+	}
+	
+	public ContentValues toContentValues() {
+		ContentValues cv = new ContentValues();
+//		cv.put(DbDictCard.Columns.ID.getName(), _id.$oid);
+		cv.put(DbDictCard.Columns.SPELL.getName(), spell);
+		cv.put(DbDictCard.Columns.PIC.getName(), pic);
+		cv.put(DbDictCard.Columns.FREQUENCY.getName(), frequency);
+		cv.put(DbDictCard.Columns.CREATED_AT.getName(), created_at);
+		cv.put(DbDictCard.Columns.UPDATED_AT.getName(), updated_at);
+
+		return cv;
 	}
 }

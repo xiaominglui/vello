@@ -72,8 +72,8 @@ public class VelloContent {
 					+ Columns.SPELL.getName() + " " + Columns.SPELL.getType() + ", "
 					+ Columns.PIC.getName() + " " + Columns.PIC.getType() + ", "
 					+ Columns.FREQUENCY.getName() + " " + Columns.FREQUENCY.getType() + ", "
-					+ Columns.CREATED_AT.getName() + " " + Columns.CREATED_AT.getType()
-					+ Columns.UPDATED_AT.getName() + " " + Columns.UPDATED_AT.getType() + ", "
+					+ Columns.CREATED_AT.getName() + " " + Columns.CREATED_AT.getType() + ", "
+					+ Columns.UPDATED_AT.getName() + " " + Columns.UPDATED_AT.getType()
 					+ ", PRIMARY KEY (" + Columns.ID.getName() + ")" + ");");
 		}
 

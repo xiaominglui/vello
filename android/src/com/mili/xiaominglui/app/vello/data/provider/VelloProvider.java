@@ -13,6 +13,7 @@ import android.provider.BaseColumns;
 import android.util.Log;
 
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
+import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbDictCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 
 public class VelloProvider extends ContentProvider {
@@ -25,8 +26,11 @@ public class VelloProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     private enum UriType {
         DB_WORD_CARD(DbWordCard.TABLE_NAME, DbWordCard.TABLE_NAME, DbWordCard.TYPE_ELEM_TYPE),
-        DB_WORD_CARD_ID_IN_LOCAL_DB(DbWordCard.TABLE_NAME + "/#", DbWordCard.TABLE_NAME, DbWordCard.TYPE_DIR_TYPE),
-        DB_ALL(null, null, DbWordCard.TYPE_DIR_TYPE);
+        DB_WORD_CARD_ID_IN_LOCAL(DbWordCard.TABLE_NAME + "/#", DbWordCard.TABLE_NAME, DbWordCard.TYPE_DIR_TYPE),
+        DB_WORD_CARD_ALL(null, null, DbWordCard.TYPE_DIR_TYPE),
+        DB_DICT_CARD(DbDictCard.TABLE_NAME, DbDictCard.TABLE_NAME, DbDictCard.TYPE_ELEM_TYPE),
+        DB_DICT_CARD_ID(DbDictCard.TABLE_NAME + "/#", DbDictCard.TABLE_NAME, DbDictCard.TYPE_DIR_TYPE),
+        DB_DICT_CARD_ALL(null, null, DbDictCard.TYPE_DIR_TYPE);
         
         private String mTableName;
         private String mType;
@@ -88,6 +92,7 @@ public class VelloProvider extends ContentProvider {
             if (VelloConfig.DEBUG_SWITCH) {
                 Log.d(TAG, "DbWordCard | createTable start");
             }
+            DbDictCard.createTable(db);
             DbWordCard.createTable(db);
             if (VelloConfig.DEBUG_SWITCH) {
                 Log.d(TAG, "DbWordCard | createTable end");
@@ -128,7 +133,7 @@ public class VelloProvider extends ContentProvider {
 		}
 
 		switch (uriType) {
-		case DB_WORD_CARD_ID_IN_LOCAL_DB:
+		case DB_WORD_CARD_ID_IN_LOCAL:
 			id = uri.getPathSegments().get(1);
 			c = db.query(uriType.getTableName(), projection,
 					whereWithId(selection),
@@ -172,6 +177,10 @@ public class VelloProvider extends ContentProvider {
                 id = db.insert(uriType.getTableName(), "foo", values);
                 resultUri = id == -1 ? null : ContentUris.withAppendedId(uri, id);
                 break;
+            case DB_DICT_CARD:
+            	id = db.insert(uriType.getTableName(), "foo", values);
+            	resultUri = id == -1 ? null : ContentUris.withAppendedId(uri, id);
+            	break;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -199,14 +208,16 @@ public class VelloProvider extends ContentProvider {
         String id;
         int result = -1;
         switch (uriType) {
-            case DB_WORD_CARD_ID_IN_LOCAL_DB:
+            case DB_WORD_CARD_ID_IN_LOCAL:
                 id = uri.getPathSegments().get(1);
                 result = db.delete(uriType.getTableName(), whereWithId(selection), addIdToSelectionArgs(id, selectionArgs));
                 break;
             case DB_WORD_CARD:
                 result = db.delete(uriType.getTableName(), selection, selectionArgs);
                 break;
-            case DB_ALL:
+            case DB_WORD_CARD_ALL:
+            	break;
+            case DB_DICT_CARD_ALL:
             	break;
         }
         
@@ -229,7 +240,7 @@ public class VelloProvider extends ContentProvider {
         int result = -1;
 
         switch (uriType) {
-            case DB_WORD_CARD_ID_IN_LOCAL_DB:
+            case DB_WORD_CARD_ID_IN_LOCAL:
                 String id = uri.getPathSegments().get(1);
                 result = db.update(uriType.getTableName(), values, whereWithId(selection),
                     addIdToSelectionArgs(id, selectionArgs));

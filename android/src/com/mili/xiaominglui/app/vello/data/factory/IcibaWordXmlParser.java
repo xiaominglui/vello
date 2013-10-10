@@ -18,6 +18,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
 
+@Deprecated
 public class IcibaWordXmlParser {
     private static final String TAG = IcibaWordXmlParser.class.getSimpleName();
     private static IcibaWord word;

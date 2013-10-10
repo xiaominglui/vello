@@ -433,7 +433,6 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			final WordCard wordcard = new WordCard(cursor);
 			final ItemHolder itemHolder = (ItemHolder) view.getTag();
 			itemHolder.wordcard = wordcard;
-//			itemHolder.word = IcibaWordXmlParser.parse(wordcard.desc);
 			itemHolder.word = MiliDictionaryJsonParser.parse(wordcard.desc);
 			itemHolder.iconicLifeCount.setIcon(FontAwesomeIcon.CHECK);
 			itemHolder.iconicLifeCount.setTextColor(Color.GRAY);

@@ -22,6 +22,7 @@ import com.mili.xiaominglui.app.vello.data.factory.JSONHandler;
 import com.mili.xiaominglui.app.vello.data.factory.WordCardListJsonFactory;
 import com.mili.xiaominglui.app.vello.data.model.AuthTokenRevokedOrCardDeletedResponse;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
+import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbDictCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
@@ -45,6 +46,7 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 public class SyncHelper {
 	private static final String TAG = SyncHelper.class.getSimpleName();
@@ -77,7 +79,7 @@ public class SyncHelper {
 		// Bulk of sync work, performed by executing several fetches from
 		// local and online sources.
 		final ContentResolver resolver = mContext.getContentResolver();
-		ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
+		
         
 		if (!isOnline()) {
 			return;
@@ -95,132 +97,150 @@ public class SyncHelper {
             // than what was last locally-sync'd.
 			if (localParse) {
 				// Load static local data
-				Log.i(TAG, "Local syncing dictionary data");
-				batch.addAll(new DictCardsHandler(mContext).parse(
-                        JSONHandler.parseResource(mContext, R.raw.dict)));
+				
+				// Clear the table
+				resolver.delete(DbDictCard.CONTENT_URI, null, null);
+				
+				try {
+					ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
+					Log.i(TAG, "Local syncing dictionary data");
+					Log.d("mingo.lv", "syncing dictionary data start...");
+					batch.addAll(new DictCardsHandler(mContext).parse(JSONHandler.parseResource(mContext, R.raw.dict)));
+					resolver.applyBatch(VelloProvider.AUTHORITY, batch);
+				} catch (RemoteException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (OperationApplicationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				Log.d("mingo.lv", "syncing dictionary data end.");
 			}
 			Log.i(TAG, "Local sync took " + (System.currentTimeMillis() - startLocal) + "ms");
 		}
 		
-
-		// query and backup all local items that syncInNext=true or merge
-		// locally later
-		HashMap<String, WordCard> localDirtyWords = new HashMap<String, WordCard>();
-		ProviderCriteria criteria = new ProviderCriteria();
-		criteria.addNe(DbWordCard.Columns.DATE_LAST_OPERATION, "");
-		Cursor c = resolver.query(DbWordCard.CONTENT_URI,
-				DbWordCard.PROJECTION, criteria.getWhereClause(),
-				criteria.getWhereParams(), criteria.getOrderClause());
-		if (c != null) {
-			while (c.moveToNext()) {
-				WordCard wc = new WordCard(c);
-				localDirtyWords.put(wc.id, wc);
+		if ((flags & FLAG_SYNC_REMOTE) != 0) {
+			// query and backup all local items that syncInNext=true or merge
+			// locally later
+			HashMap<String, WordCard> localDirtyWords = new HashMap<String, WordCard>();
+			ProviderCriteria criteria = new ProviderCriteria();
+			criteria.addNe(DbWordCard.Columns.DATE_LAST_OPERATION, "");
+			Cursor c = resolver.query(DbWordCard.CONTENT_URI,
+					DbWordCard.PROJECTION, criteria.getWhereClause(),
+					criteria.getWhereParams(), criteria.getOrderClause());
+			if (c != null) {
+				while (c.moveToNext()) {
+					WordCard wc = new WordCard(c);
+					localDirtyWords.put(wc.id, wc);
+				}
 			}
-		}
 
-		try {
-			ArrayList<WordCard> preSyncRemoteWordCardList = getOpenWordCards();
-			if (preSyncRemoteWordCardList.size() > 0) {
-				SimpleDateFormat format = new SimpleDateFormat(
-						"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-				for (WordCard wordCard : preSyncRemoteWordCardList) {
-					String idCard = wordCard.id;
-					if (localDirtyWords.containsKey(idCard)) {
-						// need merging
-						WordCard dirtyWordCard = localDirtyWords.get(idCard);
-						String stringLocalDateLastActivity = dirtyWordCard.dateLastActivity;
-						String markDeleted = dirtyWordCard.markDeleted;
-						String stringRemoteDateLastActivity = wordCard.dateLastActivity;
-						
-						if (markDeleted.equals("true")) {
-							// delete word remotely
-							deleteRemoteWordCard(dirtyWordCard);
-						} else if (stringLocalDateLastActivity
-								.equals(stringRemoteDateLastActivity)) {
-							// remote has no commit
-							// commit local due, closed, listId to remote
-							updateRemoteWordCard(dirtyWordCard);
-						} else {
-							// remote has commit
-							// update remote data based on local data
-							WordCard newWordCard = upgradeWordCard(wordCard,
-									dirtyWordCard);
-							updateRemoteWordCard(newWordCard);
+			try {
+				ArrayList<WordCard> preSyncRemoteWordCardList = getOpenWordCards();
+				if (preSyncRemoteWordCardList.size() > 0) {
+					SimpleDateFormat format = new SimpleDateFormat(
+							"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+					for (WordCard wordCard : preSyncRemoteWordCardList) {
+						String idCard = wordCard.id;
+						if (localDirtyWords.containsKey(idCard)) {
+							// need merging
+							WordCard dirtyWordCard = localDirtyWords.get(idCard);
+							String stringLocalDateLastActivity = dirtyWordCard.dateLastActivity;
+							String markDeleted = dirtyWordCard.markDeleted;
+							String stringRemoteDateLastActivity = wordCard.dateLastActivity;
+							
+							if (markDeleted.equals("true")) {
+								// delete word remotely
+								deleteRemoteWordCard(dirtyWordCard);
+							} else if (stringLocalDateLastActivity
+									.equals(stringRemoteDateLastActivity)) {
+								// remote has no commit
+								// commit local due, closed, listId to remote
+								updateRemoteWordCard(dirtyWordCard);
+							} else {
+								// remote has commit
+								// update remote data based on local data
+								WordCard newWordCard = upgradeWordCard(wordCard,
+										dirtyWordCard);
+								updateRemoteWordCard(newWordCard);
+							}
 						}
 					}
 				}
-			}
 
-			// Clear the table
-			mContext.getContentResolver().delete(DbWordCard.CONTENT_URI, null, null);
+				// Clear the table
+				resolver.delete(DbWordCard.CONTENT_URI, null, null);
 
-			ArrayList<WordCard> postSyncRemoteWordCardList = getOpenWordCards();
-			if (postSyncRemoteWordCardList.size() > 0) {
-				ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
-				for (WordCard wordCard : postSyncRemoteWordCardList) {
-					operationList.add(ContentProviderOperation
-							.newInsert(DbWordCard.CONTENT_URI)
-							.withValues(wordCard.toContentValues()).build());
-				}
+				ArrayList<WordCard> postSyncRemoteWordCardList = getOpenWordCards();
+				if (postSyncRemoteWordCardList.size() > 0) {
+					ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
+					for (WordCard wordCard : postSyncRemoteWordCardList) {
+						operationList.add(ContentProviderOperation
+								.newInsert(DbWordCard.CONTENT_URI)
+								.withValues(wordCard.toContentValues()).build());
+					}
 
-				mContext.getContentResolver().applyBatch(
-						VelloProvider.AUTHORITY, operationList);
+					resolver.applyBatch(VelloProvider.AUTHORITY, operationList);
 
-				// Build notification
-				// TODO need rework
-				Intent intent = new Intent(mContext, MainActivity.class);
-				PendingIntent pIntent = PendingIntent.getActivity(mContext, 0,
-						intent, 0);
+					// Build notification
+					// TODO need rework
+					Intent intent = new Intent(mContext, MainActivity.class);
+					PendingIntent pIntent = PendingIntent.getActivity(mContext, 0,
+							intent, 0);
 
-				ProviderCriteria cri = new ProviderCriteria();
-				cri.addSortOrder(DbWordCard.Columns.DUE, true);
+					ProviderCriteria cri = new ProviderCriteria();
+					cri.addSortOrder(DbWordCard.Columns.DUE, true);
 
-				Calendar rightNow = Calendar.getInstance();
-				long rightNowUnixTime = rightNow.getTimeInMillis();
-				long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
-				SimpleDateFormat fo = new SimpleDateFormat(
-						"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-				String now = fo.format(new Date(rightNowUnixTimeGMT));
-				cri.addLt(DbWordCard.Columns.DUE, now, true);
-				cri.addNe(DbWordCard.Columns.CLOSED, "true");
-				Cursor cur = mContext.getContentResolver().query(
-						DbWordCard.CONTENT_URI, DbWordCard.PROJECTION,
-						cri.getWhereClause(), cri.getWhereParams(),
-						cri.getOrderClause());
-				if (cur != null) {
-					int num = cur.getCount();
-					if (num > 0) {
-						NotificationManager notificationManager = (NotificationManager) mContext
-								.getSystemService(Context.NOTIFICATION_SERVICE);
+					Calendar rightNow = Calendar.getInstance();
+					long rightNowUnixTime = rightNow.getTimeInMillis();
+					long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
+					SimpleDateFormat fo = new SimpleDateFormat(
+							"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+					String now = fo.format(new Date(rightNowUnixTimeGMT));
+					cri.addLt(DbWordCard.Columns.DUE, now, true);
+					cri.addNe(DbWordCard.Columns.CLOSED, "true");
+					Cursor cur = mContext.getContentResolver().query(
+							DbWordCard.CONTENT_URI, DbWordCard.PROJECTION,
+							cri.getWhereClause(), cri.getWhereParams(),
+							cri.getOrderClause());
+					if (cur != null) {
+						int num = cur.getCount();
+						if (num > 0) {
+							NotificationManager notificationManager = (NotificationManager) mContext
+									.getSystemService(Context.NOTIFICATION_SERVICE);
 
-						NotificationCompat.Builder builder = new NotificationCompat.Builder(
-								mContext)
-								.setWhen(rightNow.getTimeInMillis())
-								.setSmallIcon(R.drawable.ic_stat_vaa)
-								.setContentTitle(mContext.getText(R.string.notif_content_title))
-								.setContentText(mContext.getText(R.string.notif_content_text))
-								.setContentInfo(String.valueOf(num))
-								.setContentIntent(pIntent)
-								.setAutoCancel(true);
+							NotificationCompat.Builder builder = new NotificationCompat.Builder(
+									mContext)
+									.setWhen(rightNow.getTimeInMillis())
+									.setSmallIcon(R.drawable.ic_stat_vaa)
+									.setContentTitle(mContext.getText(R.string.notif_content_title))
+									.setContentText(mContext.getText(R.string.notif_content_text))
+									.setContentInfo(String.valueOf(num))
+									.setContentIntent(pIntent)
+									.setAutoCancel(true);
 
-						notificationManager.notify(0, builder.build());
+							notificationManager.notify(0, builder.build());
+						}
 					}
 				}
-			}
 
-		} catch (ConnectionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (DataException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (OperationApplicationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			} catch (ConnectionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (DataException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (OperationApplicationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+		
+
+		
 	}
 	
 	/**

@@ -205,13 +205,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 		}
 
 		handleIntent(getIntent());
-		
-//		FragmentManager fm = getSupportFragmentManager();
-//		mReviewViewFragment = (ReviewViewFragment) fm.findFragmentById(R.id.fragment_container_master);
-//		if (mReviewViewFragment == null) {
-//			mReviewViewFragment = new ReviewViewFragment();
-//			fm.beginTransaction().add(R.id.fragment_container_master, mReviewViewFragment).commit();
-//		}
 		doBindService();
 	}
 	
@@ -316,7 +309,10 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				
 				@Override
 				public boolean onQueryTextChange(String newText) {
-					((ReviewViewFragment) mReviewViewFragment).onQueryTextChange(newText);
+					if (mReviewViewFragment.isAdded()) {
+						((ReviewViewFragment) mReviewViewFragment).onQueryTextChange(newText);
+					}
+					
 					return true;
 				}
 			});
