@@ -294,7 +294,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 		super.onCreateOptionsMenu(menu);
 		getSupportMenuInflater().inflate(R.menu.home, menu);
 
-//		setupSearchMenuItem(menu);
+		setupSearchMenuItem(menu);
 
 		return true;
 	}
@@ -316,7 +316,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				
 				@Override
 				public boolean onQueryTextChange(String newText) {
-//					mReviewViewFragment.onQueryTextChange(newText);
+					((ReviewViewFragment) mReviewViewFragment).onQueryTextChange(newText);
 					return true;
 				}
 			});
