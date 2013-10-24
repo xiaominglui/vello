@@ -105,7 +105,7 @@ public class SyncHelper {
 					ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
 					Log.i(TAG, "Local syncing dictionary data");
 					Log.d("mingo.lv", "syncing dictionary data start...");
-					batch.addAll(new DictCardsHandler(mContext).parse(JSONHandler.parseResource(mContext, R.raw.dict)));
+					batch.addAll(new DictCardsHandler(mContext).parse(JSONHandler.parseResource(mContext, R.raw.word0)));
 					resolver.applyBatch(VelloProvider.AUTHORITY, batch);
 				} catch (RemoteException e) {
 					// TODO Auto-generated catch block

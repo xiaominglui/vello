@@ -26,11 +26,8 @@ public class VelloContent {
 		
 		public static enum Columns implements ColumnMetaData {
 			ID(BaseColumns._ID, "INTEGER"),
-			SPELL("spell", "VARCHAR"),
-			PIC("pic", "VARCHAR"),
-			FREQUENCY("frequency", "VARCHAR"),
-			CREATED_AT("created_at", "VARCHAR"),
-			UPDATED_AT("updated_at", "VARCHAR");
+			KEYWORD("keyword", "VARCHAR"),
+			DICDATA("dicdata", "VARCHAR");
 
 			private final String mName;
 			private final String mType;
@@ -56,12 +53,9 @@ public class VelloContent {
 		}
 		
 		public static final String[] PROJECTION = new String[] {
-			Columns.ID.getName(),
-			Columns.SPELL.getName(),
-			Columns.PIC.getName(),
-			Columns.FREQUENCY.getName(),
-			Columns.CREATED_AT.getName(),
-			Columns.UPDATED_AT.getName() };
+				Columns.ID.getName(),
+				Columns.KEYWORD.getName(),
+				Columns.DICDATA.getName() };
 		
 		private DbDictCard() {
 		}
@@ -69,11 +63,8 @@ public class VelloContent {
 		public static void createTable(SQLiteDatabase db) {
 			db.execSQL("CREATE TABLE " + TABLE_NAME + " ("
 					+ Columns.ID.getName() + " " + Columns.ID.getType() + ", "
-					+ Columns.SPELL.getName() + " " + Columns.SPELL.getType() + ", "
-					+ Columns.PIC.getName() + " " + Columns.PIC.getType() + ", "
-					+ Columns.FREQUENCY.getName() + " " + Columns.FREQUENCY.getType() + ", "
-					+ Columns.CREATED_AT.getName() + " " + Columns.CREATED_AT.getType() + ", "
-					+ Columns.UPDATED_AT.getName() + " " + Columns.UPDATED_AT.getType()
+					+ Columns.KEYWORD.getName() + " " + Columns.KEYWORD.getType() + ", "
+					+ Columns.DICDATA.getName() + " " + Columns.DICDATA.getType()
 					+ ", PRIMARY KEY (" + Columns.ID.getName() + ")" + ");");
 		}
 

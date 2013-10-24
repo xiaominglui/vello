@@ -7,7 +7,7 @@ import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbDictCard;
 
 public class DictCard {
 	public id _id;
-	public String spell;
+	public String keyword;
 //	public Pronunciation[] pron;
 //	public Accettation[] accettation;
 	public String pic;
@@ -51,11 +51,8 @@ public class DictCard {
 	public ContentValues toContentValues() {
 		ContentValues cv = new ContentValues();
 //		cv.put(DbDictCard.Columns.ID.getName(), _id.$oid);
-		cv.put(DbDictCard.Columns.SPELL.getName(), spell);
-		cv.put(DbDictCard.Columns.PIC.getName(), pic);
-		cv.put(DbDictCard.Columns.FREQUENCY.getName(), frequency);
-		cv.put(DbDictCard.Columns.CREATED_AT.getName(), created_at);
-		cv.put(DbDictCard.Columns.UPDATED_AT.getName(), updated_at);
+		cv.put(DbDictCard.Columns.KEYWORD.getName(), keyword);
+		cv.put(DbDictCard.Columns.DICDATA.getName(), frequency);
 
 		return cv;
 	}
