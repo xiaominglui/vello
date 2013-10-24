@@ -26,6 +26,7 @@ public class VelloContent {
 		
 		public static enum Columns implements ColumnMetaData {
 			ID(BaseColumns._ID, "INTEGER"),
+			OID("oid", "VCRCHAR"),
 			KEYWORD("keyword", "VARCHAR"),
 			DICDATA("dicdata", "VARCHAR");
 
@@ -54,6 +55,7 @@ public class VelloContent {
 		
 		public static final String[] PROJECTION = new String[] {
 				Columns.ID.getName(),
+				Columns.OID.getName(),
 				Columns.KEYWORD.getName(),
 				Columns.DICDATA.getName() };
 		
@@ -63,6 +65,7 @@ public class VelloContent {
 		public static void createTable(SQLiteDatabase db) {
 			db.execSQL("CREATE TABLE " + TABLE_NAME + " ("
 					+ Columns.ID.getName() + " " + Columns.ID.getType() + ", "
+					+ Columns.OID.getName() + " " + Columns.OID.getType() + ", "
 					+ Columns.KEYWORD.getName() + " " + Columns.KEYWORD.getType() + ", "
 					+ Columns.DICDATA.getName() + " " + Columns.DICDATA.getType()
 					+ ", PRIMARY KEY (" + Columns.ID.getName() + ")" + ");");
