@@ -26,7 +26,6 @@ public class DictCard {
 		public String frequency;
 		public String more;
 		public EXAMPLES[] examples;
-		public String en_accettation;
 		public String created_at;
 		public String updated_at;
 		
