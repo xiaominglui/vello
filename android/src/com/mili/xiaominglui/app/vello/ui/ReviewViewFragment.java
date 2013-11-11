@@ -61,6 +61,8 @@ import com.mili.xiaominglui.app.vello.dialogs.WordsDeleteConfirmationDialog;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.sherlock.navigationdrawer.compat.SherlockActionBarDrawerToggle;
 
+import it.gmariotti.cardslib.library.view.CardListView;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -78,7 +80,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	private boolean mUndoShowing = false;
 	private boolean mInDeleteConfirmation = false;
 
-	private SwipeableListView mWordsList;
+	private CardListView mCardList;
 	private WordCardAdapter mAdapter;
 	private ViewGroup mRootView;
 	private onStatusChangedListener mListener;
@@ -204,7 +206,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			selectedWordCards = savedInstanceState.getIntArray(KEY_SELECTED_WORD_CARDS);
 		}
 		
-		mRootView = (ViewGroup) inflater.inflate(R.layout.fragment_review, null);
+		mRootView = (ViewGroup) inflater.inflate(R.layout.fragment_home, null);
 		
 		mDrawerLayout = (DrawerLayout) mRootView.findViewById(R.id.drawer_layout);
 		listView = (ListView) mRootView.findViewById(R.id.left_drawer);
@@ -220,14 +222,14 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		listView.setFastScrollEnabled(true);
 		listView.setSmoothScrollbarEnabled(true);
 		
-		mWordsList = (SwipeableListView) mRootView.findViewById(R.id.words_list);
-		mAdapter = new WordCardAdapter(getActivity(), null, selectedWordCards, mWordsList);
+		mCardList = (CardListView) mRootView.findViewById(R.id.card_list);
+		mAdapter = new WordCardAdapter(getActivity(), null, selectedWordCards, mCardList);
 		mAdapter.setLongClickListener(this);
-		mWordsList.setAdapter(mAdapter);
-		mWordsList.setVerticalScrollBarEnabled(true);
-		mWordsList.setOnCreateContextMenuListener(this);
+		mCardList.setAdapter(mAdapter);
+		mCardList.setVerticalScrollBarEnabled(true);
+		mCardList.setOnCreateContextMenuListener(this);
 
-		mWordsList.setOnTouchListener(new View.OnTouchListener() {
+		mCardList.setOnTouchListener(new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View view, MotionEvent event) {
 //				hideUndoBar(true, event);
@@ -696,8 +698,8 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			// Review Mode
 		    mIsSearching = false;
 		    mListener.onModeChanged(VelloConfig.REVIEW_MODE_ACTION_BAR_COLOR);
-		    mWordsList.enableSwipe(true);
-		    mWordsList.setOnItemSwipeListener(mReviewSwipeListener);
+//		    mCardList.enableSwipe(true);
+//		    mCardList.setOnItemSwipeListener(mReviewSwipeListener);
 			criteria.addSortOrder(DbWordCard.Columns.DUE, true);
 			Calendar rightNow = Calendar.getInstance();
 
@@ -712,9 +714,9 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			// Dictionary Mode
 		    mIsSearching = true;
 		    mListener.onModeChanged(VelloConfig.DICTIONARY_MODE_ACTION_BAR_COLOR);
-		    mWordsList.enableSwipe(false);
-		    mWordsList.setOnItemSwipeListener(null);
-		    mWordsList.setEmptyView(null);
+//		    mCardList.enableSwipe(false);
+//		    mCardList.setOnItemSwipeListener(null);
+		    mCardList.setEmptyView(null);
 		    criteria.addLike(DbWordCard.Columns.NAME, mCurFilter + "%");
 		}
 		return new CursorLoader(getActivity(), DbWordCard.CONTENT_URI,
