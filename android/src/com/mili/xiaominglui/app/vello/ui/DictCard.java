@@ -6,11 +6,14 @@ import android.content.Context;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 
-public class ReviewCard extends Card {
+public class DictCard extends Card {
 	protected String mTitleHeader;
+	protected String mDictData;
 
-	public ReviewCard(Context context) {
-		super(context, R.layout.card_review_inner_content);
+	public DictCard(Context context, String keyword, String data) {
+		super(context, R.layout.card_dict_inner_content);
+		mTitleHeader = keyword;
+		mDictData = data;
 		init();
 	}
 	
@@ -23,7 +26,7 @@ public class ReviewCard extends Card {
 	
 	@Override
     public int getType() {
-        return 0;
+        return 1;
     }
 
 }

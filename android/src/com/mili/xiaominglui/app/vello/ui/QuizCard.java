@@ -9,5 +9,10 @@ public class QuizCard extends Card {
 		super(context);
 		// TODO Auto-generated constructor stub
 	}
+	
+	@Override
+    public int getType() {
+        return 2;
+    }
 
 }

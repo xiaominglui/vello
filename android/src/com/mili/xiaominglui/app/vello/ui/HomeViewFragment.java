@@ -47,7 +47,7 @@ import com.android.deskclock.widget.swipeablelistview.SwipeableListView;
 import com.atermenji.android.iconictextview.IconicTextView;
 import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
 import com.mili.xiaominglui.app.vello.R;
-import com.mili.xiaominglui.app.vello.adapter.BaseCardArrayAdapter;
+import com.mili.xiaominglui.app.vello.adapter.HomeCardArrayAdapter;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.factory.MiliDictionaryJsonParser;
 import com.mili.xiaominglui.app.vello.data.model.Definition;
@@ -231,7 +231,7 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 		listView.setSmoothScrollbarEnabled(true);
 		
 		
-		mCardArrayAdapter = new BaseCardArrayAdapter(getActivity(), mCards);
+		mCardArrayAdapter = new HomeCardArrayAdapter(getActivity(), mCards);
 		mCardList = (CardListView) mRootView.findViewById(R.id.card_list);
 		if (mCardList != null) {
 			mCardList.setAdapter(mCardArrayAdapter);
