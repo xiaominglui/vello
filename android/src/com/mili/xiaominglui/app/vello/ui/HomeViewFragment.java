@@ -47,6 +47,7 @@ import com.android.deskclock.widget.swipeablelistview.SwipeableListView;
 import com.atermenji.android.iconictextview.IconicTextView;
 import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
 import com.mili.xiaominglui.app.vello.R;
+import com.mili.xiaominglui.app.vello.adapter.BaseCardArrayAdapter;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.factory.MiliDictionaryJsonParser;
 import com.mili.xiaominglui.app.vello.data.model.Definition;
@@ -55,22 +56,26 @@ import com.mili.xiaominglui.app.vello.data.model.IcibaWord;
 import com.mili.xiaominglui.app.vello.data.model.Phonetics;
 import com.mili.xiaominglui.app.vello.data.model.Phoneticss;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
+import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbDictCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.dialogs.WordsDeleteConfirmationDialog;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.sherlock.navigationdrawer.compat.SherlockActionBarDrawerToggle;
 
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.view.CardListView;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.TimeZone;
 
-public class ReviewViewFragment extends SherlockFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnLongClickListener, Callback, DialogInterface.OnClickListener {
-	private static final String TAG = ReviewViewFragment.class.getSimpleName();
+public class HomeViewFragment extends SherlockFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnLongClickListener, Callback, DialogInterface.OnClickListener {
+	private static final String TAG = HomeViewFragment.class.getSimpleName();
 	
 	private static final String KEY_DELETED_WORD = "deletedWord";
 	private static final String KEY_UNDO_SHOWING = "undoShowing";
@@ -81,6 +86,9 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	private boolean mInDeleteConfirmation = false;
 
 	private CardListView mCardList;
+	private ArrayList<Card> mCards;
+	private CardArrayAdapter mCardArrayAdapter;
+	
 	private WordCardAdapter mAdapter;
 	private ViewGroup mRootView;
 	private onStatusChangedListener mListener;
@@ -95,7 +103,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	private ActionMode mActionMode;
 	
 	public static Fragment newInstance() {
-		Fragment f = new ReviewViewFragment();
+		Fragment f = new HomeViewFragment();
 		return f;
 	}
 	
@@ -198,13 +206,13 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		int[] selectedWordCards = null;
+//		int[] selectedWordCards = null;
 		
-		if (savedInstanceState != null) {
-			mDeletedWord = savedInstanceState.getParcelable(KEY_DELETED_WORD);
-			mUndoShowing = savedInstanceState.getBoolean(KEY_UNDO_SHOWING);
-			selectedWordCards = savedInstanceState.getIntArray(KEY_SELECTED_WORD_CARDS);
-		}
+//		if (savedInstanceState != null) {
+//			mDeletedWord = savedInstanceState.getParcelable(KEY_DELETED_WORD);
+//			mUndoShowing = savedInstanceState.getBoolean(KEY_UNDO_SHOWING);
+//			selectedWordCards = savedInstanceState.getIntArray(KEY_SELECTED_WORD_CARDS);
+//		}
 		
 		mRootView = (ViewGroup) inflater.inflate(R.layout.fragment_home, null);
 		
@@ -222,7 +230,14 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		listView.setFastScrollEnabled(true);
 		listView.setSmoothScrollbarEnabled(true);
 		
+		
+		mCardArrayAdapter = new BaseCardArrayAdapter(getActivity(), mCards);
 		mCardList = (CardListView) mRootView.findViewById(R.id.card_list);
+		if (mCardList != null) {
+			mCardList.setAdapter(mCardArrayAdapter);
+		}
+		
+		/*
 		mAdapter = new WordCardAdapter(getActivity(), null, selectedWordCards, mCardList);
 		mAdapter.setLongClickListener(this);
 		mCardList.setAdapter(mAdapter);
@@ -236,9 +251,11 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 				return false;
 			}
 		});
+		
+		*/
 
 
-		if (mUndoShowing) {
+//		if (mUndoShowing) {
 //			mUndoBar.show(new ActionableToastBar.ActionClickedListener() {
 //				@Override
 //				public void onActionClicked() {
@@ -248,7 +265,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 //				}
 //			}, 0, getResources().getString(R.string.word_reviewed), true,
 //					R.string.word_reviewed_undo, true);
-		}
+//		}
 		
 		mActionBar = createActionBarHelper();
 		mActionBar.init();
@@ -263,11 +280,11 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 		mDrawerToggle.syncState();
 		
 		// Show action mode if needed
-        int selectedNum = mAdapter.getSelectedItemsNum();
-        if (selectedNum > 0) {
-            mActionMode = getSherlockActivity().startActionMode(this);
-            setActionModeTitle(selectedNum);
-        }
+//        int selectedNum = mAdapter.getSelectedItemsNum();
+//        if (selectedNum > 0) {
+//            mActionMode = getSherlockActivity().startActionMode(this);
+//            setActionModeTitle(selectedNum);
+//        }
         
 		return mRootView;
 	}
@@ -288,6 +305,11 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		getLoaderManager().initLoader(0, null, this);
+		
+	}
+	
+	private void initCards() {
+		mCards = new ArrayList<Card>();
 	}
 	
 	
@@ -710,6 +732,7 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 			String now = format.format(new Date(rightNowUnixTimeGMT));
 			criteria.addEq(DbWordCard.Columns.MARKDELETED, "false");
 			criteria.addLt(DbWordCard.Columns.DUE, now, true);
+			return new CursorLoader(getActivity(), DbWordCard.CONTENT_URI, DbWordCard.PROJECTION, criteria.getWhereClause(), criteria.getWhereParams(), criteria.getOrderClause());
 		} else {
 			// Dictionary Mode
 		    mIsSearching = true;
@@ -718,21 +741,30 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 //		    mCardList.setOnItemSwipeListener(null);
 		    mCardList.setEmptyView(null);
 		    criteria.addLike(DbWordCard.Columns.NAME, mCurFilter + "%");
+		    return new CursorLoader(getActivity(), DbDictCard.CONTENT_URI, DbDictCard.PROJECTION, criteria.getWhereClause(), criteria.getWhereParams(), criteria.getOrderClause());
 		}
-		return new CursorLoader(getActivity(), DbWordCard.CONTENT_URI,
-				DbWordCard.PROJECTION, criteria.getWhereClause(),
-				criteria.getWhereParams(), criteria.getOrderClause());
+		
 	}
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-	    mAdapter.clearExpandedArray();
-		mAdapter.swapCursor(data);
+		for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
+			if (mIsSearching) {
+				// in Dictionary Mode
+			} else {
+				// in Review Mode
+			}
+//			data.getColumnName(columnIndex)
+//			mCards.add(card);
+		}
+//	    mAdapter.clearExpandedArray();
+//		mAdapter.swapCursor(data);
 	}
 
 	@Override
 	public void onLoaderReset(Loader<Cursor> loder) {
-		mAdapter.swapCursor(null);
+//		mAdapter.swapCursor(null);
+		mCards.clear();
 	}
 	
 	private void asyncDeleteWordCache(WordCard wordcard) {

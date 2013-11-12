@@ -71,8 +71,7 @@ public class VelloContent {
 					+ ", PRIMARY KEY (" + Columns.ID.getName() + ")" + ");");
 		}
 
-		public static void upgradeTable(SQLiteDatabase db, int oldVersion,
-				int newVersion) {
+		public static void upgradeTable(SQLiteDatabase db, int oldVersion, int newVersion) {
 			// TODO
 		}
 	}
@@ -155,8 +154,7 @@ public class VelloContent {
 					+ ", PRIMARY KEY (" + Columns.ID.getName() + ")" + ");");
 		}
 
-		public static void upgradeTable(SQLiteDatabase db, int oldVersion,
-				int newVersion) {
+		public static void upgradeTable(SQLiteDatabase db, int oldVersion, int newVersion) {
 			// TODO
 		}
 	}

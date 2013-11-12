@@ -44,7 +44,7 @@ import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.mili.xiaominglui.app.vello.util.HelpUtils;
 import com.mili.xiaominglui.app.vello.util.UIUtils;
 
-public class MainActivity extends BaseActivity implements ReviewViewFragment.onStatusChangedListener {
+public class MainActivity extends BaseActivity implements HomeViewFragment.onStatusChangedListener {
 	private static final String TAG = MainActivity.class.getSimpleName();
 	private Activity mActivity;
 	
@@ -209,7 +209,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	}
 	
 	private void setInitialFragment() {
-		mReviewViewFragment = ReviewViewFragment.newInstance();
+		mReviewViewFragment = HomeViewFragment.newInstance();
 		FragmentManager fragmentManager = getSupportFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 		fragmentTransaction.add(CONTENT_VIEW_ID, mReviewViewFragment).commit();
@@ -310,7 +310,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				@Override
 				public boolean onQueryTextChange(String newText) {
 					if (mReviewViewFragment.isAdded()) {
-						((ReviewViewFragment) mReviewViewFragment).onQueryTextChange(newText);
+						((HomeViewFragment) mReviewViewFragment).onQueryTextChange(newText);
 					}
 					
 					return true;
