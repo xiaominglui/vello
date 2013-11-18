@@ -1,15 +1,19 @@
 package com.mili.xiaominglui.app.vello.ui;
 
 import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardExpand;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 
 public class ReviewCard extends Card {
+	
 	public int idInLocalDB;
 	
 	public String id;
@@ -23,7 +27,8 @@ public class ReviewCard extends Card {
 	public String dateLastOperation;
 	
 	public ReviewCard(Context context, Cursor c) {
-		super(context, R.layout.card_review_inner_content);
+		super(context);
+		
 		idInLocalDB = c.getInt(DbWordCard.Columns.ID.getIndex());
 
 		id = c.getString(DbWordCard.Columns.CARD_ID.getIndex());
@@ -35,13 +40,33 @@ public class ReviewCard extends Card {
 		dateLastActivity = c.getString(DbWordCard.Columns.DATE_LAST_ACTIVITY.getIndex());
 		markDeleted = c.getString(DbWordCard.Columns.MARKDELETED.getIndex());
 		dateLastOperation = c.getString(DbWordCard.Columns.DATE_LAST_OPERATION.getIndex());
+		
+		init(context);
 	}
 	
-	public ReviewCard(Context context) {
-		super(context, R.layout.card_review_inner_content);
-//		init();
+	private void init(Context context) {
+		CardHeader header = new CardHeader(context);
+		header.setTitle(name);
+		header.setButtonExpandVisible(true);
+		addCardHeader(header);
+		
+//		setTitle("Card Title");
+		
+		CardExpand expand = new CardExpand(context);
+		expand.setTitle(desc);
+		addCardExpand(expand);
 	}
-
+	
+	@Override
+    public void setupInnerViewElements(ViewGroup parent, View view) {
+		
+	}
+	
+	@Override
+    public int getType() {
+        return 0;
+    }
+	
 	public ContentValues toContentValues() {
 		ContentValues cv = new ContentValues();
 		cv.put(DbWordCard.Columns.CARD_ID.getName(), id);
@@ -56,17 +81,5 @@ public class ReviewCard extends Card {
 
 		return cv;
 	}
-	
-	private void init() {
-		CardHeader header = new CardHeader(getContext());
-		header.setTitle(name);
-		header.setButtonExpandVisible(true);
-		addCardHeader(header);
-	}
-	
-	@Override
-    public int getType() {
-        return 0;
-    }
 
 }

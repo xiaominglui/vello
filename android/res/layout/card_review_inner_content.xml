@@ -3,13 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content" >
     
-    <ImageView
-        android:layout_marginTop="2dp"
-        android:id="@+id/colorBorder"
-        android:background="@drawable/rectangle"
-        android:layout_width="10dp"
-        android:layout_height="@dimen/card_base_empty_height"/>
-    
     <!-- Use same ID to use built-in features -->
     <TextView
         android:layout_toRightOf="@id/colorBorder"

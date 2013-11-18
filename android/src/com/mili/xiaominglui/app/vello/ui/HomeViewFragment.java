@@ -89,7 +89,7 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 	private ArrayList<Card> mCards;
 	private CardArrayAdapter mCardArrayAdapter;
 	
-	private WordCardAdapter mAdapter;
+//	private WordCardAdapter mAdapter;
 	private ViewGroup mRootView;
 	private onStatusChangedListener mListener;
 
@@ -107,22 +107,22 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 		return f;
 	}
 	
-	private SwipeableListView.OnItemSwipeListener mReviewSwipeListener = new SwipeableListView.OnItemSwipeListener() {
-        
-        @Override
-        public void onSwipe(View view) {
-            final WordCardAdapter.ItemHolder itemHolder = (WordCardAdapter.ItemHolder) view.getTag();
-            // if wordcard expanded, do NOT mark reviewed plus
-            if (!mAdapter.isWordExpanded(itemHolder.wordcard)) {
-            	updateActionMode();
-                asyncMarkRecalledWord(itemHolder.wordcard);
-                mListener.onWordReviewed();
-            } else {
-                // review failed
-                asyncDeleteWordCache(itemHolder.wordcard);
-            }
-        }
-    };
+//	private SwipeableListView.OnItemSwipeListener mReviewSwipeListener = new SwipeableListView.OnItemSwipeListener() {
+//        
+//        @Override
+//        public void onSwipe(View view) {
+//            final WordCardAdapter.ItemHolder itemHolder = (WordCardAdapter.ItemHolder) view.getTag();
+//            // if wordcard expanded, do NOT mark reviewed plus
+//            if (!mAdapter.isWordExpanded(itemHolder.wordcard)) {
+//            	updateActionMode();
+//                asyncMarkRecalledWord(itemHolder.wordcard);
+//                mListener.onWordReviewed();
+//            } else {
+//                // review failed
+//                asyncDeleteWordCache(itemHolder.wordcard);
+//            }
+//        }
+//    };
     
 	public interface onStatusChangedListener {
 		public void onModeChanged(int modeColor);
@@ -150,9 +150,9 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putParcelable(KEY_DELETED_WORD, mDeletedWord);
-		outState.putBoolean(KEY_UNDO_SHOWING, mUndoShowing);
-		outState.putIntArray(KEY_SELECTED_WORD_CARDS, mAdapter.getSelectedWordCardsArray());
+//		outState.putParcelable(KEY_DELETED_WORD, mDeletedWord);
+//		outState.putBoolean(KEY_UNDO_SHOWING, mUndoShowing);
+//		outState.putIntArray(KEY_SELECTED_WORD_CARDS, mAdapter.getSelectedWordCardsArray());
 	}
 	
 	/**
@@ -310,7 +310,7 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 	
 	@Override
 	public void onDestroyView() {
-		mAdapter.swapCursor(null);
+//		mAdapter.swapCursor(null);
 		super.onDestroyView();
 	}
 	
@@ -318,21 +318,21 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
      * Activate/update/close action mode according to the number of selected views.
      */
     private void updateActionMode() {
-        int selectedNum = mAdapter.getSelectedItemsNum();
-        if (mActionMode == null && selectedNum > 0) {
-            // Start the action mode
-            mActionMode = getSherlockActivity().startActionMode(this);
-            setActionModeTitle(selectedNum);
-        } else if (mActionMode != null) {
-            if (selectedNum > 0) {
-                // Update the number of selected items in the title
-                setActionModeTitle(selectedNum);
-            } else {
-                // No selected items. close the action mode
-                mActionMode.finish();
-                mActionMode = null;
-            }
-        }
+//        int selectedNum = mAdapter.getSelectedItemsNum();
+//        if (mActionMode == null && selectedNum > 0) {
+//            // Start the action mode
+//            mActionMode = getSherlockActivity().startActionMode(this);
+//            setActionModeTitle(selectedNum);
+//        } else if (mActionMode != null) {
+//            if (selectedNum > 0) {
+//                // Update the number of selected items in the title
+//                setActionModeTitle(selectedNum);
+//            } else {
+//                // No selected items. close the action mode
+//                mActionMode.finish();
+//                mActionMode = null;
+//            }
+//        }
     }
 	
 	/***
@@ -753,10 +753,10 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 			// in Review Mode
 			for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
 				ReviewCard rc = new ReviewCard(getActivity().getApplicationContext(), data);
-				mCards.add(rc);
+				rc.setSwipeable(true);
+				mCardArrayAdapter.add(rc);
 			}
 		}
-		mCardArrayAdapter.notifyDataSetChanged();
 	}
 
 	@Override
@@ -927,23 +927,23 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
      * Handle the delete word cards confirmation dialog
      */
 
-    private void showConfirmationDialog() {
-        Resources res = getResources();
-        String msg = String.format(res.getQuantityText(R.plurals.word_card_delete_confirmation, mAdapter.getSelectedItemsNum()).toString());
-        
-        DialogFragment frag = WordsDeleteConfirmationDialog.newInstance(msg);
-        frag.setTargetFragment(this, 0);
-        frag.show(getFragmentManager(), msg);
-        mInDeleteConfirmation = true;
-    }
+//    private void showConfirmationDialog() {
+//        Resources res = getResources();
+//        String msg = String.format(res.getQuantityText(R.plurals.word_card_delete_confirmation, mAdapter.getSelectedItemsNum()).toString());
+//        
+//        DialogFragment frag = WordsDeleteConfirmationDialog.newInstance(msg);
+//        frag.setTargetFragment(this, 0);
+//        frag.show(getFragmentManager(), msg);
+//        mInDeleteConfirmation = true;
+//    }
 
 	@Override
 	public void onClick(DialogInterface dialog, int which) {
 		if (which == -1) {
-            if (mAdapter != null) {
-                mAdapter.deleteSelectedWordCards();
-                mActionMode.finish();
-            }
+//            if (mAdapter != null) {
+//                mAdapter.deleteSelectedWordCards();
+//                mActionMode.finish();
+//            }
         }
         dialog.dismiss();
         mInDeleteConfirmation = false;
@@ -967,7 +967,7 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 		switch (item.getItemId()) {
 		// Delete selected items and close CAB.
 		case R.id.menu_item_delete_word_card:
-			showConfirmationDialog();
+//			showConfirmationDialog();
 			break;
 		default:
 			break;
@@ -977,16 +977,16 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 
 	@Override
 	public void onDestroyActionMode(ActionMode mode) {
-		if(mAdapter != null) {
-            mAdapter.clearSelectedAlarms();
-        }
+//		if(mAdapter != null) {
+//            mAdapter.clearSelectedAlarms();
+//        }
         mActionMode = null;
 	}
 
 	@Override
 	public boolean onLongClick(View v) {
-		mAdapter.toggleSelectState(v);
-        mAdapter.notifyDataSetChanged();
+//		mAdapter.toggleSelectState(v);
+//        mAdapter.notifyDataSetChanged();
         updateActionMode();
         return false;
 	}
