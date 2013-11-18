@@ -17,10 +17,21 @@
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
     
-    <style name="body">
-        <item name="android:textSize">@dimen/body_font_size</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:fontFamily">sans-serif-condensed</item>
+    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++   -->
+
+    <!-- Myapps style -->
+
+    <style name="carddemo_myapps_main_inner_secondarytitle">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/darker_gray</item>
     </style>
+
+    <style name="carddemo_myapps_main_inner_title">
+         <item name="android:textSize">18sp</item>
+         <item name="android:textColor">@android:color/black</item>
+        <item name="android:layout_marginTop">2dp</item>
+    </style>
+
+    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++   -->
     
 </resources>

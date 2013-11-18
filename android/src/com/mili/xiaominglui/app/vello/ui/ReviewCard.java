@@ -8,11 +8,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 
 public class ReviewCard extends Card {
+	protected TextView mTitle;
+    protected TextView mSecondaryTitle;
 	
 	public int idInLocalDB;
 	
@@ -27,7 +30,7 @@ public class ReviewCard extends Card {
 	public String dateLastOperation;
 	
 	public ReviewCard(Context context, Cursor c) {
-		super(context);
+		super(context, R.layout.card_review_inner_content);
 		
 		idInLocalDB = c.getInt(DbWordCard.Columns.ID.getIndex());
 
@@ -50,7 +53,6 @@ public class ReviewCard extends Card {
 		header.setButtonExpandVisible(true);
 		addCardHeader(header);
 		
-//		setTitle("Card Title");
 		
 		CardExpand expand = new CardExpand(context);
 		expand.setTitle(desc);
@@ -59,6 +61,15 @@ public class ReviewCard extends Card {
 	
 	@Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
+		//Retrieve elements
+        mTitle = (TextView) parent.findViewById(R.id.carddemo_myapps_main_inner_title);
+        mSecondaryTitle = (TextView) parent.findViewById(R.id.carddemo_myapps_main_inner_secondaryTitle);
+        
+        if (mTitle!=null)
+            mTitle.setText("Google");
+
+        if (mSecondaryTitle!=null)
+            mSecondaryTitle.setText("Map");
 		
 	}
 	
