@@ -230,7 +230,7 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 		listView.setFastScrollEnabled(true);
 		listView.setSmoothScrollbarEnabled(true);
 		
-		
+		mCards = new ArrayList<Card>();
 		mCardArrayAdapter = new HomeCardArrayAdapter(getActivity(), mCards);
 		mCardList = (CardListView) mRootView.findViewById(R.id.card_list);
 		if (mCardList != null) {
@@ -307,11 +307,6 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 		getLoaderManager().initLoader(0, null, this);
 		
 	}
-	
-	private void initCards() {
-		mCards = new ArrayList<Card>();
-	}
-	
 	
 	@Override
 	public void onDestroyView() {
@@ -748,17 +743,20 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-		for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
-			if (mIsSearching) {
-				// in Dictionary Mode
-			} else {
-				// in Review Mode
+		if (mIsSearching) {
+			// in Dictionary Mode
+			for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
+//				DictCard dc = new DictCard(getActivity().getApplicationContext(), data);
+//				mCards.add(dc);
 			}
-//			data.getColumnName(columnIndex)
-//			mCards.add(card);
+		} else {
+			// in Review Mode
+			for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
+				ReviewCard rc = new ReviewCard(getActivity().getApplicationContext(), data);
+				mCards.add(rc);
+			}
 		}
-//	    mAdapter.clearExpandedArray();
-//		mAdapter.swapCursor(data);
+		mCardArrayAdapter.notifyDataSetChanged();
 	}
 
 	@Override
