@@ -52,7 +52,7 @@ public class MainActivity extends BaseActivity implements HomeViewFragment.onSta
 	private Drawable oldBackground = null;
 	private int currentColor = 0xFF666666;
 	private final Handler handler = new Handler();
-	private Fragment mReviewViewFragment;
+	private Fragment mHomeViewFragment;
 	
 	private MainActivityUIHandler mUICallback = new MainActivityUIHandler(this);
 
@@ -209,10 +209,10 @@ public class MainActivity extends BaseActivity implements HomeViewFragment.onSta
 	}
 	
 	private void setInitialFragment() {
-		mReviewViewFragment = HomeViewFragment.newInstance();
+		mHomeViewFragment = HomeViewFragment.newInstance();
 		FragmentManager fragmentManager = getSupportFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-		fragmentTransaction.add(CONTENT_VIEW_ID, mReviewViewFragment).commit();
+		fragmentTransaction.add(CONTENT_VIEW_ID, mHomeViewFragment).commit();
 	}
 
 	@Override
@@ -301,7 +301,7 @@ public class MainActivity extends BaseActivity implements HomeViewFragment.onSta
 				
 				@Override
 				public boolean onQueryTextSubmit(String query) {
-				    doWordSearch(query); // only for debug
+//				    doWordSearch(query); // only for debug
 				    InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
 					inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
 					return true;
@@ -309,8 +309,8 @@ public class MainActivity extends BaseActivity implements HomeViewFragment.onSta
 				
 				@Override
 				public boolean onQueryTextChange(String newText) {
-					if (mReviewViewFragment.isAdded()) {
-						((HomeViewFragment) mReviewViewFragment).onQueryTextChange(newText);
+					if (mHomeViewFragment.isAdded()) {
+						((HomeViewFragment) mHomeViewFragment).onQueryTextChange(newText);
 					}
 					
 					return true;
@@ -411,7 +411,7 @@ public class MainActivity extends BaseActivity implements HomeViewFragment.onSta
 		ContentResolver.setSyncAutomatically(account,
 				VelloProvider.AUTHORITY, true);
 		FragmentManager fm = getSupportFragmentManager();
-		fm.beginTransaction().replace(CONTENT_VIEW_ID, mReviewViewFragment).commit();
+		fm.beginTransaction().replace(CONTENT_VIEW_ID, mHomeViewFragment).commit();
 	}
 	
 	private void postAuthTokenRevoked() {

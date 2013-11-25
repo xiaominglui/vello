@@ -141,8 +141,10 @@ public class VelloProvider extends ContentProvider {
 					sortOrder);
 			break;
 		case DB_WORD_CARD:
-			c = db.query(uriType.getTableName(), projection, selection,
-					selectionArgs, null, null, sortOrder);
+			c = db.query(uriType.getTableName(), projection, selection, selectionArgs, null, null, sortOrder);
+			break;
+		case DB_DICT_CARD:
+			c = db.query(uriType.getTableName(), projection, selection, selectionArgs, null, null, sortOrder);
 			break;
 		}
 

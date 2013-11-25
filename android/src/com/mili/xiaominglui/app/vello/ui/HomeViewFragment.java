@@ -77,10 +77,6 @@ import java.util.TimeZone;
 public class HomeViewFragment extends SherlockFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnLongClickListener, Callback, DialogInterface.OnClickListener {
 	private static final String TAG = HomeViewFragment.class.getSimpleName();
 	
-	private static final String KEY_DELETED_WORD = "deletedWord";
-	private static final String KEY_UNDO_SHOWING = "undoShowing";
-	private static final String KEY_SELECTED_WORD_CARDS = "selectedWordCards";
-	
 	private WordCard mDeletedWord;
 	private boolean mUndoShowing = false;
 	private boolean mInDeleteConfirmation = false;
@@ -734,8 +730,7 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 		    mListener.onModeChanged(VelloConfig.DICTIONARY_MODE_ACTION_BAR_COLOR);
 //		    mCardList.enableSwipe(false);
 //		    mCardList.setOnItemSwipeListener(null);
-		    mCardList.setEmptyView(null);
-		    criteria.addLike(DbWordCard.Columns.NAME, mCurFilter + "%");
+		    criteria.addLike(DbDictCard.Columns.KEYWORD, mCurFilter + "%");
 		    return new CursorLoader(getActivity(), DbDictCard.CONTENT_URI, DbDictCard.PROJECTION, criteria.getWhereClause(), criteria.getWhereParams(), criteria.getOrderClause());
 		}
 		
@@ -743,11 +738,14 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+		mCardArrayAdapter.clear();
 		if (mIsSearching) {
 			// in Dictionary Mode
+			if (data == null) return;
 			for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
-//				DictCard dc = new DictCard(getActivity().getApplicationContext(), data);
-//				mCards.add(dc);
+				DictCard dc = new DictCard(getActivity().getApplicationContext(), data);
+				dc.setSwipeable(false);
+				mCardArrayAdapter.add(dc);
 			}
 		} else {
 			// in Review Mode
@@ -762,7 +760,6 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 	@Override
 	public void onLoaderReset(Loader<Cursor> loder) {
 //		mAdapter.swapCursor(null);
-		mCards.clear();
 	}
 	
 	private void asyncDeleteWordCache(WordCard wordcard) {
