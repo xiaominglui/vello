@@ -58,7 +58,7 @@ public class ReviewCard extends Card {
 		addCardHeader(header);
 		
 		
-		CardExpand expand = new CardExpand(mContext);
+		ReviewExpandCard expand = new ReviewExpandCard(mContext, desc);
 		expand.setTitle(desc);
 		addCardExpand(expand);
 	}
