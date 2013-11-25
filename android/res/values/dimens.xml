@@ -8,5 +8,71 @@
     <dimen name="toast_bar_bottom_margin_in_conversation">24dip</dimen>
     <dimen name="text_size_medium">14sp</dimen>
     <dimen name="content_padding_normal">16dp</dimen>
+    
+    <!-- Card -->
+    <dimen name="card_base_empty_height">6dp</dimen>
+    <dimen name="card_background_default_radius">2dip</dimen>
+
+    <!-- Main -->
+    <dimen name="card_main_layout_view_margin_top">0dp</dimen>
+    <dimen name="card_main_layout_view_margin_left">0dp</dimen>
+    <dimen name="card_main_layout_view_margin_bottom">0dp</dimen>
+    <dimen name="card_main_layout_view_margin_right">0dp</dimen>
+
+    <!-- Header -->
+    <dimen name="card_header_outer_view_margin_top">0dp</dimen>
+    <dimen name="card_header_outer_view_margin_left">0dp</dimen>
+    <dimen name="card_header_outer_view_margin_bottom">0dp</dimen>
+    <dimen name="card_header_outer_view_margin_right">0dp</dimen>
+
+    <!--Button Header -->
+    <dimen name="card_header_button_padding_left">10dp</dimen>
+    <dimen name="card_header_button_padding_right">0dp</dimen>
+    <dimen name="card_header_button_padding_bottom">0dp</dimen>
+    <dimen name="card_header_button_padding_top">0dp</dimen>
+
+    <!-- Title Header -->
+    <dimen name="card_header_simple_title_margin_left">10dp</dimen>
+    <dimen name="card_header_simple_title_margin_top">5dp</dimen>
+    <dimen name="card_header_simple_title_text_size">20sp</dimen>
+
+    <!-- Content -->
+    <dimen name="card_content_outer_view_margin_top">0dp</dimen>
+    <dimen name="card_content_outer_view_margin_left">0dp</dimen>
+    <dimen name="card_content_outer_view_margin_bottom">0dp</dimen>
+    <dimen name="card_content_outer_view_margin_right">0dp</dimen>
+
+    <dimen name="card_main_simple_title_margin_left">5dp</dimen>
+    <dimen name="card_main_simple_title_margin_top">0dp</dimen>
+
+    <!-- Shadow -->
+    <dimen name="card_shadow_height">3dp</dimen>
+    <dimen name="card_shadow_view_margin_top">0dp</dimen>
+    <dimen name="card_shadow_view_margin_left">0dp</dimen>
+    <dimen name="card_shadow_view_margin_bottom">0dp</dimen>
+    <dimen name="card_shadow_view_margin_right">0dp</dimen>
+
+    <!-- Thumbnail -->
+    <dimen name="card_thumbnail_width">72dp</dimen>
+    <dimen name="card_thumbnail_height">72dp</dimen>
+
+    <!-- Expand -->
+    <dimen name="card_expand_layout_padding">2dp</dimen>
+    <dimen name="card_expand_simple_title_paddingLeft">10dp</dimen>
+    <dimen name="card_expand_simple_title_paddingRight">10dp</dimen>
+    <dimen name="card_expand_simple_title_text_size">14sp</dimen>
+
+
+    <!-- List -->
+    <dimen name="list_card_padding_left">8dp</dimen>
+    <dimen name="list_card_padding_right">8dp</dimen>
+    <dimen name="list_card_padding_bottom">6dp</dimen>
+    <dimen name="list_card_padding_top">2dp</dimen>
+
+    <!-- Grid -->
+    <dimen name="grid_card_padding_left">2dp</dimen>
+    <dimen name="grid_card_padding_right">2dp</dimen>
+    <dimen name="grid_card_padding_bottom">2dp</dimen>
+    <dimen name="grid_card_padding_top">2dp</dimen>
 
 </resources>

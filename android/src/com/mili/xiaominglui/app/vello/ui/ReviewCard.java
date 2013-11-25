@@ -6,16 +6,20 @@ import it.gmariotti.cardslib.library.internal.CardHeader;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.atermenji.android.iconictextview.IconicTextView;
+import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
+import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class ReviewCard extends Card {
-	protected TextView mTitle;
-    protected TextView mSecondaryTitle;
+    protected IconicTextView iconicLifeSign;
+	protected TextView textViewLifeCount;
 	
 	public int idInLocalDB;
 	
@@ -44,17 +48,17 @@ public class ReviewCard extends Card {
 		markDeleted = c.getString(DbWordCard.Columns.MARKDELETED.getIndex());
 		dateLastOperation = c.getString(DbWordCard.Columns.DATE_LAST_OPERATION.getIndex());
 		
-		init(context);
+		init();
 	}
 	
-	private void init(Context context) {
-		CardHeader header = new CardHeader(context);
+	private void init() {
+		CardHeader header = new CardHeader(mContext);
 		header.setTitle(name);
 		header.setButtonExpandVisible(true);
 		addCardHeader(header);
 		
 		
-		CardExpand expand = new CardExpand(context);
+		CardExpand expand = new CardExpand(mContext);
 		expand.setTitle(desc);
 		addCardExpand(expand);
 	}
@@ -62,14 +66,20 @@ public class ReviewCard extends Card {
 	@Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
 		//Retrieve elements
-        mTitle = (TextView) parent.findViewById(R.id.carddemo_myapps_main_inner_title);
-        mSecondaryTitle = (TextView) parent.findViewById(R.id.carddemo_myapps_main_inner_secondaryTitle);
+        iconicLifeSign = (IconicTextView) parent.findViewById(R.id.life_sign);
+        textViewLifeCount = (TextView) parent.findViewById(R.id.life_count);
         
-        if (mTitle!=null)
-            mTitle.setText("Google");
+        if (iconicLifeSign != null) {
+        	iconicLifeSign.setIcon(FontAwesomeIcon.CHECK);
+        	iconicLifeSign.setTextColor(Color.GRAY);
+        }
+            
 
-        if (mSecondaryTitle!=null)
-            mSecondaryTitle.setText("Map");
+        if (textViewLifeCount != null) {
+        	int positionList = AccountUtils.getVocabularyListPosition(mContext, idList);
+        	textViewLifeCount.setText(String.valueOf(positionList) + "/9");
+			textViewLifeCount.setTextColor(Color.GRAY);
+        }
 		
 	}
 	

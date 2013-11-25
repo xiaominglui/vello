@@ -27,6 +27,9 @@ public class AVOSPushReceiver extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		String action = intent.getAction();
 
+		if (action.equals("com.avos.avello.DICT_SYNC_MSG")) {
+			
+		}
 		if (action.equals("com.avos.avello.SYNC_MSG")) {
 			// String channel =
 			// intent.getExtras().getString("com.parse.Channel");

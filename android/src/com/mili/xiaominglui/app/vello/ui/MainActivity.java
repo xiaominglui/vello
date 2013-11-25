@@ -301,7 +301,6 @@ public class MainActivity extends BaseActivity implements HomeViewFragment.onSta
 				
 				@Override
 				public boolean onQueryTextSubmit(String query) {
-//				    doWordSearch(query); // only for debug
 				    InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
 					inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
 					return true;
