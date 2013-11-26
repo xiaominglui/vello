@@ -21,7 +21,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal" >
+    android:orientation="horizontal"
+    android:layout_gravity="bottom"
+    android:layout_marginLeft="3dp"
+    android:layout_marginRight="3dp" >
 
     <com.atermenji.android.iconictextview.IconicTextView
         android:id="@+id/life_sign"

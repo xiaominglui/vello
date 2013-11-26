@@ -3,21 +3,15 @@ package com.mili.xiaominglui.app.vello.receiver;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.accounts.Account;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
-import android.provider.SyncStateContract.Constants;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.mili.xiaominglui.app.vello.config.JSONTag;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.config.WSConfig;
-import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
-import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class AVOSPushReceiver extends BroadcastReceiver {
@@ -28,7 +22,6 @@ public class AVOSPushReceiver extends BroadcastReceiver {
 		String action = intent.getAction();
 
 		if (action.equals("com.avos.avello.DICT_SYNC_MSG")) {
-			
 		}
 		if (action.equals("com.avos.avello.SYNC_MSG")) {
 			// String channel =

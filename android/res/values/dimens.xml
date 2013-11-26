@@ -10,7 +10,7 @@
     <dimen name="content_padding_normal">16dp</dimen>
     
     <!-- Card -->
-    <dimen name="card_base_empty_height">6dp</dimen>
+    <dimen name="card_base_empty_height">32dp</dimen>
     <dimen name="card_background_default_radius">2dip</dimen>
 
     <!-- Main -->
