@@ -15,13 +15,14 @@
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
+    <!-- hide search function at present
     <item
         android:id="@+id/menu_search"
         android:actionViewClass="com.actionbarsherlock.widget.SearchView"
         android:icon="@android:drawable/ic_menu_search"
         android:orderInCategory="0"
         android:showAsAction="collapseActionView|ifRoom"
-        android:title="@string/description_search"/>
+        android:title="@string/description_search"/> -->
     <item
         android:id="@+id/menu_sync"
         android:title="@string/description_sync"

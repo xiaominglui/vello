@@ -225,7 +225,7 @@ public class SyncHelper {
 				}
 
 			} catch (ConnectionException e) {
-				// TODO Auto-generated catch block
+				// TODO if the token revoked at other place, ConnectionException will throw out 
 				e.printStackTrace();
 			} catch (DataException e) {
 				// TODO Auto-generated catch block

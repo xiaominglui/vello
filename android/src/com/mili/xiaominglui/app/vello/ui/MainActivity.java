@@ -3,9 +3,6 @@ package com.mili.xiaominglui.app.vello.ui;
 import java.lang.ref.WeakReference;
 
 import android.accounts.Account;
-import android.annotation.TargetApi;
-import android.app.Activity;
-import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -25,14 +22,12 @@ import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.widget.SearchView;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
@@ -42,11 +37,9 @@ import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.syncadapter.SyncHelper;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.mili.xiaominglui.app.vello.util.HelpUtils;
-import com.mili.xiaominglui.app.vello.util.UIUtils;
 
 public class MainActivity extends BaseActivity implements HomeViewFragment.onStatusChangedListener {
 	private static final String TAG = MainActivity.class.getSimpleName();
-	private Activity mActivity;
 	
 	private static final int CONTENT_VIEW_ID = 666;
 	private Drawable oldBackground = null;
@@ -287,11 +280,11 @@ public class MainActivity extends BaseActivity implements HomeViewFragment.onSta
 		super.onCreateOptionsMenu(menu);
 		getSupportMenuInflater().inflate(R.menu.home, menu);
 
-		setupSearchMenuItem(menu);
+//		setupSearchMenuItem(menu);
 
 		return true;
 	}
-	
+	/* hide search function
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void setupSearchMenuItem(Menu menu) {
         MenuItem searchItem = menu.findItem(R.id.menu_search);
@@ -321,16 +314,18 @@ public class MainActivity extends BaseActivity implements HomeViewFragment.onSta
             }
         }
     }
+    */
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+		/** disable search at present
 		case R.id.menu_search:
 			if (!UIUtils.hasHoneycomb()) {
                 startSearch(null, false, Bundle.EMPTY, false);
                 return true;
             }
-			break;
+			break; **/
 		case R.id.menu_sync:
 			triggerRefresh();
 			return true;

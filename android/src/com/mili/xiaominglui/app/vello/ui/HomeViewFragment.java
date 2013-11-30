@@ -92,8 +92,6 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 	private String mCurFilter = "";
 	private boolean mIsSearching = false;
 	
-	private DrawerLayout mDrawerLayout;
-	private ListView listView;
 	private SherlockActionBarDrawerToggle mDrawerToggle;
 	private ActionBarHelper mActionBar;
 	private ActionMode mActionMode;
@@ -151,54 +149,6 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 //		outState.putIntArray(KEY_SELECTED_WORD_CARDS, mAdapter.getSelectedWordCardsArray());
 	}
 	
-	/**
-	 * This list item click listener implements very simple view switching by
-	 * changing the primary content text. The drawer is closed when a selection
-	 * is made.
-	 */
-	private class DrawerItemClickListener implements ListView.OnItemClickListener {
-		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//			mContent.setText(Shakespeare.DIALOGUE[position]);
-			mActionBar.setTitle(VelloConfig.DRAWER_MENU_TITLES[position]);
-			mDrawerLayout.closeDrawer(listView);
-		}
-	}
-	
-	/**
-	 * A drawer listener can be used to respond to drawer events such as
-	 * becoming fully opened or closed. You should always prefer to perform
-	 * expensive operations such as drastic relayout when no animation is
-	 * currently in progress, either before or after the drawer animates.
-	 * 
-	 * When using ActionBarDrawerToggle, all DrawerLayout listener methods
-	 * should be forwarded if the ActionBarDrawerToggle is not used as the
-	 * DrawerLayout listener directly.
-	 */
-	private class DemoDrawerListener implements DrawerLayout.DrawerListener {
-		@Override
-		public void onDrawerOpened(View drawerView) {
-			mDrawerToggle.onDrawerOpened(drawerView);
-			mActionBar.onDrawerOpened();
-		}
-
-		@Override
-		public void onDrawerClosed(View drawerView) {
-			mDrawerToggle.onDrawerClosed(drawerView);
-			mActionBar.onDrawerClosed();
-		}
-
-		@Override
-		public void onDrawerSlide(View drawerView, float slideOffset) {
-			mDrawerToggle.onDrawerSlide(drawerView, slideOffset);
-		}
-
-		@Override
-		public void onDrawerStateChanged(int newState) {
-			mDrawerToggle.onDrawerStateChanged(newState);
-		}
-	}
-	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -211,20 +161,6 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 //		}
 		
 		mRootView = (ViewGroup) inflater.inflate(R.layout.fragment_home, null);
-		
-		mDrawerLayout = (DrawerLayout) mRootView.findViewById(R.id.drawer_layout);
-		listView = (ListView) mRootView.findViewById(R.id.left_drawer);
-		
-		mDrawerLayout.setDrawerListener(new DemoDrawerListener());
-		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-
-		listView.setAdapter(new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1, VelloConfig.DRAWER_MENU_TITLES));
-		listView.setOnItemClickListener(new DrawerItemClickListener());
-		listView.setCacheColorHint(0);
-		listView.setScrollingCacheEnabled(false);
-		listView.setScrollContainer(false);
-		listView.setFastScrollEnabled(true);
-		listView.setSmoothScrollbarEnabled(true);
 		
 		mCards = new ArrayList<Card>();
 		mCardArrayAdapter = new HomeCardArrayAdapter(getActivity(), mCards);
@@ -265,15 +201,6 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 		
 		mActionBar = createActionBarHelper();
 		mActionBar.init();
-		
-		// ActionBarDrawerToggle provides convenient helpers for tying together
-		// the
-		// prescribed interactions between a top-level sliding drawer and the
-		// action bar.
-		mDrawerToggle = new SherlockActionBarDrawerToggle(this.getActivity(),
-				mDrawerLayout, R.drawable.ic_drawer_light,
-				R.string.drawer_open, R.string.drawer_close);
-		mDrawerToggle.syncState();
 		
 		// Show action mode if needed
 //        int selectedNum = mAdapter.getSelectedItemsNum();
@@ -752,6 +679,8 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 			for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
 				ReviewCard rc = new ReviewCard(getActivity().getApplicationContext(), data);
 				rc.setSwipeable(true);
+				rc.setId(rc.id);
+				mCardArrayAdapter.setEnableUndo(true);
 				mCardArrayAdapter.add(rc);
 			}
 		}
