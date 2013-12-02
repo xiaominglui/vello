@@ -37,5 +37,8 @@ public class VelloConfig {
     public static final String DEFAULT_VOCABULARY_BOARD_HOOK_DESCRIPTION = "Vocabulary Sync Trigger";
     
 	public static final String[] DRAWER_MENU_TITLES = { "Reviewing", "Mastered"};
+	
+	public static final String API_KEY = "d8b28623f3171a9dbc870738cd5f6926";
+	public static final String API_SECRET = "71ae43e7beebe76bd75bd98cc81425e04979dfc3cb2a12f16094e15f5e348fcf";
     
 }

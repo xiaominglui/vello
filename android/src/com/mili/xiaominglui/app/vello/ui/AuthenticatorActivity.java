@@ -1,18 +1,28 @@
 
 package com.mili.xiaominglui.app.vello.ui;
 
+import org.scribe.builder.ServiceBuilder;
+import org.scribe.builder.api.TrelloApi;
+import org.scribe.model.Token;
+import org.scribe.model.Verifier;
+import org.scribe.oauth.OAuthService;
+
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.WebViewFragment;
+import android.widget.FrameLayout;
 
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
@@ -39,6 +49,8 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
     private static final String TAG = "AuthenticatorActivity";
 
     private WebView mWebView;
+    private OAuthService mService;
+    private Token mRequestToken;
 
 
 	private class MyWebViewClient extends WebViewClient {
@@ -47,11 +59,10 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 			if (VelloConfig.DEBUG_SWITCH) {
 				Log.d(TAG, "trello url = " + url);
 			}
-			if (url.contains("#token=")) {
-				String token = (url.split("#token="))[1];
-				if (token != null
-						&& token.length() == Constants.AUTHTOKEN_LENGTH) {
-					finishAuthenticated(token);
+			if (url.contains("&oauth_verifier=")) {
+				String verifier = (url.split("&oauth_verifier="))[1];
+				if (verifier != null && verifier.length() == Constants.VERIFIER_LENGTH) {
+					new GetTrelloAccessTokenTask().execute(verifier);
 				} else {
 					if (VelloConfig.DEBUG_SWITCH) {
 						Log.i(TAG, "trello not response token");
@@ -79,19 +90,16 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
      * {@inheritDoc}
      */
     @Override
-    public void onCreate(Bundle icicle) {
-        final Activity activity = this;
-        final ProgressDialog progressDialog = new ProgressDialog(activity);
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressDialog.setCancelable(false);
-
-        super.onCreate(icicle);
-        setContentView(R.layout.activity_oauth);
+    public void onCreate(Bundle savedInstanceState) {
+    	super.onCreate(savedInstanceState);
+    	
+    	FrameLayout frame = new FrameLayout(this);
+    	setContentView(frame, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+    	
         mWebView = (WebView) findViewById(R.id.webview);
 
         WebSettings webSettings = mWebView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-//        webSettings.setDomStorageEnabled(true);
+        webSettings.setJavaScriptEnabled(false);
 
         mWebView.setWebChromeClient(new WebChromeClient() {
             @Override
@@ -111,8 +119,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         });
 
         mWebView.setWebViewClient(new MyWebViewClient());
-        mWebView.loadUrl("file:///android_asset/connect.html");
-
+        new GetTrelloAuthVerifierStringTask().execute();
     }
     
     /**
@@ -133,6 +140,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         final Intent intent = new Intent();
         intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME);
         intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, Constants.ACCOUNT_TYPE);
+        intent.putExtra(AccountManager.KEY_AUTHTOKEN, authToken);
         intent.putExtra(AccountManager.KEY_PASSWORD, authToken);
         setAccountAuthenticatorResult(intent.getExtras());
         finish();
@@ -144,5 +152,49 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         intent.putExtra(AccountManager.KEY_ERROR_CODE, AccountManager.ERROR_CODE_REMOTE_EXCEPTION);
         setAccountAuthenticatorResult(intent.getExtras());
         finish();
+    }
+    
+    class GetTrelloAuthVerifierStringTask extends AsyncTask<Void, Void, String> {
+
+		@Override
+		protected String doInBackground(Void... params) {
+			mService = new ServiceBuilder()
+					.provider(TrelloApi.class)
+					.apiKey(VelloConfig.API_KEY)
+					.apiSecret(VelloConfig.API_SECRET)
+					.build();
+			mRequestToken = mService.getRequestToken();
+			
+			return mService.getAuthorizationUrl(mRequestToken);
+		}
+		
+		@Override
+		protected void onPostExecute(String result) {
+			mWebView.loadUrl(result);
+		}
+    	
+    }
+    
+    class GetTrelloAccessTokenTask extends AsyncTask<String, Void, String> {
+
+		@Override
+		protected String doInBackground(String... params) {
+			Verifier verifier = new Verifier(params[0]);
+			Token accessToken = mService.getAccessToken(mRequestToken, verifier);
+			Log.d("mingo.lv", "aToken=" + accessToken.getToken());
+			Log.d("mingo.lv", "Secret=" + accessToken.getSecret());
+			Log.d("mingo.lv", "RawResponse=" + accessToken.getRawResponse());
+			return accessToken.getToken();
+		}
+		
+		@Override
+		protected void onPostExecute(String result) {
+			mWebView.loadUrl("about:blank");
+			finishAuthenticated(result);
+		}
+    }
+    
+    public static class AuthTrelloFragment extends WebViewFragment {
+    	
     }
 }

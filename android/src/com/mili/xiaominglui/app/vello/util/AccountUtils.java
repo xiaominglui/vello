@@ -3,6 +3,11 @@ package com.mili.xiaominglui.app.vello.util;
 
 import java.io.IOException;
 
+import org.scribe.builder.ServiceBuilder;
+import org.scribe.builder.api.TrelloApi;
+import org.scribe.model.Token;
+import org.scribe.oauth.OAuthService;
+
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
@@ -24,6 +29,7 @@ import android.webkit.CookieSyncManager;
 import com.avos.avoscloud.ParseInstallation;
 import com.avos.avoscloud.PushService;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
+import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
@@ -110,22 +116,13 @@ public class AccountUtils {
                 try {
                     Bundle bundle = future.getResult();
 
-                    if (activity != null
-                            && bundle.containsKey(AccountManager.KEY_INTENT)) {
-                        Intent intent = bundle
-                                .getParcelable(AccountManager.KEY_INTENT);
-                        intent.setFlags(intent.getFlags()
-                                & ~Intent.FLAG_ACTIVITY_NEW_TASK);
-                        activity.startActivityForResult(intent,
-                                activityRequestCode);
+                    if (activity != null && bundle.containsKey(AccountManager.KEY_INTENT)) {
+                        Intent intent = bundle.getParcelable(AccountManager.KEY_INTENT);
+                        intent.setFlags(intent.getFlags() & ~Intent.FLAG_ACTIVITY_NEW_TASK);
+                        activity.startActivityForResult(intent, activityRequestCode);
 
-                    } else if (bundle.containsKey(AccountManager.KEY_PASSWORD)) {
-                        final String name = bundle
-                                .getString(AccountManager.KEY_ACCOUNT_NAME);
-                        final String type = bundle
-                                .getString(AccountManager.KEY_ACCOUNT_TYPE);
-                        final String token = bundle
-                                .getString(AccountManager.KEY_PASSWORD);
+                    } else if (bundle.containsKey(AccountManager.KEY_AUTHTOKEN)) {
+                        final String token = bundle.getString(AccountManager.KEY_AUTHTOKEN);
 //                        addAccount(context, name, type, token);
 //                        setAuthToken(context, token);
 //                        setChosenAccountName(context, name);

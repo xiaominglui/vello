@@ -31,12 +31,6 @@ public class AccountActivity extends SherlockFragmentActivity implements LoginFr
     private Intent mFinishIntent;
     private boolean mCancelAuth = false;
 
-    
-    /**
-     * Sync period in seconds, currently every 8 hours
-     */
-    private static final long SYNC_PERIOD = 8L * 60L * 60L;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,8 +111,7 @@ public class AccountActivity extends SherlockFragmentActivity implements LoginFr
 		if (mFinishIntent != null) {
 			mFinishIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 			mFinishIntent.setAction(Intent.ACTION_MAIN);
-			mFinishIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-					| Intent.FLAG_ACTIVITY_CLEAR_TASK);
+			mFinishIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 			startActivity(mFinishIntent);
 		}
 		finish();

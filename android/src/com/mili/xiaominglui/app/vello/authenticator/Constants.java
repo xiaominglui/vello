@@ -14,5 +14,7 @@ public class Constants {
      * Authtoken length int.
      */
     public static final int AUTHTOKEN_LENGTH = 64;
+    
+    public static final int VERIFIER_LENGTH = 32;
 
 }
