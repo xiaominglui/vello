@@ -16,9 +16,8 @@
  * limitations under the License.
  */
 -->
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/abs__background_holo_light" >
@@ -26,6 +25,16 @@
     <WebView
         android:id="@+id/webview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:visibility="invisible" />
+    
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:indeterminate="true"
+        android:layout_gravity="top" />
+    
 
-</LinearLayout>
+</FrameLayout>

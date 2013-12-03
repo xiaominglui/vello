@@ -89,17 +89,15 @@ public class AccountUtils {
         public void onAuthTokenAvailable(String authToken);
     }
 
-    public static void addTrelloAccount(Activity activity,
-            AuthenticateCallback callback, int activityRequestCode,
-            Account account) {
-        AccountManager.get(activity).addAccount(
+    public static void authAndAddTrelloAccount(Activity activity, AuthenticateCallback callback, int activityRequestCode, Account account) {
+    	AccountManager.get(activity).addAccount(
                 account.type,
                 Constants.AUTHTOKEN_TYPE,
                 null,
                 null,
                 activity,
-                getAccountManagerCallback(callback, account, activity,
-                        activity, activityRequestCode), null);
+                getAccountManagerCallback(callback, account, activity, activity, activityRequestCode),
+                null);
 
     }
 
