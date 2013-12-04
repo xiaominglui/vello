@@ -50,8 +50,7 @@ public class AccountActivity extends SherlockFragmentActivity implements LoginFr
     }
 
     private void tryAuthenticate() {
-        AccountUtils.authAndAddTrelloAccount(AccountActivity.this,
-                AccountActivity.this, REQUEST_AUTHENTICATE, mMyTrelloAccount);
+        AccountUtils.authAndAddTrelloAccount(AccountActivity.this, AccountActivity.this, REQUEST_AUTHENTICATE, mMyTrelloAccount);
     }
     
     /**

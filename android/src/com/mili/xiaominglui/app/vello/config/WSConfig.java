@@ -19,6 +19,7 @@ public final class WSConfig {
     public static final String WS_TRELLO_TARGET_CARD ="/cards";
     public static final String WS_TRELLO_TARGET_TOKEN = "/tokens";
     public static final String WS_TRELLO_TARGET_WEBHOOKS = "/webhooks";
+    public static final String WS_TRELLO_TARGET_MEMBERS = "/members";
     
     public static final String WS_TRELLO_PARAM_FILTER = "filter";
     public static final String WS_TRELLO_PARAM_APP_KEY = "key";
@@ -46,6 +47,7 @@ public final class WSConfig {
     public static final String WS_TRELLO_FIELD_LISTS = "/lists";
     public static final String WS_TRELLO_FIELD_CARDS = "/cards";
     public static final String WS_TRELLO_FIELD_LIST = "/list";
+    public static final String WS_TRELLO_FIELD_USERNAME = "/username";
     
     public static final String WS_TRELLO_ACTION_COMMENTS = "/actions/comments";
     

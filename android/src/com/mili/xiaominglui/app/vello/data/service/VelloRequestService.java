@@ -3,6 +3,7 @@ package com.mili.xiaominglui.app.vello.data.service;
 
 import com.foxykeep.datadroid.service.RequestService;
 import com.mili.xiaominglui.app.vello.data.operation.CheckTrelloConnectionOperation;
+import com.mili.xiaominglui.app.vello.data.operation.ReadTrelloAccountInfoOperation;
 import com.mili.xiaominglui.app.vello.data.operation.SetWebHookActiveOperation;
 import com.mili.xiaominglui.app.vello.data.operation.AddWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ArchiveWordCardOperation;
@@ -77,6 +78,8 @@ public class VelloRequestService extends RequestService {
             	return new RevokeAuthTokenOperation();
             case VelloRequestFactory.REQUEST_TYPE_CHECK_TRELLO_CONNECTION:
             	return new CheckTrelloConnectionOperation();
+            case VelloRequestFactory.REQUEST_TYPE_READ_TRELLO_ACCOUNT_INFO:
+            	return new ReadTrelloAccountInfoOperation();
         }
         return null;
     }

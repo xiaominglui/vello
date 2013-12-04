@@ -1,6 +1,8 @@
 
 package com.mili.xiaominglui.app.vello.ui;
 
+import java.lang.ref.WeakReference;
+
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
@@ -8,9 +10,17 @@ import org.scribe.oauth.OAuthService;
 
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
@@ -21,7 +31,7 @@ import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.authenticator.TrelloAuthApi;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
-import com.mili.xiaominglui.app.vello.util.AccountUtils;
+import com.mili.xiaominglui.app.vello.service.VelloService;
 
 /**
  * Activity which displays login screen to the user.
@@ -46,6 +56,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
     private OAuthService mService;
     private Token mRequestToken;
     private ProgressBar mProgressBar;
+    private String mAccessToken;
 
 
 	private class MyWebViewClient extends WebViewClient {
@@ -95,6 +106,95 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 			finishFailure();
 		}
 	}
+	
+	private UIHandler mUICallback = new UIHandler(this);
+	private class UIHandler extends Handler {
+		WeakReference<AuthenticatorActivity> mActivity;
+		
+		UIHandler(AuthenticatorActivity activity) {
+			mActivity = new WeakReference<AuthenticatorActivity>(activity);
+		}
+		
+		@Override
+		public void handleMessage(Message msg) {
+			AuthenticatorActivity theActivity = mActivity.get();
+			switch (msg.what) {
+			case VelloService.MSG_RETURN_TRELLO_USERNAME:
+				String username = (String) msg.obj;
+				finishAuthenticated(mAccessToken, username);
+				mProgressBar.setVisibility(View.INVISIBLE);
+				break;
+			}
+		}
+	}
+	Messenger mVelloService = null;
+	private boolean mIsBound;
+
+	final Messenger mMessenger = new Messenger(mUICallback);
+
+	private ServiceConnection mConnection = new ServiceConnection() {
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			// This is called when the connection with the service has been
+			// established, giving us the service object we can use to
+			// interact with the service. Because we have bound to a explicit
+			// service that we know is running in our own process, we can
+			// cast its IBinder to a concrete class and directly access it.
+			mVelloService = new Messenger(service);
+
+			try {
+				Message msg = Message.obtain(null,
+						VelloService.MSG_REGISTER_CLIENT);
+				msg.replyTo = mMessenger;
+				mVelloService.send(msg);
+			} catch (RemoteException e) {
+				// In this case the service has crashed before we could even do
+				// anything with it
+			}
+			
+			new GetTrelloAuthVerifierStringTask().execute();
+			
+		}
+
+		public void onServiceDisconnected(ComponentName className) {
+			// This is called when the connection with the service has been
+			// unexpectedly disconnected - process crashed.
+			mService = null;
+		}
+	};
+
+	private void sendMessageToService(int type, Object obj) {
+		if (mIsBound) {
+			if (mService != null) {
+				try {
+					Message msg = Message.obtain(null, type);
+					if (obj != null) {
+						msg.obj = obj;
+					}
+					msg.replyTo = mMessenger;
+					mVelloService.send(msg);
+				} catch (RemoteException e) {
+				}
+			}
+		}
+	}
+	
+	void doBindService() {
+		// Establish a connection with the service. We use an explicit
+		// class name because we want a specific service implementation that
+		// we know will be running in our own process (and thus won't be
+		// supporting component replacement by other applications).
+		bindService(new Intent(this, VelloService.class), mConnection,
+				Context.BIND_AUTO_CREATE);
+		mIsBound = true;
+	}
+
+	void doUnbindService() {
+		if (mIsBound) {
+			// Detach our existing connection.
+			unbindService(mConnection);
+			mIsBound = false;
+		}
+	}
 
     /**
      * {@inheritDoc}
@@ -107,13 +207,15 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
     	mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
         mWebView = (WebView) findViewById(R.id.webview);
         mWebView.setWebViewClient(new MyWebViewClient());
-        new GetTrelloAuthVerifierStringTask().execute();
+        
+        doBindService();
     }
     
     @Override
     protected void onDestroy() {
     	mWebView.loadUrl("about:blank");
     	mWebView.clearCache(true);
+    	doUnbindService();
     	super.onDestroy();
     }
     
@@ -126,16 +228,15 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
      * 
      * @param result the confirmCredentials result.
      */
-    private void finishAuthenticated(Token authToken) {
+    private void finishAuthenticated(String token, String username) {
+    	if (VelloConfig.DEBUG_SWITCH) {
+    		Log.i(TAG, "finishAuthenticated(). token=" + token + ", username=" + username);
+    	}
 
-        Log.i(TAG, "finishAuthenticated()");
-//        AccountUtils.addAccount(getApplicationContext(), VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE, authToken);
-//        AccountUtils.setAuthToken(getApplicationContext(), authToken);
-//        AccountUtils.setChosenAccountName(getApplicationContext(), VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME);
         final Intent intent = new Intent();
-        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME);
         intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, Constants.ACCOUNT_TYPE);
-        intent.putExtra(AccountManager.KEY_AUTHTOKEN, authToken);
+        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, username);
+        intent.putExtra(AccountManager.KEY_PASSWORD, token);
         setAccountAuthenticatorResult(intent.getExtras());
         finish();
     }
@@ -181,7 +282,9 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 		@Override
 		protected void onPostExecute(Token token) {
 			mWebView.loadUrl("about:blank");
-			finishAuthenticated(token);
+			mProgressBar.setVisibility(View.VISIBLE);
+			mAccessToken = token.getToken();
+			sendMessageToService(VelloService.MSG_READ_TRELLO_ACCOUNT_INFO, mAccessToken);
 		}
     }
 }

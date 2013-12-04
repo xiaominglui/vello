@@ -3,11 +3,6 @@ package com.mili.xiaominglui.app.vello.util;
 
 import java.io.IOException;
 
-import org.scribe.builder.ServiceBuilder;
-import org.scribe.builder.api.TrelloApi;
-import org.scribe.model.Token;
-import org.scribe.oauth.OAuthService;
-
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
@@ -15,7 +10,6 @@ import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,14 +20,9 @@ import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
-import com.avos.avoscloud.ParseInstallation;
-import com.avos.avoscloud.PushService;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
-import com.mili.xiaominglui.app.vello.data.model.WordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
-import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
-import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.ui.AccountActivity;
 
 public class AccountUtils {
@@ -119,11 +108,12 @@ public class AccountUtils {
                         intent.setFlags(intent.getFlags() & ~Intent.FLAG_ACTIVITY_NEW_TASK);
                         activity.startActivityForResult(intent, activityRequestCode);
 
-                    } else if (bundle.containsKey(AccountManager.KEY_AUTHTOKEN)) {
-                        final String token = bundle.getString(AccountManager.KEY_AUTHTOKEN);
-//                        addAccount(context, name, type, token);
-//                        setAuthToken(context, token);
-//                        setChosenAccountName(context, name);
+                    } else if (bundle.containsKey(AccountManager.KEY_PASSWORD) && bundle.containsKey(AccountManager.KEY_ACCOUNT_NAME)) {
+                        final String token = bundle.getString(AccountManager.KEY_PASSWORD);
+                        final String username = bundle.getString(AccountManager.KEY_ACCOUNT_NAME);
+                        addAccount(context, username, Constants.ACCOUNT_TYPE);
+                        setAuthToken(context, token);
+                        setChosenAccountName(context, username);
                         if (callback != null) {
                             callback.onAuthTokenAvailable(token);
                         }
@@ -213,10 +203,10 @@ public class AccountUtils {
     }
 
     public static void addAccount(final Context context, final String name,
-            final String type, final String token) {
+            final String type) {
         AccountManager am = AccountManager.get(context);
         final Account account = new Account(name, type);
-        am.addAccountExplicitly(account, token, null);
+        am.addAccountExplicitly(account, "", null);
     }
     
     public static String getAuthToken(final Context context) {

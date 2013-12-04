@@ -57,6 +57,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 import org.apache.http.HttpStatus;
+import org.scribe.model.Token;
 
 public class VelloService extends Service implements RequestListener,
 		ConnectionErrorDialogListener {
@@ -102,6 +103,8 @@ public class VelloService extends Service implements RequestListener,
 	public static final int MSG_REVOKE_AUTH_TOKEN = 108;
 	public static final int MSG_SET_WEBHOOK_ACTIVE_STATUS = 109;
 	public static final int MSG_CHECK_TRELLO_CONNECTION = 110;
+	public static final int MSG_READ_TRELLO_ACCOUNT_INFO = 111;
+	public static final int MSG_RETURN_TRELLO_USERNAME = 112;
 
 	// Unique Identification Number for the Notification.
 	// We use it on Notification start, and to cancel it.
@@ -152,6 +155,9 @@ public class VelloService extends Service implements RequestListener,
 				case MSG_CHECK_TRELLO_CONNECTION:
 					service.checkTrelloConnection();
 					break;
+				case MSG_READ_TRELLO_ACCOUNT_INFO:
+					String token = (String) msg.obj;
+					service.readTrelloAccountInfo(token);
 				default:
 					super.handleMessage(msg);
 				}
@@ -432,6 +438,15 @@ public class VelloService extends Service implements RequestListener,
 		Request checkTrelloConnection = VelloRequestFactory.checkTrelloConnection();
 		mRequestManager.execute(checkTrelloConnection, this);
 		mRequestList.add(checkTrelloConnection);
+	}
+	
+	private void readTrelloAccountInfo(String token) {
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "readTrelloAccountInfo...");
+		}
+		Request readTrelloAccountInfo = VelloRequestFactory.readTrelloAccountInfo(token);
+		mRequestManager.execute(readTrelloAccountInfo, this);
+		mRequestList.add(readTrelloAccountInfo);
 	}
 	
 	@Override
@@ -758,20 +773,20 @@ public class VelloService extends Service implements RequestListener,
 		            if (cur != null) {
 		                int num = cur.getCount();
 		                if (num > 0) {
-		                    Notification noti = new Notification.Builder(getApplicationContext())
-		                            .setContentTitle(
-		                                    "You have " + num + " words need reviewing!")
-		                            .setContentText("Click me to begin reviewing!")
-		                            .setSmallIcon(R.drawable.ic_launcher)
-		                            .setContentIntent(pIntent).build();
-
-		                    NotificationManager notificationManager = (NotificationManager) getApplicationContext()
-		                            .getSystemService(Context.NOTIFICATION_SERVICE);
-
-		                    // Hide the notification after its selected
-		                    noti.flags |= Notification.FLAG_AUTO_CANCEL;
-
-		                    notificationManager.notify(0, noti);
+//		                    Notification noti = new Notification.Builder(getApplicationContext())
+//		                            .setContentTitle(
+//		                                    "You have " + num + " words need reviewing!")
+//		                            .setContentText("Click me to begin reviewing!")
+//		                            .setSmallIcon(R.drawable.ic_launcher)
+//		                            .setContentIntent(pIntent).build();
+//
+//		                    NotificationManager notificationManager = (NotificationManager) getApplicationContext()
+//		                            .getSystemService(Context.NOTIFICATION_SERVICE);
+//
+//		                    // Hide the notification after its selected
+//		                    noti.flags |= Notification.FLAG_AUTO_CANCEL;
+//
+//		                    notificationManager.notify(0, noti);
 		                }
 		            }
 				} else {
@@ -864,6 +879,15 @@ public class VelloService extends Service implements RequestListener,
 					Log.d(TAG, "CheckTrelloConnection end...");
 				}
 				return;
+			case VelloRequestFactory.REQUEST_TYPE_READ_TRELLO_ACCOUNT_INFO:
+				String username = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_ACCOUNT_USERNAME);
+				String token = request.getString(VelloRequestFactory.PARAM_EXTRA_TRELLO_ACCESS_TOKEN);
+				if (username != null && !username.isEmpty()) {
+					sendMessageToUI(VelloService.MSG_RETURN_TRELLO_USERNAME, username);
+				} else {
+					// failed, retry
+					readTrelloAccountInfo(token);
+				}
 			default:
 				return;
 			}
@@ -885,8 +909,7 @@ public class VelloService extends Service implements RequestListener,
 
 				// continue to check vocabulary list if not well formed
 				checkVocabularyLists();
-			} else if (statusCode == HttpStatus.SC_NOT_FOUND
-					&& request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_REVOKE_AUTH_TOKEN) {
+			} else if (statusCode == HttpStatus.SC_NOT_FOUND && request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_REVOKE_AUTH_TOKEN) {
 				// token has been revoked via trello web app
 				Log.d(TAG, "token has been revoked via trello web app.");
 				sendMessageToUI(VelloService.MSG_AUTH_TOKEN_REVOKED, null);
