@@ -10,6 +10,7 @@ public class DirtyCard implements Parcelable {
 	public String id;
 	public String markDeleted;
 	public String dateLastOperation;
+	public String dateLastActivity;
 
 	public static final Parcelable.Creator<DirtyCard> CREATOR = new Creator<DirtyCard>() {
 
@@ -28,12 +29,14 @@ public class DirtyCard implements Parcelable {
 		id = source.readString();
 		markDeleted = source.readString();
 		dateLastOperation = source.readString();
+		dateLastActivity = source.readString();
 	}
 	
 	public DirtyCard(Cursor c) {
 		id = c.getString(DbWordCard.Columns.CARD_ID.getIndex());
 		markDeleted = c.getString(DbWordCard.Columns.MARKDELETED.getIndex());
-		dateLastOperation = c.getString(DbWordCard.Columns.DATE_LAST_OPERATION.getIndex());		
+		dateLastOperation = c.getString(DbWordCard.Columns.DATE_LAST_OPERATION.getIndex());
+		dateLastActivity = c.getString(DbWordCard.Columns.DATE_LAST_ACTIVITY.getIndex());
 	}
 
 	@Override
@@ -46,6 +49,7 @@ public class DirtyCard implements Parcelable {
 		dest.writeString(id);
 		dest.writeString(markDeleted);
 		dest.writeString(dateLastOperation);
+		dest.writeString(dateLastActivity);
 	}
 
 }

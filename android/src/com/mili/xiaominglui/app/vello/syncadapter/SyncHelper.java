@@ -144,8 +144,7 @@ public class SyncHelper {
 			try {
 				ArrayList<WordCard> preSyncRemoteWordCardList = getOpenWordCards();
 				if (preSyncRemoteWordCardList.size() > 0) {
-					SimpleDateFormat format = new SimpleDateFormat(
-							"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+					SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 					for (WordCard wordCard : preSyncRemoteWordCardList) {
 						String idCard = wordCard.id;
 						if (localDirtyWords.containsKey(idCard)) {

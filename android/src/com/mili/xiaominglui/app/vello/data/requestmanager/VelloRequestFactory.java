@@ -2,6 +2,7 @@
 package com.mili.xiaominglui.app.vello.data.requestmanager;
 
 import com.foxykeep.datadroid.requestmanager.Request;
+import com.mili.xiaominglui.app.vello.data.model.DirtyCard;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 
 public final class VelloRequestFactory {
@@ -30,6 +31,7 @@ public final class VelloRequestFactory {
     public static final int REQUEST_TYPE_CHECK_TRELLO_CONNECTION = 20;
     public static final int REQUEST_TYPE_READ_TRELLO_ACCOUNT_INFO = 21;
     public static final int REQUEST_TYPE_GET_DUE_REVIEW_CARD_LIST = 22;
+    public static final int REQUEST_TYPE_MERGE_DIRTY_CARD =23;
 
     // Response data
     public static final String BUNDLE_EXTRA_TRELLO_BOARD_LIST = "com.mili.xiaominglui.app.vello.extra.trello.board.list";
@@ -60,6 +62,7 @@ public final class VelloRequestFactory {
     public static final String PARAM_EXTRA_WEBHOOK_ACTIVE = "com.mili.xiaominglui.app.vello.extra.webhook.active";
     public static final String PARAM_EXTRA_TRELLO_ACCESS_TOKEN = "com.mili.xiaominglui.app.vello.extra.trello.token";
     public static final String PARAM_EXTRA_SERVICE_START_ID = "com.mili.xiaominglui.app.vello.extra.service.startid";
+    public static final String PARAM_EXTRA_DIRTY_CARD = "com.mili.xiaominglui.app.vello.extra.dirty.card";
 
     private VelloRequestFactory() {
         // no public constructor
@@ -213,6 +216,14 @@ public final class VelloRequestFactory {
 	public static Request readTrelloAccountInfo(String access_token) {
 		Request request = new Request(REQUEST_TYPE_READ_TRELLO_ACCOUNT_INFO);
 		request.put(PARAM_EXTRA_TRELLO_ACCESS_TOKEN, access_token);
+		request.setMemoryCacheEnabled(true);
+		return request;
+	}
+
+	public static Request mergeDirtyCard(DirtyCard card, int startId) {
+		Request request = new Request(REQUEST_TYPE_MERGE_DIRTY_CARD);
+		request.put(PARAM_EXTRA_DIRTY_CARD, card);
+		request.put(PARAM_EXTRA_SERVICE_START_ID, startId);
 		request.setMemoryCacheEnabled(true);
 		return request;
 	}

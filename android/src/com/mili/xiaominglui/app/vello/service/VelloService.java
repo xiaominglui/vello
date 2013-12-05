@@ -4,12 +4,14 @@ import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 
 import org.apache.http.HttpStatus;
 
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ClipboardManager;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -44,6 +46,7 @@ public class VelloService extends Service implements RequestListener,
 		ConnectionErrorDialogListener {
 	private static final String TAG = VelloService.class.getSimpleName();
 
+	HashMap<String, TrelloCard> mDirtyCards = new HashMap<String, TrelloCard>();
 	private static boolean isRunning = false;
 	ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track
 																// of all
@@ -333,6 +336,8 @@ public class VelloService extends Service implements RequestListener,
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "getDueReviewCardList start...");
 		}
+		// step 1: get open trello cards
+		getOpenTrelloCardList(startId);
 	}
 	
 	private void queryInLocalCache(String query) {
@@ -433,11 +438,21 @@ public class VelloService extends Service implements RequestListener,
 	
 	private void readTrelloAccountInfo(String token) {
 		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "readTrelloAccountInfo...");
+			Log.d(TAG, "readTrelloAccountInfo start...");
 		}
 		Request readTrelloAccountInfo = VelloRequestFactory.readTrelloAccountInfo(token);
 		mRequestManager.execute(readTrelloAccountInfo, this);
 		mRequestList.add(readTrelloAccountInfo);
+	}
+	
+	private void mergeDirtyCard(DirtyCard card, int startId) {
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "mergeDirtyCard start...");
+		}
+		
+		Request mergeDirtyCard = VelloRequestFactory.mergeDirtyCard(card, startId);
+		mRequestManager.execute(mergeDirtyCard, this);
+		mRequestList.add(mergeDirtyCard);
 	}
 	
 	@Override
@@ -739,8 +754,37 @@ public class VelloService extends Service implements RequestListener,
 				return;
 
 			case VelloRequestFactory.REQUEST_TYPE_GET_OPEN_TRELLO_CARD_LIST:
-				boolean finished = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_RESULT_STATUS);
-				int startId = request.getInt(VelloRequestFactory.PARAM_EXTRA_SERVICE_START_ID);
+				
+				ArrayList<TrelloCard> OpenTrelloCardList = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_CARD_LIST);
+				if (OpenTrelloCardList.size() > 0) {
+					final ContentResolver resolver = getContentResolver();
+					// query and backup all local items that syncInNext=true or merge
+					// locally later
+					ProviderCriteria criteria = new ProviderCriteria();
+					criteria.addNe(DbWordCard.Columns.DATE_LAST_OPERATION, "");
+					Cursor c = resolver.query(DbWordCard.CONTENT_URI,
+							DbWordCard.PROJECTION, criteria.getWhereClause(),
+							criteria.getWhereParams(), criteria.getOrderClause());
+					if (c != null) {
+						while (c.moveToNext()) {
+							TrelloCard wc = new TrelloCard(c);
+							mDirtyCards.put(wc.id, wc);
+						}
+					}
+					
+					if (mDirtyCards.size() > 0) {
+						// maybe need merging
+						for (TrelloCard tCard : OpenTrelloCardList) {
+							if (mDirtyCards.containsKey(tCard.id)) {
+								// need merging TODO
+							}
+						}
+					} else {
+						// commit to local DB TODO
+					}
+					
+				}
+				/*
 				if (finished) {
 					// TODO finished expectly
 					// Build notification
@@ -779,13 +823,10 @@ public class VelloService extends Service implements RequestListener,
 //		                    notificationManager.notify(0, noti);
 		                }
 		            }
-		            if (VelloConfig.DEBUG_SWITCH) {
-		            	Log.d(TAG, "command stopping---#" + startId);
-		            }
-		            stopSelf(startId);
 				} else {
 					// TODO something error
 				}
+				*/
 				return;
 
 			case VelloRequestFactory.REQUEST_TYPE_ARCHIVE_WORDCARD:
@@ -886,17 +927,7 @@ public class VelloService extends Service implements RequestListener,
 				
 			case VelloRequestFactory.REQUEST_TYPE_GET_DUE_REVIEW_CARD_LIST:
 				ArrayList<DirtyCard> dirtyCards = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_DIRTY_CARD_LIST);
-				if (!dirtyCards.isEmpty()) {
-					// has dirty cards, begin merge step 1: DELETE
-					for (DirtyCard dc : dirtyCards) {
-						if (dc.markDeleted.equals("true")) {
-							// has TrelloCard to delete
-						}
-					}
-				
-				} else {
-					// TODO full pull sync only
-				}
+				int startId = request.getInt(VelloRequestFactory.PARAM_EXTRA_SERVICE_START_ID);
 				return;
 				
 			default:
