@@ -18,7 +18,7 @@ import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.config.WSConfig;
 import com.mili.xiaominglui.app.vello.data.factory.ReviewedWordCardResponseJsonFactory;
 import com.mili.xiaominglui.app.vello.data.factory.UpgradeWordCardResponseJsonFactory;
-import com.mili.xiaominglui.app.vello.data.model.WordCard;
+import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
@@ -29,7 +29,7 @@ public class UpgradeWordCardOperation implements Operation {
 	public Bundle execute(Context context, Request request)
 			throws ConnectionException, DataException, CustomRequestException {
 		String token = AccountUtils.getAuthToken(context);
-		WordCard wordcard = (WordCard) request.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+		TrelloCard wordcard = (TrelloCard) request.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 		String urlString = WSConfig.TRELLO_API_URL
                 + WSConfig.WS_TRELLO_TARGET_CARD + "/" + wordcard.id;
 		

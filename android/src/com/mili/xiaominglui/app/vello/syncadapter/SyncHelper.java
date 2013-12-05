@@ -19,13 +19,14 @@ import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.config.WSConfig;
 import com.mili.xiaominglui.app.vello.data.factory.DictCardsHandler;
 import com.mili.xiaominglui.app.vello.data.factory.JSONHandler;
-import com.mili.xiaominglui.app.vello.data.factory.WordCardListJsonFactory;
+import com.mili.xiaominglui.app.vello.data.factory.TrelloCardListJsonFactory;
 import com.mili.xiaominglui.app.vello.data.model.AuthTokenRevokedOrCardDeletedResponse;
-import com.mili.xiaominglui.app.vello.data.model.WordCard;
+import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbDictCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
+import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.ui.MainActivity;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
@@ -44,6 +45,7 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.sax.StartElementListener;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -120,6 +122,10 @@ public class SyncHelper {
 		}
 		
 		if ((flags & FLAG_SYNC_REMOTE) != 0) {
+			Intent intent = new Intent(mContext, VelloService.class);
+			mContext.startService(intent);
+			
+			/*
 			// query and backup all local items that syncInNext=true or merge
 			// locally later
 			HashMap<String, WordCard> localDirtyWords = new HashMap<String, WordCard>();
@@ -184,7 +190,7 @@ public class SyncHelper {
 
 					// Build notification
 					// TODO need rework
-					Intent intent = new Intent(mContext, MainActivity.class);
+//					Intent intent = new Intent(mContext, MainActivity.class);
 					PendingIntent pIntent = PendingIntent.getActivity(mContext, 0,
 							intent, 0);
 
@@ -237,39 +243,12 @@ public class SyncHelper {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
+			*/
 		}
 		
 
 		
-	}
-	
-	/**
-	 * retrieve all open card from trello
-	 * 
-	 * @throws ConnectionException
-	 * @throws DataException
-	 */
-	private ArrayList<WordCard> getOpenWordCards() throws ConnectionException,
-			DataException {
-		String vocabularyBoardId = AccountUtils.getVocabularyBoardId(mContext);
-		String urlString = WSConfig.TRELLO_API_URL
-				+ WSConfig.WS_TRELLO_TARGET_BOARD + "/" + vocabularyBoardId
-				+ WSConfig.WS_TRELLO_FIELD_CARDS;
-
-		HashMap<String, String> parameterMap = new HashMap<String, String>();
-		parameterMap.put(WSConfig.WS_TRELLO_PARAM_FILTER, "open");
-		parameterMap.put(WSConfig.WS_TRELLO_PARAM_FIELDS,
-				"name,desc,due,closed,idList,dateLastActivity");
-		parameterMap.put(WSConfig.WS_TRELLO_PARAM_APP_KEY,
-				WSConfig.VELLO_APP_KEY);
-		parameterMap.put(WSConfig.WS_TRELLO_PARAM_ACCESS_TOKEN, mAuthToken);
-
-		NetworkConnection networkConnection = new NetworkConnection(mContext,
-				urlString);
-		networkConnection.setMethod(Method.GET);
-		networkConnection.setParameters(parameterMap);
-		ConnectionResult result = networkConnection.execute();
-		return WordCardListJsonFactory.parseResult(result.body);
 	}
 	
 	/**
@@ -278,7 +257,7 @@ public class SyncHelper {
 	 * @param wordCard
 	 * @throws ConnectionException
 	 */
-	private void updateRemoteWordCard(WordCard wordCard)
+	private void updateRemoteWordCard(TrelloCard wordCard)
 			throws ConnectionException {
 		String urlString = WSConfig.TRELLO_API_URL
 				+ WSConfig.WS_TRELLO_TARGET_CARD + "/" + wordCard.id;
@@ -303,7 +282,7 @@ public class SyncHelper {
 		}
 
 		Gson gson = new Gson();
-		WordCard updatedWordCard = gson.fromJson(result.body, WordCard.class);
+		TrelloCard updatedWordCard = gson.fromJson(result.body, TrelloCard.class);
 		if (updatedWordCard != null) {
 			// TODO update success
 		} else {
@@ -311,7 +290,7 @@ public class SyncHelper {
 		}
 	}
 	
-	private void deleteRemoteWordCard(WordCard wordCard) throws ConnectionException {
+	private void deleteRemoteWordCard(TrelloCard wordCard) throws ConnectionException {
 		String urlString = WSConfig.TRELLO_API_URL + WSConfig.WS_TRELLO_TARGET_CARD + "/" + wordCard.id;
 		
 		HashMap<String, String> parameterMap = new HashMap<String, String>();
@@ -343,7 +322,7 @@ public class SyncHelper {
 	 * @param dirtyWordCard local changed wordcard
 	 * @return new wordcard merged
 	 */
-	private WordCard upgradeWordCard(WordCard wordCard, WordCard dirtyWordCard) {
+	private TrelloCard upgradeWordCard(TrelloCard wordCard, TrelloCard dirtyWordCard) {
 		int localPositionInLists = AccountUtils.getVocabularyListPosition(
 				mContext, dirtyWordCard.idList);
 		int remotePostionInLists = AccountUtils.getVocabularyListPosition(

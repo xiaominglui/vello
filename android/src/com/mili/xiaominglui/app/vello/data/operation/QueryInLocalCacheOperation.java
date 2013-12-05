@@ -9,7 +9,7 @@ import com.foxykeep.datadroid.exception.CustomRequestException;
 import com.foxykeep.datadroid.exception.DataException;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.service.RequestService.Operation;
-import com.mili.xiaominglui.app.vello.data.model.WordCard;
+import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
@@ -27,7 +27,7 @@ public class QueryInLocalCacheOperation implements Operation {
         Cursor c = context.getContentResolver().query(DbWordCard.CONTENT_URI, DbWordCard.PROJECTION, criteria.getWhereClause(), criteria.getWhereParams(), criteria.getOrderClause());
         if (c != null) {
             if (c.getCount() == 1 && c.moveToFirst()) {
-                WordCard wordcard = new WordCard(c);
+                TrelloCard wordcard = new TrelloCard(c);
                 bundle.putParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD, wordcard);
             }
         }

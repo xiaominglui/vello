@@ -31,7 +31,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
-import com.mili.xiaominglui.app.vello.data.model.WordCard;
+import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.syncadapter.SyncHelper;
@@ -73,11 +73,6 @@ public class MainActivity extends BaseActivity implements HomeViewFragment.onSta
 //						R.string.toast_init_vocabulary_start, AppMsg.STYLE_INFO)
 //						.setLayoutGravity(Gravity.BOTTOM).show();
 				break;
-			case VelloService.MSG_TOAST_GET_DUE_WORD:
-//				AppMsg.makeText(theActivity.mActivity,
-//						R.string.toast_get_due_word, AppMsg.STYLE_INFO)
-//						.setLayoutGravity(Gravity.BOTTOM).show();
-				break;
 			case VelloService.MSG_TOAST_INIT_VOCABULARY_END:
 				break;
 			case VelloService.MSG_TOAST_NO_WORD_NOW:
@@ -93,7 +88,7 @@ public class MainActivity extends BaseActivity implements HomeViewFragment.onSta
 			case VelloService.MSG_TOAST_WORD_REVIEWED_COUNT_PLUS:
 				break;
 			case VelloService.MSG_SHOW_RESULT_WORDCARD:
-			    WordCard result = (WordCard) msg.obj;
+			    TrelloCard result = (TrelloCard) msg.obj;
 			    Toast.makeText(theActivity, result.id, Toast.LENGTH_SHORT).show();
 			    break;
 			case VelloService.MSG_AUTH_TOKEN_REVOKED:

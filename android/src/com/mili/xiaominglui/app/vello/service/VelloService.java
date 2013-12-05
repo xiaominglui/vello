@@ -1,16 +1,16 @@
 package com.mili.xiaominglui.app.vello.service;
 
-import android.accounts.Account;
-import android.app.Notification;
-import android.app.NotificationManager;
+import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+
+import org.apache.http.HttpStatus;
+
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ClipboardManager;
-import android.content.ContentProviderOperation;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,38 +26,19 @@ import com.avos.avoscloud.PushService;
 import com.avos.avoscloud.SaveCallback;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
-import com.mili.xiaominglui.app.vello.R;
-import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
-import com.mili.xiaominglui.app.vello.data.factory.IcibaWordXmlParser;
 import com.mili.xiaominglui.app.vello.data.model.Board;
-import com.mili.xiaominglui.app.vello.data.model.IcibaWord;
+import com.mili.xiaominglui.app.vello.data.model.DirtyCard;
 import com.mili.xiaominglui.app.vello.data.model.List;
-import com.mili.xiaominglui.app.vello.data.model.WordCard;
+import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.model.WordList;
-import com.mili.xiaominglui.app.vello.data.operation.GetDueWordCardListOperation;
-import com.mili.xiaominglui.app.vello.data.operation.LookUpInDictionaryOperation;
-import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
-import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestManager;
 import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment.ConnectionErrorDialogListener;
-import com.mili.xiaominglui.app.vello.syncadapter.SyncHelper;
 import com.mili.xiaominglui.app.vello.ui.MainActivity;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
-
-import java.lang.ref.WeakReference;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-
-import org.apache.http.HttpStatus;
-import org.scribe.model.Token;
 
 public class VelloService extends Service implements RequestListener,
 		ConnectionErrorDialogListener {
@@ -80,7 +61,6 @@ public class VelloService extends Service implements RequestListener,
 	public static final int MSG_DIALOG_CONNECTION_ERROR_SHOW = 4;
 	public static final int MSG_TOAST_INIT_VOCABULARY_START = 5;
 	public static final int MSG_TOAST_INIT_VOCABULARY_END = 6;
-	public static final int MSG_TOAST_GET_DUE_WORD = 7;
 	public static final int MSG_TOAST_NO_WORD_NOW = 8;
 	public static final int MSG_TOAST_NOT_AVAILABLE_WORD = 9;
 	public static final int MSG_TOAST_WORD_REVIEWED_COUNT_PLUS = 10;
@@ -96,7 +76,7 @@ public class VelloService extends Service implements RequestListener,
 	public static final int MSG_STATUS_INIT_ACCOUNT_END = 51;
 
 	public static final int MSG_CHECK_VOCABULARY_BOARD = 100;
-	public static final int MSG_GET_DUE_WORDCARD_LIST = 101;
+	public static final int MSG_GET_DUE_REVIEW_CARD_LIST = 101;
 	public static final int MSG_CLOSE_WORDCARD = 104;
 	public static final int MSG_SYNC_LOCAL_CACHE = 106;
 	public static final int MSG_TRIGGER_QUERY_WORD = 107;
@@ -106,9 +86,6 @@ public class VelloService extends Service implements RequestListener,
 	public static final int MSG_READ_TRELLO_ACCOUNT_INFO = 111;
 	public static final int MSG_RETURN_TRELLO_USERNAME = 112;
 
-	// Unique Identification Number for the Notification.
-	// We use it on Notification start, and to cancel it.
-
 	final Messenger mMessenger = new Messenger(new IncomingHandler(this));
 
 	@Override
@@ -116,8 +93,7 @@ public class VelloService extends Service implements RequestListener,
 		return mMessenger.getBinder();
 	}
 
-	static class IncomingHandler extends Handler { // Handler of incoming
-													// messages from clients.
+	static class IncomingHandler extends Handler { // Handler of incoming messages from clients.
 		private final WeakReference<VelloService> mService;
 
 		IncomingHandler(VelloService service) {
@@ -138,8 +114,9 @@ public class VelloService extends Service implements RequestListener,
 				case MSG_CHECK_VOCABULARY_BOARD:
 					service.checkVocabularyBoard();
 					break;
-				case MSG_GET_DUE_WORDCARD_LIST:
-					service.getDueWordCardList();
+				case MSG_GET_DUE_REVIEW_CARD_LIST:
+					int startId = msg.arg1;
+					service.getDueReviewCardList(startId);
 					break;
 				case MSG_TRIGGER_QUERY_WORD:
 				    String query = (String) msg.obj;
@@ -185,10 +162,19 @@ public class VelloService extends Service implements RequestListener,
 
     @Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.i("LocalService", "Received start id " + startId + ": " + intent);
-		// We want this service to continue running until it is explicitly
-		// stopped, so return sticky.
-		return START_STICKY;
+    	if (VelloConfig.DEBUG_SWITCH) {
+    		Log.d(TAG, "command started---#" + startId);
+    	}
+    	Message m = Message.obtain(null, VelloService.MSG_GET_DUE_REVIEW_CARD_LIST);
+    	m.arg1 = startId;
+    	m.arg2 = flags;
+    	m.obj = intent.getExtras();
+    	try {
+			mMessenger.send(m);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		return START_NOT_STICKY;
 	}
 
 	public static boolean isRunning() {
@@ -332,16 +318,21 @@ public class VelloService extends Service implements RequestListener,
 		mRequestList.add(configureVocabularyBoardRequest);
 	}
 
-	private void getDueWordCardList() {
+	private void getOpenTrelloCardList(int startId) {
 		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "getAllWordCardList start ...");
+			Log.d(TAG, "getOpenTrelloCardList start...");
 		}
 
-		Request getAllWordCardListRequest = VelloRequestFactory
-				.getDueWordCardListRequest();
-		mRequestManager.execute(getAllWordCardListRequest, this);
-		mRequestList.add(getAllWordCardListRequest);
+		Request getOpenTrelloCardList = VelloRequestFactory.getOpenTrelloCardListRequest(startId);
+		mRequestManager.execute(getOpenTrelloCardList, this);
+		mRequestList.add(getOpenTrelloCardList);
 
+	}
+	
+	private void getDueReviewCardList(int startId) {
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "getDueReviewCardList start...");
+		}
 	}
 	
 	private void queryInLocalCache(String query) {
@@ -456,7 +447,7 @@ public class VelloService extends Service implements RequestListener,
 
 			switch (request.getRequestType()) {
 			case VelloRequestFactory.REQUEST_TYPE_REVIEWED_WORDCARD:
-				WordCard reviewedWordCard = resultData
+				TrelloCard reviewedWordCard = resultData
 						.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 				if (reviewedWordCard != null) {
 					// reviewed
@@ -642,8 +633,7 @@ public class VelloService extends Service implements RequestListener,
 				return;
 
 			case VelloRequestFactory.REQUEST_TYPE_QUERY_IN_REMOTE_STORAGE:
-				ArrayList<WordCard> existedWordCardList = resultData
-						.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST);
+				ArrayList<TrelloCard> existedWordCardList = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_CARD_LIST);
 				String keyword = request
 						.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
 				if (existedWordCardList.isEmpty()) {
@@ -656,7 +646,7 @@ public class VelloService extends Service implements RequestListener,
 				} else {
 					// check more to decide
 					// filter to find the right one
-					for (WordCard w : existedWordCardList) {
+					for (TrelloCard w : existedWordCardList) {
 						if (w.name.equals(keyword)) {
 							// got the right word card
 							// show with user first
@@ -698,7 +688,7 @@ public class VelloService extends Service implements RequestListener,
 			case VelloRequestFactory.REQUEST_TYPE_ADD_WORDCARD:
 			    String keywordInAddWordCard = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
 			    String wsResult = request.getString(VelloRequestFactory.PARAM_EXTRA_DICTIONARY_WS_RESULT);
-				WordCard addedWordCard = resultData
+				TrelloCard addedWordCard = resultData
 						.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 				if (addedWordCard != null) {
 					// show added wordcard to user
@@ -718,7 +708,7 @@ public class VelloService extends Service implements RequestListener,
 				return;
 
 			case VelloRequestFactory.REQUEST_TYPE_RESTART_WORDCARD:
-				WordCard restartedWordCard = resultData
+				TrelloCard restartedWordCard = resultData
 						.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 				if (restartedWordCard != null) {
 					// restarted
@@ -733,7 +723,7 @@ public class VelloService extends Service implements RequestListener,
 				return;
 
 			case VelloRequestFactory.REQUEST_TYPE_INITIALIZE_WORDCARD:
-				WordCard initializedWordCard = resultData
+				TrelloCard initializedWordCard = resultData
 						.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 				if (initializedWordCard != null) {
 					// initialized
@@ -748,9 +738,9 @@ public class VelloService extends Service implements RequestListener,
 				}
 				return;
 
-			case VelloRequestFactory.REQUEST_TYPE_GET_DUE_WORDCARD_LIST:
-				boolean finished = resultData
-						.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_RESULT_STATUS);
+			case VelloRequestFactory.REQUEST_TYPE_GET_OPEN_TRELLO_CARD_LIST:
+				boolean finished = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_RESULT_STATUS);
+				int startId = request.getInt(VelloRequestFactory.PARAM_EXTRA_SERVICE_START_ID);
 				if (finished) {
 					// TODO finished expectly
 					// Build notification
@@ -789,13 +779,17 @@ public class VelloService extends Service implements RequestListener,
 //		                    notificationManager.notify(0, noti);
 		                }
 		            }
+		            if (VelloConfig.DEBUG_SWITCH) {
+		            	Log.d(TAG, "command stopping---#" + startId);
+		            }
+		            stopSelf(startId);
 				} else {
 					// TODO something error
 				}
 				return;
 
 			case VelloRequestFactory.REQUEST_TYPE_ARCHIVE_WORDCARD:
-				WordCard closedWordCard = resultData
+				TrelloCard closedWordCard = resultData
 						.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 				String idCard = request
 						.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_CARD_ID);
@@ -809,7 +803,7 @@ public class VelloService extends Service implements RequestListener,
 				return;
 				
 			case VelloRequestFactory.REQUEST_TYPE_QUERY_IN_LOCAL_CACHE:
-			    WordCard localWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+			    TrelloCard localWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 			    if (localWordCard != null) {
 			        // yes, show in UI
 			    	sendMessageToUI(MSG_SHOW_RESULT_WORDCARD, localWordCard);
@@ -888,6 +882,23 @@ public class VelloService extends Service implements RequestListener,
 					// failed, retry
 					readTrelloAccountInfo(token);
 				}
+				return;
+				
+			case VelloRequestFactory.REQUEST_TYPE_GET_DUE_REVIEW_CARD_LIST:
+				ArrayList<DirtyCard> dirtyCards = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_DIRTY_CARD_LIST);
+				if (!dirtyCards.isEmpty()) {
+					// has dirty cards, begin merge step 1: DELETE
+					for (DirtyCard dc : dirtyCards) {
+						if (dc.markDeleted.equals("true")) {
+							// has TrelloCard to delete
+						}
+					}
+				
+				} else {
+					// TODO full pull sync only
+				}
+				return;
+				
 			default:
 				return;
 			}
@@ -897,18 +908,19 @@ public class VelloService extends Service implements RequestListener,
 	@Override
 	public void onRequestConnectionError(Request request, int statusCode) {
 		if (mRequestList.contains(request)) {
-			if (statusCode == HttpStatus.SC_UNAUTHORIZED
-					&& request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_CONFIGURE_VOCABULARY_BOARD) {
-				String boardId = request
-						.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_BOARD_ID);
-				AccountUtils.setVocabularyBoardId(getApplicationContext(),
-						boardId);
-				Log.d(TAG,
-						"get a board without ownership, skip configuration! vocabulary board id = "
-								+ boardId);
+			if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
+				if (request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_CONFIGURE_VOCABULARY_BOARD) {
+					String boardId = request.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_BOARD_ID);
+					AccountUtils.setVocabularyBoardId(getApplicationContext(), boardId);
+					Log.d(TAG, "get a board without ownership, skip configuration! vocabulary board id = " + boardId);
 
-				// continue to check vocabulary list if not well formed
-				checkVocabularyLists();
+					// continue to check vocabulary list if not well formed
+					checkVocabularyLists();
+				} else if (request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_GET_OPEN_TRELLO_CARD_LIST) {
+					// TODO force logout and re-login
+					Log.i(TAG, "invalid token");
+				}
+				
 			} else if (statusCode == HttpStatus.SC_NOT_FOUND && request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_REVOKE_AUTH_TOKEN) {
 				// token has been revoked via trello web app
 				Log.d(TAG, "token has been revoked via trello web app.");
@@ -919,6 +931,7 @@ public class VelloService extends Service implements RequestListener,
 					Log.d(TAG, "CheckTrelloConnection end...");
 				}
 			}
+			Log.d(TAG, "type=" + request.getRequestType() + "; status code=" + statusCode);
 			mRequestList.remove(request);
 		}
 	}

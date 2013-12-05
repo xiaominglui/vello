@@ -13,8 +13,6 @@ public class DictCard extends Card {
 	protected String mTitleHeader;
 	protected String mDictData;
 	
-	public int idInLocalDB;
-	
 	public String oid;
 	public String keyword;
 	public String dictdata;
@@ -22,7 +20,6 @@ public class DictCard extends Card {
 	public DictCard(Context context, Cursor c) {
 		super(context, R.layout.card_dict_inner_content);
 		
-		idInLocalDB = c.getInt(DbDictCard.Columns.ID.getIndex());
 		oid = c.getString(DbDictCard.Columns.OID.getIndex());
 		keyword = c.getString(DbDictCard.Columns.KEYWORD.getIndex());
 		dictdata = c.getString(DbDictCard.Columns.DICDATA.getIndex());

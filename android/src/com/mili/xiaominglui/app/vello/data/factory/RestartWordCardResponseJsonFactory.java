@@ -4,7 +4,7 @@ package com.mili.xiaominglui.app.vello.data.factory;
 import android.os.Bundle;
 
 import com.google.gson.Gson;
-import com.mili.xiaominglui.app.vello.data.model.WordCard;
+import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 
 public class RestartWordCardResponseJsonFactory {
@@ -12,7 +12,7 @@ public class RestartWordCardResponseJsonFactory {
 
     public static Bundle parseResult(String wsResponse) {
         Gson gson = new Gson();
-        WordCard wordcard = gson.fromJson(wsResponse, WordCard.class);
+        TrelloCard wordcard = gson.fromJson(wsResponse, TrelloCard.class);
         if (wordcard != null) {
             Bundle bundle = new Bundle();
             bundle.putParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD, wordcard);

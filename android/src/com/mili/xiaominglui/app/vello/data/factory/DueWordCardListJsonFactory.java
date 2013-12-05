@@ -7,7 +7,7 @@ import android.util.Log;
 import com.foxykeep.datadroid.exception.DataException;
 import com.mili.xiaominglui.app.vello.config.JSONTag;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
-import com.mili.xiaominglui.app.vello.data.model.WordCard;
+import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 
 import org.json.JSONArray;
@@ -30,7 +30,7 @@ public class DueWordCardListJsonFactory {
     }
 
     public static Bundle parseResult(String wsResponse) throws DataException {
-        ArrayList<WordCard> wordCardList = new ArrayList<WordCard>();
+        ArrayList<TrelloCard> wordCardList = new ArrayList<TrelloCard>();
         Calendar rightNow = Calendar.getInstance();
         long rightNowUnixTime = rightNow.getTimeInMillis();
         long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
@@ -49,7 +49,7 @@ public class DueWordCardListJsonFactory {
                     long dueUnixTime = date.getTime();
                     if (dueUnixTime <= rightNowUnixTimeGMT) {
                         // it is time to review
-                        WordCard wordCard = new WordCard();
+                        TrelloCard wordCard = new TrelloCard();
                         wordCard.id = jsonCard.getString(JSONTag.CARD_ELEM_ID);
                         wordCard.name = jsonCard
                                 .getString(JSONTag.CARD_ELEM_NAME);
@@ -72,7 +72,7 @@ public class DueWordCardListJsonFactory {
 
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList(
-                VelloRequestFactory.BUNDLE_EXTRA_WORDCARD_LIST, wordCardList);
+                VelloRequestFactory.BUNDLE_EXTRA_TRELLO_CARD_LIST, wordCardList);
         return bundle;
     }
 
