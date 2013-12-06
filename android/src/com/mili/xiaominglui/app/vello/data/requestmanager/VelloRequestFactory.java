@@ -23,15 +23,14 @@ public final class VelloRequestFactory {
     public static final int REQUEST_TYPE_REVIEWED_PLUS_WORDCARD = 12;
     public static final int REQUEST_TYPE_ARCHIVE_WORDCARD = 13;
     public static final int REQUEST_TYPE_UPGRADE_WORDCARD = 14;
-    public static final int REQUEST_TYPE_QUERY_IN_LOCAL_CACHE = 15;
     public static final int REQUEST_TYPE_LOOK_UP_IN_DICTIONARY = 16;
     public static final int REQUEST_TYPE_CREATE_WEBHOOK = 17;
     public static final int REQUEST_TYPE_REVOKE_AUTH_TOKEN = 18;
     public static final int REQUEST_TYPE_SET_WEBHOOK_ACTIVE = 19;
     public static final int REQUEST_TYPE_CHECK_TRELLO_CONNECTION = 20;
     public static final int REQUEST_TYPE_READ_TRELLO_ACCOUNT_INFO = 21;
-    public static final int REQUEST_TYPE_GET_DUE_REVIEW_CARD_LIST = 22;
-    public static final int REQUEST_TYPE_MERGE_DIRTY_CARD =23;
+    public static final int REQUEST_TYPE_DELETE_REMOTE_TRELLO_CARD = 23;
+    public static final int REQUEST_TYPE_UPDATE_REMOTE_TRELLO_CARD = 24;
 
     // Response data
     public static final String BUNDLE_EXTRA_TRELLO_BOARD_LIST = "com.mili.xiaominglui.app.vello.extra.trello.board.list";
@@ -48,6 +47,8 @@ public final class VelloRequestFactory {
     public static final String BUNDLE_EXTRA_WEBHOOK_ID = "com.mili.xiaominglui.app.vello.extra.webhook.id";
     public static final String BUNDLE_EXTRA_WEBHOOK_ACTIVE = "com.mili.xiaominglui.app.vello.extra.webhook.active";
     public static final String BUNDLE_EXTRA_HAS_AUTH_TOKEN_REVOKED = "com.mili.xiaominglui.app.vello.extra.token_revoked";
+    public static final String BUNDLE_EXTRA_REMOTE_TRELLO_CARD_DELETED = "com.mili.xiaominglui.app.vello.extra.trello.card.deleted";
+    public static final String BUNDLE_EXTRA_REMOTE_TRELLO_CARD_UPDATED = "com.mili.xiaominglui.app.vello.extra.trello.card.deleted";
     public static final String BUNDLE_EXTRA_TRELLO_CONNECTION = "com.mili.xiaominglui.app.vello.extra.trello.connection";
     public static final String BUNDLE_EXTRA_TRELLO_ACCOUNT_USERNAME = "com.mili.xiaominglui.app.vello.extra.trello.username";
 
@@ -63,23 +64,19 @@ public final class VelloRequestFactory {
     public static final String PARAM_EXTRA_TRELLO_ACCESS_TOKEN = "com.mili.xiaominglui.app.vello.extra.trello.token";
     public static final String PARAM_EXTRA_SERVICE_START_ID = "com.mili.xiaominglui.app.vello.extra.service.startid";
     public static final String PARAM_EXTRA_DIRTY_CARD = "com.mili.xiaominglui.app.vello.extra.dirty.card";
+    public static final String PARAM_EXTRA_TRELLO_CARD = "com.mili.xiaominglui.app.vello.extra.trello.card";
+    public static final String PARAM_EXTRA_FORCE_GET_OPEN_TRELLO_CARD = "com.mili.xiaominglui.app.vello.extra.force.get.open.trello.card";
 
     private VelloRequestFactory() {
         // no public constructor
     }
 
-    public static Request getOpenTrelloCardListRequest(int startId) {
+    public static Request getOpenTrelloCardListRequest(int startId, boolean force) {
         Request request = new Request(REQUEST_TYPE_GET_OPEN_TRELLO_CARD_LIST);
         request.setMemoryCacheEnabled(true);
         request.put(PARAM_EXTRA_SERVICE_START_ID, startId);
+        request.put(PARAM_EXTRA_FORCE_GET_OPEN_TRELLO_CARD, force);
         return request;
-    }
-    
-    public static Request getDueReviewCardListRequest(int startId) {
-    	Request request = new Request(REQUEST_TYPE_GET_DUE_REVIEW_CARD_LIST);
-    	request.setMemoryCacheEnabled(true);
-    	request.put(PARAM_EXTRA_SERVICE_START_ID, startId);
-    	return request;
     }
     
     public static Request checkVocabularyBoardRequest() {
@@ -180,13 +177,6 @@ public final class VelloRequestFactory {
 		request.setMemoryCacheEnabled(true);
 		return request;
 	}
-	
-	public static Request queryInLocalCacheRequest(String query) {
-	    Request request = new Request(REQUEST_TYPE_QUERY_IN_LOCAL_CACHE);
-	    request.put(PARAM_EXTRA_QUERY_WORD_KEYWORD, query);
-	    request.setMemoryCacheEnabled(true);
-	    return request;
-	}
 
 	public static Request createWebHook() {
 		Request request = new Request(REQUEST_TYPE_CREATE_WEBHOOK);
@@ -219,10 +209,18 @@ public final class VelloRequestFactory {
 		request.setMemoryCacheEnabled(true);
 		return request;
 	}
-
-	public static Request mergeDirtyCard(DirtyCard card, int startId) {
-		Request request = new Request(REQUEST_TYPE_MERGE_DIRTY_CARD);
-		request.put(PARAM_EXTRA_DIRTY_CARD, card);
+	
+	public static Request deleteRemoteTrelloCard(TrelloCard card, int startId) {
+		Request request = new Request(REQUEST_TYPE_DELETE_REMOTE_TRELLO_CARD);
+		request.put(PARAM_EXTRA_TRELLO_CARD, card);
+		request.put(PARAM_EXTRA_SERVICE_START_ID, startId);
+		request.setMemoryCacheEnabled(true);
+		return request;
+	}
+	
+	public static Request updateRemoteTrelloCard(TrelloCard card, int startId) {
+		Request request = new Request(REQUEST_TYPE_UPDATE_REMOTE_TRELLO_CARD);
+		request.put(PARAM_EXTRA_TRELLO_CARD, card);
 		request.put(PARAM_EXTRA_SERVICE_START_ID, startId);
 		request.setMemoryCacheEnabled(true);
 		return request;

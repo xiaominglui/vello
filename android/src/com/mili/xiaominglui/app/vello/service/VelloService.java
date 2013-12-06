@@ -4,15 +4,19 @@ import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.TimeZone;
 
 import org.apache.http.HttpStatus;
 
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ClipboardManager;
+import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,6 +39,7 @@ import com.mili.xiaominglui.app.vello.data.model.List;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.model.WordList;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
+import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestManager;
@@ -46,7 +51,7 @@ public class VelloService extends Service implements RequestListener,
 		ConnectionErrorDialogListener {
 	private static final String TAG = VelloService.class.getSimpleName();
 
-	HashMap<String, TrelloCard> mDirtyCards = new HashMap<String, TrelloCard>();
+	HashMap<String, DirtyCard> mDirtyCards = new HashMap<String, DirtyCard>();
 	private static boolean isRunning = false;
 	ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track
 																// of all
@@ -321,12 +326,12 @@ public class VelloService extends Service implements RequestListener,
 		mRequestList.add(configureVocabularyBoardRequest);
 	}
 
-	private void getOpenTrelloCardList(int startId) {
+	private void getOpenTrelloCardList(int startId, boolean force) {
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "getOpenTrelloCardList start...");
 		}
 
-		Request getOpenTrelloCardList = VelloRequestFactory.getOpenTrelloCardListRequest(startId);
+		Request getOpenTrelloCardList = VelloRequestFactory.getOpenTrelloCardListRequest(startId, force);
 		mRequestManager.execute(getOpenTrelloCardList, this);
 		mRequestList.add(getOpenTrelloCardList);
 
@@ -337,18 +342,8 @@ public class VelloService extends Service implements RequestListener,
 			Log.d(TAG, "getDueReviewCardList start...");
 		}
 		// step 1: get open trello cards
-		getOpenTrelloCardList(startId);
+		getOpenTrelloCardList(startId, false);
 	}
-	
-	private void queryInLocalCache(String query) {
-	    if (VelloConfig.DEBUG_SWITCH) {
-	        Log.d(TAG, "query in local cache...");
-	    }
-	    Request queryInLocalCache = VelloRequestFactory.queryInLocalCacheRequest(query);
-	    mRequestManager.execute(queryInLocalCache, this);
-	    mRequestList.add(queryInLocalCache);
-        
-    }
 
 	private void queryInRemoteStorage(String query) {
 		if (VelloConfig.DEBUG_SWITCH) {
@@ -445,14 +440,22 @@ public class VelloService extends Service implements RequestListener,
 		mRequestList.add(readTrelloAccountInfo);
 	}
 	
-	private void mergeDirtyCard(DirtyCard card, int startId) {
+	private void deleteRemoteTrelloCard(TrelloCard card, int startId) {
 		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "mergeDirtyCard start...");
+			Log.d(TAG, "deleteRemoteTrelloCard start...");
 		}
-		
-		Request mergeDirtyCard = VelloRequestFactory.mergeDirtyCard(card, startId);
-		mRequestManager.execute(mergeDirtyCard, this);
-		mRequestList.add(mergeDirtyCard);
+		Request deleteRemoteTrelloCard = VelloRequestFactory.deleteRemoteTrelloCard(card, startId);
+		mRequestManager.execute(deleteRemoteTrelloCard, this);
+		mRequestList.add(deleteRemoteTrelloCard);
+	}
+	
+	private void updateRemoteTrelloCard(TrelloCard card, int startId) {
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "updateRemoteTrelloCard start...");
+		}
+		Request updateRemoteTrelloCard = VelloRequestFactory.updateRemoteTrelloCard(card, startId);
+		mRequestManager.execute(updateRemoteTrelloCard, this);
+		mRequestList.add(updateRemoteTrelloCard);
 	}
 	
 	@Override
@@ -550,8 +553,7 @@ public class VelloService extends Service implements RequestListener,
 				int position = request
 						.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
 				for (List list : listList) {
-					if (list.name
-							.equals(AccountUtils.VOCABULARY_LISTS_TITLE_ID[position])) {
+					if (list.name.equals(AccountUtils.VOCABULARY_LISTS_TITLE_ID[position])) {
 						// get the vocabulary list[position]
 						if (!list.closed.equals("false")) {
 							// list[position] be closed unexpectedly
@@ -754,21 +756,24 @@ public class VelloService extends Service implements RequestListener,
 				return;
 
 			case VelloRequestFactory.REQUEST_TYPE_GET_OPEN_TRELLO_CARD_LIST:
-				
+				int startId = request.getInt(VelloRequestFactory.PARAM_EXTRA_SERVICE_START_ID);
+				boolean force = request.getBoolean(VelloRequestFactory.PARAM_EXTRA_FORCE_GET_OPEN_TRELLO_CARD);
 				ArrayList<TrelloCard> OpenTrelloCardList = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_CARD_LIST);
 				if (OpenTrelloCardList.size() > 0) {
 					final ContentResolver resolver = getContentResolver();
-					// query and backup all local items that syncInNext=true or merge
-					// locally later
-					ProviderCriteria criteria = new ProviderCriteria();
-					criteria.addNe(DbWordCard.Columns.DATE_LAST_OPERATION, "");
-					Cursor c = resolver.query(DbWordCard.CONTENT_URI,
-							DbWordCard.PROJECTION, criteria.getWhereClause(),
-							criteria.getWhereParams(), criteria.getOrderClause());
-					if (c != null) {
-						while (c.moveToNext()) {
-							TrelloCard wc = new TrelloCard(c);
-							mDirtyCards.put(wc.id, wc);
+					if (!force) {
+						// query and backup all local items that syncInNext=true or merge
+						// locally later
+						ProviderCriteria criteria = new ProviderCriteria();
+						criteria.addNe(DbWordCard.Columns.DATE_LAST_OPERATION, "");
+						Cursor c = resolver.query(DbWordCard.CONTENT_URI,
+								DbWordCard.PROJECTION, criteria.getWhereClause(),
+								criteria.getWhereParams(), criteria.getOrderClause());
+						if (c != null) {
+							while (c.moveToNext()) {
+								DirtyCard dc = new DirtyCard(c);
+								mDirtyCards.put(dc.id, dc);
+							}
 						}
 					}
 					
@@ -777,10 +782,38 @@ public class VelloService extends Service implements RequestListener,
 						for (TrelloCard tCard : OpenTrelloCardList) {
 							if (mDirtyCards.containsKey(tCard.id)) {
 								// need merging TODO
+								DirtyCard dCard = mDirtyCards.get(tCard.id);
+								if (dCard.markDeleted.equals("true")) {
+									// delete remote Trello card
+									deleteRemoteTrelloCard(tCard, startId);
+								} else if (dCard.dateLastActivity.equals(tCard.dateLastActivity)) {
+									// remote has no commit
+									// commit local due, closed, listId to Trello
+									updateRemoteTrelloCard(upgradeTrelloCard(tCard, dCard, false), startId);
+								} else {
+									// remote has commit
+									// update remote data based on local data
+									updateRemoteTrelloCard(upgradeTrelloCard(tCard, dCard, true), startId);
+								}
 							}
 						}
 					} else {
 						// commit to local DB TODO
+						try {
+							resolver.delete(DbWordCard.CONTENT_URI, null, null);
+							ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
+							for (TrelloCard trelloCard : OpenTrelloCardList) {
+								operationList.add(ContentProviderOperation
+										.newInsert(DbWordCard.CONTENT_URI)
+										.withValues(trelloCard.toContentValues())
+										.build());
+							}
+							resolver.applyBatch(VelloProvider.AUTHORITY, operationList);
+						} catch (RemoteException e) {
+							e.printStackTrace();
+						} catch (OperationApplicationException e) {
+							e.printStackTrace();
+						}
 					}
 					
 				}
@@ -843,18 +876,6 @@ public class VelloService extends Service implements RequestListener,
 				}
 				return;
 				
-			case VelloRequestFactory.REQUEST_TYPE_QUERY_IN_LOCAL_CACHE:
-			    TrelloCard localWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
-			    if (localWordCard != null) {
-			        // yes, show in UI
-			    	sendMessageToUI(MSG_SHOW_RESULT_WORDCARD, localWordCard);
-			    } else {
-			        // no, go on query in remote storage
-			        String query = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
-			        queryInRemoteStorage(query);
-			    }
-			    return;
-
 			case VelloRequestFactory.REQUEST_TYPE_CREATE_WEBHOOK:
 				String hookId = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_WEBHOOK_ID);
 				if (hookId != null) {
@@ -925,10 +946,36 @@ public class VelloService extends Service implements RequestListener,
 				}
 				return;
 				
-			case VelloRequestFactory.REQUEST_TYPE_GET_DUE_REVIEW_CARD_LIST:
-				ArrayList<DirtyCard> dirtyCards = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_DIRTY_CARD_LIST);
-				int startId = request.getInt(VelloRequestFactory.PARAM_EXTRA_SERVICE_START_ID);
-				return;
+			case VelloRequestFactory.REQUEST_TYPE_DELETE_REMOTE_TRELLO_CARD:
+				boolean deleted = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_REMOTE_TRELLO_CARD_DELETED);
+				TrelloCard deletingCard = (TrelloCard) request.getParcelable(VelloRequestFactory.PARAM_EXTRA_TRELLO_CARD);
+				int startIdTriggerDelete = request.getInt(VelloRequestFactory.PARAM_EXTRA_SERVICE_START_ID);
+				if (deleted) {
+					mDirtyCards.remove(deletingCard.id);
+				} else {
+					// retry
+					deleteRemoteTrelloCard(deletingCard, startIdTriggerDelete);
+				}
+				
+				if (mDirtyCards.isEmpty()) {
+					// merge ok, go clean full sync
+					getOpenTrelloCardList(startIdTriggerDelete, true);
+				}
+				
+			case VelloRequestFactory.REQUEST_TYPE_UPDATE_REMOTE_TRELLO_CARD:
+				boolean updated = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_REMOTE_TRELLO_CARD_UPDATED);
+				TrelloCard updatingCard = (TrelloCard) request.getParcelable(VelloRequestFactory.PARAM_EXTRA_TRELLO_CARD);
+				int startIdTriggerUpdate = request.getInt(VelloRequestFactory.PARAM_EXTRA_SERVICE_START_ID);
+				if (updated) {
+					mDirtyCards.remove(updatingCard.id);
+				} else {
+					updateRemoteTrelloCard(updatingCard, startIdTriggerUpdate);
+				}
+				
+				if (mDirtyCards.isEmpty()) {
+					// merge ok, go clean full sync
+					getOpenTrelloCardList(startIdTriggerUpdate, true);
+				}
 				
 			default:
 				return;
@@ -991,6 +1038,45 @@ public class VelloService extends Service implements RequestListener,
 	public void connectionErrorDialogRetry(Request request) {
 		mRequestManager.execute(request, this);
 		mRequestList.add(request);
+	}
+	
+	/**
+	 * merge wordcard when remote wordcard is NOT the same state
+	 * @param wordCard remote wordcard
+	 * @param dirtyWordCard local changed wordcard
+	 * @return new wordcard merged
+	 */
+	private TrelloCard upgradeTrelloCard(TrelloCard trelloCard, DirtyCard dirtyCard, boolean forcePush) {
+		if (forcePush) {
+			int localPositionInLists = AccountUtils.getVocabularyListPosition(getApplicationContext(), dirtyCard.idList);
+			int remotePostionInLists = AccountUtils.getVocabularyListPosition(getApplicationContext(), trelloCard.idList);
+			int delta = remotePostionInLists - localPositionInLists;
+			if (delta > 0) {
+				int compensation = delta + 1;
+				if (remotePostionInLists + compensation > VelloConfig.VOCABULARY_LIST_POSITION_8TH) {
+					trelloCard.closed = "true";
+				} else {
+					int newPostionInLists = remotePostionInLists + compensation;
+					trelloCard.idList = AccountUtils.getVocabularyListId(getApplicationContext(), newPostionInLists);
+					Calendar rightNow = Calendar.getInstance();
+					long rightNowUnixTime = rightNow.getTimeInMillis();
+					long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
+					long deltaTime = VelloConfig.VOCABULARY_LIST_DUE_DELTA[newPostionInLists];
+					long newDueUnixTime = rightNowUnixTimeGMT + deltaTime;
+					SimpleDateFormat format = new SimpleDateFormat(
+							"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+					Date newDueDate = new Date(newDueUnixTime);
+					String stringNewDueDate = format.format(newDueDate);
+					trelloCard.due = stringNewDueDate;
+				}
+			}
+		} else {
+			trelloCard.idList = dirtyCard.idList;
+			trelloCard.due = dirtyCard.due;
+			trelloCard.closed = dirtyCard.closed;
+		}
+		
+		return trelloCard;
 	}
 	
 	class ClipboardListener implements

@@ -8,6 +8,9 @@ import android.os.Parcelable;
 
 public class DirtyCard implements Parcelable {
 	public String id;
+	public String idList;
+	public String due;
+	public String closed;
 	public String markDeleted;
 	public String dateLastOperation;
 	public String dateLastActivity;
@@ -27,6 +30,9 @@ public class DirtyCard implements Parcelable {
 	};
 	public DirtyCard(Parcel source) {
 		id = source.readString();
+		idList = source.readString();
+		due = source.readString();
+		closed = source.readString();
 		markDeleted = source.readString();
 		dateLastOperation = source.readString();
 		dateLastActivity = source.readString();
@@ -34,6 +40,9 @@ public class DirtyCard implements Parcelable {
 	
 	public DirtyCard(Cursor c) {
 		id = c.getString(DbWordCard.Columns.CARD_ID.getIndex());
+		idList = c.getString(DbWordCard.Columns.LIST_ID.getIndex());
+		due = c.getString(DbWordCard.Columns.DUE.getIndex());
+		closed = c.getString(DbWordCard.Columns.CLOSED.getIndex());
 		markDeleted = c.getString(DbWordCard.Columns.MARKDELETED.getIndex());
 		dateLastOperation = c.getString(DbWordCard.Columns.DATE_LAST_OPERATION.getIndex());
 		dateLastActivity = c.getString(DbWordCard.Columns.DATE_LAST_ACTIVITY.getIndex());
@@ -47,6 +56,9 @@ public class DirtyCard implements Parcelable {
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeString(id);
+		dest.writeString(idList);
+		dest.writeString(due);
+		dest.writeString(closed);
 		dest.writeString(markDeleted);
 		dest.writeString(dateLastOperation);
 		dest.writeString(dateLastActivity);
