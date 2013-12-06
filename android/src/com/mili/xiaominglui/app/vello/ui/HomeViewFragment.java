@@ -38,6 +38,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
@@ -67,23 +68,16 @@ import com.mili.xiaominglui.app.vello.util.AccountUtils;
 public class HomeViewFragment extends SherlockFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnLongClickListener, Callback, DialogInterface.OnClickListener {
 	private static final String TAG = HomeViewFragment.class.getSimpleName();
 	
-	private TrelloCard mDeletedWord;
-	private boolean mUndoShowing = false;
-	private boolean mInDeleteConfirmation = false;
-
 	private CardListView mCardList;
 	private ArrayList<Card> mCards;
 	private CardArrayAdapter mCardArrayAdapter;
 	
-//	private WordCardAdapter mAdapter;
-	private ViewGroup mRootView;
 	private onStatusChangedListener mListener;
 
 	private String mCurFilter = "";
 	private boolean mIsSearching = false;
 	
 	private ActionBarHelper mActionBar;
-	private ActionMode mActionMode;
 	
 	public static Fragment newInstance() {
 		Fragment f = new HomeViewFragment();
@@ -133,94 +127,26 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-//		outState.putParcelable(KEY_DELETED_WORD, mDeletedWord);
-//		outState.putBoolean(KEY_UNDO_SHOWING, mUndoShowing);
-//		outState.putIntArray(KEY_SELECTED_WORD_CARDS, mAdapter.getSelectedWordCardsArray());
 	}
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-//		int[] selectedWordCards = null;
-		
-//		if (savedInstanceState != null) {
-//			mDeletedWord = savedInstanceState.getParcelable(KEY_DELETED_WORD);
-//			mUndoShowing = savedInstanceState.getBoolean(KEY_UNDO_SHOWING);
-//			selectedWordCards = savedInstanceState.getIntArray(KEY_SELECTED_WORD_CARDS);
-//		}
-		
-		mRootView = (ViewGroup) inflater.inflate(R.layout.fragment_home, null);
-		
-		mCards = new ArrayList<Card>();
-		mCardArrayAdapter = new HomeCardArrayAdapter(getActivity(), mCards);
-		mCardList = (CardListView) mRootView.findViewById(R.id.card_list);
-		if (mCardList != null) {
-			mCardList.setAdapter(mCardArrayAdapter);
-		}
-		
-		/*
-		mAdapter = new WordCardAdapter(getActivity(), null, selectedWordCards, mCardList);
-		mAdapter.setLongClickListener(this);
-		mCardList.setAdapter(mAdapter);
-		mCardList.setVerticalScrollBarEnabled(true);
-		mCardList.setOnCreateContextMenuListener(this);
-
-		mCardList.setOnTouchListener(new View.OnTouchListener() {
-			@Override
-			public boolean onTouch(View view, MotionEvent event) {
-//				hideUndoBar(true, event);
-				return false;
-			}
-		});
-		
-		*/
-
-
-//		if (mUndoShowing) {
-//			mUndoBar.show(new ActionableToastBar.ActionClickedListener() {
-//				@Override
-//				public void onActionClicked() {
-//					asyncUnmarkDeleteWord(mDeletedWord);
-//					mDeletedWord = null;
-//					mUndoShowing = false;
-//				}
-//			}, 0, getResources().getString(R.string.word_reviewed), true,
-//					R.string.word_reviewed_undo, true);
-//		}
-		
-		mActionBar = createActionBarHelper();
-		mActionBar.init();
-		
-		// Show action mode if needed
-//        int selectedNum = mAdapter.getSelectedItemsNum();
-//        if (selectedNum > 0) {
-//            mActionMode = getSherlockActivity().startActionMode(this);
-//            setActionModeTitle(selectedNum);
-//        }
-        
-		return mRootView;
+		return inflater.inflate(R.layout.fragment_home, container, false);
 	}
 	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		mCards = new ArrayList<Card>();
+		mCardList = (CardListView) getActivity().findViewById(R.id.card_list);
 		getLoaderManager().initLoader(0, null, this);
-		
 	}
 	
 	@Override
 	public void onDestroyView() {
-//		mAdapter.swapCursor(null);
 		super.onDestroyView();
 	}
-	
-	/***
-     * Display the number of selected items on the action bar in action mode
-     * @param items - number of selected items
-     */
-    private void setActionModeTitle(int items) {
-        mActionMode.setTitle(String.format(getString(R.string.word_cards_selected), items));
-    }
 	
 	@SuppressLint("SimpleDateFormat")
 	@Override
@@ -246,8 +172,6 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 			// Dictionary Mode
 		    mIsSearching = true;
 		    mListener.onModeChanged(VelloConfig.DICTIONARY_MODE_ACTION_BAR_COLOR);
-//		    mCardList.enableSwipe(false);
-//		    mCardList.setOnItemSwipeListener(null);
 		    criteria.addLike(DbDictCard.Columns.KEYWORD, mCurFilter + "%");
 		    return new CursorLoader(getActivity(), DbDictCard.CONTENT_URI, DbDictCard.PROJECTION, criteria.getWhereClause(), criteria.getWhereParams(), criteria.getOrderClause());
 		}
@@ -256,32 +180,68 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-		mCardArrayAdapter.clear();
+		mCards.clear();
+		
 		if (mIsSearching) {
 			// in Dictionary Mode
 			if (data == null) return;
 			for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
 				DictCard dc = new DictCard(getActivity().getApplicationContext(), data);
 				dc.setSwipeable(false);
+				
 				mCardArrayAdapter.add(dc);
 			}
 		} else {
 			// in Review Mode
 			for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
 				ReviewCard rc = new ReviewCard(getActivity().getApplicationContext(), data);
-				rc.setSwipeable(true);
 				rc.setId(rc.trelloCard.id);
-				mCardArrayAdapter.setEnableUndo(true);
-				mCardArrayAdapter.add(rc);
+				rc.init();
+				/*
+				rc.setOnSwipeListener(new Card.OnSwipeListener() {
+
+					@Override
+					public void onSwipe(Card card) {
+						Log.d("mingo.lv", "onSwipe");
+						asyncMarkRecalledWord(card);
+
+					}
+				});
+
+				rc.setOnUndoSwipeListListener(new Card.OnUndoSwipeListListener() {
+
+					@Override
+					public void onUndoSwipe(Card card) {
+						Log.d("mingo.lv", "onUndoSwipe");
+						asyncUnmarkRecalledWord(card);
+					}
+				});
+
+				rc.setOnLongClickListener(new Card.OnLongCardClickListener() {
+
+					@Override
+					public boolean onLongClick(Card card, View view) {
+						// TODO Auto-generated method stub
+						Toast.makeText(getSherlockActivity().getApplicationContext(), "onLongClick", Toast.LENGTH_SHORT).show();
+						return false;
+					}
+				});
+				*/
+				mCards.add(rc);
+				mCardArrayAdapter = new CardArrayAdapter(getActivity(),mCards);
+				//Enable undo controller!
+		        mCardArrayAdapter.setEnableUndo(true);
+		        
+		        if (mCardList != null) {
+		        	mCardList.setAdapter(mCardArrayAdapter);
+		        }
 			}
 		}
 	}
 
 	@Override
 	public void onLoaderReset(Loader<Cursor> loder) {
-//		mAdapter.swapCursor(null);
 	}
-	
 	
 	private void asyncMarkDeleteWordRemotely(final Integer [] wordIds) {
 		final AsyncTask<Integer, Void, Void> deleteTask = new AsyncTask<Integer, Void, Void>() {
@@ -305,18 +265,6 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
         deleteTask.execute(wordIds);
 	}
 
-//	private void hideUndoBar(boolean animate, MotionEvent event) {
-//		if (mUndoBar != null) {
-//			if (event != null && mUndoBar.isEventInToastBar(event)) {
-//				// Avoid touches inside the undo bar.
-//				return;
-//			}
-//			mUndoBar.hide(animate);
-//		}
-//		mDeletedWord = null;
-//		mUndoShowing = false;
-//	}
-	
 	void onQueryTextChange(String newText) {
 		mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;
 		getLoaderManager().restartLoader(0, null, this);
@@ -343,71 +291,40 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 		}
 
 	}
-	
-	/***
-     * Handle the delete word cards confirmation dialog
-     */
-
-//    private void showConfirmationDialog() {
-//        Resources res = getResources();
-//        String msg = String.format(res.getQuantityText(R.plurals.word_card_delete_confirmation, mAdapter.getSelectedItemsNum()).toString());
-//        
-//        DialogFragment frag = WordsDeleteConfirmationDialog.newInstance(msg);
-//        frag.setTargetFragment(this, 0);
-//        frag.show(getFragmentManager(), msg);
-//        mInDeleteConfirmation = true;
-//    }
 
 	@Override
-	public void onClick(DialogInterface dialog, int which) {
-		if (which == -1) {
-//            if (mAdapter != null) {
-//                mAdapter.deleteSelectedWordCards();
-//                mActionMode.finish();
-//            }
-        }
-        dialog.dismiss();
-        mInDeleteConfirmation = false;
+	public void onClick(DialogInterface arg0, int arg1) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
 	public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-//		getActivity().getMenuInflater().inflate(R.menu.word_card_cab_menu, menu);
-		MenuInflater inflater = mode.getMenuInflater();
-		inflater.inflate(R.menu.word_card_cab_menu, menu);
-        return true;
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	@Override
 	public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-		switch (item.getItemId()) {
-		// Delete selected items and close CAB.
-		case R.id.menu_item_delete_word_card:
-//			showConfirmationDialog();
-			break;
-		default:
-			break;
-		}
+		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public void onDestroyActionMode(ActionMode mode) {
-//		if(mAdapter != null) {
-//            mAdapter.clearSelectedAlarms();
-//        }
-        mActionMode = null;
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
-	public boolean onLongClick(View v) {
-//		mAdapter.toggleSelectState(v);
-//        mAdapter.notifyDataSetChanged();
-        return false;
+	public boolean onLongClick(View arg0) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

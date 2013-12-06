@@ -252,7 +252,7 @@ public class VelloProvider extends ContentProvider {
                 break;
         }
 
-        getContext().getContentResolver().notifyChange(uri, null, false);
+//        getContext().getContentResolver().notifyChange(uri, null, false);
         return result;
     }
     

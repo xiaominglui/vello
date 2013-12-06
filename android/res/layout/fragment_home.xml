@@ -31,7 +31,6 @@
             card:list_card_layout_resourceID="@layout/list_card_base_layout" />
     </RelativeLayout>
 
-    <include layout="@layout/list_card_undo_message"
-        android:visibility="invisible" />
+    <include layout="@layout/list_card_undo_message" />
 
 </FrameLayout>

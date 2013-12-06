@@ -832,9 +832,10 @@ public class VelloService extends Service implements RequestListener,
 						}
 						stopSelf(startId);
 					}
-				}
-				if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "has no open trello card");
+				} else {
+					if (VelloConfig.DEBUG_SWITCH) {
+						Log.d(TAG, "has no open trello card");
+					}
 				}
 				/*
 				if (finished) {
