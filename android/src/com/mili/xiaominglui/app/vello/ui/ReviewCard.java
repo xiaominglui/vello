@@ -85,6 +85,15 @@ public class ReviewCard extends Card {
 				asyncUnmarkRecalledWord(card);
 			}
 		});
+		
+		setOnLongClickListener(new OnLongCardClickListener() {
+			
+			@Override
+			public boolean onLongClick(Card card, View view) {
+				Log.d("mingo.lv", "onLongClick");
+				return false;
+			}
+		});
 	}
 	
 	@Override

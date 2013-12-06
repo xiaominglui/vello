@@ -149,8 +149,7 @@ public class VelloProvider extends ContentProvider {
 		}
 
 		if ((c != null) && !isTemporary()) {
-			c.setNotificationUri(getContext().getContentResolver(),
-					notificationUri);
+			c.setNotificationUri(getContext().getContentResolver(), notificationUri);
 		}
 		return c;
 	}
@@ -186,7 +185,7 @@ public class VelloProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
-        getContext().getContentResolver().notifyChange(uri, null, false);
+//        getContext().getContentResolver().notifyChange(uri, null, false);
         return resultUri;
     }
 
@@ -223,7 +222,7 @@ public class VelloProvider extends ContentProvider {
             	break;
         }
         
-		getContext().getContentResolver().notifyChange(uri, null, false);
+//		getContext().getContentResolver().notifyChange(uri, null, false);
 		return result;
     }
 

@@ -395,10 +395,8 @@ public class MainActivity extends BaseActivity implements HomeViewFragment.onSta
 	
 	private void postInitAccount() {
 		Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
-		ContentResolver.setIsSyncable(account,
-				VelloProvider.AUTHORITY, 1);
-		ContentResolver.setSyncAutomatically(account,
-				VelloProvider.AUTHORITY, true);
+		ContentResolver.setIsSyncable(account, VelloProvider.AUTHORITY, 1);
+		ContentResolver.setSyncAutomatically(account, VelloProvider.AUTHORITY, true);
 		FragmentManager fm = getSupportFragmentManager();
 		fm.beginTransaction().replace(CONTENT_VIEW_ID, mHomeViewFragment).commit();
 	}
