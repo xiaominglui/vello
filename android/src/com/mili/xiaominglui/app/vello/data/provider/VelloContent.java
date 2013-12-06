@@ -147,10 +147,10 @@ public class VelloContent {
 					+ Columns.DESC.getName() + " " + Columns.DESC.getType() + ", "
 					+ Columns.DUE.getName() + " " + Columns.DUE.getType() + ", "
 					+ Columns.CLOSED.getName() + " " + Columns.CLOSED.getType() + ", "
-					+ Columns.DATE_LAST_OPERATION.getName() + " " + Columns.DATE_LAST_OPERATION.getType() + ", "
+					+ Columns.DATE_LAST_OPERATION.getName() + " " + Columns.DATE_LAST_OPERATION.getType() + " " + "DEFAULT" + " " + "\"\"" + ", "
 					+ Columns.LIST_ID.getName() + " " + Columns.LIST_ID.mType + ", "
 					+ Columns.DATE_LAST_ACTIVITY.getName() + " " + Columns.DATE_LAST_ACTIVITY.getType() + ", "
-					+ Columns.MARKDELETED.getName() + " " + Columns.MARKDELETED.getType()
+					+ Columns.MARKDELETED.getName() + " " + Columns.MARKDELETED.getType() + " " + "DEFAULT" + " " + "\"false\""
 					+ ", PRIMARY KEY (" + Columns.ID.getName() + ")" + ");");
 		}
 

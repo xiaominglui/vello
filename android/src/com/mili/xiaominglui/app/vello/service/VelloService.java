@@ -328,7 +328,7 @@ public class VelloService extends Service implements RequestListener,
 
 	private void getOpenTrelloCardList(int startId, boolean force) {
 		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "getOpenTrelloCardList start...");
+			Log.d(TAG, "getOpenTrelloCardList with startId = " + startId + ", force = " + force + " start...");
 		}
 
 		Request getOpenTrelloCardList = VelloRequestFactory.getOpenTrelloCardListRequest(startId, force);
@@ -339,7 +339,7 @@ public class VelloService extends Service implements RequestListener,
 	
 	private void getDueReviewCardList(int startId) {
 		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "getDueReviewCardList start...");
+			Log.d(TAG, "getDueReviewCardList with startId = " + startId + " start...");
 		}
 		// step 1: get open trello cards
 		getOpenTrelloCardList(startId, false);
@@ -760,6 +760,9 @@ public class VelloService extends Service implements RequestListener,
 				boolean force = request.getBoolean(VelloRequestFactory.PARAM_EXTRA_FORCE_GET_OPEN_TRELLO_CARD);
 				ArrayList<TrelloCard> OpenTrelloCardList = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_CARD_LIST);
 				if (OpenTrelloCardList.size() > 0) {
+					if (VelloConfig.DEBUG_SWITCH) {
+						Log.d(TAG, "has open trello card, with startId = " + startId + ", force = " + force);
+					}
 					final ContentResolver resolver = getContentResolver();
 					if (!force) {
 						// query and backup all local items that syncInNext=true or merge
@@ -778,10 +781,16 @@ public class VelloService extends Service implements RequestListener,
 					}
 					
 					if (mDirtyCards.size() > 0) {
+						if (VelloConfig.DEBUG_SWITCH) {
+							Log.d(TAG, "dirty card found: " + mDirtyCards.size());
+						}
 						// maybe need merging
 						for (TrelloCard tCard : OpenTrelloCardList) {
 							if (mDirtyCards.containsKey(tCard.id)) {
-								// need merging TODO
+								// need merging
+								if (VelloConfig.DEBUG_SWITCH) {
+									Log.d(TAG, "merge card --- " + tCard.id);
+								}
 								DirtyCard dCard = mDirtyCards.get(tCard.id);
 								if (dCard.markDeleted.equals("true")) {
 									// delete remote Trello card
@@ -799,6 +808,9 @@ public class VelloService extends Service implements RequestListener,
 						}
 					} else {
 						// commit to local DB TODO
+						if (VelloConfig.DEBUG_SWITCH) {
+							Log.d(TAG, "no dirty card, commit to local DB");
+						}
 						try {
 							resolver.delete(DbWordCard.CONTENT_URI, null, null);
 							ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
@@ -814,8 +826,15 @@ public class VelloService extends Service implements RequestListener,
 						} catch (OperationApplicationException e) {
 							e.printStackTrace();
 						}
+						
+						if (VelloConfig.DEBUG_SWITCH) {
+							Log.d(TAG, "...stop command---#" + startId);
+						}
+						stopSelf(startId);
 					}
-					
+				}
+				if (VelloConfig.DEBUG_SWITCH) {
+					Log.d(TAG, "has no open trello card");
 				}
 				/*
 				if (finished) {

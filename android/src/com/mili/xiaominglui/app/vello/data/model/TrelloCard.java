@@ -15,8 +15,6 @@ public class TrelloCard implements Parcelable {
 	public String idList;
 	public String closed;
 	public String dateLastActivity;
-//	public String markDeleted;
-//	public String dateLastOperation;
 
 	public TrelloCard() {
 
@@ -54,8 +52,6 @@ public class TrelloCard implements Parcelable {
 		idList = source.readString();
 		closed = source.readString();
 		dateLastActivity = source.readString();
-//		markDeleted = source.readString();
-//		dateLastOperation = source.readString();
 	}
 
 	@Override
@@ -72,8 +68,6 @@ public class TrelloCard implements Parcelable {
 		dest.writeString(idList);
 		dest.writeString(closed);
 		dest.writeString(dateLastActivity);
-//		dest.writeString(markDeleted);
-//		dest.writeString(dateLastOperation);
 	}
 
 	public ContentValues toContentValues() {
@@ -85,8 +79,6 @@ public class TrelloCard implements Parcelable {
 		cv.put(DbWordCard.Columns.CLOSED.getName(), closed);
 		cv.put(DbWordCard.Columns.LIST_ID.getName(), idList);
 		cv.put(DbWordCard.Columns.DATE_LAST_ACTIVITY.getName(), dateLastActivity);
-//		cv.put(DbWordCard.Columns.MARKDELETED.getName(), markDeleted);
-//		cv.put(DbWordCard.Columns.DATE_LAST_OPERATION.getName(), dateLastOperation);
 
 		return cv;
 	}

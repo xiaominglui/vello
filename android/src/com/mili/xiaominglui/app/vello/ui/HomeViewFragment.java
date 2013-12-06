@@ -232,13 +232,10 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 			// Review Mode
 		    mIsSearching = false;
 		    mListener.onModeChanged(VelloConfig.REVIEW_MODE_ACTION_BAR_COLOR);
-//		    mCardList.enableSwipe(true);
-//		    mCardList.setOnItemSwipeListener(mReviewSwipeListener);
 			criteria.addSortOrder(DbWordCard.Columns.DUE, true);
 			Calendar rightNow = Calendar.getInstance();
 
-			SimpleDateFormat format = new SimpleDateFormat(
-					"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 			long rightNowUnixTime = rightNow.getTimeInMillis();
 			long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
 			String now = format.format(new Date(rightNowUnixTimeGMT));

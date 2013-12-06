@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import com.google.gson.Gson;
-import com.mili.xiaominglui.app.vello.data.model.DictCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbDictCard;
+import com.mili.xiaominglui.app.vello.ui.DictCard;
 import com.mili.xiaominglui.app.vello.util.Lists;
 
 import android.content.ContentProviderOperation;

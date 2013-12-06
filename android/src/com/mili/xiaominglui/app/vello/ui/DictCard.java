@@ -2,7 +2,9 @@ package com.mili.xiaominglui.app.vello.ui;
 
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbDictCard;
+import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import it.gmariotti.cardslib.library.internal.Card;
@@ -57,5 +59,20 @@ public class DictCard extends Card {
     public int getType() {
         return 1;
     }
+	
+	public ContentValues toContentValues() {
+		ContentValues cv = new ContentValues();
+//		cv.put(DbWordCard.Columns.CARD_ID.getName(), trelloCard.id);
+//		cv.put(DbWordCard.Columns.NAME.getName(), trelloCard.name);
+//		cv.put(DbWordCard.Columns.DESC.getName(), trelloCard.desc);
+//		cv.put(DbWordCard.Columns.DUE.getName(), trelloCard.due);
+//		cv.put(DbWordCard.Columns.CLOSED.getName(), trelloCard.closed);
+//		cv.put(DbWordCard.Columns.LIST_ID.getName(), trelloCard.idList);
+//		cv.put(DbWordCard.Columns.DATE_LAST_ACTIVITY.getName(), trelloCard.dateLastActivity);
+//		cv.put(DbWordCard.Columns.MARKDELETED.getName(), markDeleted);
+//		cv.put(DbWordCard.Columns.DATE_LAST_OPERATION.getName(), dateLastOperation);
+
+		return cv;
+	}
 
 }
