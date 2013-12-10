@@ -20,7 +20,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.atermenji.android.iconictextview.IconicTextView;
 import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
@@ -49,8 +48,6 @@ public class ReviewCard extends Card {
 		dateLastOperation = c.getString(DbWordCard.Columns.DATE_LAST_OPERATION.getIndex());
 		
 		idInLocalDB = c.getInt(DbWordCard.Columns.ID.getIndex());
-		
-//		init();
 	}
 	
 	public void init() {
@@ -69,9 +66,6 @@ public class ReviewCard extends Card {
 		setOnSwipeListener(new OnSwipeListener() {
 			@Override
 			public void onSwipe(Card card) {
-				Toast.makeText(getContext(), "Removed card=" + trelloCard.name,
-						Toast.LENGTH_SHORT).show();
-				Log.d("mingo.lv", "onSwipe");
 				asyncMarkRecalledWord(card);
 			}
 		});
@@ -79,9 +73,6 @@ public class ReviewCard extends Card {
 		setOnUndoSwipeListListener(new OnUndoSwipeListListener() {
 			@Override
 			public void onUndoSwipe(Card card) {
-				Toast.makeText(getContext(), "Undo card=" + trelloCard.name,
-						Toast.LENGTH_SHORT).show();
-				Log.d("mingo.lv", "onUndoSwipe");
 				asyncUnmarkRecalledWord(card);
 			}
 		});
@@ -90,7 +81,6 @@ public class ReviewCard extends Card {
 			
 			@Override
 			public boolean onLongClick(Card card, View view) {
-				Log.d("mingo.lv", "onLongClick");
 				return false;
 			}
 		});
@@ -98,7 +88,6 @@ public class ReviewCard extends Card {
 	
 	@Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
-		//Retrieve elements
         iconicLifeSign = (IconicTextView) parent.findViewById(R.id.life_sign);
         textViewLifeCount = (TextView) parent.findViewById(R.id.life_count);
         
@@ -106,7 +95,6 @@ public class ReviewCard extends Card {
         	iconicLifeSign.setIcon(FontAwesomeIcon.CHECK);
         	iconicLifeSign.setTextColor(Color.GRAY);
         }
-            
 
         if (textViewLifeCount != null) {
         	int positionList = AccountUtils.getVocabularyListPosition(mContext, trelloCard.idList);

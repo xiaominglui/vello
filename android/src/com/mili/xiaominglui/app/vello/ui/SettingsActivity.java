@@ -45,6 +45,12 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 		public void handleMessage(Message msg) {
 			SettingsActivity theActivity = mActivity.get();
 			switch (msg.what) {
+			case VelloService.MSG_STATUS_WEBHOOK_ACTIVED:
+				theActivity.postActiveWebhook();
+				break;
+			case VelloService.MSG_STATUS_WEBHOOK_DEACTIVED:
+				theActivity.postDeactiveWebhook();
+				break;
 			case VelloService.MSG_VALID_TRELLO_CONNECTION:
 				theActivity.withValidTrelloConnection();
 				break;
@@ -69,8 +75,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 			mService = new Messenger(service);
 
 			try {
-				Message msg = Message.obtain(null,
-						VelloService.MSG_REGISTER_CLIENT);
+				Message msg = Message.obtain(null, VelloService.MSG_REGISTER_CLIENT);
 				msg.replyTo = mMessenger;
 				mService.send(msg);
 			} catch (RemoteException e) {
@@ -105,12 +110,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	}
 	
 	void doBindService() {
-		// Establish a connection with the service. We use an explicit
-		// class name because we want a specific service implementation that
-		// we know will be running in our own process (and thus won't be
-		// supporting component replacement by other applications).
-		bindService(new Intent(this, VelloService.class), mConnection,
-				Context.BIND_AUTO_CREATE);
+		bindService(new Intent(this, VelloService.class), mConnection, Context.BIND_AUTO_CREATE);
 		mIsBound = true;
 	}
 
@@ -174,17 +174,35 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 		if (key.equals(KEY_PREF_SYNC_FREQ)) {
-			Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
-			Bundle extras = new Bundle();
-			ContentResolver.removePeriodicSync(account, VelloProvider.AUTHORITY, extras);
-			
 			ListPreference syncFreqPref = (ListPreference) findPreference(key);
 			syncFreqPref.setSummary(syncFreqPref.getEntry());
 			mNewSyncValue = syncFreqPref.getValue();
-			
-			int pollFrequency = Integer.valueOf(mNewSyncValue) * 60 * 60;
-			ContentResolver.addPeriodicSync(account, VelloProvider.AUTHORITY, extras, pollFrequency);
+			syncFreqPref.setEnabled(false);
+			if (mNewSyncValue.equals("0")) {
+				// choose PUSH
+				// active PUSH
+				sendMessageToService(VelloService.MSG_SET_WEBHOOK_ACTIVE_STATUS, true);
+			} else {
+				// choose schedule sync
+				// deactive PUSH
+				sendMessageToService(VelloService.MSG_SET_WEBHOOK_ACTIVE_STATUS, false);
+			}
 		}
+	}
+	
+	private void postActiveWebhook() {
+		Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
+		Bundle extras = new Bundle();
+		ContentResolver.removePeriodicSync(account, VelloProvider.AUTHORITY, extras);
+		mListPreference.setEnabled(true);
+	}
+
+	private void postDeactiveWebhook() {
+		Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
+		Bundle extras = new Bundle();
+		int pollFrequency = Integer.valueOf(mNewSyncValue) * 60 * 60;
+		ContentResolver.addPeriodicSync(account, VelloProvider.AUTHORITY, extras, pollFrequency);
+		mListPreference.setEnabled(true);
 	}
 	
 	private void withValidTrelloConnection() {

@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.avos.avoscloud.AVAnalytics;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
@@ -194,6 +195,8 @@ public class MainActivity extends BaseActivity implements HomeViewFragment.onSta
 
 		handleIntent(getIntent());
 		doBindService();
+		
+		AVAnalytics.trackAppOpened(getIntent());
 	}
 	
 	private void setInitialFragment() {

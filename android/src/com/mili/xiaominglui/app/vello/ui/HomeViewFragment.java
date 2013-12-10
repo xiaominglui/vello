@@ -197,36 +197,6 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 				ReviewCard rc = new ReviewCard(getActivity().getApplicationContext(), data);
 				rc.setId(rc.trelloCard.id);
 				rc.init();
-				/*
-				rc.setOnSwipeListener(new Card.OnSwipeListener() {
-
-					@Override
-					public void onSwipe(Card card) {
-						Log.d("mingo.lv", "onSwipe");
-						asyncMarkRecalledWord(card);
-
-					}
-				});
-
-				rc.setOnUndoSwipeListListener(new Card.OnUndoSwipeListListener() {
-
-					@Override
-					public void onUndoSwipe(Card card) {
-						Log.d("mingo.lv", "onUndoSwipe");
-						asyncUnmarkRecalledWord(card);
-					}
-				});
-
-				rc.setOnLongClickListener(new Card.OnLongCardClickListener() {
-
-					@Override
-					public boolean onLongClick(Card card, View view) {
-						// TODO Auto-generated method stub
-						Toast.makeText(getSherlockActivity().getApplicationContext(), "onLongClick", Toast.LENGTH_SHORT).show();
-						return false;
-					}
-				});
-				*/
 				mCards.add(rc);
 				mCardArrayAdapter = new CardArrayAdapter(getActivity(),mCards);
 				//Enable undo controller!

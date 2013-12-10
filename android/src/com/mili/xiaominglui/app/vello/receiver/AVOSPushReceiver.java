@@ -23,9 +23,9 @@ public class AVOSPushReceiver extends BroadcastReceiver {
 
 		if (action.equals("com.avos.avello.DICT_SYNC_MSG")) {
 		}
+		
 		if (action.equals("com.avos.avello.SYNC_MSG")) {
-			// String channel =
-			// intent.getExtras().getString("com.parse.Channel");
+			// String channel = intent.getExtras().getString("com.parse.Channel");
 			try {
 				JSONObject json = new JSONObject(intent.getExtras().getString("com.parse.Data"));
 				JSONObject jsonInformation = json.getJSONObject(JSONTag.AVOS_INFORMATION);

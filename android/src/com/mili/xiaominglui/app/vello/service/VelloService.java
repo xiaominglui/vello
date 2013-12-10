@@ -10,7 +10,6 @@ import java.util.TimeZone;
 
 import org.apache.http.HttpStatus;
 
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ClipboardManager;
 import android.content.ContentProviderOperation;
@@ -27,7 +26,8 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.avos.avoscloud.ParseInstallation;
+import com.avos.avoscloud.AVException;
+import com.avos.avoscloud.AVInstallation;
 import com.avos.avoscloud.PushService;
 import com.avos.avoscloud.SaveCallback;
 import com.foxykeep.datadroid.requestmanager.Request;
@@ -200,19 +200,6 @@ public class VelloService extends Service implements RequestListener,
 		// status bar.
 		// showNotification();
 		
-		// save Installation for push
-		PushService.setDefaultPushCallback(this, MainActivity.class);
-		PushService.subscribe(this, "sync", MainActivity.class);
-		PushService.subscribe(this, "protected", MainActivity.class);
-		ParseInstallation.getCurrentInstallation().saveInBackground(new SaveCallback() {
-
-			@Override
-			public void done(com.avos.avoscloud.ParseException e) {
-				PushService.unsubscribe(getApplicationContext(), "protected");
-                ParseInstallation.getCurrentInstallation().saveInBackground();
-			}
-		});
-		
 //		ClipboardManager clipBoard = (ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
 //		clipBoard.addPrimaryClipChangedListener( new ClipboardListener() );
 		// https://code.google.com/p/android/issues/detail?id=58043
@@ -307,8 +294,7 @@ public class VelloService extends Service implements RequestListener,
 			if (VelloConfig.DEBUG_SWITCH) {
 				Log.d(TAG, "checkVocabularyLists start..." + i);
 			}
-			Request checkVocabularyListReqest = VelloRequestFactory
-					.checkVocabularyListRequest(i);
+			Request checkVocabularyListReqest = VelloRequestFactory.checkVocabularyListRequest(i);
 
 			mRequestManager.execute(checkVocabularyListReqest, this);
 			mRequestList.add(checkVocabularyListReqest);
@@ -394,7 +380,6 @@ public class VelloService extends Service implements RequestListener,
 		mRequestList.add(reStartWordCard);
 	}
 	
-	@Deprecated
 	private void createWebHook() {
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "createWebHook start...");
@@ -561,11 +546,11 @@ public class VelloService extends Service implements RequestListener,
 							return;
 						} else {
 							// list[position]'s status ok, save listId
-							AccountUtils.setVocabularyListId(
-									getApplicationContext(), list.id, position);
+							AccountUtils.setVocabularyListId(getApplicationContext(), list.id, position);
 							
 							if (AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
-								sendMessageToUI(VelloService.MSG_STATUS_INIT_ACCOUNT_END, null);
+								createWebHook();
+//								sendMessageToUI(VelloService.MSG_STATUS_INIT_ACCOUNT_END, null);
 							}
 							return;
 						}
@@ -902,6 +887,15 @@ public class VelloService extends Service implements RequestListener,
 					// hook created, save it
 					AccountUtils.setVocabularyBoardWebHookId(getApplicationContext(), hookId);
 					
+					// save Installation for push
+					PushService.setDefaultPushCallback(this, MainActivity.class);
+					AVInstallation.getCurrentInstallation().saveInBackground();
+					
+					sendMessageToUI(VelloService.MSG_STATUS_INIT_ACCOUNT_END, null);
+					if (VelloConfig.DEBUG_SWITCH) {
+						Log.d(TAG, "webhook created.");
+					}
+					
 				} else {
 					// to create again
 					createWebHook();
@@ -915,6 +909,9 @@ public class VelloService extends Service implements RequestListener,
 					
 					if (currentActive == requestActive) {
 						// request success
+						if (VelloConfig.DEBUG_SWITCH) {
+							Log.d(TAG, "setWebHookActive end --- success");
+						}
 						if (currentActive) {
 							// PUSH
 							sendMessageToUI(MSG_STATUS_WEBHOOK_ACTIVED, null);
@@ -926,9 +923,6 @@ public class VelloService extends Service implements RequestListener,
 				} else {
 					// request fail, try again
 					setWebHookActive(requestActive);
-				}
-				if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "setWebHookActive end...");
 				}
 				return;
 				
