@@ -24,6 +24,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnLongClickListener;
@@ -42,8 +43,8 @@ import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbDictCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 
-public class HomeViewFragment extends SherlockFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnLongClickListener, Callback, DialogInterface.OnClickListener {
-	private static final String TAG = HomeViewFragment.class.getSimpleName();
+public class ReviewViewFragment extends SherlockFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnLongClickListener, Callback, DialogInterface.OnClickListener {
+	private static final String TAG = ReviewViewFragment.class.getSimpleName();
 	
 	private CardListView mCardList;
 	private ArrayList<Card> mCards;
@@ -54,29 +55,10 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 	private String mCurFilter = "";
 	private boolean mIsSearching = false;
 	
-	private ActionBarHelper mActionBar;
-	
 	public static Fragment newInstance() {
-		Fragment f = new HomeViewFragment();
+		Fragment f = new ReviewViewFragment();
 		return f;
 	}
-	
-//	private SwipeableListView.OnItemSwipeListener mReviewSwipeListener = new SwipeableListView.OnItemSwipeListener() {
-//        
-//        @Override
-//        public void onSwipe(View view) {
-//            final WordCardAdapter.ItemHolder itemHolder = (WordCardAdapter.ItemHolder) view.getTag();
-//            // if wordcard expanded, do NOT mark reviewed plus
-//            if (!mAdapter.isWordExpanded(itemHolder.wordcard)) {
-//            	updateActionMode();
-//                asyncMarkRecalledWord(itemHolder.wordcard);
-//                mListener.onWordReviewed();
-//            } else {
-//                // review failed
-//                asyncDeleteWordCache(itemHolder.wordcard);
-//            }
-//        }
-//    };
     
 	public interface onStatusChangedListener {
 		public void onModeChanged(int modeColor);
@@ -109,7 +91,7 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_home, container, false);
+		return inflater.inflate(R.layout.fragment_review, container, false);
 	}
 	
 	@Override
@@ -184,14 +166,14 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 		        }
 			}
 		}
-
-		data.close();
 	}
 
 	@Override
 	public void onLoaderReset(Loader<Cursor> loader) {
+		Log.d("mingo.lv", "onLoaderReset");
 	}
 	
+	@SuppressLint("SimpleDateFormat")
 	private void asyncMarkDeleteWordRemotely(final Integer [] wordIds) {
 		final AsyncTask<Integer, Void, Void> deleteTask = new AsyncTask<Integer, Void, Void>() {
             @Override

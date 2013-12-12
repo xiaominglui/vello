@@ -21,13 +21,11 @@ public class LoginFragment extends SherlockFragment implements View.OnClickListe
     PageIndicator mIndicator;
 
     Button mLogInButton;
-    Button mSignUpButton;
 	public LoginFragment() {
 	}
 	
 	public interface onButtonClickedListener {
 		public void onSignInButtonClicked();
-		public void onSignUpButtonClicked();
 	}
 	
 	@Override
@@ -55,8 +53,6 @@ public class LoginFragment extends SherlockFragment implements View.OnClickListe
 
         mLogInButton = (Button) rootView.findViewById(R.id.log_in);
         mLogInButton.setOnClickListener(this);
-        mSignUpButton = (Button) rootView.findViewById(R.id.sign_up);
-        mSignUpButton.setOnClickListener(this);
 		return rootView;
 	}
 
@@ -66,9 +62,6 @@ public class LoginFragment extends SherlockFragment implements View.OnClickListe
         switch (id) {
             case R.id.log_in:
             	mListener.onSignInButtonClicked();
-                break;
-            case R.id.sign_up:
-            	mListener.onSignUpButtonClicked();
                 break;
         }
 		

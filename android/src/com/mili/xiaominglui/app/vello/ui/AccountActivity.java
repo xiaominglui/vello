@@ -132,15 +132,4 @@ public class AccountActivity extends SherlockFragmentActivity implements LoginFr
                 .addToBackStack("log_in").commit();
         tryAuthenticate();
 	}
-
-	@Override
-	public void onSignUpButtonClicked() {
-		ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-
-        if (activeNetwork == null || !activeNetwork.isConnected()) {
-            Toast.makeText(getApplicationContext(), R.string.no_connection_cant_login, Toast.LENGTH_SHORT).show();
-            return;
-        }
-	}
 }

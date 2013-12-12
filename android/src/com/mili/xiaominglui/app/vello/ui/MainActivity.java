@@ -39,7 +39,7 @@ import com.mili.xiaominglui.app.vello.syncadapter.SyncHelper;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.mili.xiaominglui.app.vello.util.HelpUtils;
 
-public class MainActivity extends BaseActivity implements HomeViewFragment.onStatusChangedListener {
+public class MainActivity extends BaseActivity implements ReviewViewFragment.onStatusChangedListener {
 	private static final String TAG = MainActivity.class.getSimpleName();
 	
 	private static final int CONTENT_VIEW_ID = 666;
@@ -198,7 +198,7 @@ public class MainActivity extends BaseActivity implements HomeViewFragment.onSta
 	}
 	
 	private void setInitialFragment() {
-		mHomeViewFragment = HomeViewFragment.newInstance();
+		mHomeViewFragment = ReviewViewFragment.newInstance();
 		FragmentManager fragmentManager = getSupportFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 		fragmentTransaction.add(CONTENT_VIEW_ID, mHomeViewFragment).commit();

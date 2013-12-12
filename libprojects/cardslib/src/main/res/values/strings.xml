@@ -27,8 +27,8 @@
     <!--<string name="undo_card">Card removed</string>-->
 
     <plurals name="list_card_undo_items">
-        <item quantity="one">1 card removed</item>
-        <item quantity="other">%d cards removed</item>
+        <item quantity="one">1 word recalled</item>
+        <item quantity="other">%d words recalled</item>
     </plurals>
 
 

@@ -547,11 +547,6 @@ public class VelloService extends Service implements RequestListener,
 						} else {
 							// list[position]'s status ok, save listId
 							AccountUtils.setVocabularyListId(getApplicationContext(), list.id, position);
-							
-							if (AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
-								createWebHook();
-//								sendMessageToUI(VelloService.MSG_STATUS_INIT_ACCOUNT_END, null);
-							}
 							return;
 						}
 					}
@@ -574,12 +569,7 @@ public class VelloService extends Service implements RequestListener,
 							.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_ID);
 					int pos = resultData
 							.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
-					AccountUtils.setVocabularyListId(getApplicationContext(),
-							id, pos);
-					
-					if (AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
-						sendMessageToUI(VelloService.MSG_STATUS_INIT_ACCOUNT_END, null);
-					}
+					AccountUtils.setVocabularyListId(getApplicationContext(), id, pos);
 				} else {
 					// reopen failed, try again
 					reOpenVocabulayList(positonList, idList);
@@ -595,12 +585,7 @@ public class VelloService extends Service implements RequestListener,
 							.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_ID);
 					int pos = request
 							.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
-					AccountUtils.setVocabularyListId(getApplicationContext(),
-							id, pos);
-					
-					if (AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
-						sendMessageToUI(VelloService.MSG_STATUS_INIT_ACCOUNT_END, null);
-					}
+					AccountUtils.setVocabularyListId(getApplicationContext(), id, pos);
 				} else {
 					// create list failed, try again
 					createVocabularyList(positionList);
