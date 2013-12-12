@@ -20,6 +20,9 @@ public class AVOSPushReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		String action = intent.getAction();
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "onReceive --- " + action);
+		}
 
 		if (action.equals("com.avos.avello.DICT_SYNC_MSG")) {
 		}

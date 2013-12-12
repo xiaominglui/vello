@@ -61,6 +61,7 @@ public class ReviewCard extends Card {
 		expand.setTitle(trelloCard.desc);
 		addCardExpand(expand);
 		
+		setClickable(false);
 		setSwipeable(true);
 		
 		setOnSwipeListener(new OnSwipeListener() {

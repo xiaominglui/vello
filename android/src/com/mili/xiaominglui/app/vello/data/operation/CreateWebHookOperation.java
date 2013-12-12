@@ -39,8 +39,7 @@ public class CreateWebHookOperation implements Operation {
 		parameterMap.put(WSConfig.WS_TRELLO_PARAM_WEBHOOK_CALLBACK_URL, myCallback);
 		parameterMap.put(WSConfig.WS_TRELLO_PARAM_WEBHOOK_ID_MODEL, vocabularyBoardId);
 		
-		NetworkConnection networkConnection = new NetworkConnection(context,
-				urlString);
+		NetworkConnection networkConnection = new NetworkConnection(context, urlString);
 		networkConnection.setMethod(Method.POST);
 		networkConnection.setParameters(parameterMap);
 		ConnectionResult result = networkConnection.execute();
