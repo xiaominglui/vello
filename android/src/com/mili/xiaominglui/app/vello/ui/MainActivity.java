@@ -120,8 +120,7 @@ public class MainActivity extends BaseActivity implements HomeViewFragment.onSta
 			mService = new Messenger(service);
 
 			try {
-				Message msg = Message.obtain(null,
-						VelloService.MSG_REGISTER_CLIENT);
+				Message msg = Message.obtain(null, VelloService.MSG_REGISTER_CLIENT);
 				msg.replyTo = mMessenger;
 				mService.send(msg);
 			} catch (RemoteException e) {
@@ -129,8 +128,7 @@ public class MainActivity extends BaseActivity implements HomeViewFragment.onSta
 				// anything with it
 			}
 
-			if (AccountUtils.hasVocabularyBoard(getApplicationContext()) &&
-					AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
+			if (AccountUtils.hasVocabularyBoard(getApplicationContext()) && AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
 				// all initialized
 				// do nothing now
 			} else {

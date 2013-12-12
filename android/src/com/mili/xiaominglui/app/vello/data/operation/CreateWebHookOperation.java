@@ -17,7 +17,6 @@ import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.service.RequestService.Operation;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.config.WSConfig;
-import com.mili.xiaominglui.app.vello.data.factory.CreateVocabularyListResponseJsonFactory;
 import com.mili.xiaominglui.app.vello.data.factory.CreateWebHookResponseJsonFactory;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
@@ -47,7 +46,6 @@ public class CreateWebHookOperation implements Operation {
 		if (VelloConfig.DEBUG_SWITCH) {
 		    Log.d(TAG, "result.body = " + result.body);
 		}
-		
 		
 		return CreateWebHookResponseJsonFactory.parseResult(result.body);
 	}

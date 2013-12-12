@@ -199,9 +199,6 @@ public class VelloProvider extends ContentProvider {
                 result = db.delete(uriType.getTableName(), whereWithId(selection), addIdToSelectionArgs(id, selectionArgs));
                 break;
             case DB_WORD_CARD:
-            	Log.d("mingo.lv", "uriType.getTableName()=" + uriType.getTableName());
-            	Log.d("mingo.lv", "selection=" + selection);
-            	Log.d("mingo.lv", "selectionArgs=" + selectionArgs);
                 result = db.delete(uriType.getTableName(), selection, selectionArgs);
                 break;
             case DB_ALL:

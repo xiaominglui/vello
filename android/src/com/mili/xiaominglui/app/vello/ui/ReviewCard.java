@@ -62,6 +62,7 @@ public class ReviewCard extends Card {
 		addCardExpand(expand);
 		
 		setClickable(false);
+		setLongClickable(false);
 		setSwipeable(true);
 		
 		setOnSwipeListener(new OnSwipeListener() {
@@ -75,14 +76,6 @@ public class ReviewCard extends Card {
 			@Override
 			public void onUndoSwipe(Card card) {
 				asyncUnmarkRecalledWord(card);
-			}
-		});
-		
-		setOnLongClickListener(new OnLongCardClickListener() {
-			
-			@Override
-			public boolean onLongClick(Card card, View view) {
-				return false;
 			}
 		});
 	}
@@ -186,13 +179,11 @@ public class ReviewCard extends Card {
 						String newIdList = AccountUtils.getVocabularyListId(mContext, positionList + 1);
 						cv.put(DbWordCard.Columns.LIST_ID.getName(), newIdList);
 					}
+
 					Date rightNowDate = new Date(rightNowUnixTime);
 					String stringRightNow = format.format(rightNowDate);
-					cv.put(DbWordCard.Columns.DATE_LAST_OPERATION.getName(),
-							stringRightNow);
-					Uri uri = ContentUris.withAppendedId(
-							DbWordCard.CONTENT_URI,
-							((ReviewCard) reviewCard).idInLocalDB);
+					cv.put(DbWordCard.Columns.DATE_LAST_OPERATION.getName(), stringRightNow);
+					Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI, ((ReviewCard) reviewCard).idInLocalDB);
 					mContext.getContentResolver().update(uri, cv, null, null);
 				}
 				return null;
