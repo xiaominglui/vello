@@ -8,19 +8,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.TimeZone;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.Color;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,17 +23,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.CursorAdapter;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
@@ -46,24 +35,12 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.ActionMode.Callback;
 import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import com.atermenji.android.iconictextview.IconicTextView;
-import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
 import com.mili.xiaominglui.app.vello.R;
-import com.mili.xiaominglui.app.vello.adapter.HomeCardArrayAdapter;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
-import com.mili.xiaominglui.app.vello.data.factory.MiliDictionaryJsonParser;
-import com.mili.xiaominglui.app.vello.data.model.Definition;
-import com.mili.xiaominglui.app.vello.data.model.Definitions;
-import com.mili.xiaominglui.app.vello.data.model.IcibaWord;
-import com.mili.xiaominglui.app.vello.data.model.Phonetics;
-import com.mili.xiaominglui.app.vello.data.model.Phoneticss;
-import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbDictCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
-import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class HomeViewFragment extends SherlockFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnLongClickListener, Callback, DialogInterface.OnClickListener {
 	private static final String TAG = HomeViewFragment.class.getSimpleName();
@@ -207,10 +184,12 @@ public class HomeViewFragment extends SherlockFragment implements LoaderManager.
 		        }
 			}
 		}
+
+		data.close();
 	}
 
 	@Override
-	public void onLoaderReset(Loader<Cursor> loder) {
+	public void onLoaderReset(Loader<Cursor> loader) {
 	}
 	
 	private void asyncMarkDeleteWordRemotely(final Integer [] wordIds) {
