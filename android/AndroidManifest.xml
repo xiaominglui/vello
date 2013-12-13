@@ -68,7 +68,6 @@
             android:name=".ui.AuthenticatorActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:excludeFromRecents="true"
-            android:theme="@android:style/Theme.NoTitleBar"
             android:windowSoftInputMode="adjustResize" >
 
             <!--

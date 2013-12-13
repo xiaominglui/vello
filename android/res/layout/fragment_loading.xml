@@ -28,18 +28,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-        <LinearLayout android:id="@+id/taking_a_while_panel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="true"
-            android:baselineAlignedChildIndex="0" >
-            <TextView android:text="@string/taking_a_while"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:textAppearanceMedium"
-                android:layout_marginRight="@dimen/element_spacing_normal" />
-        </LinearLayout>
 
     </LinearLayout>
 

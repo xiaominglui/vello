@@ -7,6 +7,7 @@ import android.accounts.Account;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ComponentName;
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -25,11 +26,8 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
-import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.ui.SettingsActivity;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
@@ -55,9 +53,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			mService = new Messenger(service);
 
 			try {
-				Message msg = Message.obtain(null,
-						VelloService.MSG_REGISTER_CLIENT);
-				// msg.replyTo = mMessenger;
+				Message msg = Message.obtain(null, VelloService.MSG_REGISTER_CLIENT);
 				mService.send(msg);
 			} catch (RemoteException e) {
 				// In this case the service has crashed before we could even do
@@ -83,7 +79,11 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			ContentProviderClient provider, SyncResult syncResult) {
 		
 		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
-		boolean wifiOnly = sharedPref.getBoolean(SettingsActivity.KEY_PREF_SYNC_WIFI_ONLY, true);
+		boolean wifiOnly = sharedPref.getBoolean(SettingsActivity.KEY_PREF_SYNC_WIFI_ONLY, false);
+		
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "onPerformSync --- " + "wifiOnly=" + wifiOnly);
+		}
 
 		WifiManager.WifiLock wifiLock = null;
 		WakeLock wakeLock = null;
@@ -101,8 +101,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			
 			
 			if(mConnManager == null) {
-				mConnManager =  (ConnectivityManager)getContext().getSystemService(
-			            Context.CONNECTIVITY_SERVICE);
+				mConnManager =  (ConnectivityManager)getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 			}
 			NetworkInfo netInfo = mConnManager.getActiveNetworkInfo();
 			if (netInfo != null && netInfo.getType() == ConnectivityManager.TYPE_WIFI) {

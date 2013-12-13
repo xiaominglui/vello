@@ -63,12 +63,10 @@ public class AccountUtils {
         return !TextUtils.isEmpty(getChosenAccountName(context));
     }
 
-    public static void startAuthenticationFlow(final Context context,
-            final Intent finishIntent) {
+    public static void startAuthenticationFlow(final Context context, final Intent finishIntent) {
         Intent loginFlowIntent = new Intent(context, AccountActivity.class);
         loginFlowIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        loginFlowIntent.putExtra(AccountActivity.EXTRA_FINISH_INTENT,
-                finishIntent);
+        loginFlowIntent.putExtra(AccountActivity.EXTRA_FINISH_INTENT, finishIntent);
         context.startActivity(loginFlowIntent);
     }
     

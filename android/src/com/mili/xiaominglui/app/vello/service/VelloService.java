@@ -16,6 +16,7 @@ import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.OperationApplicationException;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,6 +24,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -45,6 +47,7 @@ import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestManager;
 import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment.ConnectionErrorDialogListener;
 import com.mili.xiaominglui.app.vello.ui.MainActivity;
+import com.mili.xiaominglui.app.vello.ui.SettingsActivity;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class VelloService extends Service implements RequestListener,
@@ -82,6 +85,10 @@ public class VelloService extends Service implements RequestListener,
 	
 	public static final int MSG_STATUS_INIT_ACCOUNT_BEGIN = 50;
 	public static final int MSG_STATUS_INIT_ACCOUNT_END = 51;
+	public static final int MSG_STATUS_SYNC_BEGIN = 52;
+	public static final int MSG_STATUS_SYNC_END = 53;
+	public static final int MSG_STATUS_REVOKE_BEGIN = 54;
+	public static final int MSG_STATUS_REVOKE_END = 55;
 
 	public static final int MSG_CHECK_VOCABULARY_BOARD = 100;
 	public static final int MSG_GET_DUE_REVIEW_CARD_LIST = 101;
@@ -131,6 +138,7 @@ public class VelloService extends Service implements RequestListener,
 				    service.queryInRemoteStorage(query);
 				    break;
 				case MSG_REVOKE_AUTH_TOKEN:
+					service.sendMessageToUI(MSG_STATUS_REVOKE_BEGIN, null);
 					service.revokeAuthToken();
 					break;
 				case MSG_SET_WEBHOOK_ACTIVE_STATUS:
@@ -253,8 +261,7 @@ public class VelloService extends Service implements RequestListener,
 		}
 		sendMessageToUI(VelloService.MSG_STATUS_INIT_ACCOUNT_BEGIN, null);
 
-		Request checkVocabularyBoardRequest = VelloRequestFactory
-				.checkVocabularyBoardRequest();
+		Request checkVocabularyBoardRequest = VelloRequestFactory.checkVocabularyBoardRequest();
 		mRequestManager.execute(checkVocabularyBoardRequest, this);
 		mRequestList.add(checkVocabularyBoardRequest);
 	}
@@ -327,6 +334,7 @@ public class VelloService extends Service implements RequestListener,
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "getDueReviewCardList with startId = " + startId + " start...");
 		}
+		sendMessageToUI(VelloService.MSG_STATUS_SYNC_BEGIN, null);
 		// step 1: get open trello cards
 		getOpenTrelloCardList(startId, false);
 	}
@@ -471,8 +479,7 @@ public class VelloService extends Service implements RequestListener,
 						.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_CARD_ID);
 				if (wordList != null) {
 					String idList = wordList.id;
-					int position = AccountUtils.getVocabularyListPosition(
-							getApplicationContext(), idList);
+					int position = AccountUtils.getVocabularyListPosition(getApplicationContext(), idList);
 					reviewedWordCard(idReviewedPlusCard, position);
 				}
 				return;
@@ -496,8 +503,7 @@ public class VelloService extends Service implements RequestListener,
 						} else {
 							// s - 0.1 well configured vocabulary board,
 							// save id
-							AccountUtils.setVocabularyBoardId(
-									getApplicationContext(), board.id);
+							AccountUtils.setVocabularyBoardId(getApplicationContext(), board.id);
 							checkVocabularyLists();
 							return;
 						}
@@ -512,17 +518,12 @@ public class VelloService extends Service implements RequestListener,
 				return;
 
 			case VelloRequestFactory.REQUEST_TYPE_CONFIGURE_VOCABULARY_BOARD:
-				String boardId = request
-						.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_BOARD_ID);
+				String boardId = request.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_BOARD_ID);
 				if (resultData != null) {
 					// configure board successfully & save it
-					String id = resultData
-							.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_BOARD_ID);
-					AccountUtils.setVocabularyBoardId(getApplicationContext(),
-							id);
-					Log.d(TAG,
-							"configure board successfully! vocabulary board id = "
-									+ id);
+					String id = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_BOARD_ID);
+					AccountUtils.setVocabularyBoardId(getApplicationContext(), id);
+					Log.d(TAG, "configure board successfully! vocabulary board id = " + id);
 
 					// continue to check vocabulary list if not well formed
 					checkVocabularyLists();
@@ -533,10 +534,8 @@ public class VelloService extends Service implements RequestListener,
 				return;
 
 			case VelloRequestFactory.REQUEST_TYPE_CHECK_VOCABULARY_LIST:
-				ArrayList<List> listList = resultData
-						.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_LIST);
-				int position = request
-						.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
+				ArrayList<List> listList = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_LIST);
+				int position = request.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
 				for (List list : listList) {
 					if (list.name.equals(AccountUtils.VOCABULARY_LISTS_TITLE_ID[position])) {
 						// get the vocabulary list[position]
@@ -547,10 +546,14 @@ public class VelloService extends Service implements RequestListener,
 						} else {
 							// list[position]'s status ok, save listId
 							AccountUtils.setVocabularyListId(getApplicationContext(), list.id, position);
+							if (AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
+								sendMessageToUI(VelloService.MSG_STATUS_INIT_ACCOUNT_END, null);
+							}
 							return;
 						}
 					}
 				}
+				
 				// no vocabulary list found
 				createVocabularyList(position);
 				if (VelloConfig.DEBUG_SWITCH) {
@@ -581,10 +584,8 @@ public class VelloService extends Service implements RequestListener,
 						.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
 				if (resultData != null) {
 					// create list successfully
-					String id = resultData
-							.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_ID);
-					int pos = request
-							.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
+					String id = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_ID);
+					int pos = request.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
 					AccountUtils.setVocabularyListId(getApplicationContext(), id, pos);
 				} else {
 					// create list failed, try again
@@ -598,8 +599,7 @@ public class VelloService extends Service implements RequestListener,
 			case VelloRequestFactory.REQUEST_TYPE_CREATE_VOCABULARY_BOARD:
 				if (resultData != null) {
 					// create vocabulary board successfully
-					String id = resultData
-							.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_BOARD_ID);
+					String id = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_BOARD_ID);
 
 					configureVocabularyBoard(id);
 				} else {
@@ -621,8 +621,7 @@ public class VelloService extends Service implements RequestListener,
 
 			case VelloRequestFactory.REQUEST_TYPE_QUERY_IN_REMOTE_STORAGE:
 				ArrayList<TrelloCard> existedWordCardList = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_CARD_LIST);
-				String keyword = request
-						.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
+				String keyword = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
 				if (existedWordCardList.isEmpty()) {
 					// not exist in remote storage
 					if (VelloConfig.DEBUG_SWITCH) {
@@ -675,8 +674,7 @@ public class VelloService extends Service implements RequestListener,
 			case VelloRequestFactory.REQUEST_TYPE_ADD_WORDCARD:
 			    String keywordInAddWordCard = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
 			    String wsResult = request.getString(VelloRequestFactory.PARAM_EXTRA_DICTIONARY_WS_RESULT);
-				TrelloCard addedWordCard = resultData
-						.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+				TrelloCard addedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 				if (addedWordCard != null) {
 					// show added wordcard to user
 					// TODO
@@ -695,8 +693,7 @@ public class VelloService extends Service implements RequestListener,
 				return;
 
 			case VelloRequestFactory.REQUEST_TYPE_RESTART_WORDCARD:
-				TrelloCard restartedWordCard = resultData
-						.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+				TrelloCard restartedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 				if (restartedWordCard != null) {
 					// restarted
 					// do nothing at present.
@@ -710,8 +707,7 @@ public class VelloService extends Service implements RequestListener,
 				return;
 
 			case VelloRequestFactory.REQUEST_TYPE_INITIALIZE_WORDCARD:
-				TrelloCard initializedWordCard = resultData
-						.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+				TrelloCard initializedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 				if (initializedWordCard != null) {
 					// initialized
 					// should show to user
@@ -735,13 +731,16 @@ public class VelloService extends Service implements RequestListener,
 					}
 					final ContentResolver resolver = getContentResolver();
 					if (!force) {
-						// query and backup all local items that syncInNext=true or merge
+						// query and backup all local items that syncInNext=true
+						// or merge
 						// locally later
 						ProviderCriteria criteria = new ProviderCriteria();
 						criteria.addNe(DbWordCard.Columns.DATE_LAST_OPERATION, "");
 						Cursor c = resolver.query(DbWordCard.CONTENT_URI,
-								DbWordCard.PROJECTION, criteria.getWhereClause(),
-								criteria.getWhereParams(), criteria.getOrderClause());
+								DbWordCard.PROJECTION,
+								criteria.getWhereClause(),
+								criteria.getWhereParams(),
+								criteria.getOrderClause());
 						if (c != null) {
 							while (c.moveToNext()) {
 								DirtyCard dc = new DirtyCard(c);
@@ -750,7 +749,37 @@ public class VelloService extends Service implements RequestListener,
 						}
 					}
 					
-					if (mDirtyCards.size() > 0) {
+					if (force || !(mDirtyCards.size() > 0)) {
+						// no dirty, commit to local DB directly
+						if (VelloConfig.DEBUG_SWITCH) {
+							Log.d(TAG, "no dirty card, commit to local DB");
+						}
+						try {
+							resolver.delete(DbWordCard.CONTENT_URI, null, null);
+
+							ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
+							for (TrelloCard trelloCard : OpenTrelloCardList) {
+								operationList.add(ContentProviderOperation
+										.newInsert(DbWordCard.CONTENT_URI)
+										.withValues(trelloCard.toContentValues())
+										.build());
+							}
+							resolver.applyBatch(VelloProvider.AUTHORITY, operationList);
+						} catch (RemoteException e) {
+							e.printStackTrace();
+						} catch (OperationApplicationException e) {
+							e.printStackTrace();
+						}
+
+						if (VelloConfig.DEBUG_SWITCH) {
+							Log.d(TAG, "...stop command---#" + startId);
+						}
+						sendMessageToUI(VelloService.MSG_STATUS_SYNC_END, null);
+
+						stopSelf(startId);
+					}
+					
+					if (mDirtyCards.size() > 0 && !force) {
 						if (VelloConfig.DEBUG_SWITCH) {
 							Log.d(TAG, "dirty card found: " + mDirtyCards.size());
 						}
@@ -767,7 +796,8 @@ public class VelloService extends Service implements RequestListener,
 									deleteRemoteTrelloCard(tCard, startId);
 								} else if (dCard.dateLastActivity.equals(tCard.dateLastActivity)) {
 									// remote has no commit
-									// commit local due, closed, listId to Trello
+									// commit local due, closed, listId to
+									// Trello
 									updateRemoteTrelloCard(upgradeTrelloCard(tCard, dCard, false), startId);
 								} else {
 									// remote has commit
@@ -776,31 +806,6 @@ public class VelloService extends Service implements RequestListener,
 								}
 							}
 						}
-					} else {
-						// commit to local DB TODO
-						if (VelloConfig.DEBUG_SWITCH) {
-							Log.d(TAG, "no dirty card, commit to local DB");
-						}
-						try {
-							resolver.delete(DbWordCard.CONTENT_URI, null, null);
-							ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
-							for (TrelloCard trelloCard : OpenTrelloCardList) {
-								operationList.add(ContentProviderOperation
-										.newInsert(DbWordCard.CONTENT_URI)
-										.withValues(trelloCard.toContentValues())
-										.build());
-							}
-							resolver.applyBatch(VelloProvider.AUTHORITY, operationList);
-						} catch (RemoteException e) {
-							e.printStackTrace();
-						} catch (OperationApplicationException e) {
-							e.printStackTrace();
-						}
-						
-						if (VelloConfig.DEBUG_SWITCH) {
-							Log.d(TAG, "...stop command---#" + startId);
-						}
-						stopSelf(startId);
 					}
 				} else {
 					if (VelloConfig.DEBUG_SWITCH) {
@@ -875,8 +880,7 @@ public class VelloService extends Service implements RequestListener,
 					// save Installation for push
 					PushService.setDefaultPushCallback(this, MainActivity.class);
 					AVInstallation.getCurrentInstallation().saveInBackground();
-					
-					sendMessageToUI(VelloService.MSG_STATUS_INIT_ACCOUNT_END, null);
+
 					if (VelloConfig.DEBUG_SWITCH) {
 						Log.d(TAG, "webhook created.");
 					}

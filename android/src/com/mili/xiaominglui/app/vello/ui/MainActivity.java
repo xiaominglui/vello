@@ -19,9 +19,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.Toast;
@@ -46,7 +44,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	private Drawable oldBackground = null;
 	private int currentColor = 0xFF666666;
 	private final Handler handler = new Handler();
-	private Fragment mHomeViewFragment;
 	
 	private MainActivityUIHandler mUICallback = new MainActivityUIHandler(this);
 
@@ -100,6 +97,14 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				break;
 			case VelloService.MSG_STATUS_INIT_ACCOUNT_END:
 				theActivity.postInitAccount();
+			case VelloService.MSG_STATUS_SYNC_BEGIN:
+				theActivity.preSync();
+				break;
+			case VelloService.MSG_STATUS_SYNC_END:
+				theActivity.postSync();
+				break;
+			case VelloService.MSG_STATUS_REVOKE_BEGIN:
+				theActivity.preAuthTokenRevoke();
 				break;
 			}
 		}
@@ -130,7 +135,10 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 
 			if (AccountUtils.hasVocabularyBoard(getApplicationContext()) && AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
 				// all initialized
-				// do nothing now
+				// if has no open card, blank page after init
+				// if has open card, review page
+				FragmentManager fm = getSupportFragmentManager();
+				fm.beginTransaction().add(CONTENT_VIEW_ID, ReviewViewFragment.newInstance()).commit();
 			} else {
 				// begin to check vocabulary board
 				sendMessageToService(VelloService.MSG_CHECK_VOCABULARY_BOARD);
@@ -162,8 +170,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 		// class name because we want a specific service implementation that
 		// we know will be running in our own process (and thus won't be
 		// supporting component replacement by other applications).
-		bindService(new Intent(this, VelloService.class), mConnection,
-				Context.BIND_AUTO_CREATE);
+		bindService(new Intent(this, VelloService.class), mConnection, Context.BIND_AUTO_CREATE);
 		mIsBound = true;
 	}
 
@@ -186,22 +193,11 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
         FrameLayout frame = new FrameLayout(this);
         frame.setId(CONTENT_VIEW_ID);
         setContentView(frame, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        
-        if (savedInstanceState == null) {
-			setInitialFragment();
-		}
 
 		handleIntent(getIntent());
 		doBindService();
 		
 		AVAnalytics.trackAppOpened(getIntent());
-	}
-	
-	private void setInitialFragment() {
-		mHomeViewFragment = ReviewViewFragment.newInstance();
-		FragmentManager fragmentManager = getSupportFragmentManager();
-		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-		fragmentTransaction.add(CONTENT_VIEW_ID, mHomeViewFragment).commit();
 	}
 
 	@Override
@@ -255,8 +251,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 		if (mIsBound) {
 			if (mService != null) {
 				try {
-					Message msg = Message.obtain(null,
-							VelloService.MSG_TRIGGER_QUERY_WORD);
+					Message msg = Message.obtain(null, VelloService.MSG_TRIGGER_QUERY_WORD);
 					msg.obj = query;
 					msg.replyTo = mMessenger;
 					mService.send(msg);
@@ -398,12 +393,28 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 		Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
 		ContentResolver.setIsSyncable(account, VelloProvider.AUTHORITY, 1);
 		ContentResolver.setSyncAutomatically(account, VelloProvider.AUTHORITY, true);
+		ContentResolver.setMasterSyncAutomatically(true);
+		triggerRefresh();
+	}
+	
+	private void preSync() {
 		FragmentManager fm = getSupportFragmentManager();
-		fm.beginTransaction().replace(CONTENT_VIEW_ID, mHomeViewFragment).commit();
+		fm.beginTransaction().replace(CONTENT_VIEW_ID, new ProgressFragment()).commit();
+	}
+	
+	private void postSync() {
+		FragmentManager fm = getSupportFragmentManager();
+		fm.beginTransaction().replace(CONTENT_VIEW_ID, ReviewViewFragment.newInstance()).commit();
+	}
+	
+	private void preAuthTokenRevoke() {
+		FragmentManager fm = getSupportFragmentManager();
+		fm.beginTransaction().replace(CONTENT_VIEW_ID, new ProgressFragment()).commit();
 	}
 	
 	private void postAuthTokenRevoked() {
 		AccountUtils.signOut(this);
+		Toast.makeText(getApplicationContext(), getString(R.string.hink_revoked), Toast.LENGTH_SHORT).show();
 		finish();
 	}
 	

@@ -7,7 +7,6 @@
     <string name="action_query_hint">Search word&#8230;</string>
     <string name="action_invalid_query">Invalid query</string>
     <string name="no_connection_cant_login">Can\'t sign in. Check your network connection.</string>
-    <string name="taking_a_while">This is taking a while&#8230;</string>
     <string name="toast_no_word_now">Good job! No word now!</string>
     <string name="toast_not_available_word">NOT a word?</string>
     <string name="toast_get_due_word">Checking vocabulary&#8230;</string>
@@ -54,7 +53,7 @@
     <string name="about_eula">End User License Agreement</string>
     <string name="about_licenses">Open Source Licenses</string>
     <string name="about_body"><![CDATA[
-        <b>Google I/O 2013</b><br>
+        <b>Vello 2013</b><br>
         Version %s<br><br>
         <a href="http://m.google.com/utos">Terms of Service</a><br><br>
         <a href="http://www.google.com/policies/privacy/">Privacy Policy</a>
@@ -88,6 +87,7 @@
     <string name="drawer_close">Close navigation drawer</string>
     
     <string name="delete_word_card">Delete word</string>
+    <string name="hink_revoked">bye~</string>
     
     <!-- Alarm deletion confirmation message-->
     <plurals name="word_card_delete_confirmation">

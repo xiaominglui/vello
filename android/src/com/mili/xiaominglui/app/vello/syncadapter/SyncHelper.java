@@ -42,9 +42,7 @@ public class SyncHelper {
 	public static void requestManualSync(Account mChosenAccount) {
         Bundle b = new Bundle();
         b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        ContentResolver.requestSync(
-                mChosenAccount,
-                VelloProvider.AUTHORITY, b);
+        ContentResolver.requestSync(mChosenAccount, VelloProvider.AUTHORITY, b);
     }
 	
 	public void performSync(SyncResult syncResult, int flags) throws IOException {
@@ -76,18 +74,16 @@ public class SyncHelper {
 				// Clear the table
 				resolver.delete(DbDictCard.CONTENT_URI, null, null);
 				
-				try {
-					ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
-					Log.i(TAG, "Local syncing dictionary data");
-					batch.addAll(new DictCardsHandler(mContext).parse(JSONHandler.parseResource(mContext, R.raw.word0)));
-					resolver.applyBatch(VelloProvider.AUTHORITY, batch);
-				} catch (RemoteException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (OperationApplicationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+//				try {
+//					ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
+//					Log.i(TAG, "Local syncing dictionary data");
+//					batch.addAll(new DictCardsHandler(mContext).parse(JSONHandler.parseResource(mContext, R.raw.word0)));
+//					resolver.applyBatch(VelloProvider.AUTHORITY, batch);
+//				} catch (RemoteException e) {
+//					e.printStackTrace();
+//				} catch (OperationApplicationException e) {
+//					e.printStackTrace();
+//				}
 			}
 			Log.i(TAG, "Local sync took " + (System.currentTimeMillis() - startLocal) + "ms");
 		}
@@ -99,10 +95,8 @@ public class SyncHelper {
 	}
 	
 	private boolean isOnline() {
-		ConnectivityManager cm = (ConnectivityManager) mContext
-				.getSystemService(Context.CONNECTIVITY_SERVICE);
+		ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-		return cm.getActiveNetworkInfo() != null
-				&& cm.getActiveNetworkInfo().isConnectedOrConnecting();
+		return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnectedOrConnecting();
 	}
 }

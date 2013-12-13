@@ -122,7 +122,6 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 			case VelloService.MSG_RETURN_TRELLO_USERNAME:
 				String username = (String) msg.obj;
 				finishAuthenticated(mAccessToken, username);
-				mProgressBar.setVisibility(View.INVISIBLE);
 				break;
 			}
 		}
@@ -213,7 +212,6 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
     
     @Override
     protected void onDestroy() {
-    	mWebView.loadUrl("about:blank");
     	mWebView.clearCache(true);
     	doUnbindService();
     	super.onDestroy();
@@ -281,8 +279,8 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 		
 		@Override
 		protected void onPostExecute(Token token) {
-			mWebView.loadUrl("about:blank");
-			mProgressBar.setVisibility(View.VISIBLE);
+			mWebView.setVisibility(View.INVISIBLE);
+			
 			mAccessToken = token.getToken();
 			sendMessageToService(VelloService.MSG_READ_TRELLO_ACCOUNT_INFO, mAccessToken);
 		}

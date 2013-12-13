@@ -128,8 +128,8 @@ public class AccountActivity extends SherlockFragmentActivity implements LoginFr
 		mMyTrelloAccount = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container_master, new AuthProgressFragment(), "loading")
-                .addToBackStack("log_in").commit();
+                .replace(R.id.fragment_container_master, new AuthProgressFragment(), "loading").commit();
+//                .addToBackStack("log_in").commit();
         tryAuthenticate();
 	}
 }

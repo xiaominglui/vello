@@ -170,7 +170,9 @@ public class ReviewViewFragment extends SherlockFragment implements LoaderManage
 
 	@Override
 	public void onLoaderReset(Loader<Cursor> loader) {
-		Log.d("mingo.lv", "onLoaderReset");
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "onLoaderReset");
+		}
 	}
 	
 	@SuppressLint("SimpleDateFormat")
