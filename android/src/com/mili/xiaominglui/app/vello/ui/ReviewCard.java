@@ -51,7 +51,7 @@ public class ReviewCard extends Card {
 	}
 	
 	public void init() {
-		CardHeader header = new CardHeader(mContext);
+		CardHeader header = new ReviewCardHeader(mContext);
 		header.setTitle(trelloCard.name);
 		header.setButtonExpandVisible(true);
 		addCardHeader(header);

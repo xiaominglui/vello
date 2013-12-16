@@ -767,57 +767,60 @@ public class VelloService extends Service implements RequestListener,
 										.build());
 							}
 							resolver.applyBatch(VelloProvider.AUTHORITY, operationList);
+							
+							// show notification
+							Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+							PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+
+							ProviderCriteria cri = new ProviderCriteria();
+							cri.addSortOrder(DbWordCard.Columns.DUE, true);
+
+							Calendar rightNow = Calendar.getInstance();
+							SimpleDateFormat fo = new SimpleDateFormat(
+									"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+							String now = fo.format(rightNow.getTime());
+							cri.addLt(DbWordCard.Columns.DUE, now, true);
+							cri.addNe(DbWordCard.Columns.CLOSED, "true");
+							Cursor cur = getContentResolver().query(
+									DbWordCard.CONTENT_URI,
+									DbWordCard.PROJECTION,
+									cri.getWhereClause(),
+									cri.getWhereParams(),
+									cri.getOrderClause());
+							if (cur != null) {
+								int num = cur.getCount();
+								if (num > 0) {
+									Resources res = getApplicationContext().getResources();
+									String stringContentTitle = res.getQuantityString(R.plurals.notif_content_title, num, num);
+									String stringContentText = res.getString(R.string.notif_content_text);
+									Notification noti = new NotificationCompat.Builder(getApplicationContext())
+											.setContentTitle(stringContentTitle)
+											.setContentText(stringContentText)
+											.setSmallIcon(R.drawable.ic_launcher)
+											.setContentIntent(pIntent)
+											.build();
+
+									NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+
+									// Hide the notification after its selected
+									noti.flags |= Notification.FLAG_AUTO_CANCEL;
+
+									notificationManager.notify(0, noti);
+								}
+								cur.close();
+							}
+
+							if (VelloConfig.DEBUG_SWITCH) {
+								Log.d(TAG, "...stop command---#" + startId);
+							}
+							sendMessageToUI(VelloService.MSG_STATUS_SYNC_END, null);
+
+							stopSelf(startId);
 						} catch (RemoteException e) {
 							e.printStackTrace();
 						} catch (OperationApplicationException e) {
 							e.printStackTrace();
 						}
-
-						// show notification
-						Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-						PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
-
-						ProviderCriteria cri = new ProviderCriteria();
-						cri.addSortOrder(DbWordCard.Columns.DUE, true);
-
-						Calendar rightNow = Calendar.getInstance();
-						SimpleDateFormat fo = new SimpleDateFormat(
-								"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-						String now = fo.format(rightNow.getTime());
-						cri.addLt(DbWordCard.Columns.DUE, now, true);
-						cri.addNe(DbWordCard.Columns.CLOSED, "true");
-						Cursor cur = getContentResolver().query(
-								DbWordCard.CONTENT_URI, DbWordCard.PROJECTION,
-								cri.getWhereClause(), cri.getWhereParams(),
-								cri.getOrderClause());
-						if (cur != null) {
-							int num = cur.getCount();
-							if (num > 0) {
-								Resources res = getApplicationContext().getResources();
-								String stringContentTitle = res.getQuantityString(R.plurals.notif_content_title, num, num);
-								String stringContentText = res.getString(R.string.notif_content_text);
-								Notification noti = new NotificationCompat.Builder(getApplicationContext())
-										.setContentTitle(stringContentTitle)
-										.setContentText(stringContentText)
-										.setSmallIcon(R.drawable.ic_launcher)
-										.setContentIntent(pIntent)
-										.build();
-
-								NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-
-								// Hide the notification after its selected
-								noti.flags |= Notification.FLAG_AUTO_CANCEL;
-
-								notificationManager.notify(0, noti);
-							}
-						}
-
-						if (VelloConfig.DEBUG_SWITCH) {
-							Log.d(TAG, "...stop command---#" + startId);
-						}
-						sendMessageToUI(VelloService.MSG_STATUS_SYNC_END, null);
-
-						stopSelf(startId);
 					}
 					
 					if (mDirtyCards.size() > 0 && !force) {

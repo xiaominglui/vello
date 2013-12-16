@@ -25,6 +25,7 @@ import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.service.VelloService;
+import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.mili.xiaominglui.app.vello.util.NetworkUtil;
 
 public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
@@ -191,14 +192,14 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	}
 	
 	private void postActiveWebhook() {
-		Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
+		Account account = new Account(AccountUtils.getChosenAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
 		Bundle extras = new Bundle();
 		ContentResolver.removePeriodicSync(account, VelloProvider.AUTHORITY, extras);
 		mListPreference.setEnabled(true);
 	}
 
 	private void postDeactiveWebhook() {
-		Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
+		Account account = new Account(AccountUtils.getChosenAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
 		Bundle extras = new Bundle();
 		int pollFrequency = Integer.valueOf(mNewSyncValue) * 60 * 60;
 		ContentResolver.addPeriodicSync(account, VelloProvider.AUTHORITY, extras, pollFrequency);

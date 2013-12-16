@@ -90,7 +90,7 @@
     <string name="drawer_close">Close navigation drawer</string>
     
     <string name="delete_word_card">Delete word</string>
-    <string name="hink_revoked">bye~</string>
+    <string name="hink_revoked">token revoked</string>
     
     <!-- Alarm deletion confirmation message-->
     <plurals name="word_card_delete_confirmation">

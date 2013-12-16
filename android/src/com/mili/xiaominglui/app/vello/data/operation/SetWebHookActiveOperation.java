@@ -41,8 +41,7 @@ public class SetWebHookActiveOperation implements Operation {
 		parameterMap.put(WSConfig.WS_TRELLO_PARAM_APP_KEY, WSConfig.VELLO_APP_KEY);
 		parameterMap.put(WSConfig.WS_TRELLO_PARAM_ACCESS_TOKEN, token);
 		
-		NetworkConnection networkConnection = new NetworkConnection(context,
-				urlString);
+		NetworkConnection networkConnection = new NetworkConnection(context, urlString);
 		networkConnection.setMethod(Method.PUT);
 		networkConnection.setParameters(parameterMap);
 		ConnectionResult result = networkConnection.execute();

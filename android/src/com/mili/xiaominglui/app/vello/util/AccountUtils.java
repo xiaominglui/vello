@@ -128,8 +128,7 @@ public class AccountUtils {
     }
     
     public static String getVocabularyBoardWebHookId(final Context context) {
-    	SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(context);
+    	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
     	return sp.getString(PREF_VOCABULARY_BOARD_WEB_HOOK_ID, "");
     }
     
@@ -193,10 +192,8 @@ public class AccountUtils {
         return 0;
     }
 
-    public static void setChosenAccountName(final Context context,
-            final String accountName) {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(context);
+    public static void setChosenAccountName(final Context context, final String accountName) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.edit().putString(PREF_CHOSEN_ACCOUNT, accountName).commit();
     }
 

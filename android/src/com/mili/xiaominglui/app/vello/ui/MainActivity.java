@@ -8,6 +8,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
@@ -19,6 +20,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
@@ -390,10 +392,18 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	}
 	
 	private void postInitAccount() {
-		Account account = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
+		Account account = new Account(AccountUtils.getChosenAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
 		ContentResolver.setIsSyncable(account, VelloProvider.AUTHORITY, 1);
 		ContentResolver.setSyncAutomatically(account, VelloProvider.AUTHORITY, true);
 		ContentResolver.setMasterSyncAutomatically(true);
+		
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+		int syncFreqValue = Integer.valueOf(settings.getString(SettingsActivity.KEY_PREF_SYNC_FREQ, "24"));
+		if (syncFreqValue > 0) {
+			Bundle extras = new Bundle();
+			ContentResolver.addPeriodicSync(account, VelloProvider.AUTHORITY, extras, syncFreqValue * 60 * 60);
+		}
+		
 		triggerRefresh();
 	}
 	
