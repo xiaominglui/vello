@@ -10,13 +10,17 @@ import java.util.TimeZone;
 
 import org.apache.http.HttpStatus;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ClipboardManager;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.OperationApplicationException;
-import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,16 +28,15 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.avos.avoscloud.AVException;
 import com.avos.avoscloud.AVInstallation;
 import com.avos.avoscloud.PushService;
-import com.avos.avoscloud.SaveCallback;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
+import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.Board;
 import com.mili.xiaominglui.app.vello.data.model.DirtyCard;
@@ -47,7 +50,6 @@ import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestManager;
 import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment.ConnectionErrorDialogListener;
 import com.mili.xiaominglui.app.vello.ui.MainActivity;
-import com.mili.xiaominglui.app.vello.ui.SettingsActivity;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class VelloService extends Service implements RequestListener,
@@ -769,6 +771,45 @@ public class VelloService extends Service implements RequestListener,
 							e.printStackTrace();
 						} catch (OperationApplicationException e) {
 							e.printStackTrace();
+						}
+
+						// show notification
+						Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+						PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+
+						ProviderCriteria cri = new ProviderCriteria();
+						cri.addSortOrder(DbWordCard.Columns.DUE, true);
+
+						Calendar rightNow = Calendar.getInstance();
+						SimpleDateFormat fo = new SimpleDateFormat(
+								"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+						String now = fo.format(rightNow.getTime());
+						cri.addLt(DbWordCard.Columns.DUE, now, true);
+						cri.addNe(DbWordCard.Columns.CLOSED, "true");
+						Cursor cur = getContentResolver().query(
+								DbWordCard.CONTENT_URI, DbWordCard.PROJECTION,
+								cri.getWhereClause(), cri.getWhereParams(),
+								cri.getOrderClause());
+						if (cur != null) {
+							int num = cur.getCount();
+							if (num > 0) {
+								Resources res = getApplicationContext().getResources();
+								String stringContentTitle = res.getQuantityString(R.plurals.notif_content_title, num, num);
+								String stringContentText = res.getString(R.string.notif_content_text);
+								Notification noti = new NotificationCompat.Builder(getApplicationContext())
+										.setContentTitle(stringContentTitle)
+										.setContentText(stringContentText)
+										.setSmallIcon(R.drawable.ic_launcher)
+										.setContentIntent(pIntent)
+										.build();
+
+								NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+
+								// Hide the notification after its selected
+								noti.flags |= Notification.FLAG_AUTO_CANCEL;
+
+								notificationManager.notify(0, noti);
+							}
 						}
 
 						if (VelloConfig.DEBUG_SWITCH) {
