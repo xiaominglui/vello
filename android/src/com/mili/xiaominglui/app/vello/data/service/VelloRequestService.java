@@ -22,7 +22,6 @@ import com.mili.xiaominglui.app.vello.data.operation.ReopenVocabularyListOperati
 import com.mili.xiaominglui.app.vello.data.operation.RestartWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ReviewedPlusWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ReviewedWordCardOperation;
-import com.mili.xiaominglui.app.vello.data.operation.RevokeAuthTokenOperation;
 import com.mili.xiaominglui.app.vello.data.operation.UpdateRemoteTrelloCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.UpgradeWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
@@ -73,8 +72,6 @@ public class VelloRequestService extends RequestService {
             	return new CreateWebHookOperation();
             case VelloRequestFactory.REQUEST_TYPE_SET_WEBHOOK_ACTIVE:
             	return new SetWebHookActiveOperation();
-            case VelloRequestFactory.REQUEST_TYPE_REVOKE_AUTH_TOKEN:
-            	return new RevokeAuthTokenOperation();
             case VelloRequestFactory.REQUEST_TYPE_CHECK_TRELLO_CONNECTION:
             	return new CheckTrelloConnectionOperation();
             case VelloRequestFactory.REQUEST_TYPE_READ_TRELLO_ACCOUNT_INFO:

@@ -39,8 +39,7 @@ public class LoginFragment extends SherlockFragment implements View.OnClickListe
 	}
 	
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_login, container, false);
 		
 		mAdapter = new WelcomeFragmentAdapter(getActivity().getSupportFragmentManager());
@@ -64,7 +63,5 @@ public class LoginFragment extends SherlockFragment implements View.OnClickListe
             	mListener.onSignInButtonClicked();
                 break;
         }
-		
 	}
-
 }

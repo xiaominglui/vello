@@ -53,53 +53,6 @@ public class AccountActivity extends SherlockFragmentActivity implements LoginFr
         AccountUtils.authAndAddTrelloAccount(AccountActivity.this, AccountActivity.this, REQUEST_AUTHENTICATE, mMyTrelloAccount);
     }
     
-    /**
-     * This fragment shows a login progress spinner. Upon reaching a timeout of
-     * 7 seconds (in case of a poor network connection), the user can try again.
-     */
-    public static class AuthProgressFragment extends SherlockFragment {
-        private static final int TRY_AGAIN_DELAY_MILLIS = 7 * 1000; // 7 seconds
-
-        private final Handler mHandler = new Handler();
-
-        public AuthProgressFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_login_loading, container, false);
-
-            final View takingAWhilePanel = rootView.findViewById(R.id.taking_a_while_panel);
-            final View tryAgainButton = rootView.findViewById(R.id.retry_button);
-            tryAgainButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    getFragmentManager().popBackStack();
-                }
-            });
-
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (!isAdded()) {
-                        return;
-                    }
-
-                    takingAWhilePanel.setVisibility(View.VISIBLE);
-                }
-            }, TRY_AGAIN_DELAY_MILLIS);
-
-            return rootView;
-        }
-
-        @Override
-        public void onDetach() {
-            super.onDetach();
-            ((AccountActivity) getActivity()).mCancelAuth = true;
-        }
-    }
-
     @Override
     public boolean shouldCancelAuthentication() {
         return mCancelAuth;
@@ -126,10 +79,6 @@ public class AccountActivity extends SherlockFragmentActivity implements LoginFr
             return;
         }
 		mMyTrelloAccount = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container_master, new AuthProgressFragment(), "loading").commit();
-//                .addToBackStack("log_in").commit();
         tryAuthenticate();
 	}
 }

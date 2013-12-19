@@ -25,7 +25,6 @@ public final class VelloRequestFactory {
     public static final int REQUEST_TYPE_UPGRADE_WORDCARD = 14;
     public static final int REQUEST_TYPE_LOOK_UP_IN_DICTIONARY = 16;
     public static final int REQUEST_TYPE_CREATE_WEBHOOK = 17;
-    public static final int REQUEST_TYPE_REVOKE_AUTH_TOKEN = 18;
     public static final int REQUEST_TYPE_SET_WEBHOOK_ACTIVE = 19;
     public static final int REQUEST_TYPE_CHECK_TRELLO_CONNECTION = 20;
     public static final int REQUEST_TYPE_READ_TRELLO_ACCOUNT_INFO = 21;
@@ -188,12 +187,6 @@ public final class VelloRequestFactory {
 		Request request = new Request(REQUEST_TYPE_SET_WEBHOOK_ACTIVE);
 		request.put(PARAM_EXTRA_WEBHOOK_ACTIVE, isActive);
 		request.setMemoryCacheEnabled(true);
-		return request;
-	}
-	
-	public static Request revokeAuthToken() {
-		Request request = new Request(REQUEST_TYPE_REVOKE_AUTH_TOKEN);
-		request.setMemoryCacheEnabled(false);
 		return request;
 	}
 

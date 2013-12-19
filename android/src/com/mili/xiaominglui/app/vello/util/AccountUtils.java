@@ -21,7 +21,6 @@ import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
-import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
 import com.mili.xiaominglui.app.vello.ui.AccountActivity;
 
@@ -32,6 +31,7 @@ public class AccountUtils {
     private static final String PREF_AUTH_TOKEN = "auth_token";
     private static final String PREF_VOCABULARY_BOARD_ID = "board_id";
     private static final String PREF_VOCABULARY_BOARD_WEB_HOOK_ID = "board_hook_id";
+    private static final String PREF_VOCABULARY_BOARD_WEB_HOOK_STATUS = "board_hook_status";
     private static final String PREF_VOCABULARY_BOARD_NAME = "board_name";
     private static final String PREF_VOCABULARY_BOARD_NAME_DEFAULT = "MyWords";
     private static final String PREF_VOCABULARY_BOARD_VERIFICATION_STRING = "TrelloDB";
@@ -72,7 +72,6 @@ public class AccountUtils {
     
     public static interface AuthenticateCallback {
         public boolean shouldCancelAuthentication();
-
         public void onAuthTokenAvailable(String authToken);
     }
 
@@ -85,7 +84,6 @@ public class AccountUtils {
                 activity,
                 getAccountManagerCallback(callback, account, activity, activity, activityRequestCode),
                 null);
-
     }
 
     private static AccountManagerCallback<Bundle> getAccountManagerCallback(
@@ -133,26 +131,32 @@ public class AccountUtils {
     }
     
     public static void setVocabularyBoardWebHookId(final Context context, String hookId) {
-    	SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(context);
+    	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
     	sp.edit().putString(PREF_VOCABULARY_BOARD_WEB_HOOK_ID, hookId).commit();
     }
     
+    public static void setVocabularyBoardWebHookStatus(final Context context, boolean enable) {
+    	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+    	sp.edit().putBoolean(PREF_VOCABULARY_BOARD_WEB_HOOK_STATUS, enable).commit();
+    }
+    
+    public static boolean getVocabularyBoardWebHookStatus(final Context context) {
+    	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+    	return sp.getBoolean(PREF_VOCABULARY_BOARD_WEB_HOOK_STATUS, false);
+    }
+    
     public static String getVocabularyBoardId(final Context context) {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(context);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getString(PREF_VOCABULARY_BOARD_ID, "");
     }
 
     public static void setVocabularyBoardId(final Context context, final String id) {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(context);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.edit().putString(PREF_VOCABULARY_BOARD_ID, id).commit();
     }
 
     public static String getVocabularyBoardName(final Context context) {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(context);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getString(PREF_VOCABULARY_BOARD_NAME, PREF_VOCABULARY_BOARD_NAME_DEFAULT);
     }
 
@@ -161,21 +165,17 @@ public class AccountUtils {
     }
 
     public static String getChosenAccountName(final Context context) {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(context);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getString(PREF_CHOSEN_ACCOUNT, "");
     }
 
     public static String getVocabularyListId(final Context context, final int position) {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(context);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getString(VOCABULARY_LISTS_TITLE_ID[position], "");
     }
 
-    public static void setVocabularyListId(final Context context, final String id,
-            final int position) {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(context);
+    public static void setVocabularyListId(final Context context, final String id, final int position) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.edit().putString(VOCABULARY_LISTS_TITLE_ID[position], id).commit();
     }
 
@@ -197,45 +197,38 @@ public class AccountUtils {
         sp.edit().putString(PREF_CHOSEN_ACCOUNT, accountName).commit();
     }
 
-    public static void addAccount(final Context context, final String name,
-            final String type) {
+    public static void addAccount(final Context context, final String name, final String type) {
         AccountManager am = AccountManager.get(context);
         final Account account = new Account(name, type);
         am.addAccountExplicitly(account, "", null);
     }
     
     public static String getAuthToken(final Context context) {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(context);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getString(PREF_AUTH_TOKEN, "");
     }
 
-    public static void setAuthToken(final Context context,
-            final String authToken) {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(context);
+    public static void setAuthToken(final Context context, final String authToken) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.edit().putString(PREF_AUTH_TOKEN, authToken).commit();
     }
 
     public static void invalidateAuthToken(final Context context) {
         AccountManager am = AccountManager.get(context);
-        am.invalidateAuthToken(Constants.ACCOUNT_TYPE,
-                getAuthToken(context));
-        setAuthToken(context, null);
+        am.invalidateAuthToken(Constants.ACCOUNT_TYPE, getAuthToken(context));
+        setAuthToken(context, "");
     }
 
     public static void signOut(final Context context) {
         invalidateAuthToken(context);
         
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(context);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.edit().clear().commit();
         
         CookieSyncManager.createInstance(context);
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.removeAllCookie();
 
-		context.getContentResolver().delete(
-				VelloContent.CONTENT_URI, null, null);
+		context.getContentResolver().delete(VelloContent.CONTENT_URI, null, null);
     }
 }

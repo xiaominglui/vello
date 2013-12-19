@@ -11,10 +11,8 @@ import com.mili.xiaominglui.app.vello.R;
 public class ProgressFragment extends SherlockFragment {
 	
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_loading, container, false);
 		return rootView;
 	}
-
 }

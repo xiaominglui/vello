@@ -26,6 +26,7 @@ import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
@@ -51,13 +52,22 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 
     /** The tag used to log to adb console. */
     private static final String TAG = "AuthenticatorActivity";
+    private static final int AUTH_TIMEOUT_IN_MILLIS = 30 * 1000; // 30 seconds
+    
+    private static final int AUTH_FAILURE_NO_VERIFIER = 0;
+    private static final int AUTH_FAILURE_USER_DENY = 1;
+    private static final int AUTH_FAILURE_ERROR_RECEIVED = 2;
+    private static final int AUTH_FAILURE_TIMEOUT = 3;
+    
+    private final Handler mHandler = new Handler();
 
     private WebView mWebView;
     private OAuthService mService;
     private Token mRequestToken;
     private ProgressBar mProgressBar;
     private String mAccessToken;
-
+    private boolean mTimeout;
+    
 
 	private class MyWebViewClient extends WebViewClient {
 		@Override
@@ -73,7 +83,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 					if (VelloConfig.DEBUG_SWITCH) {
 						Log.i(TAG, "trello not response verifier");
 					}
-					finishFailure();
+					finishFailure(AUTH_FAILURE_NO_VERIFIER);
 				}
 				return true;
 			} else if (url.equals("https://trello.com/")) {
@@ -81,7 +91,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 				if (VelloConfig.DEBUG_SWITCH) {
 					Log.i(TAG, "user deny auth");
 				}
-				finishFailure();
+				finishFailure(AUTH_FAILURE_USER_DENY);
 				return true;
 			} else {
 				if (VelloConfig.DEBUG_SWITCH) {
@@ -94,6 +104,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 		
 		@Override
 		public void onPageFinished(WebView view, String url) {
+			mTimeout = false;
 			if (mProgressBar.isShown()) {
 				mProgressBar.setVisibility(View.INVISIBLE);
 				mWebView.setVisibility(View.VISIBLE);
@@ -101,14 +112,18 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 		}
 		
 		@Override
-		public void onReceivedError(WebView view, int errorCode,
-				String description, String failingUrl) {
-			finishFailure();
+		public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+			if (VelloConfig.DEBUG_SWITCH) {
+				Log.d(TAG, "onReceivedError --- " + "errorCode=" + errorCode);
+				Log.d(TAG, "onReceivedError --- " + "description=" + description);
+				Log.d(TAG, "onReceivedError --- " + "failingUrl=" + failingUrl);
+			}
+			finishFailure(AUTH_FAILURE_ERROR_RECEIVED);
 		}
 	}
 	
 	private UIHandler mUICallback = new UIHandler(this);
-	private class UIHandler extends Handler {
+	static class UIHandler extends Handler {
 		WeakReference<AuthenticatorActivity> mActivity;
 		
 		UIHandler(AuthenticatorActivity activity) {
@@ -121,7 +136,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 			switch (msg.what) {
 			case VelloService.MSG_RETURN_TRELLO_USERNAME:
 				String username = (String) msg.obj;
-				finishAuthenticated(mAccessToken, username);
+				theActivity.finishAuthenticated(username);
 				break;
 			}
 		}
@@ -149,6 +164,15 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 				// In this case the service has crashed before we could even do
 				// anything with it
 			}
+			
+			mHandler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					if (mTimeout) {
+						finishFailure(AUTH_FAILURE_TIMEOUT);
+					}
+				}
+			}, AUTH_TIMEOUT_IN_MILLIS);
 			
 			new GetTrelloAuthVerifierStringTask().execute();
 			
@@ -182,8 +206,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 		// class name because we want a specific service implementation that
 		// we know will be running in our own process (and thus won't be
 		// supporting component replacement by other applications).
-		bindService(new Intent(this, VelloService.class), mConnection,
-				Context.BIND_AUTO_CREATE);
+		bindService(new Intent(this, VelloService.class), mConnection, Context.BIND_AUTO_CREATE);
 		mIsBound = true;
 	}
 
@@ -202,6 +225,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.activity_oauth);
+    	mTimeout = true;
     	
     	mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
         mWebView = (WebView) findViewById(R.id.webview);
@@ -226,21 +250,33 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
      * 
      * @param result the confirmCredentials result.
      */
-    private void finishAuthenticated(String token, String username) {
+    private void finishAuthenticated(String username) {
     	if (VelloConfig.DEBUG_SWITCH) {
-    		Log.i(TAG, "finishAuthenticated(). token=" + token + ", username=" + username);
+    		Log.i(TAG, "finishAuthenticated(). token=" + mAccessToken + ", username=" + username);
     	}
 
         final Intent intent = new Intent();
         intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, Constants.ACCOUNT_TYPE);
         intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, username);
-        intent.putExtra(AccountManager.KEY_PASSWORD, token);
+        intent.putExtra(AccountManager.KEY_PASSWORD, mAccessToken);
         setAccountAuthenticatorResult(intent.getExtras());
+        Toast.makeText(getApplicationContext(), R.string.toast_auth_finished, Toast.LENGTH_SHORT).show();
         finish();
     }
     
-    private void finishFailure() {
-    	Log.i(TAG, "finishFailure()");
+    private void finishFailure(int type) {
+    	Log.i(TAG, "finishFailure() --- " + "type=" + type);
+		switch (type) {
+		case AUTH_FAILURE_TIMEOUT:
+			Toast.makeText(getApplicationContext(), R.string.toast_auth_timeout, Toast.LENGTH_SHORT).show();
+			break;
+		case AUTH_FAILURE_USER_DENY:
+		case AUTH_FAILURE_NO_VERIFIER:
+		case AUTH_FAILURE_ERROR_RECEIVED:
+		default:
+			Toast.makeText(getApplicationContext(), R.string.toast_auth_failure, Toast.LENGTH_SHORT).show();
+			break;
+		}
         final Intent intent = new Intent();
         intent.putExtra(AccountManager.KEY_ERROR_CODE, AccountManager.ERROR_CODE_REMOTE_EXCEPTION);
         setAccountAuthenticatorResult(intent.getExtras());
@@ -280,6 +316,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 		@Override
 		protected void onPostExecute(Token token) {
 			mWebView.setVisibility(View.INVISIBLE);
+			mProgressBar.setVisibility(View.VISIBLE);
 			
 			mAccessToken = token.getToken();
 			sendMessageToService(VelloService.MSG_READ_TRELLO_ACCOUNT_INFO, mAccessToken);

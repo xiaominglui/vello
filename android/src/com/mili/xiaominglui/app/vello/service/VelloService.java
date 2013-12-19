@@ -78,12 +78,12 @@ public class VelloService extends Service implements RequestListener,
 	public static final int MSG_TOAST_NOT_AVAILABLE_WORD = 9;
 	public static final int MSG_TOAST_WORD_REVIEWED_COUNT_PLUS = 10;
 	public static final int MSG_SHOW_RESULT_WORDCARD = 11;
-	public static final int MSG_AUTH_TOKEN_REVOKED = 12;
 	public static final int MSG_VALID_TRELLO_CONNECTION = 13;
 	public static final int MSG_INVALID_TRELLO_CONNECTION = 14;
 	
 	public static final int MSG_STATUS_WEBHOOK_ACTIVED = 15;
 	public static final int MSG_STATUS_WEBHOOK_DEACTIVED = 16;
+	public static final int MSG_STATUS_WEBHOOK_CREATED = 17;
 	
 	public static final int MSG_STATUS_INIT_ACCOUNT_BEGIN = 50;
 	public static final int MSG_STATUS_INIT_ACCOUNT_END = 51;
@@ -97,7 +97,7 @@ public class VelloService extends Service implements RequestListener,
 	public static final int MSG_CLOSE_WORDCARD = 104;
 	public static final int MSG_SYNC_LOCAL_CACHE = 106;
 	public static final int MSG_TRIGGER_QUERY_WORD = 107;
-	public static final int MSG_REVOKE_AUTH_TOKEN = 108;
+	public static final int MSG_CREATE_WEBHOOK = 108;
 	public static final int MSG_SET_WEBHOOK_ACTIVE_STATUS = 109;
 	public static final int MSG_CHECK_TRELLO_CONNECTION = 110;
 	public static final int MSG_READ_TRELLO_ACCOUNT_INFO = 111;
@@ -139,13 +139,12 @@ public class VelloService extends Service implements RequestListener,
 				    String query = (String) msg.obj;
 				    service.queryInRemoteStorage(query);
 				    break;
-				case MSG_REVOKE_AUTH_TOKEN:
-					service.sendMessageToUI(MSG_STATUS_REVOKE_BEGIN, null);
-					service.revokeAuthToken();
-					break;
 				case MSG_SET_WEBHOOK_ACTIVE_STATUS:
 					boolean isActive = (Boolean) msg.obj;
 					service.setWebHookActive(isActive);
+					break;
+				case MSG_CREATE_WEBHOOK:
+					service.createWebHook();
 					break;
 				case MSG_CHECK_TRELLO_CONNECTION:
 					service.checkTrelloConnection();
@@ -406,15 +405,6 @@ public class VelloService extends Service implements RequestListener,
 		Request setWebHookActive = VelloRequestFactory.setWebHookActive(isActive);
 		mRequestManager.execute(setWebHookActive, this);
 		mRequestList.add(setWebHookActive);
-	}
-	
-	private void revokeAuthToken() {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "revokeAuthToken start...");
-		}
-		Request revokeAuthToken = VelloRequestFactory.revokeAuthToken();
-		mRequestManager.execute(revokeAuthToken, this);
-		mRequestList.add(revokeAuthToken);
 	}
 	
 	private void checkTrelloConnection() {
@@ -856,49 +846,6 @@ public class VelloService extends Service implements RequestListener,
 						Log.d(TAG, "has no open trello card");
 					}
 				}
-				/*
-				if (finished) {
-					// TODO finished expectly
-					// Build notification
-		            // TODO need rework
-		        	Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-		            PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
-
-		            
-		            ProviderCriteria cri = new ProviderCriteria();
-		            cri.addSortOrder(DbWordCard.Columns.DUE, true);
-
-		            Calendar rightNow = Calendar.getInstance();
-		            SimpleDateFormat fo = new SimpleDateFormat(
-		                    "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-		            String now = fo.format(rightNow.getTime());
-		            cri.addLt(DbWordCard.Columns.DUE, now, true);
-		            cri.addNe(DbWordCard.Columns.CLOSED, "true");
-		            Cursor cur = getContentResolver().query(DbWordCard.CONTENT_URI, DbWordCard.PROJECTION,
-		                    cri.getWhereClause(), cri.getWhereParams(), cri.getOrderClause());
-		            if (cur != null) {
-		                int num = cur.getCount();
-		                if (num > 0) {
-//		                    Notification noti = new Notification.Builder(getApplicationContext())
-//		                            .setContentTitle(
-//		                                    "You have " + num + " words need reviewing!")
-//		                            .setContentText("Click me to begin reviewing!")
-//		                            .setSmallIcon(R.drawable.ic_launcher)
-//		                            .setContentIntent(pIntent).build();
-//
-//		                    NotificationManager notificationManager = (NotificationManager) getApplicationContext()
-//		                            .getSystemService(Context.NOTIFICATION_SERVICE);
-//
-//		                    // Hide the notification after its selected
-//		                    noti.flags |= Notification.FLAG_AUTO_CANCEL;
-//
-//		                    notificationManager.notify(0, noti);
-		                }
-		            }
-				} else {
-					// TODO something error
-				}
-				*/
 				return;
 
 			case VelloRequestFactory.REQUEST_TYPE_ARCHIVE_WORDCARD:
@@ -920,17 +867,16 @@ public class VelloService extends Service implements RequestListener,
 				if (hookId != null) {
 					// hook created, save it
 					AccountUtils.setVocabularyBoardWebHookId(getApplicationContext(), hookId);
-					
-					// save Installation for push
-					PushService.setDefaultPushCallback(this, MainActivity.class);
-					AVInstallation.getCurrentInstallation().saveInBackground();
-
+					sendMessageToUI(MSG_STATUS_WEBHOOK_CREATED, null);
 					if (VelloConfig.DEBUG_SWITCH) {
 						Log.d(TAG, "webhook created.");
 					}
 					
 				} else {
 					// to create again
+					if (VelloConfig.DEBUG_SWITCH) {
+						Log.d(TAG, "retry --- createWebHook");
+					}
 					createWebHook();
 				}
 				return;
@@ -955,17 +901,10 @@ public class VelloService extends Service implements RequestListener,
 					}
 				} else {
 					// request fail, try again
+					if (VelloConfig.DEBUG_SWITCH) {
+						Log.d(TAG, "retry --- setWebHookActive(" + requestActive + ")");
+					}
 					setWebHookActive(requestActive);
-				}
-				return;
-				
-			case VelloRequestFactory.REQUEST_TYPE_REVOKE_AUTH_TOKEN:
-				boolean hasRevoked = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_HAS_AUTH_TOKEN_REVOKED);
-				if (hasRevoked) {
-					// revoked
-					sendMessageToUI(VelloService.MSG_AUTH_TOKEN_REVOKED, null);
-				} else {
-					// TODO
 				}
 				return;
 				
@@ -989,6 +928,9 @@ public class VelloService extends Service implements RequestListener,
 					sendMessageToUI(VelloService.MSG_RETURN_TRELLO_USERNAME, username);
 				} else {
 					// failed, retry
+					if (VelloConfig.DEBUG_SWITCH) {
+						Log.d(TAG, "retry --- readTrelloAccountInfo");
+					}
 					readTrelloAccountInfo(token);
 				}
 				return;
@@ -1046,10 +988,6 @@ public class VelloService extends Service implements RequestListener,
 					Log.i(TAG, "invalid token");
 				}
 				
-			} else if (statusCode == HttpStatus.SC_NOT_FOUND && request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_REVOKE_AUTH_TOKEN) {
-				// token has been revoked via trello web app
-				Log.d(TAG, "token has been revoked via trello web app.");
-				sendMessageToUI(VelloService.MSG_AUTH_TOKEN_REVOKED, null);
 			} else if (statusCode == -1 && request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_CHECK_TRELLO_CONNECTION) {
 				sendMessageToUI(VelloService.MSG_INVALID_TRELLO_CONNECTION, null);
 				if (VelloConfig.DEBUG_SWITCH) {

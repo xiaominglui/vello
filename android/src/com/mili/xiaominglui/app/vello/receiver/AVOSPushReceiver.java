@@ -23,9 +23,6 @@ public class AVOSPushReceiver extends BroadcastReceiver {
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "onReceive --- " + action);
 		}
-
-		if (action.equals("com.avos.avello.DICT_SYNC_MSG")) {
-		}
 		
 		if (action.equals("com.avos.avello.SYNC_MSG")) {
 			// String channel = intent.getExtras().getString("com.parse.Channel");
@@ -60,8 +57,6 @@ public class AVOSPushReceiver extends BroadcastReceiver {
 						} else {
 							Log.i(TAG, "unknow sub-type of UPDATECARD, data = " + jsonActionData.toString());
 						}
-						
-						
 					} else {
 						if (VelloConfig.DEBUG_SWITCH) {
 							Log.d(TAG, "unknow action type = " + actionType);

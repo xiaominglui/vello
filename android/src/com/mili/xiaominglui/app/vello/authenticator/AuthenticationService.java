@@ -1,5 +1,7 @@
 package com.mili.xiaominglui.app.vello.authenticator;
 
+import com.mili.xiaominglui.app.vello.config.VelloConfig;
+
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
@@ -19,25 +21,25 @@ public class AuthenticationService extends Service {
 
     @Override
     public void onCreate() {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "SampleSyncAdapter Authentication Service started.");
-        }
+    	if (VelloConfig.DEBUG_SWITCH) {
+    		Log.d(TAG, "AuthenticationService onCreate.");
+    	}
+
         mAuthenticator = new Authenticator(this);
     }
 
     @Override
     public void onDestroy() {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "SampleSyncAdapter Authentication Service stopped.");
-        }
+    	if (VelloConfig.DEBUG_SWITCH) {
+    		Log.d(TAG, "AuthenticationService onDestroy.");
+    	}
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        if (Log.isLoggable(TAG, Log.VERBOSE)) {
-            Log.v(TAG, "getBinder()...  returning the AccountAuthenticator binder for intent "
-                    + intent);
-        }
+    	if (VelloConfig.DEBUG_SWITCH) {
+    		Log.d(TAG, "AuthenticationService onBind.");
+    	}
         return mAuthenticator.getIBinder();
     }
 }

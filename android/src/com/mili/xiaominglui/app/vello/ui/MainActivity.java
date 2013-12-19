@@ -29,9 +29,10 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.avos.avoscloud.AVAnalytics;
+import com.avos.avoscloud.AVInstallation;
+import com.avos.avoscloud.PushService;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
-import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.service.VelloService;
@@ -45,6 +46,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	private static final int CONTENT_VIEW_ID = 666;
 	private Drawable oldBackground = null;
 	private int currentColor = 0xFF666666;
+	private boolean isInFront;
 	private final Handler handler = new Handler();
 	
 	private MainActivityUIHandler mUICallback = new MainActivityUIHandler(this);
@@ -91,9 +93,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			    TrelloCard result = (TrelloCard) msg.obj;
 			    Toast.makeText(theActivity, result.id, Toast.LENGTH_SHORT).show();
 			    break;
-			case VelloService.MSG_AUTH_TOKEN_REVOKED:
-				theActivity.postAuthTokenRevoked();
-				break;
 			case VelloService.MSG_STATUS_INIT_ACCOUNT_BEGIN:
 				theActivity.preInitAccount();
 				break;
@@ -139,8 +138,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				// all initialized
 				// if has no open card, blank page after init
 				// if has open card, review page
-				FragmentManager fm = getSupportFragmentManager();
-				fm.beginTransaction().add(CONTENT_VIEW_ID, ReviewViewFragment.newInstance()).commit();
 			} else {
 				// begin to check vocabulary board
 				sendMessageToService(VelloService.MSG_CHECK_VOCABULARY_BOARD);
@@ -195,6 +192,9 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
         FrameLayout frame = new FrameLayout(this);
         frame.setId(CONTENT_VIEW_ID);
         setContentView(frame, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        
+        FragmentManager fm = getSupportFragmentManager();
+		fm.beginTransaction().add(CONTENT_VIEW_ID, ReviewViewFragment.newInstance()).commit();
 
 		handleIntent(getIntent());
 		doBindService();
@@ -209,11 +209,13 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 
 	@Override
 	protected void onResume() {
+		isInFront = true;
 		super.onResume();
 	}
 
 	@Override
 	protected void onPause() {
+		isInFront = false;
 		super.onPause();
 	}
 
@@ -332,7 +334,11 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
             return true;
             
 		case R.id.menu_sign_out:
-			sendMessageToService(VelloService.MSG_REVOKE_AUTH_TOKEN);
+			AccountUtils.signOut(this);
+			// restart
+			Intent intent = getIntent();
+			finish();
+			startActivity(intent);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -408,24 +414,22 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	}
 	
 	private void preSync() {
-		FragmentManager fm = getSupportFragmentManager();
-		fm.beginTransaction().replace(CONTENT_VIEW_ID, new ProgressFragment()).commit();
+		if (isInFront) {
+			FragmentManager fm = getSupportFragmentManager();
+			fm.beginTransaction().replace(CONTENT_VIEW_ID, new ProgressFragment()).commit();
+		}
 	}
 	
 	private void postSync() {
-		FragmentManager fm = getSupportFragmentManager();
-		fm.beginTransaction().replace(CONTENT_VIEW_ID, ReviewViewFragment.newInstance()).commit();
+		if (isInFront) {
+			FragmentManager fm = getSupportFragmentManager();
+			fm.beginTransaction().replace(CONTENT_VIEW_ID, ReviewViewFragment.newInstance()).commit();
+		}
 	}
 	
 	private void preAuthTokenRevoke() {
 		FragmentManager fm = getSupportFragmentManager();
 		fm.beginTransaction().replace(CONTENT_VIEW_ID, new ProgressFragment()).commit();
-	}
-	
-	private void postAuthTokenRevoked() {
-		AccountUtils.signOut(this);
-		Toast.makeText(getApplicationContext(), getString(R.string.hink_revoked), Toast.LENGTH_SHORT).show();
-		finish();
 	}
 	
 	private Drawable.Callback drawableCallback = new Drawable.Callback() {

@@ -20,9 +20,10 @@ import android.os.RemoteException;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
 
+import com.avos.avoscloud.AVInstallation;
+import com.avos.avoscloud.PushService;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
-import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
@@ -35,7 +36,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	private String mNewSyncValue = "0";
 	private ListPreference mListPreference;
 	private SettingsActivityUIHandler mUICallback = new SettingsActivityUIHandler(this);
-	private class SettingsActivityUIHandler extends Handler {
+	static class SettingsActivityUIHandler extends Handler {
 		WeakReference<SettingsActivity> mActivity;
 		
 		SettingsActivityUIHandler(SettingsActivity activity) {
@@ -51,6 +52,9 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 				break;
 			case VelloService.MSG_STATUS_WEBHOOK_DEACTIVED:
 				theActivity.postDeactiveWebhook();
+				break;
+			case VelloService.MSG_STATUS_WEBHOOK_CREATED:
+				theActivity.postCreateWebhook();
 				break;
 			case VelloService.MSG_VALID_TRELLO_CONNECTION:
 				theActivity.withValidTrelloConnection();
@@ -129,8 +133,6 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
             getActionBar().setDisplayHomeAsUpEnabled(true);
         }
-		
-		doBindService();
 	}
 	
 	@Override
@@ -139,8 +141,9 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 		// setup the initial value
 		mListPreference.setEnabled(false);
 		mListPreference.setSummary(R.string.pref_sync_frequency_summary_retrieving_setting);
+		
 		if (NetworkUtil.isOnline(getApplicationContext())) {
-			
+			doBindService();
 		} else {
 			mListPreference.setSummary(R.string.pref_sync_frequency_summary_no_network);
 		}
@@ -151,6 +154,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	@Override
 	protected void onPause() {
 		super.onPause();
+		doUnbindService();
 		getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
 	}
 	
@@ -161,48 +165,74 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 		mListPreference = (ListPreference) getPreferenceScreen().findPreference(KEY_PREF_SYNC_FREQ);
 	}
 	
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		doUnbindService();
-	}
-	
+	@SuppressWarnings("deprecation")
 	private void setupSimplePreferencesScreen() {
         // Add 'general' preferences.
         addPreferencesFromResource(R.xml.preferences);
     }
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 		if (key.equals(KEY_PREF_SYNC_FREQ)) {
 			ListPreference syncFreqPref = (ListPreference) findPreference(key);
 			syncFreqPref.setSummary(syncFreqPref.getEntry());
 			mNewSyncValue = syncFreqPref.getValue();
-			syncFreqPref.setEnabled(false);
 			if (mNewSyncValue.equals("0")) {
 				// choose PUSH
 				// active PUSH
-				sendMessageToService(VelloService.MSG_SET_WEBHOOK_ACTIVE_STATUS, true);
+				syncFreqPref.setEnabled(false);
+				String idWebhook = AccountUtils.getVocabularyBoardWebHookId(getApplicationContext());
+				
+				if (idWebhook.equals("")) {
+					// create and active it
+					sendMessageToService(VelloService.MSG_CREATE_WEBHOOK, null);
+				} else {
+					// activie it
+					sendMessageToService(VelloService.MSG_SET_WEBHOOK_ACTIVE_STATUS, true);
+				}
 			} else {
 				// choose schedule sync
+				Account account = new Account(AccountUtils.getChosenAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
+				Bundle extras = new Bundle();
+				int pollFrequency = Integer.valueOf(mNewSyncValue) * 60 * 60;
+				ContentResolver.addPeriodicSync(account, VelloProvider.AUTHORITY, extras, pollFrequency);
 				// deactive PUSH
-				sendMessageToService(VelloService.MSG_SET_WEBHOOK_ACTIVE_STATUS, false);
+				if (AccountUtils.getVocabularyBoardWebHookStatus(getApplicationContext())) {
+					sendMessageToService(VelloService.MSG_SET_WEBHOOK_ACTIVE_STATUS, false);
+				}
 			}
 		}
 	}
 	
-	private void postActiveWebhook() {
+	private void postCreateWebhook() {
+		AccountUtils.setVocabularyBoardWebHookStatus(getApplicationContext(), true);
 		Account account = new Account(AccountUtils.getChosenAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
 		Bundle extras = new Bundle();
 		ContentResolver.removePeriodicSync(account, VelloProvider.AUTHORITY, extras);
+		
+		// save Installation for push
+		PushService.setDefaultPushCallback(getApplicationContext(), MainActivity.class);
+		AVInstallation.getCurrentInstallation().saveInBackground();
+		
+		mListPreference.setEnabled(true);
+	}
+	
+	private void postActiveWebhook() {
+		AccountUtils.setVocabularyBoardWebHookStatus(getApplicationContext(), true);
+		Account account = new Account(AccountUtils.getChosenAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
+		Bundle extras = new Bundle();
+		ContentResolver.removePeriodicSync(account, VelloProvider.AUTHORITY, extras);
+		
+		// save Installation for push
+		PushService.setDefaultPushCallback(getApplicationContext(), MainActivity.class);
+		AVInstallation.getCurrentInstallation().saveInBackground();
+
 		mListPreference.setEnabled(true);
 	}
 
 	private void postDeactiveWebhook() {
-		Account account = new Account(AccountUtils.getChosenAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
-		Bundle extras = new Bundle();
-		int pollFrequency = Integer.valueOf(mNewSyncValue) * 60 * 60;
-		ContentResolver.addPeriodicSync(account, VelloProvider.AUTHORITY, extras, pollFrequency);
+		AccountUtils.setVocabularyBoardWebHookStatus(getApplicationContext(), false);
 		mListPreference.setEnabled(true);
 	}
 	
