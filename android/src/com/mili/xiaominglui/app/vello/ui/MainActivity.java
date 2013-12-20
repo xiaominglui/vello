@@ -69,29 +69,8 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				// TODO
 //				 ConnectionErrorDialogFragment.show();
 				break;
-			case VelloService.MSG_TOAST_INIT_VOCABULARY_START:
-//				superActivityToast = new SuperActivityToast(theActivity.getApplicationContext(), SuperToast.Type.STANDARD);
-//				AppMsg.makeText(theActivity.mActivity,
-//						R.string.toast_init_vocabulary_start, AppMsg.STYLE_INFO)
-//						.setLayoutGravity(Gravity.BOTTOM).show();
-				break;
-			case VelloService.MSG_TOAST_INIT_VOCABULARY_END:
-				break;
-			case VelloService.MSG_TOAST_NO_WORD_NOW:
-//				AppMsg.makeText(theActivity.mActivity,
-//						R.string.toast_no_word_now, AppMsg.STYLE_CONFIRM)
-//						.setLayoutGravity(Gravity.TOP).show();
-				break;
-			case VelloService.MSG_TOAST_NOT_AVAILABLE_WORD:
-//				AppMsg.makeText(theActivity.mActivity,
-//						R.string.toast_not_available_word, AppMsg.STYLE_ALERT)
-//						.setLayoutGravity(Gravity.TOP).show();
-				break;
-			case VelloService.MSG_TOAST_WORD_REVIEWED_COUNT_PLUS:
-				break;
 			case VelloService.MSG_SHOW_RESULT_WORDCARD:
 			    TrelloCard result = (TrelloCard) msg.obj;
-			    Toast.makeText(theActivity, result.id, Toast.LENGTH_SHORT).show();
 			    break;
 			case VelloService.MSG_STATUS_INIT_ACCOUNT_BEGIN:
 				theActivity.preInitAccount();

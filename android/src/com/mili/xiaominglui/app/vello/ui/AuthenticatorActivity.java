@@ -14,6 +14,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,8 +27,8 @@ import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
+import com.github.johnpersano.supertoasts.SuperToast;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.authenticator.TrelloAuthApi;
@@ -260,27 +261,42 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, username);
         intent.putExtra(AccountManager.KEY_PASSWORD, mAccessToken);
         setAccountAuthenticatorResult(intent.getExtras());
-        Toast.makeText(getApplicationContext(), R.string.toast_auth_finished, Toast.LENGTH_SHORT).show();
+
+		SuperToast superToast = new SuperToast(this);
+		superToast.setDuration(SuperToast.DURATION_MEDIUM);
+		superToast.setBackgroundResource(SuperToast.BACKGROUND_GREENTRANSLUCENT);
+		superToast.setTextColor(Color.WHITE);
+		superToast.setText(getString(R.string.toast_auth_finished));
+		superToast.show();
         finish();
     }
     
     private void finishFailure(int type) {
-    	Log.i(TAG, "finishFailure() --- " + "type=" + type);
+		Log.i(TAG, "finishFailure() --- " + "type=" + type);
+		SuperToast superToast = new SuperToast(getApplicationContext());
 		switch (type) {
 		case AUTH_FAILURE_TIMEOUT:
-			Toast.makeText(getApplicationContext(), R.string.toast_auth_timeout, Toast.LENGTH_SHORT).show();
+			superToast.setDuration(SuperToast.DURATION_SHORT);
+			superToast.setBackgroundResource(SuperToast.BACKGROUND_ORANGETRANSLUCENT);
+			superToast.setTextColor(Color.WHITE);
+			superToast.setText(getString(R.string.toast_auth_timeout));
+			superToast.show();
 			break;
 		case AUTH_FAILURE_USER_DENY:
 		case AUTH_FAILURE_NO_VERIFIER:
 		case AUTH_FAILURE_ERROR_RECEIVED:
 		default:
-			Toast.makeText(getApplicationContext(), R.string.toast_auth_failure, Toast.LENGTH_SHORT).show();
+			superToast.setDuration(SuperToast.DURATION_SHORT);
+			superToast.setBackgroundResource(SuperToast.BACKGROUND_REDTRANSLUCENT);
+			superToast.setTextColor(Color.WHITE);
+			superToast.setText(getString(R.string.toast_auth_failure));
+			superToast.show();
 			break;
 		}
-        final Intent intent = new Intent();
-        intent.putExtra(AccountManager.KEY_ERROR_CODE, AccountManager.ERROR_CODE_REMOTE_EXCEPTION);
-        setAccountAuthenticatorResult(intent.getExtras());
-        finish();
+		final Intent intent = new Intent();
+		intent.putExtra(AccountManager.KEY_ERROR_CODE, AccountManager.ERROR_CODE_REMOTE_EXCEPTION);
+		setAccountAuthenticatorResult(intent.getExtras());
+		finish();
     }
     
     class GetTrelloAuthVerifierStringTask extends AsyncTask<Void, Void, String> {

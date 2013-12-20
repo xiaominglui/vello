@@ -73,14 +73,9 @@ public class VelloService extends Service implements RequestListener,
 	public static final int MSG_SPINNER_OFF = 2;
 	public static final int MSG_DIALOG_BAD_DATA_ERROR_SHOW = 3;
 	public static final int MSG_DIALOG_CONNECTION_ERROR_SHOW = 4;
-	public static final int MSG_TOAST_INIT_VOCABULARY_START = 5;
-	public static final int MSG_TOAST_INIT_VOCABULARY_END = 6;
-	public static final int MSG_TOAST_NO_WORD_NOW = 8;
-	public static final int MSG_TOAST_NOT_AVAILABLE_WORD = 9;
-	public static final int MSG_TOAST_WORD_REVIEWED_COUNT_PLUS = 10;
-	public static final int MSG_SHOW_RESULT_WORDCARD = 11;
-	public static final int MSG_VALID_TRELLO_CONNECTION = 13;
-	public static final int MSG_INVALID_TRELLO_CONNECTION = 14;
+	public static final int MSG_SHOW_RESULT_WORDCARD = 5;
+	public static final int MSG_VALID_TRELLO_CONNECTION = 6;
+	public static final int MSG_INVALID_TRELLO_CONNECTION = 7;
 	
 	public static final int MSG_STATUS_WEBHOOK_ACTIVED = 15;
 	public static final int MSG_STATUS_WEBHOOK_DEACTIVED = 16;
@@ -245,16 +240,6 @@ public class VelloService extends Service implements RequestListener,
 				idCard, position);
 		mRequestManager.execute(reviewedWordCard, this);
 		mRequestList.add(reviewedWordCard);
-	}
-
-	private void reviewedPlusWordCard(String idCard) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "reviewedPlusWordCard start...");
-		}
-		Request reviewedPlusWordCard = VelloRequestFactory
-				.reviewedPlusWordCardRequest(idCard);
-		mRequestManager.execute(reviewedPlusWordCard, this);
-		mRequestList.add(reviewedPlusWordCard);
 	}
 
 	private void checkVocabularyBoard() {
@@ -466,18 +451,6 @@ public class VelloService extends Service implements RequestListener,
 				}
 				return;
 
-			case VelloRequestFactory.REQUEST_TYPE_REVIEWED_PLUS_WORDCARD:
-				WordList wordList = resultData
-						.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDLIST);
-				String idReviewedPlusCard = request
-						.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_CARD_ID);
-				if (wordList != null) {
-					String idList = wordList.id;
-					int position = AccountUtils.getVocabularyListPosition(getApplicationContext(), idList);
-					reviewedWordCard(idReviewedPlusCard, position);
-				}
-				return;
-
 			case VelloRequestFactory.REQUEST_TYPE_CHECK_VOCABULARY_BOARD:
 				ArrayList<Board> boardList = resultData
 						.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_BOARD_LIST);
@@ -608,7 +581,6 @@ public class VelloService extends Service implements RequestListener,
 				    addWordCard(keywordInQuery, wsResponse);
 				} else {
 				    // no result in dictionary server. TODO
-				    Toast.makeText(getApplicationContext(), "no result", Toast.LENGTH_SHORT).show();
 				}
 				
 				return;
@@ -719,6 +691,7 @@ public class VelloService extends Service implements RequestListener,
 				int startId = request.getInt(VelloRequestFactory.PARAM_EXTRA_SERVICE_START_ID);
 				boolean force = request.getBoolean(VelloRequestFactory.PARAM_EXTRA_FORCE_GET_OPEN_TRELLO_CARD);
 				ArrayList<TrelloCard> OpenTrelloCardList = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_CARD_LIST);
+
 				if (OpenTrelloCardList.size() > 0) {
 					if (VelloConfig.DEBUG_SWITCH) {
 						Log.d(TAG, "has open trello card, with startId = " + startId + ", force = " + force);
@@ -740,6 +713,7 @@ public class VelloService extends Service implements RequestListener,
 								DirtyCard dc = new DirtyCard(c);
 								mDirtyCards.put(dc.id, dc);
 							}
+							c.close();
 						}
 					}
 
@@ -807,7 +781,6 @@ public class VelloService extends Service implements RequestListener,
 								Log.d(TAG, "...stop command---#" + startId);
 							}
 							sendMessageToUI(VelloService.MSG_STATUS_SYNC_END, null);
-
 							stopSelf(startId);
 						} catch (RemoteException e) {
 							e.printStackTrace();
@@ -987,8 +960,13 @@ public class VelloService extends Service implements RequestListener,
 					// continue to check vocabulary list if not well formed
 					checkVocabularyLists();
 				} else if (request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_GET_OPEN_TRELLO_CARD_LIST) {
-					// TODO force logout and re-login
-					Log.i(TAG, "invalid token");
+					// force logout and re-login
+					if (VelloConfig.DEBUG_SWITCH) {
+						Log.d(TAG, "invalid token");
+					}
+					AccountUtils.signOut(getApplicationContext());
+					Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+					startActivity(intent);
 				}
 				
 			} else if (statusCode == -1 && request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_CHECK_TRELLO_CONNECTION) {
@@ -1004,12 +982,12 @@ public class VelloService extends Service implements RequestListener,
 
 	@Override
 	public void onRequestDataError(Request request) {
-		// TODO
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "onRequestDataError --- " + "type=" + request.getRequestType());
+		}
 		if (mRequestList.contains(request)) {
 			mRequestList.remove(request);
-
 		}
-
 	}
 
 	@Override
@@ -1034,6 +1012,7 @@ public class VelloService extends Service implements RequestListener,
 	 * @param dirtyWordCard local changed wordcard
 	 * @return new wordcard merged
 	 */
+	@SuppressLint("SimpleDateFormat")
 	private TrelloCard upgradeTrelloCard(TrelloCard trelloCard, DirtyCard dirtyCard, boolean forcePush) {
 		if (forcePush) {
 			int localPositionInLists = AccountUtils.getVocabularyListPosition(getApplicationContext(), dirtyCard.idList);
@@ -1051,8 +1030,7 @@ public class VelloService extends Service implements RequestListener,
 					long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
 					long deltaTime = VelloConfig.VOCABULARY_LIST_DUE_DELTA[newPostionInLists];
 					long newDueUnixTime = rightNowUnixTimeGMT + deltaTime;
-					SimpleDateFormat format = new SimpleDateFormat(
-							"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+					SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 					Date newDueDate = new Date(newDueUnixTime);
 					String stringNewDueDate = format.format(newDueDate);
 					trelloCard.due = stringNewDueDate;
@@ -1072,7 +1050,6 @@ public class VelloService extends Service implements RequestListener,
 		public void onPrimaryClipChanged() {
 			// do something useful here with the clipboard
 			// use getText() method
-			Toast.makeText(getApplicationContext(), "clipboard changed", Toast.LENGTH_SHORT).show();
 		}
 	}
 }

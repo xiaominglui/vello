@@ -24,7 +24,6 @@ public class GetOpenTrelloCardListOperation implements Operation {
 
 	@Override
 	public Bundle execute(Context context, Request request) throws ConnectionException, DataException, CustomRequestException {
-
 		String token = AccountUtils.getAuthToken(context);
 		String vocabularyBoardId = AccountUtils.getVocabularyBoardId(context);
 		String urlString = WSConfig.TRELLO_API_URL + WSConfig.WS_TRELLO_TARGET_BOARD + "/" + vocabularyBoardId + WSConfig.WS_TRELLO_FIELD_CARDS;
@@ -43,34 +42,6 @@ public class GetOpenTrelloCardListOperation implements Operation {
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "result.body = " + result.body);
 		}
-		
-		
-/*
-//		// Clear the table
-//		context.getContentResolver().delete(DbWordCard.CONTENT_URI, null, null);
-
-		// Adds the wordcards in the database
-		int wordCardListSize = wordCardList.size();
-		if (wordCardListSize > 0) {
-			ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
-			for (TrelloCard wordCard : wordCardList) {
-				operationList.add(ContentProviderOperation
-						.newInsert(DbWordCard.CONTENT_URI)
-						.withValues(wordCard.toContentValues()).build());
-			}
-
-			try {
-				context.getContentResolver().applyBatch(
-						VelloProvider.AUTHORITY, operationList);
-				bundle.putBoolean(VelloRequestFactory.BUNDLE_EXTRA_RESULT_STATUS, true);
-			} catch (RemoteException e) {
-				throw new DataException(e);
-			} catch (OperationApplicationException e) {
-				throw new DataException(e);
-			}
-		}
-		*/
-
 		return TrelloCardListJsonFactory.parseResult(result.body);
 	}
 }

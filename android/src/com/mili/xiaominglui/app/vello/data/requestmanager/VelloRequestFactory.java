@@ -2,7 +2,6 @@
 package com.mili.xiaominglui.app.vello.data.requestmanager;
 
 import com.foxykeep.datadroid.requestmanager.Request;
-import com.mili.xiaominglui.app.vello.data.model.DirtyCard;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 
 public final class VelloRequestFactory {
@@ -20,7 +19,6 @@ public final class VelloRequestFactory {
     public static final int REQUEST_TYPE_RESTART_WORDCARD = 9;
     public static final int REQUEST_TYPE_INITIALIZE_WORDCARD = 10;
     public static final int REQUEST_TYPE_REVIEWED_WORDCARD = 11;
-    public static final int REQUEST_TYPE_REVIEWED_PLUS_WORDCARD = 12;
     public static final int REQUEST_TYPE_ARCHIVE_WORDCARD = 13;
     public static final int REQUEST_TYPE_UPGRADE_WORDCARD = 14;
     public static final int REQUEST_TYPE_LOOK_UP_IN_DICTIONARY = 16;
@@ -160,13 +158,6 @@ public final class VelloRequestFactory {
         request.put(PARAM_EXTRA_VOCABULARY_CARD_ID, idCard);
         request.put(PARAM_EXTRA_VOCABULARY_LIST_POSITION, position);
         request.setMemoryCacheEnabled(true);
-        return request;
-    }
-    
-    public static Request reviewedPlusWordCardRequest(String idCard) {
-        Request request = new Request(REQUEST_TYPE_REVIEWED_PLUS_WORDCARD);
-        request.put(PARAM_EXTRA_VOCABULARY_CARD_ID, idCard);
-        request.setMemoryCacheEnabled(false);
         return request;
     }
     

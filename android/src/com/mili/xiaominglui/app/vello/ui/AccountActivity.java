@@ -3,18 +3,14 @@ package com.mili.xiaominglui.app.vello.ui;
 
 import android.accounts.Account;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.FragmentManager;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.github.johnpersano.supertoasts.SuperToast;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
@@ -75,7 +71,12 @@ public class AccountActivity extends SherlockFragmentActivity implements LoginFr
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
 
         if (activeNetwork == null || !activeNetwork.isConnected()) {
-            Toast.makeText(getApplicationContext(), R.string.no_connection_cant_login, Toast.LENGTH_SHORT).show();
+			SuperToast superToast = new SuperToast(getApplicationContext());
+			superToast.setDuration(SuperToast.DURATION_SHORT);
+			superToast.setBackgroundResource(SuperToast.BACKGROUND_REDTRANSLUCENT);
+			superToast.setTextColor(Color.WHITE);
+			superToast.setText(getString(R.string.no_connection));
+			superToast.show();
             return;
         }
 		mMyTrelloAccount = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);
