@@ -10,6 +10,7 @@ import java.util.TimeZone;
 
 import org.apache.http.HttpStatus;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -443,6 +444,7 @@ public class VelloService extends Service implements RequestListener,
 		mRequestList.add(updateRemoteTrelloCard);
 	}
 	
+	@SuppressLint("SimpleDateFormat")
 	@Override
 	public void onRequestFinished(Request request, Bundle resultData) {
 		if (mRequestList.contains(request)) {
@@ -740,7 +742,7 @@ public class VelloService extends Service implements RequestListener,
 							}
 						}
 					}
-					
+
 					if (force || !(mDirtyCards.size() > 0)) {
 						// no dirty, commit to local DB directly
 						if (VelloConfig.DEBUG_SWITCH) {
@@ -757,20 +759,21 @@ public class VelloService extends Service implements RequestListener,
 										.build());
 							}
 							resolver.applyBatch(VelloProvider.AUTHORITY, operationList);
-							
+
 							// show notification
 							Intent intent = new Intent(getApplicationContext(), MainActivity.class);
 							PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
 
 							ProviderCriteria cri = new ProviderCriteria();
 							cri.addSortOrder(DbWordCard.Columns.DUE, true);
-
 							Calendar rightNow = Calendar.getInstance();
-							SimpleDateFormat fo = new SimpleDateFormat(
-									"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-							String now = fo.format(rightNow.getTime());
+
+							SimpleDateFormat fo = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+							long rightNowUnixTime = rightNow.getTimeInMillis();
+							long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
+							String now = fo.format(new Date(rightNowUnixTimeGMT));
+							cri.addEq(DbWordCard.Columns.MARKDELETED, "false");
 							cri.addLt(DbWordCard.Columns.DUE, now, true);
-							cri.addNe(DbWordCard.Columns.CLOSED, "true");
 							Cursor cur = getContentResolver().query(
 									DbWordCard.CONTENT_URI,
 									DbWordCard.PROJECTION,
@@ -812,7 +815,7 @@ public class VelloService extends Service implements RequestListener,
 							e.printStackTrace();
 						}
 					}
-					
+
 					if (mDirtyCards.size() > 0 && !force) {
 						if (VelloConfig.DEBUG_SWITCH) {
 							Log.d(TAG, "dirty card found: " + mDirtyCards.size());

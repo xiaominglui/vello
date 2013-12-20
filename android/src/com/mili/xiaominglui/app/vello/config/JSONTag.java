@@ -40,6 +40,8 @@ public final class JSONTag {
 	public static final String ACTION_ELEM_DATA = "data";
 	public static final String ACTION_ELEM_DATA_OLD = "old";
 	public static final String ACTION_ELEM_TYPE = "type";
+	public static final String ACTION_ELEM_DATA_CARD = "card";
+	public static final String ACTION_ELEM_DATA_CARD_NAME = "name";
 	
 	// AVOS tags
 	public static final String AVOS_INFORMATION = "infomation";

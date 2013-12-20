@@ -19,7 +19,7 @@
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.READ_LOGS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:name="VaaApplication"
@@ -81,7 +81,6 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.USER_PRESENT" />
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-                <action android:name="com.avos.UPDATE_STATUS" />
                 <action android:name="com.avos.avello.SYNC_MSG" />
             </intent-filter>
         </receiver>
@@ -102,14 +101,6 @@
             android:name=".data.service.VelloRequestService"
             android:exported="false" />
         <service android:name="com.avos.avoscloud.PushService" />
-
-        <provider
-            android:name=".data.provider.VelloProvider"
-            android:authorities="com.mili.xiaominglui.app.vello.provider.VelloProvider"
-            android:exported="false"
-            android:label="@string/label_provider_wordcard"
-            android:syncable="true" />
-
         <service
             android:name=".syncadapter.SyncService"
             android:exported="false" >
@@ -123,6 +114,13 @@
         </service>
         <service android:name=".service.VelloService" >
         </service>
+
+        <provider
+            android:name=".data.provider.VelloProvider"
+            android:authorities="com.mili.xiaominglui.app.vello.provider.VelloProvider"
+            android:exported="false"
+            android:label="@string/label_provider_wordcard"
+            android:syncable="true" />
 
         <meta-data
             android:name="android.app.default_searchable"
