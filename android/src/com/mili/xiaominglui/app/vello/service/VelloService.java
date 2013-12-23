@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.TimeZone;
 
 import org.apache.http.HttpStatus;
@@ -81,8 +82,10 @@ public class VelloService extends Service implements RequestListener,
 	public static final int MSG_STATUS_INIT_ACCOUNT_END = 51;
 	public static final int MSG_STATUS_SYNC_BEGIN = 52;
 	public static final int MSG_STATUS_SYNC_END = 53;
-	public static final int MSG_STATUS_REVOKE_BEGIN = 54;
-	public static final int MSG_STATUS_REVOKE_END = 55;
+	public static final int MSG_STATUS_SYNC_BLANK = 54;
+	public static final int MSG_STATUS_CONNECTION_TIMEOUT = 55;
+	public static final int MSG_STATUS_REVOKE_BEGIN = 56;
+	public static final int MSG_STATUS_REVOKE_END = 57;
 
 	public static final int MSG_CHECK_VOCABULARY_BOARD = 100;
 	public static final int MSG_GET_DUE_REVIEW_CARD_LIST = 101;
@@ -769,9 +772,10 @@ public class VelloService extends Service implements RequestListener,
 									noti.flags |= Notification.FLAG_AUTO_CANCEL;
 
 									notificationManager.notify(0, noti);
+									sendMessageToUI(VelloService.MSG_STATUS_SYNC_END, null);
 								} else {
-									// no word need recalling  TODO
-									Log.d("mingo.lv", "no word need recalling");
+									// no word need recalling
+									sendMessageToUI(MSG_STATUS_SYNC_BLANK, null);
 								}
 								cur.close();
 							}
@@ -779,7 +783,7 @@ public class VelloService extends Service implements RequestListener,
 							if (VelloConfig.DEBUG_SWITCH) {
 								Log.d(TAG, "...stop command---#" + startId);
 							}
-							sendMessageToUI(VelloService.MSG_STATUS_SYNC_END, null);
+
 							stopSelf(startId);
 						} catch (RemoteException e) {
 							e.printStackTrace();
@@ -794,6 +798,7 @@ public class VelloService extends Service implements RequestListener,
 						}
 						// maybe need merging
 						for (TrelloCard tCard : OpenTrelloCardList) {
+							
 							if (mDirtyCards.containsKey(tCard.id)) {
 								// need merging
 								if (VelloConfig.DEBUG_SWITCH) {
@@ -930,11 +935,19 @@ public class VelloService extends Service implements RequestListener,
 				boolean updated = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_REMOTE_TRELLO_CARD_UPDATED);
 				TrelloCard updatingCard = (TrelloCard) request.getParcelable(VelloRequestFactory.PARAM_EXTRA_TRELLO_CARD);
 				int startIdTriggerUpdate = request.getInt(VelloRequestFactory.PARAM_EXTRA_SERVICE_START_ID);
+				if (VelloConfig.DEBUG_SWITCH) {
+					Log.d(TAG, "updateRemoteTrelloCard returned, with updated=" + updated);
+				}
 				if (updated) {
 					mDirtyCards.remove(updatingCard.id);
 				} else {
+					if (VelloConfig.DEBUG_SWITCH) {
+						Log.d(TAG, "retry updateRemoteTrelloCard");
+					}
 					updateRemoteTrelloCard(updatingCard, startIdTriggerUpdate);
 				}
+				
+				Log.d("mingo.lv", String.valueOf(mDirtyCards.size()));
 				
 				if (mDirtyCards.isEmpty()) {
 					// merge ok, go clean full sync
@@ -968,10 +981,14 @@ public class VelloService extends Service implements RequestListener,
 					startActivity(intent);
 				}
 				
-			} else if (statusCode == -1 && request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_CHECK_TRELLO_CONNECTION) {
-				sendMessageToUI(VelloService.MSG_INVALID_TRELLO_CONNECTION, null);
-				if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "CheckTrelloConnection end...");
+			} else if (statusCode == -1) {
+				if (request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_CHECK_TRELLO_CONNECTION) {
+					sendMessageToUI(VelloService.MSG_INVALID_TRELLO_CONNECTION, null);
+					if (VelloConfig.DEBUG_SWITCH) {
+						Log.d(TAG, "CheckTrelloConnection end...");
+					}
+				} else {
+					sendMessageToUI(VelloService.MSG_STATUS_CONNECTION_TIMEOUT, null);
 				}
 			}
 			Log.d(TAG, "type=" + request.getRequestType() + "; status code=" + statusCode);

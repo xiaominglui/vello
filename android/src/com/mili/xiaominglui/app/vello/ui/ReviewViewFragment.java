@@ -31,7 +31,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragment;
@@ -70,9 +69,9 @@ public class ReviewViewFragment extends SherlockFragment implements
 	public interface onStatusChangedListener {
 		public void onModeChanged(int modeColor);
 
-		public void onAllReviewed();
+		public void syncOnAllRecalled();
 
-		public void onWordReviewed();
+		public void onWordRecalled();
 	}
 
 	@Override
@@ -101,28 +100,29 @@ public class ReviewViewFragment extends SherlockFragment implements
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		return inflater.inflate(R.layout.fragment_review, container, false);
+		ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_review, container, false);
+		mCards = new ArrayList<Card>();
+		mCardList = (CardListView) rootView.findViewById(R.id.card_list);
+		
+		View empty = rootView.findViewById(R.id.emptyView);
+		empty.setOnTouchListener(new View.OnTouchListener() {
+			
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				mListener.syncOnAllRecalled();
+				return true;
+			}
+		});
+		IconicTextView iconicTextView = (IconicTextView) rootView.findViewById(R.id.iconic_all_recalled);
+		iconicTextView.setIcon(FontAwesomeIcon.OK);
+		iconicTextView.setTextColor(Color.GRAY);
+		mCardList.setEmptyView(empty);
+		return rootView;
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		mCards = new ArrayList<Card>();
-		mCardList = (CardListView) getActivity().findViewById(R.id.card_list);
-		View empty = getActivity().findViewById(R.id.emptyView);
-		IconicTextView iconicTextView = (IconicTextView) getActivity()
-				.findViewById(R.id.iconic_all_checked);
-		iconicTextView.setIcon(FontAwesomeIcon.OK);
-		iconicTextView.setTextColor(Color.GRAY);
-		empty.setOnTouchListener(new View.OnTouchListener() {
-
-			@Override
-			public boolean onTouch(View arg0, MotionEvent arg1) {
-				Log.d("mingo.lv", "onClick called");
-				return true;
-			}
-		});
-		mCardList.setEmptyView(empty);
 		getLoaderManager().initLoader(0, null, this);
 	}
 
@@ -144,22 +144,20 @@ public class ReviewViewFragment extends SherlockFragment implements
 			criteria.addSortOrder(DbWordCard.Columns.DUE, true);
 			Calendar rightNow = Calendar.getInstance();
 
-			SimpleDateFormat format = new SimpleDateFormat(
-					"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 			long rightNowUnixTime = rightNow.getTimeInMillis();
-			long rightNowUnixTimeGMT = rightNowUnixTime
-					- TimeZone.getDefault().getRawOffset();
+			long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
 			String now = format.format(new Date(rightNowUnixTimeGMT));
 			criteria.addEq(DbWordCard.Columns.MARKDELETED, "false");
 			criteria.addLt(DbWordCard.Columns.DUE, now, true);
+			criteria.addNe(DbWordCard.Columns.CLOSED, "true");
 			return new CursorLoader(getActivity(), DbWordCard.CONTENT_URI,
 					DbWordCard.PROJECTION, criteria.getWhereClause(),
 					criteria.getWhereParams(), criteria.getOrderClause());
 		} else {
 			// Dictionary Mode
 			mIsSearching = true;
-			mListener
-					.onModeChanged(VelloConfig.DICTIONARY_MODE_ACTION_BAR_COLOR);
+			mListener.onModeChanged(VelloConfig.DICTIONARY_MODE_ACTION_BAR_COLOR);
 			criteria.addLike(DbDictCard.Columns.KEYWORD, mCurFilter + "%");
 			return new CursorLoader(getActivity(), DbDictCard.CONTENT_URI,
 					DbDictCard.PROJECTION, criteria.getWhereClause(),

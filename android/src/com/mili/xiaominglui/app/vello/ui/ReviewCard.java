@@ -30,6 +30,7 @@ import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class ReviewCard extends Card {
+	private static final String TAG = ReviewCard.class.getSimpleName();
     protected IconicTextView iconicLifeSign;
 	protected TextView textViewLifeCount;
 	
@@ -68,7 +69,6 @@ public class ReviewCard extends Card {
 		setOnSwipeListener(new OnSwipeListener() {
 			@Override
 			public void onSwipe(Card card) {
-				Log.d("mingo.lv", "onSwipe called");
 				asyncMarkRecalledWord(card);
 			}
 		});
@@ -76,7 +76,6 @@ public class ReviewCard extends Card {
 		setOnUndoSwipeListListener(new OnUndoSwipeListListener() {
 			@Override
 			public void onUndoSwipe(Card card) {
-				Log.d("mingo.lv", "onUndoSwipe called");
 				asyncUnmarkRecalledWord(card);
 			}
 		});

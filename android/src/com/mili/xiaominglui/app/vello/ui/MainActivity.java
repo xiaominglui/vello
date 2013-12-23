@@ -22,17 +22,16 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
-import android.widget.Toast;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.avos.avoscloud.AVAnalytics;
-import com.avos.avoscloud.AVInstallation;
-import com.avos.avoscloud.PushService;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
+import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.service.VelloService;
@@ -40,7 +39,7 @@ import com.mili.xiaominglui.app.vello.syncadapter.SyncHelper;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.mili.xiaominglui.app.vello.util.HelpUtils;
 
-public class MainActivity extends BaseActivity implements ReviewViewFragment.onStatusChangedListener {
+public class MainActivity extends BaseActivity implements ReviewViewFragment.onStatusChangedListener, ConnectionTimeOutFragment.ConnectionTimeOutFragmentEventListener {
 	private static final String TAG = MainActivity.class.getSimpleName();
 	
 	private static final int CONTENT_VIEW_ID = 666;
@@ -83,8 +82,14 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			case VelloService.MSG_STATUS_SYNC_END:
 				theActivity.postSync();
 				break;
+			case VelloService.MSG_STATUS_SYNC_BLANK:
+				theActivity.showSyncBlank();
+				break;
 			case VelloService.MSG_STATUS_REVOKE_BEGIN:
 				theActivity.preAuthTokenRevoke();
+				break;
+			case VelloService.MSG_STATUS_CONNECTION_TIMEOUT:
+				theActivity.showConnectionTimeoutView();
 				break;
 			}
 		}
@@ -299,10 +304,10 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
                 startSearch(null, false, Bundle.EMPTY, false);
                 return true;
             }
-			break; **/
+			break; 
 		case R.id.menu_sync:
 			triggerRefresh();
-			return true;
+			return true;**/
 
 		case R.id.menu_about:
 			HelpUtils.showAbout(this);
@@ -407,9 +412,29 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 		}
 	}
 	
+	private void showSyncBlank() {
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "showSyncBlank called, with isInFront=" + isInFront);
+		}
+		if (isInFront) {
+			FragmentManager fm = getSupportFragmentManager();
+			fm.beginTransaction().replace(CONTENT_VIEW_ID, SyncBlankViewFragment.newInstance()).commit();
+		}
+	}
+	
 	private void preAuthTokenRevoke() {
 		FragmentManager fm = getSupportFragmentManager();
 		fm.beginTransaction().replace(CONTENT_VIEW_ID, new ProgressFragment()).commit();
+	}
+	
+	private void showConnectionTimeoutView() {
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "showConnectionTimeoutView called, with isInFront=" + isInFront);
+		}
+		if (isInFront) {
+			FragmentManager fm = getSupportFragmentManager();
+			fm.beginTransaction().replace(CONTENT_VIEW_ID, ConnectionTimeOutFragment.newInstance()).commit();
+		}
 	}
 	
 	private Drawable.Callback drawableCallback = new Drawable.Callback() {
@@ -435,11 +460,17 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	}
 
 	@Override
-	public void onAllReviewed() {
+	public void syncOnAllRecalled() {
+		triggerRefresh();
 	}
 
 	@Override
-	public void onWordReviewed() {
+	public void onWordRecalled() {
 //		reviewedCountPlusToastShow();
+	}
+
+	@Override
+	public void onReload() {
+		triggerRefresh();
 	}
 }

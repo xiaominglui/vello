@@ -22,16 +22,15 @@
 
     <LinearLayout
         android:id="@+id/emptyView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
         android:orientation="vertical" >
 
         <com.atermenji.android.iconictextview.IconicTextView
-            android:id="@+id/iconic_all_checked"
+            android:id="@+id/iconic_all_recalled"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
             android:textSize="100sp" />
 
         <TextView
@@ -40,6 +39,7 @@
             android:text="@string/tile_listview_empty"
             android:textColor="@android:color/darker_gray"
             android:textSize="20sp" />
+
     </LinearLayout>
 
     <RelativeLayout
@@ -55,6 +55,6 @@
 
     <include
         layout="@layout/list_card_undo_message"
-        android:visibility="invisible" />
+        android:visibility="gone" />
 
 </FrameLayout>
