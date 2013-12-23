@@ -303,15 +303,15 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 		case R.id.menu_sync:
 			triggerRefresh();
 			return true;
-			
+
 		case R.id.menu_about:
 			HelpUtils.showAbout(this);
 			return true;
-			
+
 		case R.id.menu_settings:
-            startActivity(new Intent(this, SettingsActivity.class));
-            return true;
-            
+			startActivity(new Intent(this, SettingsActivity.class));
+			return true;
+
 		case R.id.menu_sign_out:
 			AccountUtils.signOut(this);
 			// restart
@@ -319,8 +319,9 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			finish();
 			startActivity(intent);
 			return true;
+		default:
+			return super.onOptionsItemSelected(item);
 		}
-		return super.onOptionsItemSelected(item);
 	}
 
 	private void triggerRefresh() {

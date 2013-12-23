@@ -20,6 +20,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <LinearLayout
+        android:id="@+id/emptyView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical" >
+
+        <com.atermenji.android.iconictextview.IconicTextView
+            android:id="@+id/iconic_all_checked"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textSize="100sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tile_listview_empty"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="20sp" />
+    </LinearLayout>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
@@ -31,7 +53,8 @@
             card:list_card_layout_resourceID="@layout/list_card_base_layout" />
     </RelativeLayout>
 
-    <include layout="@layout/list_card_undo_message"
+    <include
+        layout="@layout/list_card_undo_message"
         android:visibility="invisible" />
 
 </FrameLayout>

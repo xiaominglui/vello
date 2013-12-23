@@ -31,10 +31,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.avos.avoscloud.AVInstallation;
-import com.avos.avoscloud.PushService;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
 import com.mili.xiaominglui.app.vello.R;
@@ -43,7 +40,6 @@ import com.mili.xiaominglui.app.vello.data.model.Board;
 import com.mili.xiaominglui.app.vello.data.model.DirtyCard;
 import com.mili.xiaominglui.app.vello.data.model.List;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
-import com.mili.xiaominglui.app.vello.data.model.WordList;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
@@ -773,6 +769,9 @@ public class VelloService extends Service implements RequestListener,
 									noti.flags |= Notification.FLAG_AUTO_CANCEL;
 
 									notificationManager.notify(0, noti);
+								} else {
+									// no word need recalling  TODO
+									Log.d("mingo.lv", "no word need recalling");
 								}
 								cur.close();
 							}
