@@ -39,14 +39,17 @@ public class ReviewExpandCard extends CardExpand {
 		linearLayoutDefinitionArea.removeAllViews();
 
 		for (Phonetics phonetics : word.phonetics) {
-			View phoneticsView = LayoutInflater.from(mContext).inflate(
-					R.layout.phonetics_item, null);
-			LinearLayout phoneticsGroup = (LinearLayout) phoneticsView
-					.findViewById(R.id.phonetics_group);
-			((TextView) phoneticsView.findViewById(R.id.phonetics_type))
-					.setText(phonetics.type);
-			((TextView) phoneticsView.findViewById(R.id.phonetics_symbol))
-					.setText("[" + phonetics.symbol + "]");
+			View phoneticsView = LayoutInflater.from(mContext).inflate(R.layout.phonetics_item, null);
+			LinearLayout phoneticsGroup = (LinearLayout) phoneticsView.findViewById(R.id.phonetics_group);
+			String phoneticsType = "";
+			if (phonetics.type.equals("en")) {
+				phoneticsType = mContext.getResources().getString(R.string.title_phonetics_uk);
+			} else if (phonetics.type.equals("us")) {
+				phoneticsType = mContext.getResources().getString(R.string.title_phonetics_us);
+			}
+			
+			((TextView) phoneticsView.findViewById(R.id.phonetics_type)).setText(phoneticsType);
+			((TextView) phoneticsView.findViewById(R.id.phonetics_symbol)).setText("[" + phonetics.symbol + "]");
 			/*
 			 * remove sound icon in word card at present ((IconicTextView)
 			 * phoneticsView

@@ -80,6 +80,13 @@ public class ReviewCard extends Card {
 				asyncUnmarkRecalledWord(card);
 			}
 		});
+		
+		setOnExpandAnimatorEndListener(new Card.OnExpandAnimatorEndListener() {
+            @Override
+            public void onExpandEnd(Card card) {
+            	setSwipeable(false);
+            }
+        });
 	}
 	
 	@Override

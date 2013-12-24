@@ -15,6 +15,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
@@ -31,6 +32,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
@@ -203,10 +205,10 @@ public class VelloService extends Service implements RequestListener,
 
 		// Display a notification about us starting. We put an icon in the
 		// status bar.
-		// showNotification();
+//		 showNotification();
 		
-//		ClipboardManager clipBoard = (ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
-//		clipBoard.addPrimaryClipChangedListener( new ClipboardListener() );
+		ClipboardManager clipBoard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+		clipBoard.addPrimaryClipChangedListener(new ClipboardListener());
 		// https://code.google.com/p/android/issues/detail?id=58043
 		
 		isRunning = true;
@@ -1069,11 +1071,15 @@ public class VelloService extends Service implements RequestListener,
 		return trelloCard;
 	}
 	
-	class ClipboardListener implements
-			ClipboardManager.OnPrimaryClipChangedListener {
+	class ClipboardListener implements ClipboardManager.OnPrimaryClipChangedListener {
 		public void onPrimaryClipChanged() {
 			// do something useful here with the clipboard
 			// use getText() method
+			ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+			String pasteData = "";
+			ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
+			pasteData = item.getText().toString();
+			Toast.makeText(getApplicationContext(), "clipboard changed --- pasteData=" + pasteData, Toast.LENGTH_SHORT).show();
 		}
 	}
 }

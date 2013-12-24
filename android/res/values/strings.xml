@@ -34,16 +34,7 @@
     <string name="button_signup_title">Sign Up</string>
     <string name="button_login_title">Log In</string>
     
-    <!-- Toast content when an alarm was reviewed  -->
-    <string name="word_reviewed">Reviewed +1</string>
-    <!-- Displays the number of alarms selected from the list of alarms. -->
-    <string name="word_cards_selected"><xliff:g id="word_cards">%d</xliff:g> selected</string>
     <!-- Description of the button to undo change to alarm -->
-    <string name="word_reviewed_undo">undo</string>
-    <!-- Description of the up caret in the alarm alert screen to collapse the alarm content to summary perspective. [CHAR LIMIT=NONE] -->
-    <string name="collapse_word">Collapse word</string>
-    <!-- Description of the down caret in the alarm alert screen to expand the alarm content to edit perspective. [CHAR LIMIT=NONE] -->
-    <string name="expand_word">Expand word</string>
     <plurals name="notif_content_title">
         <item quantity="one">1 word to recall</item>
         <item quantity="other">%d words to recall</item>
@@ -60,6 +51,8 @@
     <string name="title_sync_blank">All Recalled</string>
     <string name="title_connection_timeout">Error: GET timed out.</string>
     <string name="title_connection_timeout_hint_retry">Tap to retry now.</string>
+    <string name="title_phonetics_uk">UK</string>
+    <string name="title_phonetics_us">US</string>
     <string name="about_eula">End User License Agreement</string>
     <string name="about_licenses">Open Source Licenses</string>
     <string name="about_body"><![CDATA[
@@ -88,7 +81,7 @@
     <string name="label_provider_wordcard">Words</string>
     <string name="pref_sync_title">SYNC</string>
     <string name="pref_sync_frequency">Sync frequency</string>
-    <string name="pref_sync_wifi_only">Sync only on WiFi</string>
+    <string name="pref_sync_wifi_only">Sync only on Wi-Fi</string>
     <string name="pref_sync_frequency_summary_no_network">You don\'t have a network connection.</string>
     <string name="pref_sync_frequency_summary_no_reliable_network">Can\'t establish a reliable connection to the server.</string>
     <string name="pref_sync_frequency_summary_retrieving_setting">Retrieving settings&#8230;</string>
