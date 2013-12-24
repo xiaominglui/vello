@@ -29,6 +29,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,9 +42,11 @@ import java.lang.ref.WeakReference;
 import java.net.URL;
 
 import it.gmariotti.cardslib.library.Constants;
-import it.gmariotti.cardslib.library.R;
 import it.gmariotti.cardslib.library.internal.CardThumbnail;
+import it.gmariotti.cardslib.library.utils.CacheUtil;
 import it.gmariotti.cardslib.library.view.base.CardViewInterface;
+
+import it.gmariotti.cardslib.library.R;
 
 /**
  * Compound View for Thumbnail Component.
@@ -91,6 +94,9 @@ public class CardThumbnailView extends FrameLayout implements CardViewInterface 
      * Used to replace inner layout elements.
      */
     protected boolean mForceReplaceInnerLayout =false;
+
+
+    protected boolean mLoadingErrorResource = false;
 
     //--------------------------------------------------------------------------
     // Constructors
@@ -177,19 +183,23 @@ public class CardThumbnailView extends FrameLayout implements CardViewInterface 
         // Use 1/8th of the available memory for this memory cache.
         final int cacheSize = maxMemory / 8;
 
-        mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+        mMemoryCache = CacheUtil.getMemoryCache();
+        if (mMemoryCache==null){
+            mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
 
-            @Override
-            protected int sizeOf(String key, Bitmap bitmap) {
-                // The cache size will be measured in kilobytes rather than
-                // number of items.
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB_MR1) {
-                    return bitmap.getByteCount() / 1024;
-                } else {
-                    return bitmap.getRowBytes() * bitmap.getHeight() / 1024;
+                @Override
+                protected int sizeOf(String key, Bitmap bitmap) {
+                    // The cache size will be measured in kilobytes rather than
+                    // number of items.
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB_MR1) {
+                        return bitmap.getByteCount() / 1024;
+                    } else {
+                        return bitmap.getRowBytes() * bitmap.getHeight() / 1024;
+                    }
                 }
-            }
-        };
+            };
+            CacheUtil.putMemoryCache(mMemoryCache);
+        }
     }
 
     //--------------------------------------------------------------------------
@@ -213,6 +223,9 @@ public class CardThumbnailView extends FrameLayout implements CardViewInterface 
     protected void buildUI() {
         if (mCardThumbnail==null) return;
 
+        if (mIsRecycle)
+            mLoadingErrorResource=false;
+
         //Setup InnerView
         setupInnerView();
     }
@@ -230,7 +243,9 @@ public class CardThumbnailView extends FrameLayout implements CardViewInterface 
 
         //Load bitmap
         if (!mCardThumbnail.isExternalUsage()){
-            if(mCardThumbnail.getDrawableResource()>0)
+            if (mCardThumbnail.getCustomSource() != null)
+                loadBitmap(mCardThumbnail.getCustomSource(), mImageView);
+            else if(mCardThumbnail.getDrawableResource()>0)
                 loadBitmap(mCardThumbnail.getDrawableResource(), mImageView);
             else
                 loadBitmap(mCardThumbnail.getUrlResource(), mImageView);
@@ -246,7 +261,8 @@ public class CardThumbnailView extends FrameLayout implements CardViewInterface 
         final Bitmap bitmap = getBitmapFromMemCache(imageKey);
 
         if (bitmap != null) {
-            imageView.setImageBitmap(bitmap);
+            if (!mCardThumbnail.applyBitmap(imageView,bitmap))
+                imageView.setImageBitmap(bitmap);
             sendBroadcast();
         } else {
             if (cancelPotentialWork(resId, imageView)) {
@@ -264,7 +280,8 @@ public class CardThumbnailView extends FrameLayout implements CardViewInterface 
         final Bitmap bitmap = getBitmapFromMemCache(imageKey);
 
         if (bitmap != null){
-            imageView.setImageBitmap(bitmap);
+            if (!mCardThumbnail.applyBitmap(imageView,bitmap))
+                imageView.setImageBitmap(bitmap);
             sendBroadcast();
         }else{
             if (cancelPotentialWork(url, imageView)) {
@@ -277,14 +294,35 @@ public class CardThumbnailView extends FrameLayout implements CardViewInterface 
         }
     }
 
+    public void loadBitmap(CardThumbnail.CustomSource customSource, ImageView imageView) {
+        final String imageKey = customSource.getTag();
+        final Bitmap bitmap = getBitmapFromMemCache(imageKey);
+
+        if (bitmap != null){
+            if (!mCardThumbnail.applyBitmap(imageView,bitmap))
+                imageView.setImageBitmap(bitmap);
+            sendBroadcast();
+        }else{
+            if (cancelPotentialWork(customSource, imageView)) {
+                final BitmapWorkerCustomSourceTask task = new BitmapWorkerCustomSourceTask(imageView);
+                final AsyncDrawableCustomSource asyncDrawable =
+                        new AsyncDrawableCustomSource(getResources(), null, task);
+                imageView.setImageDrawable(asyncDrawable);
+                task.execute(customSource);
+            }
+        }
+    }
 
     protected void addBitmapToMemoryCache(String key, Bitmap bitmap) {
-        if (getBitmapFromMemCache(key) == null) {
-            mMemoryCache.put(key, bitmap);
+        if (!mLoadingErrorResource && getBitmapFromMemCache(key) == null) {
+            if (key!=null && bitmap!=null){
+                mMemoryCache.put(key, bitmap);
+            }
         }
     }
 
     protected Bitmap getBitmapFromMemCache(String key) {
+        if (key==null) return null;
         return mMemoryCache.get(key);
     }
 
@@ -324,7 +362,9 @@ public class CardThumbnailView extends FrameLayout implements CardViewInterface 
             return BitmapFactory.decodeStream(new URL(resUrl).openStream());
 
         }catch (IOException ioe){
-            ioe.printStackTrace();
+            //Url not available
+            //ioe.printStackTrace();
+            Log.w("CardThumbnailView","Error while retrieving image",ioe);
         }
         return null;
     }
@@ -391,6 +431,22 @@ public class CardThumbnailView extends FrameLayout implements CardViewInterface 
         return true;
     }
 
+    public static boolean cancelPotentialWork(CardThumbnail.CustomSource customSource, ImageView imageView) {
+        final BitmapWorkerCustomSourceTask bitmapWorkerTask = getBitmapWorkerCustomSourceTask(imageView);
+
+        if (bitmapWorkerTask != null) {
+            final CardThumbnail.CustomSource bitmapWorkerTaskCustomSource = bitmapWorkerTask.customSource;
+            if (!bitmapWorkerTaskCustomSource.getTag().equals(customSource.getTag())) {
+                // Cancel previous task
+                bitmapWorkerTask.cancel(true);
+            } else {
+                // The same work is already in progress
+                return false;
+            }
+        }
+        // No task associated with the ImageView, or an existing task was cancelled
+        return true;
+    }
 
     protected static BitmapWorkerTask getBitmapWorkerTask(ImageView imageView) {
         if (imageView != null) {
@@ -414,6 +470,16 @@ public class CardThumbnailView extends FrameLayout implements CardViewInterface 
         return null;
     }
 
+    protected static BitmapWorkerCustomSourceTask getBitmapWorkerCustomSourceTask(ImageView imageView) {
+        if (imageView != null) {
+            final Drawable drawable = imageView.getDrawable();
+            if (drawable instanceof AsyncDrawableCustomSource) {
+                final AsyncDrawableCustomSource asyncDrawable = (AsyncDrawableCustomSource) drawable;
+                return asyncDrawable.getBitmapWorkerCustomSourceTask();
+            }
+        }
+        return null;
+    }
 
     class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
         private final WeakReference<ImageView> imageViewReference;
@@ -431,8 +497,13 @@ public class CardThumbnailView extends FrameLayout implements CardViewInterface 
             ImageView thumbnail = imageViewReference.get();
             Bitmap bitmap = decodeSampledBitmapFromResource(getResources(), resId, thumbnail.getWidth(),
                     thumbnail.getHeight());
-            addBitmapToMemoryCache(String.valueOf(params[0]), bitmap);
-            return bitmap;
+            if (bitmap!=null){
+                addBitmapToMemoryCache(String.valueOf(params[0]), bitmap);
+                return bitmap;
+            }else{
+                return (Bitmap)null;
+            }
+
         }
 
         // Once complete, see if ImageView is still around and set bitmap.
@@ -447,8 +518,19 @@ public class CardThumbnailView extends FrameLayout implements CardViewInterface 
                 final BitmapWorkerTask bitmapWorkerTask =
                         getBitmapWorkerTask(imageView);
                 if (this == bitmapWorkerTask && imageView != null) {
-                    imageView.setImageBitmap(bitmap);
+                    if (!mCardThumbnail.applyBitmap(imageView,bitmap))
+                        imageView.setImageBitmap(bitmap);
                     sendBroadcast();
+                    mLoadingErrorResource=false;
+                }
+            }else{
+                sendBroadcast(false);
+                if (mCardThumbnail!=null && mCardThumbnail.getErrorResourceId()!=0){
+                    if (!mLoadingErrorResource){
+                        //To avoid a loop
+                        loadBitmap(mCardThumbnail.getErrorResourceId(), mImageView);
+                    }
+                    mLoadingErrorResource=true;
                 }
             }
         }
@@ -470,8 +552,11 @@ public class CardThumbnailView extends FrameLayout implements CardViewInterface 
             ImageView thumbnail = imageViewReference.get();
             Bitmap bitmap = decodeSampledBitmapFromResource(getResources(), resUrl, thumbnail.getWidth(),
                     thumbnail.getHeight());
-            addBitmapToMemoryCache(String.valueOf(params[0]), bitmap);
-            return bitmap;
+            if (bitmap!=null){
+                addBitmapToMemoryCache(String.valueOf(params[0]), bitmap);
+                return bitmap;
+            }else
+                return (Bitmap) null;
         }
 
         // Once complete, see if ImageView is still around and set bitmap.
@@ -486,8 +571,73 @@ public class CardThumbnailView extends FrameLayout implements CardViewInterface 
                 final BitmapWorkerUrlTask bitmapWorkerTask =
                         getBitmapWorkerUrlTask(imageView);
                 if (this == bitmapWorkerTask && imageView != null) {
-                    imageView.setImageBitmap(bitmap);
+                    if (!mCardThumbnail.applyBitmap(imageView,bitmap))
+                        imageView.setImageBitmap(bitmap);
                     sendBroadcast();
+                    mLoadingErrorResource=false;
+                }
+            }else{
+                sendBroadcast(false);
+                if (mCardThumbnail!=null && mCardThumbnail.getErrorResourceId()!=0){
+                    if (!mLoadingErrorResource){
+                        //To avoid a loop
+                        loadBitmap(mCardThumbnail.getErrorResourceId(), mImageView);
+                    }
+                    mLoadingErrorResource=true;
+                }
+            }
+        }
+    }
+
+    class BitmapWorkerCustomSourceTask extends AsyncTask<CardThumbnail.CustomSource, Void, Bitmap> {
+        private final WeakReference<ImageView> imageViewReference;
+        private CardThumbnail.CustomSource customSource = null;
+
+        public BitmapWorkerCustomSourceTask(ImageView imageView) {
+            // Use a WeakReference to ensure the ImageView can be garbage collected
+            imageViewReference = new WeakReference<ImageView>(imageView);
+        }
+
+        // Decode image in background.
+        @Override
+        protected Bitmap doInBackground(CardThumbnail.CustomSource... params) {
+            customSource = params[0];
+            ImageView thumbnail = imageViewReference.get();
+            Bitmap bitmap = customSource.getBitmap();
+            if (bitmap!=null){
+                addBitmapToMemoryCache(customSource.getTag(), bitmap);
+                return bitmap;
+            }else{
+                return (Bitmap)null;
+            }
+
+        }
+
+        // Once complete, see if ImageView is still around and set bitmap.
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            if (isCancelled()) {
+                bitmap = null;
+            }
+
+            if (imageViewReference != null && bitmap != null) {
+                final ImageView imageView = imageViewReference.get();
+                final BitmapWorkerCustomSourceTask bitmapWorkerTask =
+                        getBitmapWorkerCustomSourceTask(imageView);
+                if (this == bitmapWorkerTask && imageView != null) {
+                    if (!mCardThumbnail.applyBitmap(imageView,bitmap))
+                        imageView.setImageBitmap(bitmap);
+                    sendBroadcast();
+                    mLoadingErrorResource=false;
+                }
+            }else{
+                sendBroadcast(false);
+                if (mCardThumbnail!=null && mCardThumbnail.getErrorResourceId()!=0){
+                    if (!mLoadingErrorResource){
+                        //To avoid a loop
+                        loadBitmap(mCardThumbnail.getErrorResourceId(), mImageView);
+                    }
+                    mLoadingErrorResource=true;
                 }
             }
         }
@@ -524,21 +674,49 @@ public class CardThumbnailView extends FrameLayout implements CardViewInterface 
         }
     }
 
+    static class AsyncDrawableCustomSource extends BitmapDrawable {
+        private final WeakReference<BitmapWorkerCustomSourceTask> bitmapWorkerTaskReference;
+
+        public AsyncDrawableCustomSource(Resources res, Bitmap bitmap,
+                                BitmapWorkerCustomSourceTask bitmapWorkerTask) {
+            super(res, bitmap);
+            bitmapWorkerTaskReference =
+                    new WeakReference<BitmapWorkerCustomSourceTask>(bitmapWorkerTask);
+        }
+
+        public BitmapWorkerCustomSourceTask getBitmapWorkerCustomSourceTask() {
+            return bitmapWorkerTaskReference.get();
+        }
+    }
+
     //--------------------------------------------------------------------------
     // Broadcast
     //--------------------------------------------------------------------------
 
     /**
-     * Send a broadcast when image is downloaded
+     * Send a successful broadcast when image is downloaded
      */
     protected void sendBroadcast(){
+        sendBroadcast(true);
+    }
 
+    /**
+     * Send a broadcast when image is downloaded
+     *
+     * @param result
+     */
+    protected void sendBroadcast(boolean result) {
         Intent intent = new Intent();
         intent.setAction(Constants.IntentManager.INTENT_ACTION_IMAGE_DOWNLOADED);
-        intent.putExtra(Constants.IntentManager.INTENT_ACTION_IMAGE_DOWNLOADED_EXTRA_RESULT,true);
-        if (mCardThumbnail!=null && mCardThumbnail.getParentCard()!=null)
-            intent.putExtra(Constants.IntentManager.INTENT_ACTION_IMAGE_DOWNLOADED_EXTRA_CARD_ID,mCardThumbnail.getParentCard().getId());
-        if (getContext()!=null)
+        intent.putExtra(Constants.IntentManager.INTENT_ACTION_IMAGE_DOWNLOADED_EXTRA_RESULT, result);
+        if (mLoadingErrorResource)
+            intent.putExtra(Constants.IntentManager.INTENT_ACTION_IMAGE_DOWNLOADED_EXTRA_ERROR_LOADING, true);
+        else
+            intent.putExtra(Constants.IntentManager.INTENT_ACTION_IMAGE_DOWNLOADED_EXTRA_ERROR_LOADING, false);
+
+        if (mCardThumbnail != null && mCardThumbnail.getParentCard() != null)
+            intent.putExtra(Constants.IntentManager.INTENT_ACTION_IMAGE_DOWNLOADED_EXTRA_CARD_ID, mCardThumbnail.getParentCard().getId());
+        if (getContext() != null)
             getContext().sendBroadcast(intent);
 
     }

@@ -19,6 +19,7 @@
 package it.gmariotti.cardslib.library.internal;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,12 +63,12 @@ public class Card extends BaseCard {
     /**
      * Used to enable a onClick Action on card
      */
-    protected boolean mIsClickable = true;
+    protected boolean mIsClickable = false;
 
     /**
      * Used to enable a onLongClick Action on card
      */
-    protected boolean mIsLongClickable = true;
+    protected boolean mIsLongClickable = false;
 
     /**
      * Used to enable a swipe gesture and its listener {@link Card#setOnClickListener(OnCardClickListener)}
@@ -156,6 +157,32 @@ public class Card extends BaseCard {
      * Listener invoked when the user undo a swipe action in a List
      */
     protected OnUndoSwipeListListener mOnUndoSwipeListListener;
+
+    /**
+     * It identifies the background resource of view with this id:
+     * android:id="@+id/card_main_layout"
+     * <p/>
+     * In a standard card it identifies the main background.
+     */
+    private int mBackgroundResourceId =0;
+
+    /**
+     * It identifies the background resource of view with this id:
+     * android:id="@+id/card_main_layout"
+     * <p/>
+     * In a standard card it identifies the main background.
+     */
+    private Drawable mBackgroundResource =null;
+
+    /**
+     * Used to enable a onLongClick Action on multichoiceAdapter
+     */
+    private boolean mCheckable= true;
+
+    /**
+     * Used by multichoice
+     */
+    protected boolean mMultiChoiceEnabled = false;
 
     // -------------------------------------------------------------
     // Constructors
@@ -591,7 +618,7 @@ public class Card extends BaseCard {
     }
 
     /**
-     * Return <code>true</code> if the card is clickable
+     * Returns <code>true</code> if the card is clickable
      * If card hasn't a {@link OnCardClickListener} or any partial Listener return <code>true</code> in any cases.
      *
      * @return
@@ -649,7 +676,7 @@ public class Card extends BaseCard {
     }
 
     /**
-     * Set the card as longClickable
+     * Sets the card as longClickable
      *
      * @param isLongClickable
      */
@@ -658,7 +685,7 @@ public class Card extends BaseCard {
     }
 
     /**
-     * Add a clickListener on a specific area
+     * Adds a clickListener on a specific area
      * </p>
      * You can use one of these values:
      * {@link Card#CLICK_LISTENER_ALL_VIEW}
@@ -735,7 +762,7 @@ public class Card extends BaseCard {
 
 
     /**
-     * Check if 2 cards have the same innerLayouts
+     * Checks if 2 cards have the same innerLayouts
      * It can be used to force inner layout redraw
      *
      * @param oldCard
@@ -786,4 +813,89 @@ public class Card extends BaseCard {
 
         return false;
     }
+
+    /**
+     * Sets the background drawable resource to override the style of MainLayout (card.main_layout)
+     *
+     * @param drawableResourceId drawable resource Id
+     */
+    public void setBackgroundResourceId(int drawableResourceId) {
+        this.mBackgroundResourceId = drawableResourceId;
+    }
+
+    /**
+     * Retrieves the background drawable resource
+     *
+     * @return
+     */
+    public int getBackgroundResourceId() {
+        return mBackgroundResourceId;
+    }
+
+    /**
+     * Retrieves the background drawable resource
+     *
+     * @return
+     */
+    public Drawable getBackgroundResource() {
+        return mBackgroundResource;
+    }
+
+    /**
+     * Sets the background drawable resource to override the style of MainLayout (card.main_layout)
+     *
+     * @param drawableResource drawable resource
+     */
+    public void setBackgroundResource(Drawable drawableResource) {
+        this.mBackgroundResource = drawableResource;
+    }
+
+    /**
+     * Changes dynamically the drawable resource to override the style of MainLayout.
+     *
+     * @param drawableResourceId   drawable resource Id
+     */
+    public void changeBackgroundResourceId(int drawableResourceId){
+        if (mCardView!=null){
+            mCardView.changeBackgroundResourceId(drawableResourceId);
+        }
+    }
+
+    /**
+     * Changes dynamically the drawable resource to override the style of MainLayout.
+     *
+     * @param drawableResource   drawable resource
+     */
+    public void changeBackgroundResource(Drawable drawableResource){
+        if (mCardView!=null){
+            mCardView.changeBackgroundResource(drawableResource);
+        }
+    }
+
+    /**
+     * Indicates if the card is clickable on a MultiChoiceAdapter
+     *
+     * @return <code>true</code> if card is clickable
+     */
+    public boolean isCheckable() {
+        return mCheckable;
+    }
+
+    /**
+     * Set the card as clickable in a MultiChoiceAdapter
+     *
+     * @param checkable <code>true</code> to indicates that the card is clickable
+     */
+    public void setCheckable(boolean checkable) {
+        mCheckable = checkable;
+    }
+
+    /**
+     * Returns true if the multichoice is enabled
+     * @return
+     */
+    public boolean isMultiChoiceEnabled() {
+        return mMultiChoiceEnabled;
+    }
+
 }

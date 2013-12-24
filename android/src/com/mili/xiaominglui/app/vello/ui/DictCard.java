@@ -1,5 +1,9 @@
 package com.mili.xiaominglui.app.vello.ui;
 
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardExpand;
+import it.gmariotti.cardslib.library.internal.CardHeader;
+
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbDictCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
@@ -7,9 +11,6 @@ import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardExpand;
-import it.gmariotti.cardslib.library.internal.CardHeader;
 
 public class DictCard extends Card {
 	protected String mTitleHeader;

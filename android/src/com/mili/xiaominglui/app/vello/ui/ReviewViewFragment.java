@@ -100,24 +100,8 @@ public class ReviewViewFragment extends SherlockFragment implements
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.fragment_review, container, false);
 		mCards = new ArrayList<Card>();
-		mCardList = (CardListView) rootView.findViewById(R.id.card_list);
-		
-		View empty = rootView.findViewById(R.id.emptyView);
-		empty.setOnTouchListener(new View.OnTouchListener() {
-			
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				mListener.syncOnAllRecalled();
-				return true;
-			}
-		});
-		IconicTextView iconicTextView = (IconicTextView) rootView.findViewById(R.id.iconic_all_recalled);
-		iconicTextView.setIcon(FontAwesomeIcon.OK);
-		iconicTextView.setTextColor(Color.GRAY);
-		mCardList.setEmptyView(empty);
-		return rootView;
+		return inflater.inflate(R.layout.fragment_review, container, false);
 	}
 
 	@Override
@@ -163,13 +147,12 @@ public class ReviewViewFragment extends SherlockFragment implements
 					DbDictCard.PROJECTION, criteria.getWhereClause(),
 					criteria.getWhereParams(), criteria.getOrderClause());
 		}
-
 	}
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 		mCards.clear();
-
+		mCardList = (CardListView) getActivity().findViewById(R.id.card_list);
 		if (mIsSearching) {
 			// in Dictionary Mode
 			if (data == null)
@@ -184,8 +167,7 @@ public class ReviewViewFragment extends SherlockFragment implements
 		} else {
 			// in Review Mode
 			for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
-				ReviewCard rc = new ReviewCard(getActivity()
-						.getApplicationContext(), data);
+				ReviewCard rc = new ReviewCard(getActivity().getApplicationContext(), data);
 				rc.setId(rc.trelloCard.id);
 				rc.init();
 				mCards.add(rc);
@@ -198,6 +180,27 @@ public class ReviewViewFragment extends SherlockFragment implements
 				}
 			}
 		}
+
+		View empty = getActivity().findViewById(R.id.emptyView);
+		empty.setOnTouchListener(new View.OnTouchListener() {
+
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				switch (event.getAction()) {
+				case MotionEvent.ACTION_DOWN:
+					return false;
+				case MotionEvent.ACTION_UP:
+					mListener.syncOnAllRecalled();
+					return true;
+				default:
+					return false;
+				}
+			}
+		});
+		IconicTextView iconicTextView = (IconicTextView) getActivity().findViewById(R.id.iconic_all_recalled);
+		iconicTextView.setIcon(FontAwesomeIcon.OK);
+		iconicTextView.setTextColor(Color.GRAY);
+		mCardList.setEmptyView(empty);
 	}
 
 	@Override

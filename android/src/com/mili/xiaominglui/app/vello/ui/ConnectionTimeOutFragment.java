@@ -32,8 +32,7 @@ public class ConnectionTimeOutFragment extends SherlockFragment {
 		try {
 			mListener = (ConnectionTimeOutFragmentEventListener) activity;
 		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString()
-					+ " must implement ConnectionTimeOutFragmentEventListener");
+			throw new ClassCastException(activity.toString() + " must implement ConnectionTimeOutFragmentEventListener");
 		}
 	}
 	
@@ -51,7 +50,7 @@ public class ConnectionTimeOutFragment extends SherlockFragment {
 		});
 		IconicTextView iconicTextView = (IconicTextView) rootView.findViewById(R.id.iconic_connection_timeout);
 		iconicTextView.setIcon(FontAwesomeIcon.INFO_SIGN);
-		iconicTextView.setTextColor(Color.RED);
+		iconicTextView.setTextColor(Color.LTGRAY);
 		return rootView;
 	}
 }

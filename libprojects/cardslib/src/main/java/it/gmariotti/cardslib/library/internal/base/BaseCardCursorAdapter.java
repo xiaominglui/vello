@@ -19,21 +19,18 @@
 package it.gmariotti.cardslib.library.internal.base;
 
 import android.content.Context;
-import android.view.View;
-import android.widget.ArrayAdapter;
-
-import java.util.List;
+import android.database.Cursor;
+import android.widget.CursorAdapter;
 
 import it.gmariotti.cardslib.library.R;
 import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.view.CardView;
 
 /**
- * Base Array Adapter
+ * Base Cursor Adapter
  *
  * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
  */
-public abstract class BaseCardArrayAdapter extends ArrayAdapter<Card> {
+public abstract class BaseCardCursorAdapter extends CursorAdapter {
 
     /**
      * Current context
@@ -54,14 +51,20 @@ public abstract class BaseCardArrayAdapter extends ArrayAdapter<Card> {
     // Constructors
     // -------------------------------------------------------------
 
+
     /**
      * Constructor
      *
      * @param context The current context.
-     * @param cards   The cards to represent in the ListView.
      */
-    public BaseCardArrayAdapter(Context context, List<Card> cards) {
-        super(context, 0, cards);
+    protected BaseCardCursorAdapter(Context context, Cursor c, boolean autoRequery) {
+        super(context, c, autoRequery);
+        mContext = context;
+    }
+
+
+    protected BaseCardCursorAdapter(Context context, Cursor c, int flags) {
+        super(context, c, flags);
         mContext = context;
     }
 
@@ -76,28 +79,35 @@ public abstract class BaseCardArrayAdapter extends ArrayAdapter<Card> {
 
     @Override
     public int getItemViewType(int position) {
-        Card card = (Card) getItem(position);
+        Card card = (Card)  getItem(position);
         return card.getType();
     }
 
     @Override
     public boolean isEnabled(int position) {
         //Disable card if it is not clickable or longClickable
-        Card card = (Card) getItem(position);
+        Card card = (Card)  getItem(position);
         if (card.isClickable() || card.isLongClickable())
             return true;
         else
             return false;
     }
 
-    /**
-     * This method is used in with multichoice
-     * @param mCard
-     * @param mCardView
-     */
-    protected void setupMultichoice(View view,Card mCard,CardView mCardView,long position){
-        //empty
+    @Override
+    public Card getItem(int position) {
+        Object obj = super.getItem(position);
+        if (obj instanceof Cursor)
+            return (Card) getCardFromCursor((Cursor) obj);
+        else
+            return null;
     }
+
+    /**
+     * You should implement this method to
+     * @param cursor
+     * @return
+     */
+    protected abstract Card getCardFromCursor(Cursor cursor);
 
     // -------------------------------------------------------------
     //  Getters and Setters

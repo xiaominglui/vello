@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
@@ -275,8 +276,10 @@ public class CardView extends BaseCardView {
 
         //Setup Listeners
         setupListeners();
-    }
 
+        //Setup Drawable Resources
+        setupDrawableResources();
+    }
 
 
     /**
@@ -408,6 +411,21 @@ public class CardView extends BaseCardView {
         }
     }
 
+    /**
+     * Setup Drawable Resources
+     */
+    protected void setupDrawableResources() {
+
+        //Card
+        if (mCard!=null){
+            if (mCard.getBackgroundResourceId()!=0){
+                changeBackgroundResourceId(mCard.getBackgroundResourceId());
+            }else if (mCard.getBackgroundResource()!=null){
+                changeBackgroundResource(mCard.getBackgroundResource());
+            }
+        }
+    }
+
     //--------------------------------------------------------------------------
     // Listeners
     //--------------------------------------------------------------------------
@@ -447,51 +465,53 @@ public class CardView extends BaseCardView {
 
         if (mCard.isClickable()){
             //Set the onClickListener
-            if (mCard.getOnClickListener() != null) {
-                this.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (mCard.getOnClickListener()!=null)
-                            mCard.getOnClickListener().onClick(mCard,v);
-                    }
-                });
+            if(!mCard.isMultiChoiceEnabled()){
+                if (mCard.getOnClickListener() != null) {
+                    this.setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (mCard.getOnClickListener()!=null)
+                                mCard.getOnClickListener().onClick(mCard,v);
+                        }
+                    });
 
-                //Prevent multiple events
-                //if (!mCard.isSwipeable() && mCard.getOnSwipeListener() == null) {
-                //    this.setClickable(true);
-                //}
+                    //Prevent multiple events
+                    //if (!mCard.isSwipeable() && mCard.getOnSwipeListener() == null) {
+                    //    this.setClickable(true);
+                    //}
 
-            }else{
-                HashMap<Integer,Card.OnCardClickListener> mMultipleOnClickListner=mCard.getMultipleOnClickListener();
-                if (mMultipleOnClickListner!=null && !mMultipleOnClickListner.isEmpty()){
+                }else{
+                    HashMap<Integer,Card.OnCardClickListener> mMultipleOnClickListner=mCard.getMultipleOnClickListener();
+                    if (mMultipleOnClickListner!=null && !mMultipleOnClickListner.isEmpty()){
 
-                    for (int key:mMultipleOnClickListner.keySet()){
-                        View viewClickable= decodeAreaOnClickListener(key);
-                        final Card.OnCardClickListener mListener=mMultipleOnClickListner.get(key);
-                        if (viewClickable!=null){
-                            //Add listener to this view
-                            viewClickable.setOnClickListener(new OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    //Callback to card listener
-                                    if (mListener!=null)
-                                        mListener.onClick(mCard,v);
-                                }
-                            });
+                        for (int key:mMultipleOnClickListner.keySet()){
+                            View viewClickable= decodeAreaOnClickListener(key);
+                            final Card.OnCardClickListener mListener=mMultipleOnClickListner.get(key);
+                            if (viewClickable!=null){
+                                //Add listener to this view
+                                viewClickable.setOnClickListener(new OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        //Callback to card listener
+                                        if (mListener!=null)
+                                            mListener.onClick(mCard,v);
+                                    }
+                                });
 
-                            //Add Selector to this view
-                            if (key > Card.CLICK_LISTENER_ALL_VIEW) {
-                                if (Build.VERSION.SDK_INT >= 16){
-                                    viewClickable.setBackground(getResources().getDrawable(R.drawable.card_selector));
-                                } else {
-                                    viewClickable.setBackgroundDrawable(getResources().getDrawable(R.drawable.card_selector));
+                                //Add Selector to this view
+                                if (key > Card.CLICK_LISTENER_ALL_VIEW) {
+                                    if (Build.VERSION.SDK_INT >= 16){
+                                        viewClickable.setBackground(getResources().getDrawable(R.drawable.card_selector));
+                                    } else {
+                                        viewClickable.setBackgroundDrawable(getResources().getDrawable(R.drawable.card_selector));
+                                    }
                                 }
                             }
                         }
+                    }else{
+                        //There aren't listners
+                        this.setClickable(false);
                     }
-                }else{
-                    //There aren't listners
-                    this.setClickable(false);
                 }
             }
         }else{
@@ -618,7 +638,6 @@ public class CardView extends BaseCardView {
             }
         }
     }
-
 
 
     /**
@@ -840,6 +859,45 @@ public class CardView extends BaseCardView {
     public void setExpanded(boolean expanded) {
         if (mCard!=null){
             mCard.setExpanded(expanded);
+        }
+    }
+
+    /**
+     * Retrieves the InternalMainCardGlobalLayout.
+     * Background style is applied here.
+     *
+     * @return
+     */
+    public View getInternalMainCardLayout() {
+        return mInternalMainCardLayout;
+    }
+
+    /**
+     * Changes dynamically the drawable resource to override the style of MainLayout.
+     *
+     * @param drawableResourceId drawable resource Id
+     */
+    public void changeBackgroundResourceId(int drawableResourceId) {
+        if (drawableResourceId!=0){
+            if (mInternalMainCardLayout!=null){
+                mInternalMainCardLayout.setBackgroundResource(drawableResourceId);
+            }
+        }
+    }
+
+    /**
+     * Changes dynamically the drawable resource to override the style of MainLayout.
+     *
+     * @param drawableResource drawable resource
+     */
+    public void changeBackgroundResource(Drawable drawableResource) {
+        if (drawableResource!=null){
+            if (mInternalMainCardLayout!=null){
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                    mInternalMainCardLayout.setBackground(drawableResource);
+                else
+                    mInternalMainCardLayout.setBackgroundDrawable(drawableResource);
+            }
         }
     }
 }

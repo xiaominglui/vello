@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ /*******************************************************************************
+  ~ *******************************************************************************
   ~   Copyright (c) 2013 Gabriele Mariotti.
   ~
   ~   Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +14,15 @@
   ~   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~   See the License for the specific language governing permissions and
   ~   limitations under the License.
-  ~  ******************************************************************************/
+  ~  *****************************************************************************
   -->
 
-<ImageView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/card_thumbnail_image"
-    style="@style/card_thumbnail_image"/>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item android:drawable="@drawable/ic_menu_overflow_card_rounded_dark_pressed"
+          android:state_pressed="true"/>
+    <item android:drawable="@drawable/ic_menu_overflow_card_rounded_dark_pressed"
+          android:state_focused="true"/>
+    <item android:drawable="@drawable/ic_menu_overflow_card_rounded_dark_normal"/>
 
+</selector>

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.TimeZone;
 
 import org.apache.http.HttpStatus;
@@ -55,6 +54,8 @@ public class VelloService extends Service implements RequestListener,
 	private static final String TAG = VelloService.class.getSimpleName();
 
 	HashMap<String, DirtyCard> mDirtyCards = new HashMap<String, DirtyCard>();
+//	ArrayList<TrelloCard> mMergeCards = new ArrayList<TrelloCard>();
+	HashMap<String, TrelloCard> mMergeCards = new HashMap<String, TrelloCard>();
 	private static boolean isRunning = false;
 	ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track
 																// of all
@@ -801,23 +802,31 @@ public class VelloService extends Service implements RequestListener,
 							
 							if (mDirtyCards.containsKey(tCard.id)) {
 								// need merging
-								if (VelloConfig.DEBUG_SWITCH) {
-									Log.d(TAG, "merge card --- " + tCard.id);
-								}
-								DirtyCard dCard = mDirtyCards.get(tCard.id);
-								if (dCard.markDeleted.equals("true")) {
-									// delete remote Trello card
-									deleteRemoteTrelloCard(tCard, startId);
-								} else if (dCard.dateLastActivity.equals(tCard.dateLastActivity)) {
-									// remote has no commit
-									// commit local due, closed, listId to
-									// Trello
-									updateRemoteTrelloCard(upgradeTrelloCard(tCard, dCard, false), startId);
-								} else {
-									// remote has commit
-									// update remote data based on local data
-									updateRemoteTrelloCard(upgradeTrelloCard(tCard, dCard, true), startId);
-								}
+								mMergeCards.put(tCard.id, tCard);
+							}
+						}
+
+						if (VelloConfig.DEBUG_SWITCH) {
+							Log.d(TAG, "merge cards num=" + mMergeCards.size());
+						}
+
+						for (TrelloCard tCard : mMergeCards.values()) {
+							if (VelloConfig.DEBUG_SWITCH) {
+								Log.d(TAG, "to merge card --- " + tCard.id);
+							}
+							DirtyCard dCard = mDirtyCards.get(tCard.id);
+							if (dCard.markDeleted.equals("true")) {
+								// delete remote Trello card
+								deleteRemoteTrelloCard(tCard, startId);
+							} else if (dCard.dateLastActivity.equals(tCard.dateLastActivity)) {
+								// remote has no commit
+								// commit local due, closed, listId to
+								// Trello
+								updateRemoteTrelloCard(upgradeTrelloCard(tCard, dCard, false), startId);
+							} else {
+								// remote has commit
+								// update remote data based on local data
+								updateRemoteTrelloCard(upgradeTrelloCard(tCard, dCard, true), startId);
 							}
 						}
 					}
@@ -920,13 +929,13 @@ public class VelloService extends Service implements RequestListener,
 				TrelloCard deletingCard = (TrelloCard) request.getParcelable(VelloRequestFactory.PARAM_EXTRA_TRELLO_CARD);
 				int startIdTriggerDelete = request.getInt(VelloRequestFactory.PARAM_EXTRA_SERVICE_START_ID);
 				if (deleted) {
-					mDirtyCards.remove(deletingCard.id);
+					mMergeCards.remove(deletingCard.id);
 				} else {
 					// retry
 					deleteRemoteTrelloCard(deletingCard, startIdTriggerDelete);
 				}
 				
-				if (mDirtyCards.isEmpty()) {
+				if (mMergeCards.isEmpty()) {
 					// merge ok, go clean full sync
 					getOpenTrelloCardList(startIdTriggerDelete, true);
 				}
@@ -938,8 +947,9 @@ public class VelloService extends Service implements RequestListener,
 				if (VelloConfig.DEBUG_SWITCH) {
 					Log.d(TAG, "updateRemoteTrelloCard returned, with updated=" + updated);
 				}
+
 				if (updated) {
-					mDirtyCards.remove(updatingCard.id);
+					mMergeCards.remove(updatingCard.id);
 				} else {
 					if (VelloConfig.DEBUG_SWITCH) {
 						Log.d(TAG, "retry updateRemoteTrelloCard");
@@ -947,9 +957,7 @@ public class VelloService extends Service implements RequestListener,
 					updateRemoteTrelloCard(updatingCard, startIdTriggerUpdate);
 				}
 				
-				Log.d("mingo.lv", String.valueOf(mDirtyCards.size()));
-				
-				if (mDirtyCards.isEmpty()) {
+				if (mMergeCards.isEmpty()) {
 					// merge ok, go clean full sync
 					getOpenTrelloCardList(startIdTriggerUpdate, true);
 				}

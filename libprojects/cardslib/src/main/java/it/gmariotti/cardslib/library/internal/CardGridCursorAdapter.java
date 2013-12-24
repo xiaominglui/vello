@@ -18,82 +18,50 @@
 
 package it.gmariotti.cardslib.library.internal;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.res.Resources;
-import android.os.Parcelable;
+import android.database.Cursor;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
 import java.util.HashMap;
-import java.util.List;
 
 import it.gmariotti.cardslib.library.R;
-import it.gmariotti.cardslib.library.internal.base.BaseCardArrayAdapter;
-import it.gmariotti.cardslib.library.view.CardListView;
+import it.gmariotti.cardslib.library.internal.base.BaseCardCursorAdapter;
+import it.gmariotti.cardslib.library.view.CardGridView;
 import it.gmariotti.cardslib.library.view.CardView;
-import it.gmariotti.cardslib.library.view.listener.SwipeDismissListViewTouchListener;
-import it.gmariotti.cardslib.library.view.listener.UndoBarController;
-import it.gmariotti.cardslib.library.view.listener.UndoCard;
 
 /**
- * Array Adapter for {@link Card} model
- * <p/>
- * Usage:
- * <pre><code>
- * ArrayList<Card> cards = new ArrayList<Card>();
- * for (int i=0;i<1000;i++){
- *     CardExample card = new CardExample(getActivity(),"My title "+i,"Inner text "+i);
- *     cards.add(card);
- * }
+ * Cursor Adapter for {@link Card} model
  *
- * CardArrayAdapter mCardArrayAdapter = new CardArrayAdapter(getActivity(),cards);
  *
- * CardListView listView = (CardListView) getActivity().findViewById(R.id.listId);
- * listView.setAdapter(mCardArrayAdapter); *
- * </code></pre>
- * It provides a default layout id for each row @layout/list_card_layout
- * Use can easily customize it using card:list_card_layout_resourceID attr in your xml layout:
- * <pre><code>
- *    <it.gmariotti.cardslib.library.view.CardListView
- *      android:layout_width="match_parent"
- *      android:layout_height="match_parent"
- *      android:id="@+id/carddemo_list_gplaycard"
- *      card:list_card_layout_resourceID="@layout/list_card_thumbnail_layout" />
- * </code></pre>
- * or:
- * <pre><code>
- * adapter.setRowLayoutId(list_card_layout_resourceID);
- * </code></pre>
  * </p>
  * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
  */
-public class CardArrayAdapter extends BaseCardArrayAdapter implements UndoBarController.UndoListener {
+public abstract class CardGridCursorAdapter extends BaseCardCursorAdapter  {
 
-    protected static String TAG = "CardArrayAdapter";
+    protected static String TAG = "CardGridCursorAdapter";
 
     /**
-     * {@link CardListView}
+     * {@link it.gmariotti.cardslib.library.view.CardGridView}
      */
-    protected CardListView mCardListView;
+    protected CardGridView mCardGridView;
 
     /**
      * Listener invoked when a card is swiped
      */
-    protected SwipeDismissListViewTouchListener mOnTouchListener;
+    //protected SwipeDismissListViewTouchListener mOnTouchListener;
 
     /**
      * Used to enable an undo message after a swipe action
      */
-    protected boolean mEnableUndo=false;
+    //protected boolean mEnableUndo=false;
 
     /**
      * Undo Controller
      */
-    protected UndoBarController mUndoBarController;
+    //protected UndoBarController mUndoBarController;
 
     /**
      * Internal Map with all Cards.
@@ -101,50 +69,60 @@ public class CardArrayAdapter extends BaseCardArrayAdapter implements UndoBarCon
      */
     protected HashMap<String /* id */,Card>  mInternalObjects;
 
-
+    /**
+     * Recycle
+     */
+    private boolean recycle = false;
     // -------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------
 
-    /**
-     * Constructor
-     *
-     * @param context The current context.
-     * @param cards   The cards to represent in the ListView.
-     */
-    public CardArrayAdapter(Context context, List<Card> cards) {
-        super(context, cards);
+    public CardGridCursorAdapter(Context context) {
+        super(context, null, false);
+        mContext= context;
+    }
+
+    protected CardGridCursorAdapter(Context context, Cursor c, boolean autoRequery) {
+        super(context, c, autoRequery);
+        mContext= context;
+    }
+
+    protected CardGridCursorAdapter(Context context, Cursor c, int flags) {
+        super(context, c, flags);
+        mContext= context;
     }
 
     // -------------------------------------------------------------
     // Views
     // -------------------------------------------------------------
 
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        //Check for recycle
+        if (convertView == null) {
+            recycle = false;
+        } else {
+            recycle = true;
+        }
+        return super.getView(position, convertView, parent);
+    }
 
-        View view = convertView;
+    @Override
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        int layout = mRowLayoutId;
+        LayoutInflater mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        return mInflater.inflate(layout, parent, false);
+    }
+
+    @Override
+    public void bindView(View view, Context context, Cursor cursor) {
+
         CardView mCardView;
         Card mCard;
 
-        LayoutInflater mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        //Retrieve card from items
-        mCard = (Card) getItem(position);
+        mCard = (Card) getCardFromCursor(cursor);
         if (mCard != null) {
-
-            int layout = mRowLayoutId;
-            boolean recycle = false;
-
-            //Inflate layout
-            if (view == null) {
-                recycle = false;
-                view = mInflater.inflate(layout, parent, false);
-            } else {
-                recycle = true;
-            }
-
-            //Setup card
             mCardView = (CardView) view.findViewById(R.id.list_cardId);
             if (mCardView != null) {
                 //It is important to set recycle value for inner layout elements
@@ -160,22 +138,21 @@ public class CardArrayAdapter extends BaseCardArrayAdapter implements UndoBarCon
                 mCardView.setCard(mCard);
 
                 //Set originalValue
-                mCard.setSwipeable(origianlSwipeable);
+                //mCard.setSwipeable(origianlSwipeable);
+                if (origianlSwipeable)
+                    Log.d(TAG, "Swipe action not enabled in this type of view");
 
                 //If card has an expandable button override animation
                 if (mCard.getCardHeader() != null && mCard.getCardHeader().isButtonExpandVisible()) {
-                    setupExpandCollapseListAnimation(mCardView);
+                    //setupExpandCollapseListAnimation(mCardView);
+                    Log.d(TAG, "Expand action not enabled in this type of view");
                 }
 
                 //Setup swipeable animation
                 setupSwipeableAnimation(mCard, mCardView);
 
-                //setupMultiChoice
-                setupMultichoice(view,mCard,mCardView,position);
             }
         }
-
-        return view;
     }
 
 
@@ -184,10 +161,12 @@ public class CardArrayAdapter extends BaseCardArrayAdapter implements UndoBarCon
      * Sets SwipeAnimation on List
      *
      * @param card {@link Card}
-     * @param cardView {@link CardView}
+     * @param cardView {@link it.gmariotti.cardslib.library.view.CardView}
      */
     protected void setupSwipeableAnimation(final Card card, CardView cardView) {
 
+        cardView.setOnTouchListener(null);
+        /*
         if (card.isSwipeable()){
             if (mOnTouchListener == null){
                 mOnTouchListener = new SwipeDismissListViewTouchListener(mCardListView, mCallback);
@@ -201,18 +180,18 @@ public class CardArrayAdapter extends BaseCardArrayAdapter implements UndoBarCon
         }else{
             //prevent issue with recycle view
             cardView.setOnTouchListener(null);
-        }
+        }*/
     }
 
     /**
      * Overrides the default collapse/expand animation in a List
      *
-     * @param cardView {@link CardView}
+     * @param cardView {@link it.gmariotti.cardslib.library.view.CardView}
      */
     protected void setupExpandCollapseListAnimation(CardView cardView) {
 
         if (cardView == null) return;
-        cardView.setOnExpandListAnimatorListener(mCardListView);
+        cardView.setOnExpandListAnimatorListener(mCardGridView);
     }
 
     // -------------------------------------------------------------
@@ -221,7 +200,7 @@ public class CardArrayAdapter extends BaseCardArrayAdapter implements UndoBarCon
     /**
      * Listener invoked when a card is swiped
      */
-    SwipeDismissListViewTouchListener.DismissCallbacks mCallback = new SwipeDismissListViewTouchListener.DismissCallbacks() {
+    /*SwipeDismissListViewTouchListener.DismissCallbacks mCallback = new SwipeDismissListViewTouchListener.DismissCallbacks() {
 
         @Override
         public boolean canDismiss(int position, Card card) {
@@ -230,6 +209,7 @@ public class CardArrayAdapter extends BaseCardArrayAdapter implements UndoBarCon
 
         @Override
         public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+
 
             int[] itemPositions=new int[reverseSortedPositions.length];
             String[] itemIds=new String[reverseSortedPositions.length];
@@ -242,13 +222,13 @@ public class CardArrayAdapter extends BaseCardArrayAdapter implements UndoBarCon
                 itemIds[i]=card.getId();
                 i++;
 
-                remove(card);
                 if (card.getOnSwipeListener() != null){
                         card.getOnSwipeListener().onSwipe(card);
                 }
             }
-            notifyDataSetChanged();
+            //notifyDataSetChanged();
 
+            /*
             //Check for a undo message to confirm
             if (isEnableUndo() && mUndoBarController!=null){
 
@@ -269,14 +249,15 @@ public class CardArrayAdapter extends BaseCardArrayAdapter implements UndoBarCon
 
             }
         }
-    };
+    };*/
 
     // -------------------------------------------------------------
     //  Undo Default Listener
     // -------------------------------------------------------------
 
-    @Override
+    /*@Override
     public void onUndo(Parcelable token) {
+        /*
         //Restore items in lists (use reverseSortedOrder)
         if (token != null) {
 
@@ -304,27 +285,27 @@ public class CardArrayAdapter extends BaseCardArrayAdapter implements UndoBarCon
                     }
                 }
             }
-        }
-    }
+        }*
+    }*/
 
     // -------------------------------------------------------------
     //  Getters and Setters
     // -------------------------------------------------------------
 
     /**
-     * @return {@link CardListView}
+     * @return {@link it.gmariotti.cardslib.library.view.CardGridView}
      */
-    public CardListView getCardListView() {
-        return mCardListView;
+    public CardGridView getCardGridView() {
+        return mCardGridView;
     }
 
     /**
-     * Sets the {@link CardListView}
+     * Sets the {@link it.gmariotti.cardslib.library.view.CardListView}
      *
-     * @param cardListView cardListView
+     * @param cardGridView cardGridView
      */
-    public void setCardListView(CardListView cardListView) {
-        this.mCardListView = cardListView;
+    public void setCardGridView(CardGridView cardGridView) {
+        this.mCardGridView = cardGridView;
     }
 
     /**
@@ -332,15 +313,16 @@ public class CardArrayAdapter extends BaseCardArrayAdapter implements UndoBarCon
      *
      * @return <code>true</code> if the undo message is enabled
      */
-    public boolean isEnableUndo() {
+    /*public boolean isEnableUndo() {
         return mEnableUndo;
-    }
+    }*/
 
     /**
      * Enables an undo message after a swipe action
      *
      * @param enableUndo <code>true</code> to enable an undo message
      */
+    /*
     public void setEnableUndo(boolean enableUndo) {
         mEnableUndo = enableUndo;
         if (enableUndo) {
@@ -360,14 +342,15 @@ public class CardArrayAdapter extends BaseCardArrayAdapter implements UndoBarCon
         }else{
             mUndoBarController=null;
         }
-    }
+    }*/
 
     /**
      * Return the UndoBarController for undo action
      *
-     * @return {@link UndoBarController}
+     * @return {@link it.gmariotti.cardslib.library.view.listener.UndoBarController}
      */
+    /*
     public UndoBarController getUndoBarController() {
         return mUndoBarController;
-    }
+    }*/
 }

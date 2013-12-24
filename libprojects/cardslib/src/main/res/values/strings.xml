@@ -27,9 +27,17 @@
     <!--<string name="undo_card">Card removed</string>-->
 
     <plurals name="list_card_undo_items">
-        <item quantity="one">1 word recalled</item>
-        <item quantity="other">%d words recalled</item>
+        <item quantity="one">1 card removed</item>
+        <item quantity="other">%d cards removed</item>
     </plurals>
+
+    <!-- Card selected item with CAB -->
+    <plurals name="card_selected_items">
+        <item quantity="one">1 item selected</item>
+        <item quantity="other">%d items selected</item>
+    </plurals>
+
+
 
 
 </resources>
