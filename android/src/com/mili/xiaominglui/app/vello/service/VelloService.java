@@ -1,5 +1,9 @@
 package com.mili.xiaominglui.app.vello.service;
 
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardHeader;
+import it.gmariotti.cardslib.library.view.CardView;
+
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,6 +30,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -35,6 +40,7 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -478,20 +484,27 @@ public class VelloService extends Service implements RequestListener, Connection
 		}
 	}
 	private void showFloatWindow(String str) {
-		SuperToast toast = new SuperToast(getApplicationContext());
-		toast.setDuration(SuperToast.DURATION_MEDIUM);
-		toast.setIconResource(R.drawable.ic_stat_vaa, SuperToast.IconPosition.LEFT);
-		toast.setText(str);
-		toast.show();
+//		SuperToast toast = new SuperToast(getApplicationContext());
+//		toast.setDuration(SuperToast.DURATION_MEDIUM);
+//		toast.setIconResource(R.drawable.ic_stat_vaa, SuperToast.IconPosition.LEFT);
+//		toast.setText(str);
+//		toast.show();
 		
-//      WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-//      params.type = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
-//      params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-//      params.width = WindowManager.LayoutParams.WRAP_CONTENT;
-//      params.height = WindowManager.LayoutParams.WRAP_CONTENT;
-//      TextView tv = new TextView(getApplicationContext());
-//      tv.setText(str);
-//      mWM.addView(tv, params);
+      WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+      params.type = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+      params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+      params.width = WindowManager.LayoutParams.WRAP_CONTENT;
+      params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+      params.format = PixelFormat.RGBA_8888;
+      params.gravity=Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+      Card card = new Card(getApplicationContext());
+      card.setShadow(false);
+      CardHeader header = new CardHeader(getApplicationContext());
+      header.setTitle(str);
+      card.addCardHeader(header);
+      CardView cardview = new CardView(getApplicationContext());
+      cardview.setCard(card);
+      mWM.addView(cardview, params);
 	}
 	
 	@SuppressLint("SimpleDateFormat")
