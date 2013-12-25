@@ -17,8 +17,10 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
+import android.util.Log;
 
 import com.avos.avoscloud.AVInstallation;
 import com.avos.avoscloud.PushService;
@@ -30,9 +32,11 @@ import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.mili.xiaominglui.app.vello.util.NetworkUtil;
 
 public class SettingsActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
+	private static final String TAG = SettingsActivity.class.getSimpleName();
 	public static final String KEY_PREF_SYNC_FREQ = "pref_sync_frequency";
 	public static final String KEY_PREF_SYNC_WIFI_ONLY = "pref_sync_wifi_only";
-	
+	public static final String KEY_PREF_DICT_CLIPBOARD_MONITOR = "pref_dict_clipboard_monitor";
+	private boolean isInFront;
 	private String mNewSyncValue = "0";
 	private ListPreference mListPreference;
 	private SettingsActivityUIHandler mUICallback = new SettingsActivityUIHandler(this);
@@ -139,6 +143,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	protected void onResume() {
 		super.onResume();
 		// setup the initial value
+		isInFront = true;
 		mListPreference.setEnabled(false);
 		mListPreference.setSummary(R.string.pref_sync_frequency_summary_retrieving_setting);
 		
@@ -153,6 +158,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	
 	@Override
 	protected void onPause() {
+		isInFront = false;
 		super.onPause();
 		doUnbindService();
 		getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
@@ -202,6 +208,19 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 					sendMessageToService(VelloService.MSG_SET_WEBHOOK_ACTIVE_STATUS, false);
 				}
 			}
+		} else if (key.equals(KEY_PREF_DICT_CLIPBOARD_MONITOR)) {
+			CheckBoxPreference dictClipMonitorPref = (CheckBoxPreference) findPreference(key);
+			if (dictClipMonitorPref.isChecked()) {
+				Intent startMonitor = new Intent(getApplicationContext(), VelloService.class);
+				startMonitor.putExtra("monitor", true);
+				ComponentName service = getApplicationContext().startService(startMonitor);
+	            if (service == null) {
+	                Log.e(TAG, "Can't start service " + VelloService.class.getName());
+	            }
+			} else {
+				sendMessageToService(VelloService.MSG_SHUTDOWN_CLIPBOARD_MONITOR, null);
+			}
+			
 		}
 	}
 	
@@ -214,8 +233,10 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 		// save Installation for push
 		PushService.setDefaultPushCallback(getApplicationContext(), MainActivity.class);
 		AVInstallation.getCurrentInstallation().saveInBackground();
-		
-		mListPreference.setEnabled(true);
+
+		if (isInFront) {
+			mListPreference.setEnabled(true);
+		}
 	}
 	
 	private void postActiveWebhook() {
@@ -228,21 +249,29 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 		PushService.setDefaultPushCallback(getApplicationContext(), MainActivity.class);
 		AVInstallation.getCurrentInstallation().saveInBackground();
 
-		mListPreference.setEnabled(true);
+		if (isInFront) {
+			mListPreference.setEnabled(true);
+		}
 	}
 
 	private void postDeactiveWebhook() {
 		AccountUtils.setVocabularyBoardWebHookStatus(getApplicationContext(), false);
-		mListPreference.setEnabled(true);
+		if (isInFront) {
+			mListPreference.setEnabled(true);
+		}
 	}
 	
 	private void withValidTrelloConnection() {
-		mListPreference.setEnabled(true);
-		mListPreference.setSummary(mListPreference.getEntry());
+		if (isInFront) {
+			mListPreference.setEnabled(true);
+			mListPreference.setSummary(mListPreference.getEntry());
+		}
 	}
 	
 	private void withInvalidTrelloConnection() {
-		mListPreference.setSummary(R.string.pref_sync_frequency_summary_no_reliable_network);
-		mListPreference.setEnabled(false);
+		if (isInFront) {
+			mListPreference.setSummary(R.string.pref_sync_frequency_summary_no_reliable_network);
+			mListPreference.setEnabled(false);
+		}
 	}
 }

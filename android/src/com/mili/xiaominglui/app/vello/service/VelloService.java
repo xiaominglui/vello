@@ -22,20 +22,27 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.OperationApplicationException;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.view.WindowManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
+import com.github.johnpersano.supertoasts.SuperCardToast;
+import com.github.johnpersano.supertoasts.SuperToast;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.Board;
@@ -51,19 +58,28 @@ import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment.Conn
 import com.mili.xiaominglui.app.vello.ui.MainActivity;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
-public class VelloService extends Service implements RequestListener,
-		ConnectionErrorDialogListener {
+public class VelloService extends Service implements RequestListener, ConnectionErrorDialogListener {
 	private static final String TAG = VelloService.class.getSimpleName();
+	private static boolean isRunning = false;
+	private NotificationManager mNM;
+	private ClipboardManager mCM;
+	private WindowManager mWM;
+	private MonitorTask mTask = null;
+	private SharedPreferences mPrefs;
+	
+	/**
+     * Time interval of monitor checking in milliseconds
+     * <p>TYPE: int</p>
+     */
+    public static final String KEY_MONITOR_INTERVAL = "monitor.interval";
+    public static final int DEF_MONITOR_INTERVAL = 3000;
 
 	HashMap<String, DirtyCard> mDirtyCards = new HashMap<String, DirtyCard>();
 //	ArrayList<TrelloCard> mMergeCards = new ArrayList<TrelloCard>();
 	HashMap<String, TrelloCard> mMergeCards = new HashMap<String, TrelloCard>();
-	private static boolean isRunning = false;
-	ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track
-																// of all
-																// current
-																// registered
-																// clients.
+
+	// Keeps track of all current registered clients.
+	ArrayList<Messenger> mClients = new ArrayList<Messenger>();
 
 	int mValue = 0; // Holds last value set by a client.
 	public static final int MSG_UNREGISTER_CLIENT = -1;
@@ -76,6 +92,7 @@ public class VelloService extends Service implements RequestListener,
 	public static final int MSG_SHOW_RESULT_WORDCARD = 5;
 	public static final int MSG_VALID_TRELLO_CONNECTION = 6;
 	public static final int MSG_INVALID_TRELLO_CONNECTION = 7;
+	public static final int MSG_SHOW_FLOAT_WINDOW = 8;
 	
 	public static final int MSG_STATUS_WEBHOOK_ACTIVED = 15;
 	public static final int MSG_STATUS_WEBHOOK_DEACTIVED = 16;
@@ -100,6 +117,7 @@ public class VelloService extends Service implements RequestListener,
 	public static final int MSG_CHECK_TRELLO_CONNECTION = 110;
 	public static final int MSG_READ_TRELLO_ACCOUNT_INFO = 111;
 	public static final int MSG_RETURN_TRELLO_USERNAME = 112;
+	public static final int MSG_SHUTDOWN_CLIPBOARD_MONITOR = 113;
 
 	final Messenger mMessenger = new Messenger(new IncomingHandler(this));
 
@@ -150,6 +168,14 @@ public class VelloService extends Service implements RequestListener,
 				case MSG_READ_TRELLO_ACCOUNT_INFO:
 					String token = (String) msg.obj;
 					service.readTrelloAccountInfo(token);
+					break;
+				case MSG_SHUTDOWN_CLIPBOARD_MONITOR:
+					service.shutdownClipboardMonitor();
+					break;
+				case MSG_SHOW_FLOAT_WINDOW:
+					String str = (String) msg.obj;
+					service.showFloatWindow(str);
+					break;
 				default:
 					super.handleMessage(msg);
 				}
@@ -177,19 +203,30 @@ public class VelloService extends Service implements RequestListener,
 
     @Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-    	if (VelloConfig.DEBUG_SWITCH) {
-    		Log.d(TAG, "command started---#" + startId);
+    	boolean monitor = intent.getBooleanExtra("monitor", false);
+    	if (monitor) {
+    		if (mTask == null) {
+    			mTask = new MonitorTask();
+    			mWM = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+    		}
+    		mTask.start();
+    		showNotification();
+    	} else {
+    		if (VelloConfig.DEBUG_SWITCH) {
+        		Log.d(TAG, "command started---#" + startId);
+        	}
+        	Message m = Message.obtain(null, VelloService.MSG_GET_DUE_REVIEW_CARD_LIST);
+        	m.arg1 = startId;
+        	m.arg2 = flags;
+        	m.obj = intent.getExtras();
+        	try {
+    			mMessenger.send(m);
+    		} catch (RemoteException e) {
+    			e.printStackTrace();
+    		}
     	}
-    	Message m = Message.obtain(null, VelloService.MSG_GET_DUE_REVIEW_CARD_LIST);
-    	m.arg1 = startId;
-    	m.arg2 = flags;
-    	m.obj = intent.getExtras();
-    	try {
-			mMessenger.send(m);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-		return START_NOT_STICKY;
+    	
+		return monitor ? START_REDELIVER_INTENT : START_NOT_STICKY;
 	}
 
 	public static boolean isRunning() {
@@ -198,18 +235,16 @@ public class VelloService extends Service implements RequestListener,
 
 	@Override
 	public void onCreate() {
-		super.onCreate();
 		Log.i(TAG, "VelloService Started.");
 		mRequestManager = VelloRequestManager.from(this);
 		mRequestList = new ArrayList<Request>();
+		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-		// Display a notification about us starting. We put an icon in the
-		// status bar.
-//		 showNotification();
-		
-		ClipboardManager clipBoard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-		clipBoard.addPrimaryClipChangedListener(new ClipboardListener());
+		mCM = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+//		mCM.addPrimaryClipChangedListener(new ClipboardListener());
 		// https://code.google.com/p/android/issues/detail?id=58043
+		// TODO add a option in setting
 		
 		isRunning = true;
 	}
@@ -217,6 +252,11 @@ public class VelloService extends Service implements RequestListener,
 	@Override
 	public void onDestroy() {
 		// Cancel the persistent notification.
+		mNM.cancel(R.string.notif_clip_monitor_service);
+		if (mTask != null && mTask.isRunning()) {
+			mTask.cancel();
+		}
+
 		Log.i(TAG, "VelloService Stopped.");
 		isRunning = false;
 	}
@@ -429,6 +469,29 @@ public class VelloService extends Service implements RequestListener,
 		Request updateRemoteTrelloCard = VelloRequestFactory.updateRemoteTrelloCard(card, startId);
 		mRequestManager.execute(updateRemoteTrelloCard, this);
 		mRequestList.add(updateRemoteTrelloCard);
+	}
+	
+	private void shutdownClipboardMonitor() {
+		if (mTask != null && mTask.isRunning()) {
+			mNM.cancel(R.string.notif_clip_monitor_service);
+			mTask.cancel();
+		}
+	}
+	private void showFloatWindow(String str) {
+		SuperToast toast = new SuperToast(getApplicationContext());
+		toast.setDuration(SuperToast.DURATION_MEDIUM);
+		toast.setIconResource(R.drawable.ic_stat_vaa, SuperToast.IconPosition.LEFT);
+		toast.setText(str);
+		toast.show();
+		
+//      WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+//      params.type = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+//      params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+//      params.width = WindowManager.LayoutParams.WRAP_CONTENT;
+//      params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+//      TextView tv = new TextView(getApplicationContext());
+//      tv.setText(str);
+//      mWM.addView(tv, params);
 	}
 	
 	@SuppressLint("SimpleDateFormat")
@@ -769,12 +832,11 @@ public class VelloService extends Service implements RequestListener,
 											.setContentIntent(pIntent)
 											.build();
 
-									NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
 
 									// Hide the notification after its selected
 									noti.flags |= Notification.FLAG_AUTO_CANCEL;
 
-									notificationManager.notify(0, noti);
+									mNM.notify(0, noti);
 									sendMessageToUI(VelloService.MSG_STATUS_SYNC_END, null);
 								} else {
 									// no word need recalling
@@ -1070,6 +1132,73 @@ public class VelloService extends Service implements RequestListener,
 		
 		return trelloCard;
 	}
+	
+	private void showNotification() {
+        Notification notif = new Notification(R.drawable.ic_stat_vaa, "VAA clipboard monitor is started", System.currentTimeMillis());
+        notif.flags |= (Notification.FLAG_ONGOING_EVENT | Notification.FLAG_NO_CLEAR);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
+        notif.setLatestEventInfo(this, getText(R.string.notif_clip_monitor_service), "Tap here to enter VAA UI", contentIntent);
+        // Use layout id because it's unique
+        mNM.notify(R.string.notif_clip_monitor_service, notif);
+    }
+	
+	/**
+     * Monitor task: monitor new text clips in global system clipboard
+     */
+    private class MonitorTask extends Thread {
+
+        private volatile boolean mKeepRunning = false;
+        private String mOldClip = null;
+        
+        public MonitorTask() {
+            super("ClipboardMonitor");
+        }
+        
+        public boolean isRunning() {
+        	return mKeepRunning;
+        }
+
+        /** Cancel task */
+        public void cancel() {
+            mKeepRunning = false;
+            interrupt();
+        }
+        
+        @Override
+        public void run() {
+            mKeepRunning = true;
+            while (true) {
+                doTask();
+                try {
+                    Thread.sleep(mPrefs.getInt(KEY_MONITOR_INTERVAL, DEF_MONITOR_INTERVAL));
+                } catch (InterruptedException ignored) {
+                }
+                if (!mKeepRunning) {
+                    break;
+                }
+            }
+        }
+        
+        private void doTask() {
+        	ClipData data = mCM.getPrimaryClip();
+        	if (data != null) {
+        		ClipData.Item item = data.getItemAt(0);
+        		String newClip = item.getText().toString();
+        		if (!newClip.equals(mOldClip)) {
+                    Log.i(TAG, "detect new text clip: " + newClip.toString());
+                    mOldClip = newClip;
+                    Log.i(TAG, "new text clip inserted: " + newClip.toString());
+                    Message msg = Message.obtain(null, MSG_SHOW_FLOAT_WINDOW, newClip);
+                    try {
+						mMessenger.send(msg);
+					} catch (RemoteException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+                }
+        	}
+        }
+    }
 	
 	class ClipboardListener implements ClipboardManager.OnPrimaryClipChangedListener {
 		public void onPrimaryClipChanged() {

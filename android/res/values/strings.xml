@@ -42,6 +42,7 @@
     <string name="notif_content_text">Touch me to recall.</string>
     <string name="notif_sync_ticker">Syncing now&#8230;</string>
     <string name="notif_sync_content_title">Syncing now&#8230;</string>
+    <string name="notif_clip_monitor_service">VAA Clipboard Monitor</string>
     <string name="title_search">Search</string>
     <string name="title_search_query">Search for \"&lt;b&gt;<xliff:g id="query">%1$s</xliff:g>&lt;b&gt;\"</string>
     <string name="title_settings">Settings</string>
@@ -79,6 +80,9 @@
     ]]></string>
     <string name="ok">OK</string>
     <string name="label_provider_wordcard">Words</string>
+    <string name="pref_dict_title">DICTIONARY</string>
+    <string name="pref_dict_clipboard_monitor">Clipboard Monitor</string>
+    <string name="pref_dict_clipboard_monitor_summary">Clipboard Monitor summary, tbd</string>
     <string name="pref_sync_title">SYNC</string>
     <string name="pref_sync_frequency">Sync frequency</string>
     <string name="pref_sync_wifi_only">Sync only on Wi-Fi</string>

@@ -5,6 +5,7 @@ import org.json.JSONObject;
 
 import android.accounts.Account;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,6 +18,7 @@ import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.config.JSONTag;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.config.WSConfig;
+import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.syncadapter.SyncHelper;
 import com.mili.xiaominglui.app.vello.ui.MainActivity;
 import com.mili.xiaominglui.app.vello.ui.SettingsActivity;
@@ -35,7 +37,17 @@ public class AVOSPushReceiver extends BroadcastReceiver {
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
 		int syncFreqValue = Integer.valueOf(settings.getString(SettingsActivity.KEY_PREF_SYNC_FREQ, "24"));
 		if (syncFreqValue == 0) {
-			if (action.equals("android.intent.action.BOOT_COMPLETED") || action.equals("android.net.conn.CONNECTIVITY_CHANGE")) {
+			if (action.equals("android.intent.action.BOOT_COMPLETED")) {
+				boolean monitor = settings.getBoolean(SettingsActivity.KEY_PREF_DICT_CLIPBOARD_MONITOR, false);
+				if (monitor) {
+					Intent startMonitor = new Intent(context, VelloService.class);
+					startMonitor.putExtra("monitor", true);
+					ComponentName service = context.startService(startMonitor);
+		            if (service == null) {
+		                Log.e(TAG, "Can't start service " + VelloService.class.getName());
+		            }
+				}
+
 				// save Installation for push
 				PushService.setDefaultPushCallback(context, MainActivity.class);
 				AVInstallation.getCurrentInstallation().saveInBackground();
