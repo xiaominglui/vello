@@ -115,6 +115,8 @@
         </service>
         <service android:name=".service.VelloService" >
         </service>
+        <service android:name=".ui.FloatDictCardWindow" >
+        </service>
 
         <provider
             android:name=".data.provider.VelloProvider"

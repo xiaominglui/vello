@@ -2,7 +2,6 @@ package com.mili.xiaominglui.app.vello.service;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
-import it.gmariotti.cardslib.library.view.CardView;
 
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
@@ -14,6 +13,7 @@ import java.util.TimeZone;
 
 import org.apache.http.HttpStatus;
 
+import wei.mark.standout.StandOutWindow;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -21,7 +21,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ClipData;
 import android.content.ClipboardManager;
-import android.content.ComponentName;
+import android.content.ClipboardManager.OnPrimaryClipChangedListener;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -30,8 +30,6 @@ import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.Color;
-import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -41,18 +39,11 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.view.DragEvent;
-import android.view.Gravity;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.WindowManager;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
-import com.github.johnpersano.supertoasts.SuperCardToast;
-import com.github.johnpersano.supertoasts.SuperToast;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.Board;
@@ -66,10 +57,10 @@ import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestManager;
 import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment.ConnectionErrorDialogListener;
 import com.mili.xiaominglui.app.vello.ui.MainActivity;
-import com.mili.xiaominglui.app.vello.ui.SettingsActivity;
+import com.mili.xiaominglui.app.vello.ui.FloatDictCardWindow;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
-public class VelloService extends Service implements RequestListener, ConnectionErrorDialogListener {
+public class VelloService extends Service implements RequestListener, ConnectionErrorDialogListener, OnPrimaryClipChangedListener {
 	private static final String TAG = VelloService.class.getSimpleName();
 	private static boolean isRunning = false;
 	private NotificationManager mNM;
@@ -129,6 +120,8 @@ public class VelloService extends Service implements RequestListener, Connection
 	public static final int MSG_READ_TRELLO_ACCOUNT_INFO = 111;
 	public static final int MSG_RETURN_TRELLO_USERNAME = 112;
 	public static final int MSG_SHUTDOWN_CLIPBOARD_MONITOR = 113;
+	
+	public static final int REQ_DATA_CHANGED = 200;
 
 	final Messenger mMessenger = new Messenger(new IncomingHandler(this));
 
@@ -253,22 +246,22 @@ public class VelloService extends Service implements RequestListener, Connection
 		mWM = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
 		mCM = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 
-		boolean monitor = mPrefs.getBoolean(SettingsActivity.KEY_PREF_DICT_CLIPBOARD_MONITOR, false);
-		if (monitor) {
-			if (mTask == null) {
-				mTask = new MonitorTask();
-			}
-
-			if (!mTask.isRunning()) {
-				Intent startMonitor = new Intent(getApplicationContext(), VelloService.class);
-				startMonitor.putExtra("monitor", true);
-				ComponentName service = getApplicationContext().startService(startMonitor);
-	            if (service == null) {
-	                Log.e(TAG, "Can't start service " + VelloService.class.getName());
-	            }
-			}
-		}
-//		mCM.addPrimaryClipChangedListener(new ClipboardListener());
+//		boolean monitor = mPrefs.getBoolean(SettingsActivity.KEY_PREF_DICT_CLIPBOARD_MONITOR, false);
+//		if (monitor) {
+//			if (mTask == null) {
+//				mTask = new MonitorTask();
+//			}
+//
+//			if (!mTask.isRunning()) {
+//				Intent startMonitor = new Intent(getApplicationContext(), VelloService.class);
+//				startMonitor.putExtra("monitor", true);
+//				ComponentName service = getApplicationContext().startService(startMonitor);
+//	            if (service == null) {
+//	                Log.e(TAG, "Can't start service " + VelloService.class.getName());
+//	            }
+//			}
+//		}
+//		mCM.addPrimaryClipChangedListener(this);
 		// https://code.google.com/p/android/issues/detail?id=58043
 		// TODO add a option in setting
 		
@@ -279,6 +272,7 @@ public class VelloService extends Service implements RequestListener, Connection
 	public void onDestroy() {
 		// Cancel the persistent notification.
 		mNM.cancel(R.string.notif_clip_monitor_service);
+//		mCM.removePrimaryClipChangedListener(this);
 		if (mTask != null && mTask.isRunning()) {
 			mTask.cancel();
 		}
@@ -505,31 +499,43 @@ public class VelloService extends Service implements RequestListener, Connection
 	}
 
 	private void showFloatDictCard(String str) {
-		WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-		params.type = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
-		params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-		params.width = WindowManager.LayoutParams.WRAP_CONTENT;
-		params.height = WindowManager.LayoutParams.WRAP_CONTENT;
-		params.format = PixelFormat.RGBA_8888;
-		params.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-		Card card = new Card(getApplicationContext());
-		card.setShadow(false);
-		card.setSwipeable(false);
-		CardHeader header = new CardHeader(getApplicationContext());
-		header.setTitle(str);
-		card.addCardHeader(header);
-		CardView cardview = new CardView(getApplicationContext());
-		cardview.setCard(card);
-		cardview.setOnDragListener(new View.OnDragListener() {
-
-			@Override
-			public boolean onDrag(View arg0, DragEvent arg1) {
-				// TODO Auto-generated method stub
-				Log.d(TAG, "onDrag");
-				return false;
-			}
-		});
-		mWM.addView(cardview, params);
+//		WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+//		params.type = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+//		params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+//		params.width = WindowManager.LayoutParams.WRAP_CONTENT;
+//		params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+//		params.format = PixelFormat.RGBA_8888;
+//		params.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+//		Card card = new Card(getApplicationContext());
+//		card.setShadow(false);
+//		card.setSwipeable(true);
+//		card.setOnSwipeListener(new Card.OnSwipeListener() {
+//			
+//			@Override
+//			public void onSwipe(Card arg0) {
+//				// TODO Auto-generated method stub
+//				Log.d(TAG, "onSwipe");
+//			}
+//		});
+//		card.setTouchable(true);
+//		card.setOnTouchListener(new View.OnTouchListener() {
+//			
+//			@Override
+//			public boolean onTouch(View v, MotionEvent event) {
+//				Log.d(TAG, "onTouch");
+//				return true;
+//			}
+//		});
+//		CardHeader header = new CardHeader(getApplicationContext());
+//		header.setTitle(str);
+//		card.addCardHeader(header);
+//		CardView cardview = new CardView(getApplicationContext());
+//		cardview.setCard(card);
+//		mWM.addView(cardview, params);
+		StandOutWindow.show(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID);
+		Bundle data = new Bundle();
+		data.putString("changedText", str);
+		StandOutWindow.sendData(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID, REQ_DATA_CHANGED, data, StandOutWindow.class, StandOutWindow.DEFAULT_ID);
 	}
 	
 	@SuppressLint("SimpleDateFormat")
@@ -1223,7 +1229,7 @@ public class VelloService extends Service implements RequestListener, Connection
 				ClipData.Item item = data.getItemAt(0);
 				String newClip = item.getText().toString();
 				if (mOldClip == null) {
-					mOldClip = newClip;
+					mOldClip = "";
 					if (VelloConfig.DEBUG_SWITCH) {
 						Log.d(TAG, "monitor service firstly started, ignore old text in clip");
 					}
@@ -1243,16 +1249,18 @@ public class VelloService extends Service implements RequestListener, Connection
 			}
 		}
     }
-	
-	class ClipboardListener implements ClipboardManager.OnPrimaryClipChangedListener {
-		public void onPrimaryClipChanged() {
-			// do something useful here with the clipboard
-			// use getText() method
-			ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-			String pasteData = "";
-			ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
-			pasteData = item.getText().toString();
-			Toast.makeText(getApplicationContext(), "clipboard changed --- pasteData=" + pasteData, Toast.LENGTH_SHORT).show();
-		}
+
+	@Override
+	public void onPrimaryClipChanged() {
+		// TODO Auto-generated method stub
+		// do something useful here with the clipboard
+		// use getText() method
+		ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+		String pasteData = "";
+		ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
+		pasteData = item.getText().toString();
+		Toast.makeText(getApplicationContext(),
+				"clipboard changed --- pasteData=" + pasteData,
+				Toast.LENGTH_SHORT).show();
 	}
 }

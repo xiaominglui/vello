@@ -2,6 +2,8 @@ package com.mili.xiaominglui.app.vello.ui;
 
 import java.lang.ref.WeakReference;
 
+import wei.mark.standout.StandOutWindow;
+
 import android.accounts.Account;
 import android.content.ComponentName;
 import android.content.ContentResolver;
