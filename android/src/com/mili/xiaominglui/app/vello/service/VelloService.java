@@ -177,8 +177,10 @@ public class VelloService extends Service implements RequestListener, Connection
 					break;
 				case MSG_SHOW_FLOAT_WINDOW:
 					String fakedClipText = (String) msg.obj;
+					if (!service.mLastFakeClipText.equals("")) {
+						service.showFloatDictCard(fakedClipText.trim());
+					}
 					service.mLastFakeClipText = fakedClipText;
-					service.showFloatDictCard(fakedClipText.trim());
 					break;
 				default:
 					super.handleMessage(msg);
