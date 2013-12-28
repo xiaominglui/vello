@@ -1,8 +1,5 @@
 package com.mili.xiaominglui.app.vello.service;
 
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardHeader;
-
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,8 +53,8 @@ import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestManager;
 import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment.ConnectionErrorDialogListener;
-import com.mili.xiaominglui.app.vello.ui.MainActivity;
 import com.mili.xiaominglui.app.vello.ui.FloatDictCardWindow;
+import com.mili.xiaominglui.app.vello.ui.MainActivity;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class VelloService extends Service implements RequestListener, ConnectionErrorDialogListener, OnPrimaryClipChangedListener {
@@ -67,6 +64,7 @@ public class VelloService extends Service implements RequestListener, Connection
 	private ClipboardManager mCM;
 	private WindowManager mWM;
 	private MonitorTask mTask = null;
+	private String mLastFakeClipText = "";
 	private SharedPreferences mPrefs;
 	
 	/**
@@ -95,6 +93,7 @@ public class VelloService extends Service implements RequestListener, Connection
 	public static final int MSG_VALID_TRELLO_CONNECTION = 6;
 	public static final int MSG_INVALID_TRELLO_CONNECTION = 7;
 	public static final int MSG_SHOW_FLOAT_WINDOW = 8;
+	public static final int MSG_UPDATE_FAKED_CLIP_TEXT = 9;
 	
 	public static final int MSG_STATUS_WEBHOOK_ACTIVED = 15;
 	public static final int MSG_STATUS_WEBHOOK_DEACTIVED = 16;
@@ -177,8 +176,9 @@ public class VelloService extends Service implements RequestListener, Connection
 					service.shutdownClipboardMonitor();
 					break;
 				case MSG_SHOW_FLOAT_WINDOW:
-					String str = (String) msg.obj;
-					service.showFloatDictCard(str);
+					String fakedClipText = (String) msg.obj;
+					service.mLastFakeClipText = fakedClipText;
+					service.showFloatDictCard(fakedClipText.trim());
 					break;
 				default:
 					super.handleMessage(msg);
@@ -1212,7 +1212,13 @@ public class VelloService extends Service implements RequestListener, Connection
         public void run() {
             mKeepRunning = true;
             while (true) {
-                doTask();
+				if (mCM.hasText()) {
+					String clipText = mCM.getText().toString();
+					if (!clipText.equals(mLastFakeClipText)) {
+						FakingTask();
+					}
+				}
+
                 try {
                     Thread.sleep(mPrefs.getInt(KEY_MONITOR_INTERVAL, DEF_MONITOR_INTERVAL));
                 } catch (InterruptedException ignored) {
@@ -1223,28 +1229,18 @@ public class VelloService extends Service implements RequestListener, Connection
             }
         }
         
-		private void doTask() {
+		private void FakingTask() {
 			ClipData data = mCM.getPrimaryClip();
 			if (data != null) {
 				ClipData.Item item = data.getItemAt(0);
-				String newClip = item.getText().toString();
-				if (mOldClip == null) {
-					mOldClip = "";
-					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "monitor service firstly started, ignore old text in clip");
-					}
-				} else {
-					if (!newClip.equals(mOldClip)) {
-						Log.i(TAG, "detect new text clip: " + newClip.toString());
-						mOldClip = newClip;
-						Log.i(TAG, "new text clip inserted: " + newClip.toString());
-						Message msg = Message.obtain(null, MSG_SHOW_FLOAT_WINDOW, newClip);
-						try {
-							mMessenger.send(msg);
-						} catch (RemoteException e) {
-							e.printStackTrace();
-						}
-					}
+				String queryClipText = item.getText().toString();
+				String fakedClipText = queryClipText + " ";
+				mCM.setText(fakedClipText);
+				Message msg = Message.obtain(null, MSG_SHOW_FLOAT_WINDOW, fakedClipText);
+				try {
+					mMessenger.send(msg);
+				} catch (RemoteException e) {
+					e.printStackTrace();
 				}
 			}
 		}
