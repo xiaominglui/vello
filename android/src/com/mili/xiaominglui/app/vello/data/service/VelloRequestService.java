@@ -5,7 +5,7 @@ import com.foxykeep.datadroid.service.RequestService;
 import com.mili.xiaominglui.app.vello.data.operation.CheckTrelloConnectionOperation;
 import com.mili.xiaominglui.app.vello.data.operation.DeleteRemoteTrelloCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ReadTrelloAccountInfoOperation;
-import com.mili.xiaominglui.app.vello.data.operation.SetWebHookActiveOperation;
+import com.mili.xiaominglui.app.vello.data.operation.deleteWebHookOperation;
 import com.mili.xiaominglui.app.vello.data.operation.AddWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ArchiveWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.CheckVocabularyBoardOperation;
@@ -67,8 +67,8 @@ public class VelloRequestService extends RequestService {
             	return new LookUpInDictionaryOperation();
             case VelloRequestFactory.REQUEST_TYPE_CREATE_WEBHOOK:
             	return new CreateWebHookOperation();
-            case VelloRequestFactory.REQUEST_TYPE_SET_WEBHOOK_ACTIVE:
-            	return new SetWebHookActiveOperation();
+            case VelloRequestFactory.REQUEST_TYPE_DELETE_WEBHOOK:
+            	return new deleteWebHookOperation();
             case VelloRequestFactory.REQUEST_TYPE_CHECK_TRELLO_CONNECTION:
             	return new CheckTrelloConnectionOperation();
             case VelloRequestFactory.REQUEST_TYPE_READ_TRELLO_ACCOUNT_INFO:

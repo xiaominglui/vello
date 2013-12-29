@@ -17,7 +17,7 @@ import com.foxykeep.datadroid.service.RequestService.Operation;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.config.WSConfig;
 import com.mili.xiaominglui.app.vello.data.factory.CheckTrelloConnectionResponseFactory;
-import com.mili.xiaominglui.app.vello.data.factory.DeleteRemoteTrelloCardResponseFactory;
+import com.mili.xiaominglui.app.vello.data.factory.DeleteRemoteModelResponseFactory;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
@@ -45,7 +45,7 @@ public class DeleteRemoteTrelloCardOperation implements Operation {
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "result.body = " + result.body);
 		}
-		return DeleteRemoteTrelloCardResponseFactory.parseResult(result.body);
+		return DeleteRemoteModelResponseFactory.parseResult(result.body);
 	}
 
 }

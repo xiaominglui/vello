@@ -5,7 +5,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
-import com.mili.xiaominglui.app.vello.data.model.AuthTokenRevokedOrCardDeletedResponse;
+import com.mili.xiaominglui.app.vello.data.model.RemoteModelDeletedResponse;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 
 public class RevokeAuthTokenResponseJsonFactory {
@@ -13,7 +13,7 @@ public class RevokeAuthTokenResponseJsonFactory {
 
 	public static Bundle parseResult(String wsResponse) {
 		Gson gson = new Gson();
-		AuthTokenRevokedOrCardDeletedResponse revoked = gson.fromJson(wsResponse, AuthTokenRevokedOrCardDeletedResponse.class);
+		RemoteModelDeletedResponse revoked = gson.fromJson(wsResponse, RemoteModelDeletedResponse.class);
 		Bundle bundle = new Bundle();
 		if (revoked != null && revoked._value == null) {
 			// revoked

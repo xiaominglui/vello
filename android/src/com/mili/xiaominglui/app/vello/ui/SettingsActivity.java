@@ -193,9 +193,6 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 				if (idWebhook.equals("")) {
 					// create and active it
 					sendMessageToService(VelloService.MSG_CREATE_WEBHOOK, null);
-				} else {
-					// activie it
-					sendMessageToService(VelloService.MSG_SET_WEBHOOK_ACTIVE_STATUS, true);
 				}
 			} else {
 				// choose schedule sync
@@ -204,8 +201,8 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 				int pollFrequency = Integer.valueOf(mNewSyncValue) * 60 * 60;
 				ContentResolver.addPeriodicSync(account, VelloProvider.AUTHORITY, extras, pollFrequency);
 				// deactive PUSH
-				if (AccountUtils.getVocabularyBoardWebHookStatus(getApplicationContext())) {
-					sendMessageToService(VelloService.MSG_SET_WEBHOOK_ACTIVE_STATUS, false);
+				if (!AccountUtils.getVocabularyBoardWebHookId(getApplicationContext()).equals("")) {
+					sendMessageToService(VelloService.MSG_DELETE_WEBHOOK, null);
 				}
 			}
 		} else if (key.equals(KEY_PREF_DICT_CLIPBOARD_MONITOR)) {

@@ -114,7 +114,7 @@ public class VelloService extends Service implements RequestListener, Connection
 	public static final int MSG_SYNC_LOCAL_CACHE = 106;
 	public static final int MSG_TRIGGER_QUERY_WORD = 107;
 	public static final int MSG_CREATE_WEBHOOK = 108;
-	public static final int MSG_SET_WEBHOOK_ACTIVE_STATUS = 109;
+	public static final int MSG_DELETE_WEBHOOK = 109;
 	public static final int MSG_CHECK_TRELLO_CONNECTION = 110;
 	public static final int MSG_READ_TRELLO_ACCOUNT_INFO = 111;
 	public static final int MSG_RETURN_TRELLO_USERNAME = 112;
@@ -158,9 +158,8 @@ public class VelloService extends Service implements RequestListener, Connection
 				    String query = (String) msg.obj;
 				    service.queryInRemoteStorage(query);
 				    break;
-				case MSG_SET_WEBHOOK_ACTIVE_STATUS:
-					boolean isActive = (Boolean) msg.obj;
-					service.setWebHookActive(isActive);
+				case MSG_DELETE_WEBHOOK:
+					service.deleteWebHook();
 					break;
 				case MSG_CREATE_WEBHOOK:
 					service.createWebHook();
@@ -448,11 +447,11 @@ public class VelloService extends Service implements RequestListener, Connection
 		mRequestList.add(createWebHook);
 	}
 	
-	private void setWebHookActive(boolean isActive) {
+	private void deleteWebHook() {
 		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "setWebHookActive start...");
+			Log.d(TAG, "deleteWebHook start...");
 		}
-		Request setWebHookActive = VelloRequestFactory.setWebHookActive(isActive);
+		Request setWebHookActive = VelloRequestFactory.deleteWebHook();
 		mRequestManager.execute(setWebHookActive, this);
 		mRequestList.add(setWebHookActive);
 	}
@@ -980,30 +979,20 @@ public class VelloService extends Service implements RequestListener, Connection
 				}
 				return;
 				
-			case VelloRequestFactory.REQUEST_TYPE_SET_WEBHOOK_ACTIVE:
-				boolean requestActive = request.getBoolean(VelloRequestFactory.PARAM_EXTRA_WEBHOOK_ACTIVE);
-				if (resultData != null) {
-					boolean currentActive = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_WEBHOOK_ACTIVE);
-					
-					if (currentActive == requestActive) {
-						// request success
-						if (VelloConfig.DEBUG_SWITCH) {
-							Log.d(TAG, "setWebHookActive end --- success");
-						}
-						if (currentActive) {
-							// PUSH
-							sendMessageToUI(MSG_STATUS_WEBHOOK_ACTIVED, null);
-						} else {
-							// schedule sync
-							sendMessageToUI(MSG_STATUS_WEBHOOK_DEACTIVED, null);
-						}
+			case VelloRequestFactory.REQUEST_TYPE_DELETE_WEBHOOK:
+				boolean hasWebhookDeleted = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_REMOTE_MODEL_DELETED);
+				if (hasWebhookDeleted) {
+					// request success
+					if (VelloConfig.DEBUG_SWITCH) {
+						Log.d(TAG, "deleteWebHook success");
 					}
+					AccountUtils.setVocabularyBoardWebHookId(getApplicationContext(), "");
 				} else {
 					// request fail, try again
 					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "retry --- setWebHookActive(" + requestActive + ")");
+						Log.d(TAG, "retry --- deleteWebHook");
 					}
-					setWebHookActive(requestActive);
+					deleteWebHook();
 				}
 				return;
 				
@@ -1035,7 +1024,7 @@ public class VelloService extends Service implements RequestListener, Connection
 				return;
 				
 			case VelloRequestFactory.REQUEST_TYPE_DELETE_REMOTE_TRELLO_CARD:
-				boolean deleted = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_REMOTE_TRELLO_CARD_DELETED);
+				boolean deleted = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_REMOTE_MODEL_DELETED);
 				TrelloCard deletingCard = (TrelloCard) request.getParcelable(VelloRequestFactory.PARAM_EXTRA_TRELLO_CARD);
 				int startIdTriggerDelete = request.getInt(VelloRequestFactory.PARAM_EXTRA_SERVICE_START_ID);
 				if (deleted) {
