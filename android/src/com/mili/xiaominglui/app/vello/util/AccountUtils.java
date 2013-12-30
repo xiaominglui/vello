@@ -135,11 +135,6 @@ public class AccountUtils {
     	sp.edit().putString(PREF_VOCABULARY_BOARD_WEB_HOOK_ID, hookId).commit();
     }
     
-    public static void setVocabularyBoardWebHookStatus(final Context context, boolean enable) {
-    	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-    	sp.edit().putBoolean(PREF_VOCABULARY_BOARD_WEB_HOOK_STATUS, enable).commit();
-    }
-    
     public static String getVocabularyBoardId(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getString(PREF_VOCABULARY_BOARD_ID, "");

@@ -95,8 +95,7 @@ public class VelloService extends Service implements RequestListener, Connection
 	public static final int MSG_SHOW_FLOAT_WINDOW = 8;
 	public static final int MSG_UPDATE_FAKED_CLIP_TEXT = 9;
 	
-	public static final int MSG_STATUS_WEBHOOK_ACTIVED = 15;
-	public static final int MSG_STATUS_WEBHOOK_DEACTIVED = 16;
+	public static final int MSG_STATUS_WEBHOOK_DELETED = 16;
 	public static final int MSG_STATUS_WEBHOOK_CREATED = 17;
 	
 	public static final int MSG_STATUS_INIT_ACCOUNT_BEGIN = 50;
@@ -981,12 +980,13 @@ public class VelloService extends Service implements RequestListener, Connection
 				
 			case VelloRequestFactory.REQUEST_TYPE_DELETE_WEBHOOK:
 				boolean hasWebhookDeleted = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_REMOTE_MODEL_DELETED);
+				Log.d("mingo.lv", "hasWebhookDeleted=" + hasWebhookDeleted);
 				if (hasWebhookDeleted) {
 					// request success
 					if (VelloConfig.DEBUG_SWITCH) {
 						Log.d(TAG, "deleteWebHook success");
 					}
-					AccountUtils.setVocabularyBoardWebHookId(getApplicationContext(), "");
+					sendMessageToUI(VelloService.MSG_STATUS_WEBHOOK_DELETED, null);
 				} else {
 					// request fail, try again
 					if (VelloConfig.DEBUG_SWITCH) {

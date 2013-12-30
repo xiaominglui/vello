@@ -157,8 +157,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 			mVelloService = new Messenger(service);
 
 			try {
-				Message msg = Message.obtain(null,
-						VelloService.MSG_REGISTER_CLIENT);
+				Message msg = Message.obtain(null, VelloService.MSG_REGISTER_CLIENT);
 				msg.replyTo = mMessenger;
 				mVelloService.send(msg);
 			} catch (RemoteException e) {

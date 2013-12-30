@@ -51,11 +51,8 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 		public void handleMessage(Message msg) {
 			SettingsActivity theActivity = mActivity.get();
 			switch (msg.what) {
-			case VelloService.MSG_STATUS_WEBHOOK_ACTIVED:
-				theActivity.postActiveWebhook();
-				break;
-			case VelloService.MSG_STATUS_WEBHOOK_DEACTIVED:
-				theActivity.postDeactiveWebhook();
+			case VelloService.MSG_STATUS_WEBHOOK_DELETED:
+				theActivity.postDeleteWebhook();
 				break;
 			case VelloService.MSG_STATUS_WEBHOOK_CREATED:
 				theActivity.postCreateWebhook();
@@ -222,22 +219,6 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	}
 	
 	private void postCreateWebhook() {
-		AccountUtils.setVocabularyBoardWebHookStatus(getApplicationContext(), true);
-		Account account = new Account(AccountUtils.getChosenAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
-		Bundle extras = new Bundle();
-		ContentResolver.removePeriodicSync(account, VelloProvider.AUTHORITY, extras);
-		
-		// save Installation for push
-		PushService.setDefaultPushCallback(getApplicationContext(), MainActivity.class);
-		AVInstallation.getCurrentInstallation().saveInBackground();
-
-		if (isInFront) {
-			mListPreference.setEnabled(true);
-		}
-	}
-	
-	private void postActiveWebhook() {
-		AccountUtils.setVocabularyBoardWebHookStatus(getApplicationContext(), true);
 		Account account = new Account(AccountUtils.getChosenAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
 		Bundle extras = new Bundle();
 		ContentResolver.removePeriodicSync(account, VelloProvider.AUTHORITY, extras);
@@ -251,8 +232,8 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 		}
 	}
 
-	private void postDeactiveWebhook() {
-		AccountUtils.setVocabularyBoardWebHookStatus(getApplicationContext(), false);
+	private void postDeleteWebhook() {
+		AccountUtils.setVocabularyBoardWebHookId(getApplicationContext(), "");
 		if (isInFront) {
 			mListPreference.setEnabled(true);
 		}
