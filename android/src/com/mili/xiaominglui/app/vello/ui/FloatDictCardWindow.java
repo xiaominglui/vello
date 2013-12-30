@@ -12,7 +12,6 @@ import wei.mark.standout.ui.Window;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -50,7 +49,7 @@ public class FloatDictCardWindow extends StandOutWindow {
 
 	@Override
 	public StandOutLayoutParams getParams(int id, Window window) {
-		return new StandOutLayoutParams(id, 250, 300, StandOutLayoutParams.CENTER, StandOutLayoutParams.TOP);
+		return new StandOutLayoutParams(id, StandOutLayoutParams.WRAP_CONTENT, StandOutLayoutParams.WRAP_CONTENT, StandOutLayoutParams.CENTER, StandOutLayoutParams.CENTER);
 	}
 	
 	@Override
@@ -62,12 +61,12 @@ public class FloatDictCardWindow extends StandOutWindow {
 	
 	@Override
 	public Animation getShowAnimation(int id) {
-		return AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left);
+		return AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
 	}
 
 	@Override
 	public Animation getCloseAnimation(int id) {
-		return AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right);
+		return AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
 	}
 
 	@Override

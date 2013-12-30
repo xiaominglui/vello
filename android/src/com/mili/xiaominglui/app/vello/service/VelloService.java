@@ -95,7 +95,6 @@ public class VelloService extends Service implements RequestListener, Connection
 	public static final int MSG_VALID_TRELLO_CONNECTION = 6;
 	public static final int MSG_INVALID_TRELLO_CONNECTION = 7;
 	public static final int MSG_SHOW_FLOAT_WINDOW = 8;
-	public static final int MSG_UPDATE_FAKED_CLIP_TEXT = 9;
 	
 	public static final int MSG_STATUS_WEBHOOK_DELETED = 16;
 	public static final int MSG_STATUS_WEBHOOK_CREATED = 17;
@@ -156,8 +155,11 @@ public class VelloService extends Service implements RequestListener, Connection
 					service.getDueReviewCardList(startId);
 					break;
 				case MSG_TRIGGER_QUERY_WORD:
-				    String query = (String) msg.obj;
-				    service.queryInRemoteStorage(query);
+					String fakedClipText = (String) msg.obj;
+					if (!service.mLastFakeClipText.equals("")) {
+						service.queryInRemoteStorage(fakedClipText.trim().toLowerCase());
+					}
+					service.mLastFakeClipText = fakedClipText;
 				    break;
 				case MSG_DELETE_WEBHOOK:
 					service.deleteWebHook();
@@ -176,11 +178,6 @@ public class VelloService extends Service implements RequestListener, Connection
 					service.shutdownClipboardMonitor();
 					break;
 				case MSG_SHOW_FLOAT_WINDOW:
-					String fakedClipText = (String) msg.obj;
-					if (!service.mLastFakeClipText.equals("")) {
-						service.showFloatDictCard(fakedClipText.trim());
-					}
-					service.mLastFakeClipText = fakedClipText;
 					break;
 				default:
 					super.handleMessage(msg);
@@ -376,8 +373,7 @@ public class VelloService extends Service implements RequestListener, Connection
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "checkWordCardStatusRequest start...");
 		}
-		Request queryInRemoteStorage = VelloRequestFactory
-				.queryInRemoteStorageRequest(query);
+		Request queryInRemoteStorage = VelloRequestFactory.queryInRemoteStorageRequest(query);
 		mRequestManager.execute(queryInRemoteStorage, this);
 		mRequestList.add(queryInRemoteStorage);
 	}
@@ -395,8 +391,7 @@ public class VelloService extends Service implements RequestListener, Connection
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "addWordCard start...");
 		}
-		Request addWordCard = VelloRequestFactory.addWordCardRequest(keyword,
-				data);
+		Request addWordCard = VelloRequestFactory.addWordCardRequest(keyword, data);
 		mRequestManager.execute(addWordCard, this);
 		mRequestList.add(addWordCard);
 	}
@@ -405,8 +400,7 @@ public class VelloService extends Service implements RequestListener, Connection
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "initializeWordCard start...");
 		}
-		Request initializeWordCard = VelloRequestFactory
-				.initializeWordCardRequest(idCard);
+		Request initializeWordCard = VelloRequestFactory.initializeWordCardRequest(idCard);
 		mRequestManager.execute(initializeWordCard, this);
 		mRequestList.add(initializeWordCard);
 	}
@@ -481,9 +475,9 @@ public class VelloService extends Service implements RequestListener, Connection
 		}
 	}
 
-	private void showFloatDictCard(String str) {
+	private void showFloatDictCard(TrelloCard card) {
 		Bundle data = new Bundle();
-		data.putString("changedText", str);
+		data.putString("changedText", card.desc);
 		StandOutWindow.show(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID);
 		StandOutWindow.sendData(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID, REQ_DATA_CHANGED, data, StandOutWindow.class, StandOutWindow.DEFAULT_ID);
 		Handler handler = new Handler();
@@ -503,8 +497,7 @@ public class VelloService extends Service implements RequestListener, Connection
 
 			switch (request.getRequestType()) {
 			case VelloRequestFactory.REQUEST_TYPE_REVIEWED_WORDCARD:
-				TrelloCard reviewedWordCard = resultData
-						.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+				TrelloCard reviewedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 				if (reviewedWordCard != null) {
 					// reviewed
 
@@ -518,13 +511,10 @@ public class VelloService extends Service implements RequestListener, Connection
 				return;
 
 			case VelloRequestFactory.REQUEST_TYPE_CHECK_VOCABULARY_BOARD:
-				ArrayList<Board> boardList = resultData
-						.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_BOARD_LIST);
+				ArrayList<Board> boardList = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_BOARD_LIST);
 				for (Board board : boardList) {
-					if (board.name.equals(AccountUtils
-							.getVocabularyBoardName(getApplicationContext()))
-							&& board.desc.equals(AccountUtils
-									.getVocabularyBoardVerification())) {
+					if (board.name.equals(AccountUtils.getVocabularyBoardName(getApplicationContext()))
+							&& board.desc.equals(AccountUtils.getVocabularyBoardVerification())) {
 						// s - 0 find out vocabulary board, check the closed
 						// flag.
 
@@ -668,7 +658,8 @@ public class VelloService extends Service implements RequestListener, Connection
 						if (w.name.equals(keyword)) {
 							// got the right word card
 							// show with user first
-							sendMessageToUI(MSG_SHOW_RESULT_WORDCARD, w);
+//							sendMessageToUI(MSG_SHOW_RESULT_WORDCARD, w);
+							showFloatDictCard(w);
 
 							if (w.closed.equals("true")) {
 								// the existed word card has be closed,
@@ -683,8 +674,7 @@ public class VelloService extends Service implements RequestListener, Connection
 									// initialized, initialize it. this is the
 									// double check
 									if (VelloConfig.DEBUG_SWITCH) {
-										Log.d(TAG,
-												"initialize existed word card.");
+										Log.d(TAG, "initialize existed word card.");
 									}
 									initializeWordCard(w.id);
 								} else {
@@ -692,8 +682,7 @@ public class VelloService extends Service implements RequestListener, Connection
 									// process, do
 									// nothing at present.
 									if (VelloConfig.DEBUG_SWITCH) {
-										Log.d(TAG,
-												"the existed word is in review.");
+										Log.d(TAG, "the existed word is in review.");
 									}
 								}
 							}
@@ -744,6 +733,7 @@ public class VelloService extends Service implements RequestListener, Connection
 					// initialized
 					// should show to user
 					// TODO
+					showFloatDictCard(initializedWordCard);
 				} else {
 					// initialized failed
 					// do nothing at present
@@ -1182,7 +1172,7 @@ public class VelloService extends Service implements RequestListener, Connection
 				String queryClipText = mCM.getText().toString();
 				String fakedClipText = queryClipText + " ";
 				mCM.setText(fakedClipText);
-				Message msg = Message.obtain(null, MSG_SHOW_FLOAT_WINDOW, fakedClipText);
+				Message msg = Message.obtain(null, MSG_TRIGGER_QUERY_WORD, fakedClipText);
 				mMessenger.send(msg);
 			} catch (RemoteException e) {
 				e.printStackTrace();

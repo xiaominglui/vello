@@ -17,15 +17,12 @@ import com.mili.xiaominglui.app.vello.config.WSConfig;
 import com.mili.xiaominglui.app.vello.data.factory.CheckTrelloConnectionResponseFactory;
 
 public class CheckTrelloConnectionOperation implements Operation {
-	private static final String TAG = CheckTrelloConnectionOperation.class
-			.getSimpleName();
+	private static final String TAG = CheckTrelloConnectionOperation.class.getSimpleName();
 
 	@Override
-	public Bundle execute(Context context, Request request)
-			throws ConnectionException, DataException, CustomRequestException {
+	public Bundle execute(Context context, Request request) throws ConnectionException, DataException, CustomRequestException {
 		String urlString = WSConfig.TRELLO_API_URL;
-		NetworkConnection networkConnection = new NetworkConnection(context,
-				urlString);
+		NetworkConnection networkConnection = new NetworkConnection(context, urlString);
 		networkConnection.setMethod(Method.GET);
 		ConnectionResult result = networkConnection.execute();
 		
