@@ -19,6 +19,7 @@ import android.app.Service;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ClipboardManager.OnPrimaryClipChangedListener;
+import android.content.ComponentName;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -55,6 +56,7 @@ import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestManager;
 import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment.ConnectionErrorDialogListener;
 import com.mili.xiaominglui.app.vello.ui.FloatDictCardWindow;
 import com.mili.xiaominglui.app.vello.ui.MainActivity;
+import com.mili.xiaominglui.app.vello.ui.SettingsActivity;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class VelloService extends Service implements RequestListener, ConnectionErrorDialogListener, OnPrimaryClipChangedListener {
@@ -72,7 +74,7 @@ public class VelloService extends Service implements RequestListener, Connection
      * <p>TYPE: int</p>
      */
     public static final String KEY_MONITOR_INTERVAL = "monitor.interval";
-    public static final int DEF_MONITOR_INTERVAL = 3000;
+    public static final int DEF_MONITOR_INTERVAL = 1000;
 
 	HashMap<String, DirtyCard> mDirtyCards = new HashMap<String, DirtyCard>();
 //	ArrayList<TrelloCard> mMergeCards = new ArrayList<TrelloCard>();
@@ -213,7 +215,6 @@ public class VelloService extends Service implements RequestListener, Connection
     			mTask = new MonitorTask();
     		}
     		mTask.start();
-    		showNotification();
     	} else {
     		if (VelloConfig.DEBUG_SWITCH) {
         		Log.d(TAG, "command started---#" + startId);
@@ -245,22 +246,6 @@ public class VelloService extends Service implements RequestListener, Connection
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		mWM = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
 		mCM = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-
-//		boolean monitor = mPrefs.getBoolean(SettingsActivity.KEY_PREF_DICT_CLIPBOARD_MONITOR, false);
-//		if (monitor) {
-//			if (mTask == null) {
-//				mTask = new MonitorTask();
-//			}
-//
-//			if (!mTask.isRunning()) {
-//				Intent startMonitor = new Intent(getApplicationContext(), VelloService.class);
-//				startMonitor.putExtra("monitor", true);
-//				ComponentName service = getApplicationContext().startService(startMonitor);
-//	            if (service == null) {
-//	                Log.e(TAG, "Can't start service " + VelloService.class.getName());
-//	            }
-//			}
-//		}
 //		mCM.addPrimaryClipChangedListener(this);
 		// https://code.google.com/p/android/issues/detail?id=58043
 		// TODO add a option in setting
@@ -271,7 +256,6 @@ public class VelloService extends Service implements RequestListener, Connection
 	@Override
 	public void onDestroy() {
 		// Cancel the persistent notification.
-		mNM.cancel(R.string.notif_clip_monitor_service);
 //		mCM.removePrimaryClipChangedListener(this);
 		if (mTask != null && mTask.isRunning()) {
 			mTask.cancel();
@@ -493,49 +477,22 @@ public class VelloService extends Service implements RequestListener, Connection
 	
 	private void shutdownClipboardMonitor() {
 		if (mTask != null && mTask.isRunning()) {
-			mNM.cancel(R.string.notif_clip_monitor_service);
 			mTask.cancel();
 		}
 	}
 
 	private void showFloatDictCard(String str) {
-//		WindowManager.LayoutParams params = new WindowManager.LayoutParams();
-//		params.type = WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
-//		params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-//		params.width = WindowManager.LayoutParams.WRAP_CONTENT;
-//		params.height = WindowManager.LayoutParams.WRAP_CONTENT;
-//		params.format = PixelFormat.RGBA_8888;
-//		params.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-//		Card card = new Card(getApplicationContext());
-//		card.setShadow(false);
-//		card.setSwipeable(true);
-//		card.setOnSwipeListener(new Card.OnSwipeListener() {
-//			
-//			@Override
-//			public void onSwipe(Card arg0) {
-//				// TODO Auto-generated method stub
-//				Log.d(TAG, "onSwipe");
-//			}
-//		});
-//		card.setTouchable(true);
-//		card.setOnTouchListener(new View.OnTouchListener() {
-//			
-//			@Override
-//			public boolean onTouch(View v, MotionEvent event) {
-//				Log.d(TAG, "onTouch");
-//				return true;
-//			}
-//		});
-//		CardHeader header = new CardHeader(getApplicationContext());
-//		header.setTitle(str);
-//		card.addCardHeader(header);
-//		CardView cardview = new CardView(getApplicationContext());
-//		cardview.setCard(card);
-//		mWM.addView(cardview, params);
-		StandOutWindow.show(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID);
 		Bundle data = new Bundle();
 		data.putString("changedText", str);
+		StandOutWindow.show(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID);
 		StandOutWindow.sendData(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID, REQ_DATA_CHANGED, data, StandOutWindow.class, StandOutWindow.DEFAULT_ID);
+		Handler handler = new Handler();
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				StandOutWindow.closeAll(getApplicationContext(), FloatDictCardWindow.class);
+			}
+		}, VelloConfig.FLOAT_DICT_CARD_DISMISS_TIME);
 	}
 	
 	@SuppressLint("SimpleDateFormat")
@@ -980,7 +937,6 @@ public class VelloService extends Service implements RequestListener, Connection
 				
 			case VelloRequestFactory.REQUEST_TYPE_DELETE_WEBHOOK:
 				boolean hasWebhookDeleted = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_REMOTE_MODEL_DELETED);
-				Log.d("mingo.lv", "hasWebhookDeleted=" + hasWebhookDeleted);
 				if (hasWebhookDeleted) {
 					// request success
 					if (VelloConfig.DEBUG_SWITCH) {
@@ -1183,24 +1139,25 @@ public class VelloService extends Service implements RequestListener, Connection
     private class MonitorTask extends Thread {
 
         private volatile boolean mKeepRunning = false;
-        private String mOldClip = null;
         
         public MonitorTask() {
             super("ClipboardMonitor");
         }
-        
+
         public boolean isRunning() {
         	return mKeepRunning;
         }
 
         /** Cancel task */
         public void cancel() {
+			mNM.cancel(R.string.notif_clip_monitor_service);
             mKeepRunning = false;
             interrupt();
         }
-        
+
         @Override
         public void run() {
+			showNotification();
             mKeepRunning = true;
             while (true) {
 				if (mCM.hasText()) {
@@ -1221,33 +1178,24 @@ public class VelloService extends Service implements RequestListener, Connection
         }
         
 		private void FakingTask() {
-			ClipData data = mCM.getPrimaryClip();
-			if (data != null) {
-				ClipData.Item item = data.getItemAt(0);
-				String queryClipText = item.getText().toString();
+			try {
+				String queryClipText = mCM.getText().toString();
 				String fakedClipText = queryClipText + " ";
 				mCM.setText(fakedClipText);
 				Message msg = Message.obtain(null, MSG_SHOW_FLOAT_WINDOW, fakedClipText);
-				try {
-					mMessenger.send(msg);
-				} catch (RemoteException e) {
-					e.printStackTrace();
-				}
+				mMessenger.send(msg);
+			} catch (RemoteException e) {
+				e.printStackTrace();
 			}
 		}
     }
 
 	@Override
 	public void onPrimaryClipChanged() {
-		// TODO Auto-generated method stub
-		// do something useful here with the clipboard
-		// use getText() method
 		ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
 		String pasteData = "";
 		ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
 		pasteData = item.getText().toString();
-		Toast.makeText(getApplicationContext(),
-				"clipboard changed --- pasteData=" + pasteData,
-				Toast.LENGTH_SHORT).show();
+		Toast.makeText(getApplicationContext(), "clipboard changed --- pasteData=" + pasteData, Toast.LENGTH_SHORT).show();
 	}
 }

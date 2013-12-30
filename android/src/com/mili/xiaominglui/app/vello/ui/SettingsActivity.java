@@ -58,10 +58,14 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 				theActivity.postCreateWebhook();
 				break;
 			case VelloService.MSG_VALID_TRELLO_CONNECTION:
-				theActivity.withValidTrelloConnection();
+				if (theActivity.isInFront) {
+					theActivity.withValidTrelloConnection();
+				}
 				break;
 			case VelloService.MSG_INVALID_TRELLO_CONNECTION:
-				theActivity.withInvalidTrelloConnection();
+				if (theActivity.isInFront) {
+					theActivity.withInvalidTrelloConnection();
+				}
 				break;
 			}
 		}

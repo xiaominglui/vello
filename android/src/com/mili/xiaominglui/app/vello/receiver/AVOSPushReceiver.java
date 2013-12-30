@@ -34,20 +34,20 @@ public class AVOSPushReceiver extends BroadcastReceiver {
 			Log.d(TAG, "onReceive --- " + action);
 		}
 		
-		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-		int syncFreqValue = Integer.valueOf(settings.getString(SettingsActivity.KEY_PREF_SYNC_FREQ, "24"));
-		if (syncFreqValue == 0) {
-			if (action.equals("android.intent.action.BOOT_COMPLETED")) {
-				boolean monitor = settings.getBoolean(SettingsActivity.KEY_PREF_DICT_CLIPBOARD_MONITOR, false);
-				if (monitor) {
-					Intent startMonitor = new Intent(context, VelloService.class);
-					startMonitor.putExtra("monitor", true);
-					ComponentName service = context.startService(startMonitor);
-		            if (service == null) {
-		                Log.e(TAG, "Can't start service " + VelloService.class.getName());
-		            }
-				}
+		if (action.equals("android.intent.action.BOOT_COMPLETED")) {
+			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+			int syncFreqValue = Integer.valueOf(settings.getString(SettingsActivity.KEY_PREF_SYNC_FREQ, "24"));
+			boolean monitor = settings.getBoolean(SettingsActivity.KEY_PREF_DICT_CLIPBOARD_MONITOR, false);
+			if (monitor) {
+				Intent startMonitor = new Intent(context, VelloService.class);
+				startMonitor.putExtra("monitor", true);
+				ComponentName service = context.startService(startMonitor);
+	            if (service == null) {
+	                Log.e(TAG, "Can't start service " + VelloService.class.getName());
+	            }
+			}
 
+			if (syncFreqValue == 0) {
 				// save Installation for push
 				PushService.setDefaultPushCallback(context, MainActivity.class);
 				AVInstallation.getCurrentInstallation().saveInBackground();

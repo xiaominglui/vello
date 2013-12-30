@@ -12,6 +12,10 @@ import wei.mark.standout.ui.Window;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -20,10 +24,11 @@ import com.mili.xiaominglui.app.vello.service.VelloService;
 
 public class FloatDictCardWindow extends StandOutWindow {
 	private static final String TAG = FloatDictCardWindow.class.getSimpleName();
-	
+
+	private Card mCard;
+
 	@Override
 	public String getAppName() {
-		// TODO Auto-generated method stub
 		return "VAA FloatDictCard";
 	}
 
@@ -35,7 +40,12 @@ public class FloatDictCardWindow extends StandOutWindow {
 	@Override
 	public void createAndAttachView(int id, FrameLayout frame) {
 		LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-		inflater.inflate(R.layout.float_dict_card, frame, true);
+		View rootView = inflater.inflate(R.layout.float_dict_card, frame, true);
+		mCard = new Card(getApplicationContext());
+		CardHeader header = new CardHeader(getApplicationContext());
+		mCard.addCardHeader(header);
+		CardView cv = (CardView) rootView.findViewById(R.id.float_dict_card);
+		cv.setCard(mCard);
 	}
 
 	@Override
@@ -51,28 +61,30 @@ public class FloatDictCardWindow extends StandOutWindow {
 	}
 	
 	@Override
-	public void onReceiveData(int id, int requestCode, Bundle data,
-			Class<? extends StandOutWindow> fromCls, int fromId) {
+	public Animation getShowAnimation(int id) {
+		return AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left);
+	}
+
+	@Override
+	public Animation getCloseAnimation(int id) {
+		return AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right);
+	}
+
+	@Override
+	public void onReceiveData(int id, int requestCode, Bundle data, Class<? extends StandOutWindow> fromCls, int fromId) {
 		switch (requestCode) {
 		case VelloService.REQ_DATA_CHANGED:
 			Window window = getWindow(id);
 			if (window == null) {
-				String errorText = String.format(Locale.US,
-						"%s received data but Window id: %d is not open.",
-						getAppName(), id);
+				String errorText = String.format(Locale.US, "%s received data but Window id: %d is not open.", getAppName(), id);
 				Toast.makeText(this, errorText, Toast.LENGTH_SHORT).show();
 				return;
 			}
 			String changedText = data.getString("changedText");
-			//Create a Card
-		    Card card = new Card(getApplicationContext());
-
-		    //Create a CardHeader
-		    CardHeader header = new CardHeader(getApplicationContext());
-			header.setTitle(changedText);
-			card.addCardHeader(header);
+			mCard.getCardHeader().setTitle(changedText);
 			CardView cv = (CardView) window.findViewById(R.id.float_dict_card);
-			cv.setCard(card);
+			cv.refreshCard(mCard);
+			cv.setVisibility(View.VISIBLE);
 			break;
 		default:
 			Log.d(TAG, "Unexpected data received.");
