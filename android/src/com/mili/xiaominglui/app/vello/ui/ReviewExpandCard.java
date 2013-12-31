@@ -28,12 +28,9 @@ public class ReviewExpandCard extends CardExpand {
 		if (view == null)
 			return;
 		IcibaWord word = MiliDictionaryJsonParser.parse(mData);
-		;
 
-		LinearLayout linearLayoutPhoneticArea = (LinearLayout) view
-				.findViewById(R.id.phonetics_area);
-		LinearLayout linearLayoutDefinitionArea = (LinearLayout) view
-				.findViewById(R.id.definition_area);
+		LinearLayout linearLayoutPhoneticArea = (LinearLayout) view.findViewById(R.id.phonetics_area);
+		LinearLayout linearLayoutDefinitionArea = (LinearLayout) view.findViewById(R.id.definition_area);
 
 		linearLayoutPhoneticArea.removeAllViews();
 		linearLayoutDefinitionArea.removeAllViews();
@@ -62,14 +59,10 @@ public class ReviewExpandCard extends CardExpand {
 		}
 
 		for (Definition definition : word.definition) {
-			View definitionView = LayoutInflater.from(mContext).inflate(
-					R.layout.definition_item, null);
-			LinearLayout definiitionGroup = (LinearLayout) definitionView
-					.findViewById(R.id.definition_group);
-			((TextView) definitionView.findViewById(R.id.pos))
-					.setText(definition.pos);
-			((TextView) definitionView.findViewById(R.id.definiens))
-					.setText(definition.definiens);
+			View definitionView = LayoutInflater.from(mContext).inflate(R.layout.definition_item, null);
+			LinearLayout definiitionGroup = (LinearLayout) definitionView.findViewById(R.id.definition_group);
+			((TextView) definitionView.findViewById(R.id.pos)).setText(definition.pos);
+			((TextView) definitionView.findViewById(R.id.definiens)).setText(definition.definiens);
 			linearLayoutDefinitionArea.addView(definiitionGroup);
 		}
 	}

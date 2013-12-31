@@ -15,15 +15,13 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class QueryInRemoteStorageResponseJsonFactory {
-	private static final String TAG = QueryInRemoteStorageResponseJsonFactory.class
-			.getSimpleName();
+	private static final String TAG = QueryInRemoteStorageResponseJsonFactory.class.getSimpleName();
 
 	public static Bundle parseResult(String wsResponse) throws DataException {
 		ArrayList<TrelloCard> wordCardList = new ArrayList<TrelloCard>();
 		try {
 			JSONObject jsonSearchResult = new JSONObject(wsResponse);
-			JSONArray jsonCardArray = jsonSearchResult
-					.getJSONArray(JSONTag.SEARCH_ELEM_CARDS);
+			JSONArray jsonCardArray = jsonSearchResult.getJSONArray(JSONTag.SEARCH_ELEM_CARDS);
 			int size = jsonCardArray.length();
 			for (int i = 0; i < size; i++) {
 				JSONObject jsonCard = jsonCardArray.getJSONObject(i);
@@ -43,8 +41,7 @@ public class QueryInRemoteStorageResponseJsonFactory {
 		}
 
 		Bundle bundle = new Bundle();
-		bundle.putParcelableArrayList(
-				VelloRequestFactory.BUNDLE_EXTRA_TRELLO_CARD_LIST, wordCardList);
+		bundle.putParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_CARD_LIST, wordCardList);
 		return bundle;
 	}
 

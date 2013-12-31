@@ -692,6 +692,12 @@ public class VelloService extends Service implements RequestListener, Connection
 							return;
 						}
 					}
+					// not exist in remote storage
+					if (VelloConfig.DEBUG_SWITCH) {
+						Log.d(TAG, "not exist in remote storage");
+					}
+					// query in dictionary service
+					lookUpInDictionary(keyword);
 				}
 				return;
 

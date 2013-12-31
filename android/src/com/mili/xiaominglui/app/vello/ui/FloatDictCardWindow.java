@@ -1,7 +1,5 @@
 package com.mili.xiaominglui.app.vello.ui;
 
-import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.view.CardView;
 
 import java.util.Locale;
@@ -16,9 +14,14 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mili.xiaominglui.app.vello.R;
+import com.mili.xiaominglui.app.vello.data.factory.MiliDictionaryJsonParser;
+import com.mili.xiaominglui.app.vello.data.model.Definition;
+import com.mili.xiaominglui.app.vello.data.model.IcibaWord;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 
@@ -42,8 +45,6 @@ public class FloatDictCardWindow extends StandOutWindow {
 		LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 		View rootView = inflater.inflate(R.layout.float_dict_card, frame, true);
 		mCard = new FloatDictCard(getApplicationContext());
-		CardHeader header = new CardHeader(getApplicationContext());
-		mCard.addCardHeader(header);
 		CardView cv = (CardView) rootView.findViewById(R.id.float_dict_card);
 		cv.setCard(mCard);
 	}
@@ -82,6 +83,15 @@ public class FloatDictCardWindow extends StandOutWindow {
 			}
 			TrelloCard card = data.getParcelable("changedData");
 			mCard.getCardHeader().setTitle(card.name);
+			IcibaWord word = MiliDictionaryJsonParser.parse(card.desc);
+			StringBuilder meaning = new StringBuilder();
+			for (Definition definition : word.definition) {
+				meaning.append(definition.pos);
+				meaning.append(" ");
+				meaning.append(definition.definiens);
+				meaning.append(";");
+			}
+			((FloatDictCardHeader) mCard.getCardHeader()).setMeanning(meaning.toString());
 			CardView cv = (CardView) window.findViewById(R.id.float_dict_card);
 			cv.refreshCard(mCard);
 			cv.setVisibility(View.VISIBLE);

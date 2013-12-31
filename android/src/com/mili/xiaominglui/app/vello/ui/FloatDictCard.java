@@ -1,7 +1,6 @@
 package com.mili.xiaominglui.app.vello.ui;
 
 import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardHeader;
 import android.content.Context;
 
 public class FloatDictCard extends Card {
@@ -9,10 +8,11 @@ public class FloatDictCard extends Card {
 	
 	public FloatDictCard(Context context) {
 		super(context);
+		init();
 	}
 	
 	public void init() {
-		CardHeader header = new CardHeader(mContext);
+		FloatDictCardHeader header = new FloatDictCardHeader(mContext);
 		header.setButtonExpandVisible(false);
 		addCardHeader(header);
 
@@ -20,5 +20,4 @@ public class FloatDictCard extends Card {
 		setLongClickable(false);
 		setSwipeable(false);
 	}
-
 }
