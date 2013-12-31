@@ -155,8 +155,10 @@ public class VelloService extends Service implements RequestListener, Connection
 				case MSG_TRIGGER_QUERY_WORD:
 					String fakedClipText = (String) msg.obj;
 					if (!service.mLastFakeClipText.equals("")) {
-//						service.queryInRemoteStorage(fakedClipText.trim().toLowerCase());
-						service.lookUpInDictionary(fakedClipText.trim().toLowerCase());
+						String cleanedKeyword = fakedClipText.trim().toLowerCase();
+						if (cleanedKeyword.matches("^[a-z]+$")) {
+							service.lookUpInDictionary(cleanedKeyword);
+						}
 					}
 					service.mLastFakeClipText = fakedClipText;
 				    break;
@@ -368,18 +370,18 @@ public class VelloService extends Service implements RequestListener, Connection
 		getOpenTrelloCardList(startId, false);
 	}
 
-	private void queryInRemoteStorage(String query) {
+	private void queryInRemoteStorage(String keyword, String jsonResponse) {
 		if (VelloConfig.DEBUG_SWITCH) {
 			Log.d(TAG, "checkTrelloCardStatusRequest start...");
 		}
-		Request queryInRemoteStorage = VelloRequestFactory.queryInRemoteStorageRequest(query);
+		Request queryInRemoteStorage = VelloRequestFactory.queryInRemoteStorageRequest(keyword, jsonResponse);
 		mRequestManager.execute(queryInRemoteStorage, this);
 		mRequestList.add(queryInRemoteStorage);
 	}
 	
 	private void lookUpInDictionary(String keyword) {
 		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "look up in dictionary...");
+			Log.d(TAG, "look up [" + keyword + "] in dictionary...");
 		}
 		Request lookUpInDictionary = VelloRequestFactory.lookUpInDictionaryRequest(keyword);
 		mRequestManager.execute(lookUpInDictionary, this);
@@ -657,9 +659,13 @@ public class VelloService extends Service implements RequestListener, Connection
 //				    addWordCard(keywordInQuery, wsResponse);
 					if (keywordInQuery != null && wsResponse != null) {
 						// TODO check and update word status in remote storage
+						queryInRemoteStorage(keywordInQuery, wsResponse);
 					}
 				} else {
-				    // no result in dictionary server. TODO
+				    // no result in dictionary server.
+					if (VelloConfig.DEBUG_SWITCH) {
+						Log.d(TAG, "no result in dictionary server.");
+					}
 				}
 				
 				return;
@@ -667,13 +673,13 @@ public class VelloService extends Service implements RequestListener, Connection
 			case VelloRequestFactory.REQUEST_TYPE_QUERY_IN_REMOTE_STORAGE:
 				ArrayList<TrelloCard> existedWordCardList = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_CARD_LIST);
 				String keyword = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
+				String jsonResponse = request.getString(VelloRequestFactory.PARAM_EXTRA_DICTIONARY_WS_RESULT);
 				if (existedWordCardList.isEmpty()) {
 					// not exist in remote storage
 					if (VelloConfig.DEBUG_SWITCH) {
 						Log.d(TAG, "not exist in remote storage");
 					}
-					// query in dictionary service
-					lookUpInDictionary(keyword);
+					addWordCard(keyword, jsonResponse);
 				} else {
 					// check more to decide
 					// filter to find the right one
@@ -681,29 +687,22 @@ public class VelloService extends Service implements RequestListener, Connection
 						if (w.name.equals(keyword)) {
 							// got the right word card
 							// show with user first
-//							sendMessageToUI(MSG_SHOW_RESULT_WORDCARD, w);
-							showFloatDictCard(w);
 
 							if (w.closed.equals("true")) {
-								// the existed word card has be closed,
-								// re-open it.
+								// the existed word card has be closed, re-open it.
 								if (VelloConfig.DEBUG_SWITCH) {
 									Log.d(TAG, "re-start existed word card.");
 								}
 								reStartWordCard(w.id);
 							} else {
 								if (w.due.equals("null")) {
-									// the existed word card has not be
-									// initialized, initialize it. this is the
-									// double check
+									// the existed word card has not be initialized, initialize it. this is the double check
 									if (VelloConfig.DEBUG_SWITCH) {
 										Log.d(TAG, "initialize existed word card.");
 									}
 									initializeWordCard(w.id);
 								} else {
-									// the existed word is in review
-									// process, do
-									// nothing at present.
+									// the existed word is in review process, do nothing at present.
 									if (VelloConfig.DEBUG_SWITCH) {
 										Log.d(TAG, "the existed word is in review.");
 									}
@@ -716,8 +715,7 @@ public class VelloService extends Service implements RequestListener, Connection
 					if (VelloConfig.DEBUG_SWITCH) {
 						Log.d(TAG, "not exist in remote storage");
 					}
-					// query in dictionary service
-					lookUpInDictionary(keyword);
+					addWordCard(keyword, jsonResponse);
 				}
 				return;
 
@@ -758,7 +756,6 @@ public class VelloService extends Service implements RequestListener, Connection
 			case VelloRequestFactory.REQUEST_TYPE_INITIALIZE_WORDCARD:
 				TrelloCard initializedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 				if (initializedWordCard != null) {
-					showFloatDictCard(initializedWordCard);
 				} else {
 					// initialized failed
 					// do nothing at present

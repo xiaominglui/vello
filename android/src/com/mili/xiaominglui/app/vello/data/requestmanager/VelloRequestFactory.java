@@ -122,9 +122,10 @@ public final class VelloRequestFactory {
     	return request;
     }
 
-    public static Request queryInRemoteStorageRequest(String query) {
+    public static Request queryInRemoteStorageRequest(String query, String jsonResponse) {
         Request request = new Request(REQUEST_TYPE_QUERY_IN_REMOTE_STORAGE);
         request.put(PARAM_EXTRA_QUERY_WORD_KEYWORD, query);
+        request.put(PARAM_EXTRA_DICTIONARY_WS_RESULT, jsonResponse);
         request.setMemoryCacheEnabled(true);
         return request;
     }
