@@ -19,12 +19,13 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.mili.xiaominglui.app.vello.R;
+import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 
 public class FloatDictCardWindow extends StandOutWindow {
 	private static final String TAG = FloatDictCardWindow.class.getSimpleName();
 
-	private Card mCard;
+	private FloatDictCard mCard;
 
 	@Override
 	public String getAppName() {
@@ -40,7 +41,7 @@ public class FloatDictCardWindow extends StandOutWindow {
 	public void createAndAttachView(int id, FrameLayout frame) {
 		LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 		View rootView = inflater.inflate(R.layout.float_dict_card, frame, true);
-		mCard = new Card(getApplicationContext());
+		mCard = new FloatDictCard(getApplicationContext());
 		CardHeader header = new CardHeader(getApplicationContext());
 		mCard.addCardHeader(header);
 		CardView cv = (CardView) rootView.findViewById(R.id.float_dict_card);
@@ -49,7 +50,7 @@ public class FloatDictCardWindow extends StandOutWindow {
 
 	@Override
 	public StandOutLayoutParams getParams(int id, Window window) {
-		return new StandOutLayoutParams(id, StandOutLayoutParams.WRAP_CONTENT, StandOutLayoutParams.WRAP_CONTENT, StandOutLayoutParams.CENTER, StandOutLayoutParams.CENTER);
+		return new StandOutLayoutParams(id, StandOutLayoutParams.MATCH_PARENT, StandOutLayoutParams.WRAP_CONTENT, StandOutLayoutParams.LEFT, StandOutLayoutParams.TOP);
 	}
 	
 	@Override
@@ -79,8 +80,8 @@ public class FloatDictCardWindow extends StandOutWindow {
 				Toast.makeText(this, errorText, Toast.LENGTH_SHORT).show();
 				return;
 			}
-			String changedText = data.getString("changedText");
-			mCard.getCardHeader().setTitle(changedText);
+			TrelloCard card = data.getParcelable("changedData");
+			mCard.getCardHeader().setTitle(card.name);
 			CardView cv = (CardView) window.findViewById(R.id.float_dict_card);
 			cv.refreshCard(mCard);
 			cv.setVisibility(View.VISIBLE);

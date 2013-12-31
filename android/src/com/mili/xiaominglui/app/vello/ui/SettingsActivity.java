@@ -36,7 +36,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	public static final String KEY_PREF_SYNC_FREQ = "pref_sync_frequency";
 	public static final String KEY_PREF_SYNC_WIFI_ONLY = "pref_sync_wifi_only";
 	public static final String KEY_PREF_DICT_CLIPBOARD_MONITOR = "pref_dict_clipboard_monitor";
-	private boolean isInFront;
+	private boolean isInFront = false;
 	private String mNewSyncValue = "0";
 	private ListPreference mListPreference;
 	private SettingsActivityUIHandler mUICallback = new SettingsActivityUIHandler(this);

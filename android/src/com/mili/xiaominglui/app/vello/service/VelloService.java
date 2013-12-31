@@ -371,7 +371,7 @@ public class VelloService extends Service implements RequestListener, Connection
 
 	private void queryInRemoteStorage(String query) {
 		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "checkWordCardStatusRequest start...");
+			Log.d(TAG, "checkTrelloCardStatusRequest start...");
 		}
 		Request queryInRemoteStorage = VelloRequestFactory.queryInRemoteStorageRequest(query);
 		mRequestManager.execute(queryInRemoteStorage, this);
@@ -476,8 +476,11 @@ public class VelloService extends Service implements RequestListener, Connection
 	}
 
 	private void showFloatDictCard(TrelloCard card) {
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "showFloatDictCard --- " + card.name);
+		}
 		Bundle data = new Bundle();
-		data.putString("changedText", card.desc);
+		data.putParcelable("changedData", card);
 		StandOutWindow.show(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID);
 		StandOutWindow.sendData(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID, REQ_DATA_CHANGED, data, StandOutWindow.class, StandOutWindow.DEFAULT_ID);
 		Handler handler = new Handler();
@@ -697,13 +700,12 @@ public class VelloService extends Service implements RequestListener, Connection
 			    String wsResult = request.getString(VelloRequestFactory.PARAM_EXTRA_DICTIONARY_WS_RESULT);
 				TrelloCard addedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 				if (addedWordCard != null) {
-					// show added wordcard to user
-					// TODO
-					// new WordCardToWordTask().execute(addedWordCard);
-					// at the same time initialize it.
 					initializeWordCard(addedWordCard.id);
 				} else {
 					// add failed, add again
+					if (VelloConfig.DEBUG_SWITCH) {
+						Log.d(TAG, "retry addWordCard...");
+					}
 				    addWordCard(keywordInAddWordCard, wsResult);
 				}
 
@@ -730,9 +732,6 @@ public class VelloService extends Service implements RequestListener, Connection
 			case VelloRequestFactory.REQUEST_TYPE_INITIALIZE_WORDCARD:
 				TrelloCard initializedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
 				if (initializedWordCard != null) {
-					// initialized
-					// should show to user
-					// TODO
 					showFloatDictCard(initializedWordCard);
 				} else {
 					// initialized failed
