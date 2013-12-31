@@ -19,7 +19,6 @@ import android.app.Service;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ClipboardManager.OnPrimaryClipChangedListener;
-import android.content.ComponentName;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -56,7 +55,6 @@ import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestManager;
 import com.mili.xiaominglui.app.vello.dialogs.ConnectionErrorDialogFragment.ConnectionErrorDialogListener;
 import com.mili.xiaominglui.app.vello.ui.FloatDictCardWindow;
 import com.mili.xiaominglui.app.vello.ui.MainActivity;
-import com.mili.xiaominglui.app.vello.ui.SettingsActivity;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class VelloService extends Service implements RequestListener, ConnectionErrorDialogListener, OnPrimaryClipChangedListener {
@@ -157,7 +155,8 @@ public class VelloService extends Service implements RequestListener, Connection
 				case MSG_TRIGGER_QUERY_WORD:
 					String fakedClipText = (String) msg.obj;
 					if (!service.mLastFakeClipText.equals("")) {
-						service.queryInRemoteStorage(fakedClipText.trim().toLowerCase());
+//						service.queryInRemoteStorage(fakedClipText.trim().toLowerCase());
+						service.lookUpInDictionary(fakedClipText.trim().toLowerCase());
 					}
 					service.mLastFakeClipText = fakedClipText;
 				    break;
@@ -492,6 +491,23 @@ public class VelloService extends Service implements RequestListener, Connection
 		}, VelloConfig.FLOAT_DICT_CARD_DISMISS_TIME);
 	}
 	
+	private void showFloatDictCard(String jsonResponse) {
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "showFloatDictCard --- " + jsonResponse);
+		}
+		Bundle data = new Bundle();
+		data.putString("jsonResponse", jsonResponse);
+		StandOutWindow.show(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID);
+		StandOutWindow.sendData(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID, REQ_DATA_CHANGED, data, StandOutWindow.class, StandOutWindow.DEFAULT_ID);
+		Handler handler = new Handler();
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				StandOutWindow.closeAll(getApplicationContext(), FloatDictCardWindow.class);
+			}
+		}, VelloConfig.FLOAT_DICT_CARD_DISMISS_TIME);
+	}
+
 	@SuppressLint("SimpleDateFormat")
 	@Override
 	public void onRequestFinished(Request request, Bundle resultData) {
@@ -637,7 +653,11 @@ public class VelloService extends Service implements RequestListener, Connection
 			    String keywordInQuery = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
 				String wsResponse = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_DICTIONARY_WS_RESPONSE);
 				if (!wsResponse.equals("null\n")) {
-				    addWordCard(keywordInQuery, wsResponse);
+					showFloatDictCard(wsResponse);
+//				    addWordCard(keywordInQuery, wsResponse);
+					if (keywordInQuery != null && wsResponse != null) {
+						// TODO check and update word status in remote storage
+					}
 				} else {
 				    // no result in dictionary server. TODO
 				}

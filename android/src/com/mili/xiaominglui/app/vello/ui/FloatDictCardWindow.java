@@ -82,14 +82,21 @@ public class FloatDictCardWindow extends StandOutWindow {
 				return;
 			}
 			TrelloCard card = data.getParcelable("changedData");
-			mCard.getCardHeader().setTitle(card.name);
-			IcibaWord word = MiliDictionaryJsonParser.parse(card.desc);
+			String jsonResponse = data.getString("jsonResponse");
+			IcibaWord word = null;
+			if (card == null && jsonResponse != null) {
+				word = MiliDictionaryJsonParser.parse(jsonResponse);
+			} else if (jsonResponse == null && card != null) {
+				word = MiliDictionaryJsonParser.parse(card.desc);
+			}
+			mCard.getCardHeader().setTitle(word.keyword);
 			StringBuilder meaning = new StringBuilder();
 			for (Definition definition : word.definition) {
 				meaning.append(definition.pos);
 				meaning.append(" ");
 				meaning.append(definition.definiens);
 				meaning.append(";");
+				meaning.append("\n");
 			}
 			((FloatDictCardHeader) mCard.getCardHeader()).setMeanning(meaning.toString());
 			CardView cv = (CardView) window.findViewById(R.id.float_dict_card);
