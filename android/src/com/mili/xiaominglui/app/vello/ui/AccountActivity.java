@@ -75,7 +75,7 @@ public class AccountActivity extends SherlockFragmentActivity implements LoginFr
 			superToast.setDuration(SuperToast.DURATION_SHORT);
 			superToast.setBackgroundResource(SuperToast.BACKGROUND_REDTRANSLUCENT);
 			superToast.setTextColor(Color.WHITE);
-			superToast.setText(getString(R.string.no_connection));
+			superToast.setText(getString(R.string.toast_no_connection));
 			superToast.show();
             return;
         }

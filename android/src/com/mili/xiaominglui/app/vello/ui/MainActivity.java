@@ -66,10 +66,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			case VelloService.MSG_DIALOG_BAD_DATA_ERROR_SHOW:
 				theActivity.showBadDataErrorDialog();
 				break;
-			case VelloService.MSG_DIALOG_CONNECTION_ERROR_SHOW:
-				// TODO
-//				 ConnectionErrorDialogFragment.show();
-				break;
 			case VelloService.MSG_SHOW_RESULT_WORDCARD:
 			    TrelloCard result = (TrelloCard) msg.obj;
 			    break;

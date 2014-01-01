@@ -35,11 +35,6 @@
             android:baselineAligned="true"
             android:baselineAlignedChildIndex="0"
             android:visibility="invisible">
-
-            <Button android:id="@+id/retry_button"
-                android:text="@string/retry"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
         </LinearLayout>
 
     </LinearLayout>

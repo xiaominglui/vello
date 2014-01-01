@@ -153,20 +153,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 					mSyncHelper.performSync(syncResult, SyncHelper.FLAG_SYNC_REMOTE);
 		        }
 			}
-			// sync notification
-			/*
-			NotificationManager notificationManager = (NotificationManager) mContext
-					.getSystemService(Context.NOTIFICATION_SERVICE);
-			NotificationCompat.Builder builder = new NotificationCompat.Builder(
-					mContext)
-					.setSmallIcon(R.drawable.ic_stat_vaa)
-					.setContentTitle(
-							mContext.getText(R.string.notif_sync_content_title))
-					.setTicker(mContext.getText(R.string.notif_sync_ticker))
-					.setProgress(0, 0, true).setOngoing(true).setAutoCancel(false);
-			notificationManager.notify(1, builder.build()); */
-			// Perform a sync using SyncHelper
-
 		} catch (IOException e) {
 			++syncResult.stats.numIoExceptions;
 		} finally {

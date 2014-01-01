@@ -2,21 +2,12 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <string name="app_name">VAA</string>
-    <string name="action_settings">Settings</string>
-    <string name="action_refresh">Refresh</string>
     <string name="action_query_hint">Search word&#8230;</string>
-    <string name="action_invalid_query">Invalid query</string>
-    <string name="no_connection">Please check network connection.</string>
-    <string name="toast_no_word_now">Good job! No word now!</string>
-    <string name="toast_not_available_word">NOT a word?</string>
-    <string name="toast_get_due_word">Checking vocabulary&#8230;</string>
-    <string name="toast_init_vocabulary_start">Initialize vocabulary&#8230;</string>
-    <string name="toast_init_vocabulary_end">Vocabulary initialized!</string>
+    <string name="toast_no_connection">Please check network connection.</string>
     <string name="toast_auth_failure">Authentication failure!</string>
     <string name="toast_auth_timeout">Authentication timeout!</string>
     <string name="toast_auth_finished">Authenticated!</string>
     
-    <string name="retry">Retry</string>
     <string name="description_about">About</string>
     <string name="description_search">Search</string>
     <string name="description_sync">Sync</string>
@@ -25,39 +16,36 @@
     
    
     <string name="dialog_error_connection_error_title">Connexion error</string>
-    <string name="dialog_error_connection_error_message">A connexion error occurred. Please verify
-        that you are connected to an Edge, 3G or Wifi network.</string>
+    <string name="dialog_error_connection_error_message">A connection error occurred. Please verify that you are connected to an Edge, 3G or Wifi network.</string>
     <string name="dialog_error_title">Error</string>
     <string name="dialog_button_retry">Retry</string>
     <string name="dialog_error_data_error_title">Incorrect data</string>
     <string name="dialog_error_data_error_message">Received data is invalid.</string>
-    <string name="button_signup_title">Sign Up</string>
     <string name="button_login_title">Log In</string>
     
-    <!-- Description of the button to undo change to alarm -->
     <plurals name="notif_content_title">
         <item quantity="one">1 word to recall</item>
         <item quantity="other">%d words to recall</item>
     </plurals>
-    <string name="notif_content_text">Touch me to recall.</string>
-    <string name="notif_sync_ticker">Syncing now&#8230;</string>
+    <string name="notif_content_text">Touch here to recall.</string>
     <string name="notif_sync_content_title">Syncing now&#8230;</string>
-    <string name="notif_clip_monitor_service">VAA Clipboard Monitor</string>
+    <string name="notif_clip_monitor_service_content_title">VAA lookup copied working&#8230;</string>
+    <string name="notif_clip_monitor_service_content_text">Touch here to recall words</string>
     <string name="title_search">Search</string>
     <string name="title_search_query">Search for \"&lt;b&gt;<xliff:g id="query">%1$s</xliff:g>&lt;b&gt;\"</string>
     <string name="title_settings">Settings</string>
     <string name="title_about">About</string>
     <string name="title_listview_empty">Good Job, All Recalled!</string>
-    <string name="title_listview_hint_sync">Tap to sync now.</string>
+    <string name="title_listview_hint_sync">Touch to sync now.</string>
     <string name="title_sync_blank">All Recalled</string>
     <string name="title_connection_timeout">Error: GET timed out.</string>
-    <string name="title_connection_timeout_hint_retry">Tap to retry now.</string>
+    <string name="title_connection_timeout_hint_retry">Touch to retry now.</string>
     <string name="title_phonetics_uk">UK</string>
     <string name="title_phonetics_us">US</string>
     <string name="about_eula">End User License Agreement</string>
     <string name="about_licenses">Open Source Licenses</string>
     <string name="about_body"><![CDATA[
-        <b>Vello 2013</b><br>
+        <b>VAA for Android 2013</b><br>
         Version %s<br><br>
         <a href="http://m.google.com/utos">Terms of Service</a><br><br>
         <a href="http://www.google.com/policies/privacy/">Privacy Policy</a>
@@ -79,31 +67,14 @@
         with Google\'s privacy policy.
     ]]></string>
     <string name="ok">OK</string>
-    <string name="label_provider_wordcard">Words</string>
+    <string name="label_provider_wordcard">Vocabulary</string>
     <string name="pref_dict_title">DICTIONARY</string>
-    <string name="pref_dict_clipboard_monitor">Clipboard Monitor</string>
-    <string name="pref_dict_clipboard_monitor_summary">Clipboard Monitor summary, tbd</string>
+    <string name="pref_dict_clipboard_monitor">Lookup word copied</string>
+    <string name="pref_dict_clipboard_monitor_summary">Select word to lookup anywhere in your phone, and touch \"Copy\", the meaning will show in float window presently. Enable this will run background service.</string>
     <string name="pref_sync_title">SYNC</string>
     <string name="pref_sync_frequency">Sync frequency</string>
     <string name="pref_sync_wifi_only">Sync only on Wi-Fi</string>
     <string name="pref_sync_frequency_summary_no_network">You don\'t have a network connection.</string>
     <string name="pref_sync_frequency_summary_no_reliable_network">Can\'t establish a reliable connection to the server.</string>
     <string name="pref_sync_frequency_summary_retrieving_setting">Retrieving settings&#8230;</string>
-    
-    <string name="drawer_open">Open navigation drawer</string>
-    <string name="drawer_close">Close navigation drawer</string>
-    
-    <string name="delete_word_card">Delete word</string>
-    <string name="hink_revoked">token revoked</string>
-    
-    <!-- Alarm deletion confirmation message-->
-    <plurals name="word_card_delete_confirmation">
-        <!-- Confirmation for one alarm -->
-        <item quantity="one">Delete selected word?</item>
-        <!-- Confirmation more than one alarm  -->
-        <item quantity="other">Delete selected words?</item>
-    </plurals>
-    
-    
-
 </resources>

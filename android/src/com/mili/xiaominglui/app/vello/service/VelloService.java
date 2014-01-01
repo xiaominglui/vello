@@ -88,7 +88,6 @@ public class VelloService extends Service implements RequestListener, Connection
 	public static final int MSG_SPINNER_ON = 1;
 	public static final int MSG_SPINNER_OFF = 2;
 	public static final int MSG_DIALOG_BAD_DATA_ERROR_SHOW = 3;
-	public static final int MSG_DIALOG_CONNECTION_ERROR_SHOW = 4;
 	public static final int MSG_SHOW_RESULT_WORDCARD = 5;
 	public static final int MSG_VALID_TRELLO_CONNECTION = 6;
 	public static final int MSG_INVALID_TRELLO_CONNECTION = 7;
@@ -1140,9 +1139,9 @@ public class VelloService extends Service implements RequestListener, Connection
         Notification notif = new Notification(R.drawable.ic_stat_vaa, "VAA clipboard monitor is started", System.currentTimeMillis());
         notif.flags |= (Notification.FLAG_ONGOING_EVENT | Notification.FLAG_NO_CLEAR);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
-        notif.setLatestEventInfo(this, getText(R.string.notif_clip_monitor_service), "Tap here to enter VAA UI", contentIntent);
+        notif.setLatestEventInfo(this, getText(R.string.notif_clip_monitor_service_content_title), getText(R.string.notif_clip_monitor_service_content_text), contentIntent);
         // Use layout id because it's unique
-        mNM.notify(R.string.notif_clip_monitor_service, notif);
+        mNM.notify(R.string.notif_clip_monitor_service_content_title, notif);
     }
 	
 	/**
@@ -1162,7 +1161,7 @@ public class VelloService extends Service implements RequestListener, Connection
 
         /** Cancel task */
         public void cancel() {
-			mNM.cancel(R.string.notif_clip_monitor_service);
+			mNM.cancel(R.string.notif_clip_monitor_service_content_title);
             mKeepRunning = false;
             interrupt();
         }

@@ -23,7 +23,6 @@ public class BaseActivity extends SherlockFragmentActivity {
     }
     
     protected void showBadDataErrorDialog() {
-        new ErrorDialogFragmentBuilder(this).setTitle(R.string.dialog_error_data_error_title)
-                .setMessage(R.string.dialog_error_data_error_message).show();
+        new ErrorDialogFragmentBuilder(this).setTitle(R.string.dialog_error_data_error_title).setMessage(R.string.dialog_error_data_error_message).show();
     }
 }
