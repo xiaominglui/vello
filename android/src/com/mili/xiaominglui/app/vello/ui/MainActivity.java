@@ -87,7 +87,9 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				theActivity.preAuthTokenRevoke();
 				break;
 			case VelloService.MSG_STATUS_CONNECTION_TIMEOUT:
-				theActivity.showConnectionTimeoutView();
+				if (theActivity.isInFront) {
+					theActivity.showConnectionTimeoutView();
+				}
 				break;
 			}
 		}
@@ -464,7 +466,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 
 	@Override
 	public void onWordRecalled() {
-//		reviewedCountPlusToastShow();
 	}
 
 	@Override

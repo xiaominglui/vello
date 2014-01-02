@@ -182,13 +182,15 @@ public class ReviewViewFragment extends SherlockFragment implements
 		}
 
 		View empty = getActivity().findViewById(R.id.emptyView);
-		empty.setOnTouchListener(new View.OnTouchListener() {
+		empty.setOnTouchListener(new ViewGroup.OnTouchListener() {
 
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 				switch (event.getAction()) {
 				case MotionEvent.ACTION_DOWN:
-					return false;
+					return true;
+				case MotionEvent.ACTION_MOVE:
+					return true;
 				case MotionEvent.ACTION_UP:
 					mListener.syncOnAllRecalled();
 					return true;
