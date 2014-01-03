@@ -1,6 +1,7 @@
 package com.mili.xiaominglui.app.vello.ui;
 
 import com.actionbarsherlock.app.SherlockFragment;
+import com.mili.xiaominglui.app.vello.R;
 
 import android.os.Bundle;
 import android.view.Gravity;
@@ -16,14 +17,7 @@ public final class WelcomeFragment extends SherlockFragment {
 
     public static WelcomeFragment newInstance(String content) {
         WelcomeFragment fragment = new WelcomeFragment();
-
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < 20; i++) {
-            builder.append(content).append(" ");
-        }
-        builder.deleteCharAt(builder.length() - 1);
-        fragment.mContent = builder.toString();
-
+        fragment.mContent = content;
         return fragment;
     }
 
@@ -49,6 +43,13 @@ public final class WelcomeFragment extends SherlockFragment {
         LinearLayout layout = new LinearLayout(getActivity());
         layout.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
         layout.setGravity(Gravity.CENTER);
+        if (mContent.startsWith("Discover")) {
+        	layout.setBackgroundResource(R.drawable.discover);
+        } else if (mContent.startsWith("Recall")) {
+        	layout.setBackgroundResource(R.drawable.recall);
+        } else {
+        	layout.setBackgroundResource(R.drawable.acquire);
+        }
         layout.addView(text);
 
         return layout;
