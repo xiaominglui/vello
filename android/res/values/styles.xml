@@ -63,6 +63,24 @@
         <item name="android:layout_marginTop">@dimen/card_header_review_title_margin_top</item>
     </style>
 
+    <!--Style for float dict card title inner header view-->
+    <style name="card.header_float_title">
+        <item name="android:textSize">@dimen/card_header_float_title_text_size</item>
+        <item name="android:textColor">@color/card_expand_title_color</item>
+        <item name="android:layout_gravity">left|center_vertical</item>
+        <item name="android:layout_marginLeft">@dimen/card_header_review_title_margin_left</item>
+        <item name="android:layout_marginTop">@dimen/card_header_review_title_margin_top</item>
+    </style>
+
+    <!--Style for float dict card content inner header view-->
+    <style name="card.header_float_content">
+        <item name="android:textSize">@dimen/card_header_float_title_text_size</item>
+        <item name="android:textColor">@color/card_text_color_header</item>
+        <item name="android:layout_gravity">left|center_vertical</item>
+        <item name="android:layout_marginLeft">@dimen/card_header_review_title_margin_left</item>
+        <item name="android:layout_marginTop">@dimen/card_header_review_title_margin_top</item>
+    </style>
+
     <!-- Style for Header Buttons ***********************************************-->
 
     <style name="card.header_button_frame">

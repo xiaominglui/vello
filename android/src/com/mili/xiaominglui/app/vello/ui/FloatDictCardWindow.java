@@ -14,8 +14,6 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mili.xiaominglui.app.vello.R;
@@ -32,12 +30,12 @@ public class FloatDictCardWindow extends StandOutWindow {
 
 	@Override
 	public String getAppName() {
-		return "VAA FloatDictCard";
+		return "VAA Lookup Copied";
 	}
 
 	@Override
 	public int getAppIcon() {
-		return 0;
+		return R.drawable.ic_stat_vaa;
 	}
 
 	@Override

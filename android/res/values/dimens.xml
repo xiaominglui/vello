@@ -10,7 +10,7 @@
     <dimen name="content_padding_normal">16dp</dimen>
     
     <!-- Card -->
-    <dimen name="card_base_empty_height">32dp</dimen>
+    <dimen name="card_base_empty_height">24dp</dimen>
     <dimen name="card_background_default_radius">2dip</dimen>
 
     <!-- Main -->
@@ -35,6 +35,7 @@
     <dimen name="card_header_review_title_margin_left">10dp</dimen>
     <dimen name="card_header_review_title_margin_top">5dp</dimen>
     <dimen name="card_header_review_title_text_size">25sp</dimen>
+    <dimen name="card_header_float_title_text_size">15sp</dimen>
 
     <!-- Content -->
     <dimen name="card_content_outer_view_margin_top">0dp</dimen>
