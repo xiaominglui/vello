@@ -86,6 +86,10 @@ public class AccountUtils {
                 null);
     }
 
+	public static void removeTrelloAccount(final Context context, Account account) {
+		AccountManager.get(context).removeAccount(account, null, null);
+	}
+
     private static AccountManagerCallback<Bundle> getAccountManagerCallback(
             final AuthenticateCallback callback, final Account account,
             final Context context, final Activity activity,
@@ -211,6 +215,8 @@ public class AccountUtils {
 
     public static void signOut(final Context context) {
         invalidateAuthToken(context);
+        Account account = new Account(getChosenAccountName(context), Constants.AUTHTOKEN_TYPE);
+        removeTrelloAccount(context, account);
         
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.edit().clear().commit();

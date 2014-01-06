@@ -1,16 +1,25 @@
 package com.mili.xiaominglui.app.vello.ui;
 
 import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 import wei.mark.standout.StandOutWindow;
 
 import android.accounts.Account;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
@@ -24,6 +33,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
@@ -40,6 +50,8 @@ import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.syncadapter.SyncHelper;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.mili.xiaominglui.app.vello.util.HelpUtils;
+import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
+import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 
 public class MainActivity extends BaseActivity implements ReviewViewFragment.onStatusChangedListener, ConnectionTimeOutFragment.ConnectionTimeOutFragmentEventListener {
 	private static final String TAG = MainActivity.class.getSimpleName();
@@ -49,6 +61,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	private int currentColor = 0xFF666666;
 	private boolean isInFront;
 	private final Handler handler = new Handler();
+	private NotificationManager mNM;
 	
 	private MainActivityUIHandler mUICallback = new MainActivityUIHandler(this);
 
@@ -73,6 +86,9 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				theActivity.preInitAccount();
 				break;
 			case VelloService.MSG_STATUS_INIT_ACCOUNT_END:
+				if (VelloConfig.DEBUG_SWITCH) {
+					Log.d(TAG, "status_init_account_end");
+				}
 				theActivity.postInitAccount();
 			case VelloService.MSG_STATUS_SYNC_BEGIN:
 				theActivity.preSync();
@@ -90,6 +106,9 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				if (theActivity.isInFront) {
 					theActivity.showConnectionTimeoutView();
 				}
+				break;
+			case VelloService.MSG_STATUS_WEBHOOK_DELETED:
+				theActivity.localSignOut();
 				break;
 			}
 		}
@@ -172,6 +191,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
         if (isFinishing()) {
             return;
         }
+        mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         FrameLayout frame = new FrameLayout(this);
         frame.setId(CONTENT_VIEW_ID);
@@ -318,15 +338,28 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			return true;
 
 		case R.id.menu_sign_out:
-			AccountUtils.signOut(this);
-			// restart
-			Intent intent = getIntent();
-			finish();
-			startActivity(intent);
+			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+			int syncFreqValue = Integer.valueOf(settings.getString(SettingsActivity.KEY_PREF_SYNC_FREQ, "24"));
+			if (syncFreqValue == 0) {
+				// deactive PUSH
+				if (!AccountUtils.getVocabularyBoardWebHookId(getApplicationContext()).equals("")) {
+					sendMessageToService(VelloService.MSG_DELETE_WEBHOOK);
+					return true;
+				}
+			}
+			localSignOut();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	private void localSignOut() {
+		AccountUtils.signOut(this);
+		// restart
+		Intent intent = getIntent();
+		finish();
+		startActivity(intent);
 	}
 
 	private void triggerRefresh() {
@@ -399,6 +432,9 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	}
 	
 	private void preSync() {
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "preSync");
+		}
 		if (isInFront) {
 			FragmentManager fm = getSupportFragmentManager();
 			fm.beginTransaction().replace(CONTENT_VIEW_ID, new ProgressFragment()).commit();
@@ -406,9 +442,56 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	}
 	
 	private void postSync() {
-		if (isInFront) {
-			FragmentManager fm = getSupportFragmentManager();
-			fm.beginTransaction().replace(CONTENT_VIEW_ID, ReviewViewFragment.newInstance()).commit();
+		if (VelloConfig.DEBUG_SWITCH) {
+			Log.d(TAG, "postSync");
+		}
+		// show notification
+		Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+		PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+
+		ProviderCriteria cri = new ProviderCriteria();
+		cri.addSortOrder(DbWordCard.Columns.DUE, true);
+		Calendar rightNow = Calendar.getInstance();
+
+		SimpleDateFormat fo = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		long rightNowUnixTime = rightNow.getTimeInMillis();
+		long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
+		String now = fo.format(new Date(rightNowUnixTimeGMT));
+		cri.addEq(DbWordCard.Columns.MARKDELETED, "false");
+		cri.addLt(DbWordCard.Columns.DUE, now, true);
+		Cursor cur = getContentResolver().query(
+				DbWordCard.CONTENT_URI,
+				DbWordCard.PROJECTION,
+				cri.getWhereClause(),
+				cri.getWhereParams(),
+				cri.getOrderClause());
+		if (cur != null) {
+			int num = cur.getCount();
+			if (num > 0) {
+				Resources res = getApplicationContext().getResources();
+				String stringContentTitle = res.getQuantityString(R.plurals.notif_content_title, num, num);
+				String stringContentText = res.getString(R.string.notif_content_text);
+				Notification noti = new NotificationCompat.Builder(getApplicationContext())
+						.setContentTitle(stringContentTitle)
+						.setContentText(stringContentText)
+						.setSmallIcon(R.drawable.ic_launcher)
+						.setContentIntent(pIntent)
+						.build();
+
+
+				// Hide the notification after its selected
+				noti.flags |= Notification.FLAG_AUTO_CANCEL;
+
+				mNM.notify(0, noti);
+				if (isInFront) {
+					FragmentManager fm = getSupportFragmentManager();
+					fm.beginTransaction().replace(CONTENT_VIEW_ID, ReviewViewFragment.newInstance()).commit();
+				}
+			} else {
+				// no word need recalling
+				showSyncBlank();
+			}
+			cur.close();
 		}
 	}
 	

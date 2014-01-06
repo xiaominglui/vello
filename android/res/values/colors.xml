@@ -14,6 +14,7 @@
     <color name="bg_color_8th">#aaccff66</color>
     <color name="bg_dictionary_mode">#ffffff</color>
     <color name="card_selected_color">#aa0099cc</color>
+    <color name="bg_login_button">#f9f9f9</color>
     
     <!-- color card -->
     <color name="demo_card_background_color1">#FFBB33</color>

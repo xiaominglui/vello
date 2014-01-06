@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,7 +33,6 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -791,6 +789,7 @@ public class VelloService extends Service implements RequestListener, Connection
 								mDirtyCards.put(dc.id, dc);
 							}
 							c.close();
+							Log.d(TAG, "cursor closed");
 						}
 					}
 
@@ -810,57 +809,10 @@ public class VelloService extends Service implements RequestListener, Connection
 										.build());
 							}
 							resolver.applyBatch(VelloProvider.AUTHORITY, operationList);
-
-							// show notification
-							Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-							PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
-
-							ProviderCriteria cri = new ProviderCriteria();
-							cri.addSortOrder(DbWordCard.Columns.DUE, true);
-							Calendar rightNow = Calendar.getInstance();
-
-							SimpleDateFormat fo = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-							long rightNowUnixTime = rightNow.getTimeInMillis();
-							long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
-							String now = fo.format(new Date(rightNowUnixTimeGMT));
-							cri.addEq(DbWordCard.Columns.MARKDELETED, "false");
-							cri.addLt(DbWordCard.Columns.DUE, now, true);
-							Cursor cur = getContentResolver().query(
-									DbWordCard.CONTENT_URI,
-									DbWordCard.PROJECTION,
-									cri.getWhereClause(),
-									cri.getWhereParams(),
-									cri.getOrderClause());
-							if (cur != null) {
-								int num = cur.getCount();
-								if (num > 0) {
-									Resources res = getApplicationContext().getResources();
-									String stringContentTitle = res.getQuantityString(R.plurals.notif_content_title, num, num);
-									String stringContentText = res.getString(R.string.notif_content_text);
-									Notification noti = new NotificationCompat.Builder(getApplicationContext())
-											.setContentTitle(stringContentTitle)
-											.setContentText(stringContentText)
-											.setSmallIcon(R.drawable.ic_launcher)
-											.setContentIntent(pIntent)
-											.build();
-
-
-									// Hide the notification after its selected
-									noti.flags |= Notification.FLAG_AUTO_CANCEL;
-
-									mNM.notify(0, noti);
-									sendMessageToUI(VelloService.MSG_STATUS_SYNC_END, null);
-								} else {
-									// no word need recalling
-									sendMessageToUI(MSG_STATUS_SYNC_BLANK, null);
-								}
-								cur.close();
-							}
-
 							if (VelloConfig.DEBUG_SWITCH) {
 								Log.d(TAG, "...stop command---#" + startId);
 							}
-
+							sendMessageToUI(VelloService.MSG_STATUS_SYNC_END, null);
 							stopSelf(startId);
 						} catch (RemoteException e) {
 							e.printStackTrace();
