@@ -15,7 +15,7 @@
     <string name="description_sign_out">Sign out</string>
     
    
-    <string name="dialog_error_connection_error_title">Connexion error</string>
+    <string name="dialog_error_connection_error_title">Connection error</string>
     <string name="dialog_error_connection_error_message">A connection error occurred. Please verify that you are connected to an Edge, 3G or Wifi network.</string>
     <string name="dialog_error_title">Error</string>
     <string name="dialog_button_retry">Retry</string>

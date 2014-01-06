@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <string name="app_name">词道</string>
+    <string name="action_query_hint">查询单词…</string>
+    <string name="toast_no_connection">请确认是否连接互联网。</string>
+    <string name="toast_auth_failure">授权失败！</string>
+    <string name="toast_auth_timeout">授权超时！</string>
+    <string name="toast_auth_finished">已授权！</string>
+    
+    <string name="description_about">关于</string>
+    <string name="description_search">查询</string>
+    <string name="description_sync">同步</string>
+    <string name="description_settings">设置</string>
+    <string name="description_sign_out">注销</string>
+    
+   
+    <string name="dialog_error_connection_error_title">连接错误</string>
+    <string name="dialog_error_connection_error_message">连接过程发生错误，请确认设备已连接有效的移动或者Wi-Fi网络。</string>
+    <string name="dialog_error_title">错误</string>
+    <string name="dialog_button_retry">重试</string>
+    <string name="dialog_error_data_error_title">数据有误</string>
+    <string name="dialog_error_data_error_message">接收到的数据无效</string>
+    <string name="button_login_title">登入</string>
+    
+    <plurals name="notif_content_title">
+        <item quantity="one">有1个单词该回顾了。</item>
+        <item quantity="other">有%d个单词该回顾了。</item>
+    </plurals>
+    <string name="notif_content_text">点击立即开始回顾。</string>
+    <string name="notif_sync_content_title">开始同步…</string>
+    <string name="notif_clip_monitor_service_content_title">词道复制查询已启用</string>
+    <string name="notif_clip_monitor_service_content_text">点击开始回顾。</string>
+    <string name="title_search">查询</string>
+    <string name="title_search_query">Search for \"&lt;b&gt;<xliff:g id="query">%1$s</xliff:g>&lt;b&gt;\"</string>
+    <string name="title_settings">设置</string>
+    <string name="title_about">关于</string>
+    <string name="title_listview_empty">干得好！回顾任务完成！</string>
+    <string name="title_listview_hint_sync">点击立即同步单词</string>
+    <string name="title_sync_blank">当前没有需要回顾的单词</string>
+    <string name="title_connection_timeout">错误: GET超时</string>
+    <string name="title_connection_timeout_hint_retry">点击重试</string>
+    <string name="title_phonetics_uk">英</string>
+    <string name="title_phonetics_us">美</string>
+    <string name="about_eula">End User License Agreement</string>
+    <string name="about_licenses">Open Source Licenses</string>
+    <string name="about_body"><![CDATA[
+        <b>词道 for Android 2013</b><br>
+        Version %s<br><br>
+        <a href="http://m.google.com/utos">Terms of Service</a><br><br>
+        <a href="http://www.google.com/policies/privacy/">Privacy Policy</a>
+    ]]></string>
+    <string name="eula_text"><![CDATA[
+        By downloading, installing or using this application or any portion thereof
+        (\"Application\"), you agree to these terms and conditions.<br>
+        <br>
+        Your use of this Application is governed by: (a) the Google Terms of Service
+        (<a href="http://m.google.com/utos">m.google.com/utos</a>); (b) Google\'s Privacy Policy
+        (<a href="http://www.google.com/policies/privacy">http://www.google.com/policies/privacy</a>);
+        and (c) any applicable Google Service-specific terms of service or privacy policies.
+        Google\'s terms of service and privacy policies may be updated from time to time and without
+        notice.<br>
+        <br>
+        This Application collects certain information as you use it, including via Google Analytics.
+        Google\'s Privacy Policy explains how Google treats your information and protects your
+        privacy when you use the Application.  You agree to the use of your data in accordance
+        with Google\'s privacy policy.
+    ]]></string>
+    <string name="ok">确认</string>
+    <string name="label_provider_wordcard">单词本</string>
+    <string name="pref_dict_title">字典</string>
+    <string name="pref_dict_clipboard_monitor">复制查询</string>
+    <string name="pref_dict_clipboard_monitor_summary">在任何可以复制的地方选择要查询的单词，点击“复制”，单词解释稍后会以漂浮窗口的形式显示在屏幕上。启用该功能会启动后台服务。</string>
+    <string name="pref_sync_title">同步</string>
+    <string name="pref_sync_frequency">同步频率</string>
+    <string name="pref_sync_wifi_only">只在Wi-Fi下同步数据</string>
+    <string name="pref_sync_frequency_summary_no_network">没有网络</string>
+    <string name="pref_sync_frequency_summary_no_reliable_network">不能正常连接服务器</string>
+    <string name="pref_sync_frequency_summary_retrieving_setting">下载配置信息…</string>
+</resources>
