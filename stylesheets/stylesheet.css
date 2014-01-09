@@ -244,3 +244,11 @@ a {
 .cf {
   zoom:1;
 }
+
+#footer {
+  margin-bottom: 2em;
+  color: #3E423A;
+  font-size: 0.9em;
+  padding: 0.5em;
+  text-align: center;
+}
