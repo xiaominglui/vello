@@ -16,7 +16,7 @@ VAA for Chrome
 
 VAA for Android (Coming Soon)
 
-<a href="https://play.google.com/store/search?q=pub:vaa"><img alt="Get it on Google Play" src="https://developer.android.com/images/brand/en_generic_rgb_wo_45.png" /></a>
+<a href="https://play.google.com/store/search?q=pub:vaa" target="_blank"><img alt="Get it on Google Play" src="https://developer.android.com/images/brand/en_generic_rgb_wo_45.png" /></a>
 
 # Usage • 用法
 0. 阅读中查询生词
