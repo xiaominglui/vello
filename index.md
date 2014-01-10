@@ -9,6 +9,15 @@ VAA is a lightweight tool to look up word and aid you remember ever looked up la
 
 词道是一个小巧的工具，它可以方便你在阅读时查询不认识的单词，并且随后协助你回顾以掌握这些生词。
 
+# Get • 安装
+VAA for Chrome
+
+<a href="https://chrome.google.com/webstore/detail/词道/cgkjfohooamppcndhnmamboiipnmeaak" target="_blank" class="get-chrome"><img src="{{ site.baseurl }}/images/chromewebstore.png" alt="Download from Chrome Web Store" class="chrome-webstore"></a>
+
+VAA for Android (Coming Soon)
+
+<a href="https://play.google.com/store/search?q=pub:vaa"><img alt="Get it on Google Play" src="https://developer.android.com/images/brand/en_generic_rgb_wo_45.png" /></a>
+
 # Usage • 用法
 0. 阅读中查询生词
 
@@ -38,7 +47,7 @@ VAA is a lightweight tool to look up word and aid you remember ever looked up la
 
     点击“复制”:
 
-    <img src="{{ site.baseurl }}/images/lookup_copied_to_copy.jpg" alt="复制取词 — 复制" class="img-responsive">
+    <img src="{{ site.baseurl }}/images/lookup_copied_to_copy.png" alt="复制取词 — 复制" class="img-responsive">
 
     稍等片刻后，会弹出含有单词解释的浮动窗口。
 

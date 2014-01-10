@@ -18,16 +18,12 @@ VAA（Vocabulary Anytime Anywhere，词道；开发代号：`vello`）是一个�
 + _有针对性的学习是效率的保证；_
 + _碎片时间是词汇学习的最佳时段！_
 
-# Q&A • 常见问题
-# Feedback • 反馈信息
-# Plan • 项目计划
-tbd
 # Member • 项目成员
- + jiahe214\[at\]gmail.com
- + xiaominglui\[at\]gmail.com
- + chenjkai\[at\]163.com
++ jiahe214\[at\]gmail.com
++ xiaominglui\[at\]gmail.com
++ chenjkai\[at\]163.com
 
 # Contributors • 贡献人员
- + haihun457\[at\]gmail.com
- + wingkingleo\[at\]gmail.com
- + skymanlee\[at\]gmail.com
++ haihun457\[at\]gmail.com
++ wingkingleo\[at\]gmail.com
++ skymanlee\[at\]gmail.com
