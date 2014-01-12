@@ -163,7 +163,7 @@ public class CardArrayAdapter extends BaseCardArrayAdapter implements UndoBarCon
                 mCard.setSwipeable(origianlSwipeable);
 
                 //If card has an expandable button override animation
-                if (mCard.getCardHeader() != null && mCard.getCardHeader().isButtonExpandVisible()) {
+                if ((mCard.getCardHeader() != null && mCard.getCardHeader().isButtonExpandVisible()) || mCard.getViewToClickToExpand()!=null ){
                     setupExpandCollapseListAnimation(mCardView);
                 }
 
@@ -242,6 +242,12 @@ public class CardArrayAdapter extends BaseCardArrayAdapter implements UndoBarCon
                 itemIds[i]=card.getId();
                 i++;
 
+                if (card.isExpanded()){
+                    if (card.getCardView()!=null && card.getCardView().getOnExpandListAnimatorListener()!=null){
+                        //There is a List Animator.
+                        card.getCardView().getOnExpandListAnimatorListener().onCollapseStart(card.getCardView(), card.getCardView().getInternalExpandLayout());
+                    }
+                }
                 remove(card);
                 if (card.getOnSwipeListener() != null){
                         card.getOnSwipeListener().onSwipe(card);
@@ -307,26 +313,6 @@ public class CardArrayAdapter extends BaseCardArrayAdapter implements UndoBarCon
         }
     }
 
-    // -------------------------------------------------------------
-    //  Getters and Setters
-    // -------------------------------------------------------------
-
-    /**
-     * @return {@link CardListView}
-     */
-    public CardListView getCardListView() {
-        return mCardListView;
-    }
-
-    /**
-     * Sets the {@link CardListView}
-     *
-     * @param cardListView cardListView
-     */
-    public void setCardListView(CardListView cardListView) {
-        this.mCardListView = cardListView;
-    }
-
     /**
      * Indicates if the undo message is enabled after a swipe action
      *
@@ -352,15 +338,41 @@ public class CardArrayAdapter extends BaseCardArrayAdapter implements UndoBarCon
 
             //Create a UndoController
             if (mUndoBarController==null){
-                View undobar = ((Activity)mContext).findViewById(R.id.list_card_undobar);
+
+                if (mUndoBarUIElements==null)
+                    mUndoBarUIElements=new UndoBarController.DefaultUndoBarUIElements();
+
+                View undobar = ((Activity)mContext).findViewById(mUndoBarUIElements.getUndoBarId());
                 if (undobar != null) {
-                    mUndoBarController = new UndoBarController(undobar, this);
+                    mUndoBarController = new UndoBarController(undobar, this,mUndoBarUIElements);
                 }
             }
         }else{
             mUndoBarController=null;
         }
     }
+
+    // -------------------------------------------------------------
+    //  Getters and Setters
+    // -------------------------------------------------------------
+
+    /**
+     * @return {@link CardListView}
+     */
+    public CardListView getCardListView() {
+        return mCardListView;
+    }
+
+    /**
+     * Sets the {@link CardListView}
+     *
+     * @param cardListView cardListView
+     */
+    public void setCardListView(CardListView cardListView) {
+        this.mCardListView = cardListView;
+    }
+
+
 
     /**
      * Return the UndoBarController for undo action

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!--
-  ~ /*******************************************************************************
+  ~ *******************************************************************************
   ~   Copyright (c) 2013 Gabriele Mariotti.
   ~
   ~   Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,12 +15,13 @@
   ~   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~   See the License for the specific language governing permissions and
   ~   limitations under the License.
-  ~  ******************************************************************************/
+  ~  *****************************************************************************
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:card="http://schemas.android.com/apk/res-auto"
               android:orientation="vertical"
+              style="@style/card"
               android:layout_width="match_parent"
               android:layout_height="wrap_content">
 
@@ -42,26 +43,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
-        <LinearLayout
-            android:id="@+id/card_thumb_and_content_layout"
-            android:orientation="horizontal"
+        <!-- Main Content View -->
+        <FrameLayout
+            android:id="@+id/card_main_content_layout"
+            style="@style/card.content_outer_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"/>
 
-            <it.gmariotti.cardslib.library.view.component.CardThumbnailView
-                style="@style/card_thumbnail_outer_layout"
-                android:id="@+id/card_thumbnail_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"/>
-
-            <!-- Main Content View -->
-            <FrameLayout
-                android:id="@+id/card_main_content_layout"
-                style="@style/card.content_outer_layout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-
-        </LinearLayout>
+        <!-- Main Overlay View -->
+        <FrameLayout
+            android:id="@+id/card_overlap"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
     </LinearLayout>
 
@@ -80,6 +73,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         >
+
+
+
     </FrameLayout>
 
 </LinearLayout>

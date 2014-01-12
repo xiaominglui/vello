@@ -7,6 +7,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.http.HttpStatus;
 
@@ -33,6 +35,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.text.method.HideReturnsTransformationMethod;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -61,7 +64,9 @@ public class VelloService extends Service implements RequestListener, Connection
 	private NotificationManager mNM;
 	private ClipboardManager mCM;
 	private WindowManager mWM;
-	private MonitorTask mTask = null;
+//	private MonitorTask mTask = null; // use Timer instead now.
+	private Timer mMonitorTimer = null;
+	private TimerTask mTimerTask = null;
 	private String mLastFakeClipText = "";
 	private SharedPreferences mPrefs;
 	
@@ -206,10 +211,19 @@ public class VelloService extends Service implements RequestListener, Connection
 	public int onStartCommand(Intent intent, int flags, int startId) {
     	boolean monitor = intent.getBooleanExtra("monitor", false);
     	if (monitor) {
+			/* use Timer instead now.
     		if (mTask == null) {
     			mTask = new MonitorTask();
     		}
-    		mTask.start();
+    		mTask.start(); */
+			if (mMonitorTimer == null) {
+				mMonitorTimer = new Timer(true);
+			}
+			if (mTimerTask == null) {
+				mTimerTask = new MonitorTimerTask();
+			}
+			mMonitorTimer.scheduleAtFixedRate(mTimerTask, 0, mPrefs.getInt(KEY_MONITOR_INTERVAL, DEF_MONITOR_INTERVAL));
+			showNotification();
     	} else {
     		if (VelloConfig.DEBUG_SWITCH) {
         		Log.d(TAG, "command started---#" + startId);
@@ -252,9 +266,11 @@ public class VelloService extends Service implements RequestListener, Connection
 	public void onDestroy() {
 		// Cancel the persistent notification.
 //		mCM.removePrimaryClipChangedListener(this);
+		/* use Timer instead now
 		if (mTask != null && mTask.isRunning()) {
 			mTask.cancel();
 		}
+		*/
 
 		Log.i(TAG, "VelloService Stopped.");
 		isRunning = false;
@@ -468,8 +484,15 @@ public class VelloService extends Service implements RequestListener, Connection
 	}
 	
 	private void shutdownClipboardMonitor() {
+		/* use Timer instead now
 		if (mTask != null && mTask.isRunning()) {
 			mTask.cancel();
+		}
+		*/
+		
+		if (mMonitorTimer != null) {
+			mMonitorTimer.cancel();
+			removeNotification();
 		}
 	}
 
@@ -1096,6 +1119,28 @@ public class VelloService extends Service implements RequestListener, Connection
         mNM.notify(R.string.notif_clip_monitor_service_content_title, notif);
     }
 	
+	private void removeNotification() {
+		mNM.cancel(R.string.notif_clip_monitor_service_content_title);
+	}
+	
+	/**
+	 * Monitor task: monitor new text clips in global system clipboard
+	 * implemented with Timer
+	 */
+	private class MonitorTimerTask extends TimerTask {
+
+		@Override
+		public void run() {
+			if (mCM.hasText()) {
+				String clipText = mCM.getText().toString();
+				if (!clipText.equals(mLastFakeClipText)) {
+					FakingTask();
+				}
+			}
+		}
+
+	}
+	
 	/**
      * Monitor task: monitor new text clips in global system clipboard
      */
@@ -1113,7 +1158,7 @@ public class VelloService extends Service implements RequestListener, Connection
 
         /** Cancel task */
         public void cancel() {
-			mNM.cancel(R.string.notif_clip_monitor_service_content_title);
+        	removeNotification();
             mKeepRunning = false;
             interrupt();
         }
@@ -1139,19 +1184,19 @@ public class VelloService extends Service implements RequestListener, Connection
                 }
             }
         }
-        
-		private void FakingTask() {
-			try {
-				String queryClipText = mCM.getText().toString();
-				String fakedClipText = queryClipText + " ";
-				mCM.setText(fakedClipText);
-				Message msg = Message.obtain(null, MSG_TRIGGER_QUERY_WORD, fakedClipText);
-				mMessenger.send(msg);
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
-		}
     }
+    
+    private void FakingTask() {
+		try {
+			String queryClipText = mCM.getText().toString();
+			String fakedClipText = queryClipText + " ";
+			mCM.setText(fakedClipText);
+			Message msg = Message.obtain(null, MSG_TRIGGER_QUERY_WORD, fakedClipText);
+			mMessenger.send(msg);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
 
 	@Override
 	public void onPrimaryClipChanged() {

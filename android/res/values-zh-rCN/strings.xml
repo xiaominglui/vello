@@ -29,7 +29,7 @@
     </plurals>
     <string name="notif_content_text">点击立即开始回顾。</string>
     <string name="notif_sync_content_title">开始同步…</string>
-    <string name="notif_clip_monitor_service_content_title">词道复制查询已启用</string>
+    <string name="notif_clip_monitor_service_content_title">复制查询已启用</string>
     <string name="notif_clip_monitor_service_content_text">点击开始回顾。</string>
     <string name="title_search">查询</string>
     <string name="title_search_query">Search for \"&lt;b&gt;<xliff:g id="query">%1$s</xliff:g>&lt;b&gt;\"</string>
@@ -73,7 +73,7 @@
     <string name="pref_dict_clipboard_monitor_summary">在任何可以复制的地方选择要查询的单词，点击“复制”，单词解释稍后会以漂浮窗口的形式显示在屏幕上。启用该功能会启动后台服务。</string>
     <string name="pref_sync_title">同步</string>
     <string name="pref_sync_frequency">同步频率</string>
-    <string name="pref_sync_wifi_only">只在Wi-Fi下同步数据</string>
+    <string name="pref_sync_wifi_only">仅通过Wi-Fi同步数据</string>
     <string name="pref_sync_frequency_summary_no_network">没有网络</string>
     <string name="pref_sync_frequency_summary_no_reliable_network">不能正常连接服务器</string>
     <string name="pref_sync_frequency_summary_retrieving_setting">下载配置信息…</string>

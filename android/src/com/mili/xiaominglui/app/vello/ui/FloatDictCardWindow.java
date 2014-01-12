@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
@@ -41,7 +42,7 @@ public class FloatDictCardWindow extends StandOutWindow {
 	@Override
 	public void createAndAttachView(int id, FrameLayout frame) {
 		LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-		View rootView = inflater.inflate(R.layout.float_dict_card, frame, true);
+		ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.float_dict_card, frame, true);
 		mCard = new FloatDictCard(getApplicationContext());
 		CardView cv = (CardView) rootView.findViewById(R.id.float_dict_card);
 		cv.setCard(mCard);

@@ -56,8 +56,7 @@
         <it.gmariotti.cardslib.library.view.CardListView
             android:id="@+id/card_list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            card:list_card_layout_resourceID="@layout/list_card_base_layout" />
+            android:layout_height="match_parent" />
     </RelativeLayout>
 
     <include
