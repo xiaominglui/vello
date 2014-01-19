@@ -59,7 +59,7 @@ public final class WSConfig {
     public static final String WS_DICTIONARY_ICIBA_PARAM_KEYWORD = "w";
     
     // mili dictionary
-    public static final String WS_DICTIONARY_MILI_API = "http://mili.herokuapp.com/words/";
+    public static final String WS_DICTIONARY_MILI_API = "http://mili2.herokuapp.com/words/";
     
     // avos cloud
     public static final String WS_AVELLO_TRELISTENER_URL = "http://dev.vaa.avosapps.com/trelistener";

@@ -10,9 +10,7 @@ public class MiliDictionaryResponseJsonFactory {
 		Bundle bundle = new Bundle();
 		if (wsResponse != null) {
 
-			bundle.putString(
-					VelloRequestFactory.BUNDLE_EXTRA_DICTIONARY_WS_RESPONSE,
-					wsResponse);
+			bundle.putString(VelloRequestFactory.BUNDLE_EXTRA_DICTIONARY_WS_RESPONSE, wsResponse);
 		}
 		return bundle;
 	}

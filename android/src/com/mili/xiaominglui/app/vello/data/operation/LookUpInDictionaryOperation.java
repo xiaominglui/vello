@@ -29,13 +29,14 @@ public class LookUpInDictionaryOperation implements Operation {
 	String keyword = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
 	
 //	String urlString = WSConfig.WS_DICTIONARY_ICIBA_API;
-	String urlString = WSConfig.WS_DICTIONARY_MILI_API + keyword;
+	String urlString = WSConfig.WS_DICTIONARY_MILI_API + keyword + ".json";
 	
 //	HashMap<String, String> parameterMap = new HashMap<String, String>();
 //	parameterMap.put(WSConfig.WS_DICTIONARY_ICIBA_PARAM_KEYWORD, keyword);
-	
-	NetworkConnection networkConnection = new NetworkConnection(context,
-		urlString);
+	if (VelloConfig.DEBUG_SWITCH) {
+	    Log.d(TAG, "urlString = " + urlString);
+	}
+	NetworkConnection networkConnection = new NetworkConnection(context, urlString);
 	networkConnection.setMethod(Method.GET);
 //	networkConnection.setParameters(parameterMap);
 	ConnectionResult result = networkConnection.execute();

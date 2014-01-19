@@ -28,9 +28,9 @@ public class ACRATrelloSender implements ReportSender {
 
     @Override
     public void send(CrashReportData data) throws ReportSenderException {
-        String token = AccountUtils.getAuthToken(mContext);
+        String token = "d2c1a050532923fde013f752868078918c09feaad5c6e4a841d8540f36db0149";
         String urlString = WSConfig.TRELLO_API_URL + WSConfig.WS_TRELLO_TARGET_CARD
-                + "/5188ff6a127b7449510127cb" + WSConfig.WS_TRELLO_ACTION_COMMENTS;
+                + "/52c7ef018f5620c231008e27" + WSConfig.WS_TRELLO_ACTION_COMMENTS;
 
         String dataString = data.toString();
         int len = dataString.length();

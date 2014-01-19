@@ -239,7 +239,7 @@ public class VelloService extends Service implements RequestListener, Connection
     		}
     	}
     	
-		return monitor ? START_REDELIVER_INTENT : START_NOT_STICKY;
+		return START_NOT_STICKY;
 	}
 
 	public static boolean isRunning() {
@@ -678,8 +678,7 @@ public class VelloService extends Service implements RequestListener, Connection
 					showFloatDictCard(wsResponse);
 //				    addWordCard(keywordInQuery, wsResponse);
 					if (keywordInQuery != null && wsResponse != null) {
-						// TODO check and update word status in remote storage
-						queryInRemoteStorage(keywordInQuery, wsResponse);
+						addWordCard(keywordInQuery, wsResponse);
 					}
 				} else {
 				    // no result in dictionary server.
