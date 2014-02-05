@@ -83,7 +83,9 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			    TrelloCard result = (TrelloCard) msg.obj;
 			    break;
 			case VelloService.MSG_STATUS_INIT_ACCOUNT_BEGIN:
-				theActivity.preInitAccount();
+				if (theActivity.isInFront) {
+					theActivity.preInitAccount();
+				}
 				break;
 			case VelloService.MSG_STATUS_INIT_ACCOUNT_END:
 				if (VelloConfig.DEBUG_SWITCH) {

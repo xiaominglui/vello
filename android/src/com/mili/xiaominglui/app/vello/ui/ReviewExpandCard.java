@@ -28,6 +28,9 @@ public class ReviewExpandCard extends CardExpand {
 		if (view == null)
 			return;
 		IcibaWord word = MiliDictionaryJsonParser.parse(mData);
+		if (word == null) {
+			return;
+		}
 
 		LinearLayout linearLayoutPhoneticArea = (LinearLayout) view.findViewById(R.id.phonetics_area);
 		LinearLayout linearLayoutDefinitionArea = (LinearLayout) view.findViewById(R.id.definition_area);

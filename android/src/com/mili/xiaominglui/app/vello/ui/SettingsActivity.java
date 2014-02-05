@@ -36,7 +36,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	public static final String KEY_PREF_SYNC_FREQ = "pref_sync_frequency";
 	public static final String KEY_PREF_SYNC_WIFI_ONLY = "pref_sync_wifi_only";
 	public static final String KEY_PREF_DICT_CLIPBOARD_MONITOR = "pref_dict_clipboard_monitor";
-	private boolean isInFront = false;
+	private boolean isInFront;
 	private String mNewSyncValue = "0";
 	private ListPreference mListPreference;
 	private SettingsActivityUIHandler mUICallback = new SettingsActivityUIHandler(this);
@@ -142,9 +142,8 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
 	
 	@Override
 	protected void onResume() {
-		super.onResume();
-		// setup the initial value
 		isInFront = true;
+		super.onResume();
 		mListPreference.setEnabled(false);
 		mListPreference.setSummary(R.string.pref_sync_frequency_summary_retrieving_setting);
 		
