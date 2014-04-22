@@ -64,7 +64,6 @@ public class VelloService extends Service implements RequestListener, Connection
 	private NotificationManager mNM;
 	private ClipboardManager mCM;
 	private WindowManager mWM;
-//	private MonitorTask mTask = null; // use Timer instead now.
 	private Timer mMonitorTimer = null;
 	private TimerTask mTimerTask = null;
 	private String mLastFakeClipText = "";
@@ -78,7 +77,6 @@ public class VelloService extends Service implements RequestListener, Connection
     public static final int DEF_MONITOR_INTERVAL = 1000;
 
 	HashMap<String, DirtyCard> mDirtyCards = new HashMap<String, DirtyCard>();
-//	ArrayList<TrelloCard> mMergeCards = new ArrayList<TrelloCard>();
 	HashMap<String, TrelloCard> mMergeCards = new HashMap<String, TrelloCard>();
 
 	// Keeps track of all current registered clients.
@@ -209,7 +207,11 @@ public class VelloService extends Service implements RequestListener, Connection
 
     @Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-    	boolean monitor = intent.getBooleanExtra("monitor", false);
+        boolean monitor = false;
+        if (intent != null) {
+            monitor = intent.getBooleanExtra("monitor", false);
+        }
+
     	if (monitor) {
 			/* use Timer instead now.
     		if (mTask == null) {
