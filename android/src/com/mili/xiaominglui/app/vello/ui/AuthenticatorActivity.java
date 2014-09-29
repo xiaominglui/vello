@@ -229,6 +229,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
     	
     	mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
         mWebView = (WebView) findViewById(R.id.webview);
+        mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.setWebViewClient(new MyWebViewClient());
         
         doBindService();
