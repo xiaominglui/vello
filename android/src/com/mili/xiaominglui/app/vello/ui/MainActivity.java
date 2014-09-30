@@ -181,6 +181,16 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	void doUnbindService() {
 		if (mIsBound) {
 			// Detach our existing connection.
+            if (mService != null) {
+                try {
+                    Message msg = Message.obtain(null, VelloService.MSG_UNREGISTER_CLIENT);
+                    msg.replyTo = mMessenger;
+                    mService.send(msg);
+                } catch (RemoteException e) {
+                    // There is nothing special we need to do if the service
+                    // has crashed.
+                }
+            }
 			unbindService(mConnection);
 			mIsBound = false;
 		}

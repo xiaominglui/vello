@@ -213,6 +213,17 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 	void doUnbindService() {
 		if (mIsBound) {
 			// Detach our existing connection.
+            if (mVelloService != null) {
+                try {
+                    Message msg = Message.obtain(null, VelloService.MSG_UNREGISTER_CLIENT);
+                    msg.replyTo = mMessenger;
+                    mVelloService.send(msg);
+                } catch (RemoteException e) {
+                    // There is nothing special we need to do if the service
+                    // has crashed.
+                }
+
+            }
 			unbindService(mConnection);
 			mIsBound = false;
 		}
@@ -249,7 +260,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
      * authToken that's returned from the server as the 'password' for this
      * account - so we're never storing the user's actual password locally.
      * 
-     * @param result the confirmCredentials result.
+     * @param username the confirmCredentials result.
      */
     private void finishAuthenticated(String username) {
     	if (VelloConfig.DEBUG_SWITCH) {
