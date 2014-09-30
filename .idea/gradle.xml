@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/android" />
+            <option value="$PROJECT_DIR$/libprojects" />
+            <option value="$PROJECT_DIR$/libprojects/DataDroid" />
+            <option value="$PROJECT_DIR$/libprojects/actionbarsherlock" />
+            <option value="$PROJECT_DIR$/libprojects/cardslib" />
+            <option value="$PROJECT_DIR$/libprojects/cardslib/src" />
+            <option value="$PROJECT_DIR$/libprojects/cardslib/src/main" />
+            <option value="$PROJECT_DIR$/libprojects/iconictextview" />
+            <option value="$PROJECT_DIR$/libprojects/standout" />
+            <option value="$PROJECT_DIR$/libprojects/supertoasts" />
+            <option value="$PROJECT_DIR$/libprojects/viewpagerindicator" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
+

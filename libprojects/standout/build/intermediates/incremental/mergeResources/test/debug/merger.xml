@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="2" >
+
+    <dataSet config="debug" >
+        <source path="/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/standout/build/intermediates/bundles/debug/res" >
+            <file
+                name="drop_down_list_item"
+                path="/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/standout/build/intermediates/bundles/debug/res/layout/drop_down_list_item.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                name="system_window_decorators"
+                path="/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/standout/build/intermediates/bundles/debug/res/layout/system_window_decorators.xml"
+                qualifiers=""
+                type="layout" />
+            <file
+                path="/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/standout/build/intermediates/bundles/debug/res/values-zh-rCN/values.xml"
+                qualifiers="zh-rCN" >
+                <string name="corner" >Corner
+                </string>
+                <string name="maximize" >最大化
+                </string>
+                <string name="hide" >隐藏
+                </string>
+                <string name="close" >关闭
+                </string>
+                <string name="window_icon" >窗口图标
+                </string>
+            </file>
+            <file
+                name="maximize"
+                path="/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/standout/build/intermediates/bundles/debug/res/drawable-hdpi-v4/maximize.png"
+                qualifiers="hdpi-v4"
+                type="drawable" />
+            <file
+                name="close"
+                path="/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/standout/build/intermediates/bundles/debug/res/drawable-hdpi-v4/close.png"
+                qualifiers="hdpi-v4"
+                type="drawable" />
+            <file
+                name="hide"
+                path="/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/standout/build/intermediates/bundles/debug/res/drawable-hdpi-v4/hide.png"
+                qualifiers="hdpi-v4"
+                type="drawable" />
+            <file
+                name="border_focused"
+                path="/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/standout/build/intermediates/bundles/debug/res/drawable-hdpi-v4/border_focused.9.png"
+                qualifiers="hdpi-v4"
+                type="drawable" />
+            <file
+                name="corner"
+                path="/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/standout/build/intermediates/bundles/debug/res/drawable-hdpi-v4/corner.png"
+                qualifiers="hdpi-v4"
+                type="drawable" />
+            <file
+                name="border"
+                path="/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/standout/build/intermediates/bundles/debug/res/drawable-hdpi-v4/border.9.png"
+                qualifiers="hdpi-v4"
+                type="drawable" />
+            <file
+                path="/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/standout/build/intermediates/bundles/debug/res/values/values.xml"
+                qualifiers="" >
+                <string name="close" >Close
+                </string>
+                <string name="maximize" >Maximize
+                </string>
+                <string name="hide" >Hide
+                </string>
+                <string name="window_icon" >Window icon
+                </string>
+                <string name="corner" >Corner
+                </string>
+            </file>
+        </source>
+    </dataSet>
+    <dataSet config="main" >
+        <source path="/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/standout/src/androidTest/res" />
+        <source path="/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/standout/build/generated/res/rs/test/debug" />
+        <source path="/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/standout/build/generated/res/generated/test/debug" />
+    </dataSet>
+
+</merger>

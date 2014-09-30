@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- From: file:/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/cardslib/src/main/res/values-zh-rCN/strings.xml -->
+    <eat-comment />
+
+    <plurals name="card_selected_items">
+        <item quantity="one">1 item selected</item>
+        <item quantity="other">%d items selected</item>
+    </plurals>
+    <plurals name="list_card_undo_items">
+        <item quantity="one">1 card removed</item>
+        <item quantity="other">%d cards removed</item>
+    </plurals>
+
+    <string name="app_name">CardsLib</string>
+    <string name="list_card_undo_title">撤销</string>
+
+</resources>

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mili.xiaominglui.app.vello"
+    android:versionCode="2"
+    android:versionName="a2.0" >
+
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="19" />
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- required for setIsSyncable -->
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <application
+        android:name="com.mili.xiaominglui.app.vello.VaaApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="com.mili.xiaominglui.app.vello.ui.AccountActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:label="@string/app_name" />
+        <activity
+            android:name="com.mili.xiaominglui.app.vello.ui.MainActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleTop" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
+        <activity
+            android:name="com.mili.xiaominglui.app.vello.ui.SettingsActivity"
+            android:label="@string/title_settings"
+            android:parentActivityName="com.mili.xiaominglui.app.vello.ui.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.MainActivity" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.mili.xiaominglui.app.vello.ui.AuthenticatorActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:excludeFromRecents="true"
+            android:windowSoftInputMode="adjustResize" >
+
+            <!--
+                No intent-filter here! This activity is only ever launched by
+                someone who explicitly knows the class name
+            -->
+        </activity>
+
+        <receiver android:name="com.mili.xiaominglui.app.vello.receiver.AVOSPushReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="com.avos.avello.SYNC_MSG" />
+            </intent-filter>
+        </receiver>
+
+        <!-- The authenticator service -->
+        <service
+            android:name="com.mili.xiaominglui.app.vello.authenticator.AuthenticationService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+        <service
+            android:name="com.mili.xiaominglui.app.vello.data.service.VelloRequestService"
+            android:exported="false" />
+        <service android:name="com.avos.avoscloud.PushService" />
+        <service
+            android:name="com.mili.xiaominglui.app.vello.syncadapter.SyncService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
+        <service android:name="com.mili.xiaominglui.app.vello.service.VelloService" >
+        </service>
+        <service android:name="com.mili.xiaominglui.app.vello.ui.FloatDictCardWindow" >
+        </service>
+
+        <provider
+            android:name="com.mili.xiaominglui.app.vello.data.provider.VelloProvider"
+            android:authorities="com.mili.xiaominglui.app.vello.provider.VelloProvider"
+            android:exported="false"
+            android:label="@string/label_provider_wordcard"
+            android:syncable="true" />
+
+        <meta-data
+            android:name="android.app.default_searchable"
+            android:value=".ui.MainActivity" />
+    </application>
+
+</manifest>

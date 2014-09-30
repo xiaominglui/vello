@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="2" >
+
+    <dataSet config="main" >
+        <source path="/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/actionbarsherlock/assets" />
+    </dataSet>
+    <dataSet config="debug" >
+        <source path="/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/actionbarsherlock/build-types/debug/assets" />
+    </dataSet>
+
+</merger>

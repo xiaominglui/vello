@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- From: file:/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/supertoasts/res/values/colors.xml -->
+    <eat-comment />
+
+    <color name="black">#000000</color>
+    <color name="blue">#0f0</color>
+    <color name="darkgrey">#333333</color>
+    <color name="white">#FFFFFF</color>
+    <!-- From: file:/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/supertoasts/res/values/dimen.xml -->
+    <eat-comment />
+
+    <dimen name="superbuttontoast_button_x_padding">16dp</dimen>
+    <dimen name="superbuttontoast_buttondrawable_padding">8dp</dimen>
+    <dimen name="superbuttontoast_divider_width">1dp</dimen>
+    <dimen name="superbuttontoast_divider_y_margin">6dp</dimen>
+    <dimen name="superbuttontoast_layoutmargin_x">8dp</dimen>
+    <dimen name="superbuttontoast_layoutmargin_y">16dp</dimen>
+    <dimen name="superbuttontoast_textview_x_padding">16dp</dimen>
+    <dimen name="superbuttontoast_textview_y_padding">4dp</dimen>
+    <dimen name="superprogresstoast_progressbar_margin">4dp</dimen>
+    <dimen name="superprogresstoast_progressbar_width">32dp</dimen>
+    <dimen name="superprogresstoast_progressbar_x_padding">6dp</dimen>
+    <dimen name="supertoast_drawable_padding">4dp</dimen>
+    <dimen name="supertoast_textview_x_padding">12dp</dimen>
+    <dimen name="supertoast_textview_y_padding">6dp</dimen>
+    <dimen name="textview_padding">6dp</dimen>
+    <dimen name="toast_sidemargin">8dp</dimen>
+    <dimen name="toast_yoffset">64dp</dimen>
+    <!-- From: file:/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/supertoasts/res/values/integers.xml -->
+    <eat-comment />
+
+    <integer name="horisantalprogressbar_indeterminate_animduration">50</integer>
+    <!-- From: file:/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/supertoasts/res/values/strings.xml -->
+    <eat-comment />
+
+    <string name="app_name">EXTLIBSuperToasts</string>
+    <!-- From: file:/home/xiaominglui/tomorrow/src/xiaominglui/vello/libprojects/supertoasts/res/values/styles.xml -->
+    <eat-comment />
+
+    <style name="AppBaseTheme" parent="android:Theme.Light">
+        <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+        -->
+    </style>
+
+    <style name="AppTheme" parent="AppBaseTheme">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    </style>
+
+</resources>

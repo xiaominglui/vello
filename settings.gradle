@@ -1,0 +1,8 @@
+include ':libprojects:standout'
+include ':libprojects:DataDroid'
+include ':libprojects:iconictextview'
+include ':android'
+include ':libprojects:cardslib:src:main'
+include ':libprojects:supertoasts'
+include ':libprojects:viewpagerindicator'
+include ':libprojects:actionbarsherlock'
