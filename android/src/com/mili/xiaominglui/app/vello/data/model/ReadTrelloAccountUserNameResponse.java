@@ -1,5 +1,5 @@
 package com.mili.xiaominglui.app.vello.data.model;
 
-public class ReadTrelloAccountInfoResponse {
+public class ReadTrelloAccountUserNameResponse {
 	public String _value;
 }

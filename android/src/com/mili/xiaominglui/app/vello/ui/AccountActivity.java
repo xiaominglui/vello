@@ -25,7 +25,6 @@ public class AccountActivity extends SherlockFragmentActivity implements LoginFr
     private static final int REQUEST_AUTHENTICATE = 100;
     private Account mMyTrelloAccount;
     private Intent mFinishIntent;
-    private boolean mCancelAuth = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,24 +47,24 @@ public class AccountActivity extends SherlockFragmentActivity implements LoginFr
     private void tryAuthenticate() {
         AccountUtils.authAndAddTrelloAccount(AccountActivity.this, AccountActivity.this, REQUEST_AUTHENTICATE, mMyTrelloAccount);
     }
-    
+
     @Override
-    public boolean shouldCancelAuthentication() {
-        return mCancelAuth;
+    public void onAuthenticated(String username) {
+        if (mFinishIntent != null) {
+            mFinishIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            mFinishIntent.setAction(Intent.ACTION_MAIN);
+            mFinishIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(mFinishIntent);
+        }
+        finish();
     }
 
     @Override
-    public void onAuthTokenAvailable(String authToken) {
-		if (mFinishIntent != null) {
-			mFinishIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-			mFinishIntent.setAction(Intent.ACTION_MAIN);
-			mFinishIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-			startActivity(mFinishIntent);
-		}
-		finish();
+    public void onOperationCanceled() {
+
     }
 
-	@Override
+    @Override
 	public void onSignInButtonClicked() {
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();

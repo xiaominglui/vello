@@ -208,7 +208,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
                 }
             } else {
                 // choose schedule sync
-                Account account = new Account(AccountUtils.getChosenAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
+                Account account = new Account(AccountUtils.getAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
                 Bundle extras = new Bundle();
                 int pollFrequency = Integer.valueOf(mNewSyncValue) * 60 * 60;
                 ContentResolver.addPeriodicSync(account, VelloProvider.AUTHORITY, extras, pollFrequency);
@@ -234,7 +234,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
     }
 
     private void postCreateWebhook() {
-        Account account = new Account(AccountUtils.getChosenAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
+        Account account = new Account(AccountUtils.getAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
         Bundle extras = new Bundle();
         ContentResolver.removePeriodicSync(account, VelloProvider.AUTHORITY, extras);
 

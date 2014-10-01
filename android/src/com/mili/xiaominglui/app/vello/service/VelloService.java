@@ -13,6 +13,7 @@ import java.util.TimerTask;
 import org.apache.http.HttpStatus;
 
 import wei.mark.standout.StandOutWindow;
+
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -35,7 +36,6 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
-import android.text.method.HideReturnsTransformationMethod;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -59,214 +59,214 @@ import com.mili.xiaominglui.app.vello.ui.MainActivity;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class VelloService extends Service implements RequestListener, ConnectionErrorDialogListener, OnPrimaryClipChangedListener {
-	private static final String TAG = VelloService.class.getSimpleName();
-	private static boolean isRunning = false;
-	private NotificationManager mNM;
-	private ClipboardManager mCM;
-	private WindowManager mWM;
-	private Timer mMonitorTimer = null;
-	private TimerTask mTimerTask = null;
-	private String mLastFakeClipText = "";
-	private SharedPreferences mPrefs;
-	
-	/**
+    private static final String TAG = VelloService.class.getSimpleName();
+    private static boolean isRunning = false;
+    private NotificationManager mNM;
+    private ClipboardManager mCM;
+    private WindowManager mWM;
+    private Timer mMonitorTimer = null;
+    private TimerTask mTimerTask = null;
+    private String mLastFakeClipText = "";
+    private SharedPreferences mPrefs;
+
+    /**
      * Time interval of monitor checking in milliseconds
      * <p>TYPE: int</p>
      */
     public static final String KEY_MONITOR_INTERVAL = "monitor.interval";
     public static final int DEF_MONITOR_INTERVAL = 1000;
 
-	HashMap<String, DirtyCard> mDirtyCards = new HashMap<String, DirtyCard>();
-	HashMap<String, TrelloCard> mMergeCards = new HashMap<String, TrelloCard>();
+    HashMap<String, DirtyCard> mDirtyCards = new HashMap<String, DirtyCard>();
+    HashMap<String, TrelloCard> mMergeCards = new HashMap<String, TrelloCard>();
 
-	// Keeps track of all current registered clients.
-	ArrayList<Messenger> mClients = new ArrayList<Messenger>();
+    // Keeps track of all current registered clients.
+    ArrayList<Messenger> mClients = new ArrayList<Messenger>();
 
-	int mValue = 0; // Holds last value set by a client.
-	public static final int MSG_UNREGISTER_CLIENT = -1;
-	public static final int MSG_REGISTER_CLIENT = 0;
+    int mValue = 0; // Holds last value set by a client.
+    public static final int MSG_UNREGISTER_CLIENT = -1;
+    public static final int MSG_REGISTER_CLIENT = 0;
 
-	public static final int MSG_SPINNER_ON = 1;
-	public static final int MSG_SPINNER_OFF = 2;
-	public static final int MSG_DIALOG_BAD_DATA_ERROR_SHOW = 3;
-	public static final int MSG_SHOW_RESULT_WORDCARD = 5;
-	public static final int MSG_VALID_TRELLO_CONNECTION = 6;
-	public static final int MSG_INVALID_TRELLO_CONNECTION = 7;
-	public static final int MSG_SHOW_FLOAT_WINDOW = 8;
-	
-	public static final int MSG_STATUS_WEBHOOK_DELETED = 16;
-	public static final int MSG_STATUS_WEBHOOK_CREATED = 17;
-	
-	public static final int MSG_STATUS_INIT_ACCOUNT_BEGIN = 50;
-	public static final int MSG_STATUS_INIT_ACCOUNT_END = 51;
-	public static final int MSG_STATUS_SYNC_BEGIN = 52;
-	public static final int MSG_STATUS_SYNC_END = 53;
-	public static final int MSG_STATUS_SYNC_BLANK = 54;
-	public static final int MSG_STATUS_CONNECTION_TIMEOUT = 55;
-	public static final int MSG_STATUS_REVOKE_BEGIN = 56;
-	public static final int MSG_STATUS_REVOKE_END = 57;
+    public static final int MSG_SPINNER_ON = 1;
+    public static final int MSG_SPINNER_OFF = 2;
+    public static final int MSG_DIALOG_BAD_DATA_ERROR_SHOW = 3;
+    public static final int MSG_SHOW_RESULT_WORDCARD = 5;
+    public static final int MSG_VALID_TRELLO_CONNECTION = 6;
+    public static final int MSG_INVALID_TRELLO_CONNECTION = 7;
+    public static final int MSG_SHOW_FLOAT_WINDOW = 8;
 
-	public static final int MSG_CHECK_VOCABULARY_BOARD = 100;
-	public static final int MSG_GET_DUE_REVIEW_CARD_LIST = 101;
-	public static final int MSG_CLOSE_WORDCARD = 104;
-	public static final int MSG_SYNC_LOCAL_CACHE = 106;
-	public static final int MSG_TRIGGER_QUERY_WORD = 107;
-	public static final int MSG_CREATE_WEBHOOK = 108;
-	public static final int MSG_DELETE_WEBHOOK = 109;
-	public static final int MSG_CHECK_TRELLO_CONNECTION = 110;
-	public static final int MSG_READ_TRELLO_ACCOUNT_INFO = 111;
-	public static final int MSG_RETURN_TRELLO_USERNAME = 112;
-	public static final int MSG_SHUTDOWN_CLIPBOARD_MONITOR = 113;
-	
-	public static final int REQ_DATA_CHANGED = 200;
+    public static final int MSG_STATUS_WEBHOOK_DELETED = 16;
+    public static final int MSG_STATUS_WEBHOOK_CREATED = 17;
 
-	final Messenger mMessenger = new Messenger(new IncomingHandler(this));
+    public static final int MSG_STATUS_INIT_ACCOUNT_BEGIN = 50;
+    public static final int MSG_STATUS_INIT_ACCOUNT_END = 51;
+    public static final int MSG_STATUS_SYNC_BEGIN = 52;
+    public static final int MSG_STATUS_SYNC_END = 53;
+    public static final int MSG_STATUS_SYNC_BLANK = 54;
+    public static final int MSG_STATUS_CONNECTION_TIMEOUT = 55;
+    public static final int MSG_STATUS_REVOKE_BEGIN = 56;
+    public static final int MSG_STATUS_REVOKE_END = 57;
 
-	@Override
-	public IBinder onBind(Intent intent) {
-		return mMessenger.getBinder();
-	}
+    public static final int MSG_CHECK_VOCABULARY_BOARD = 100;
+    public static final int MSG_GET_DUE_REVIEW_CARD_LIST = 101;
+    public static final int MSG_CLOSE_WORDCARD = 104;
+    public static final int MSG_SYNC_LOCAL_CACHE = 106;
+    public static final int MSG_TRIGGER_QUERY_WORD = 107;
+    public static final int MSG_CREATE_WEBHOOK = 108;
+    public static final int MSG_DELETE_WEBHOOK = 109;
+    public static final int MSG_CHECK_TRELLO_CONNECTION = 110;
+    public static final int MSG_READ_TRELLO_ACCOUNT_USERNAME = 111;
+    public static final int MSG_RETURN_TRELLO_USERNAME = 112;
+    public static final int MSG_SHUTDOWN_CLIPBOARD_MONITOR = 113;
 
-	static class IncomingHandler extends Handler { // Handler of incoming messages from clients.
-		private final WeakReference<VelloService> mService;
+    public static final int REQ_DATA_CHANGED = 200;
 
-		IncomingHandler(VelloService service) {
-			mService = new WeakReference<VelloService>(service);
-		}
-
-		@Override
-		public void handleMessage(Message msg) {
-			VelloService service = mService.get();
-			if (service != null) {
-				switch (msg.what) {
-				case MSG_REGISTER_CLIENT:
-					service.mClients.add(msg.replyTo);
-					break;
-				case MSG_UNREGISTER_CLIENT:
-					service.mClients.remove(msg.replyTo);
-					break;
-				case MSG_CHECK_VOCABULARY_BOARD:
-					service.checkVocabularyBoard();
-					break;
-				case MSG_GET_DUE_REVIEW_CARD_LIST:
-					int startId = msg.arg1;
-					service.getDueReviewCardList(startId);
-					break;
-				case MSG_TRIGGER_QUERY_WORD:
-					String fakedClipText = (String) msg.obj;
-					if (!service.mLastFakeClipText.equals("")) {
-						String cleanedKeyword = fakedClipText.trim().toLowerCase();
-						if (cleanedKeyword.matches("^[a-z]+$")) {
-							service.lookUpInDictionary(cleanedKeyword);
-						}
-					}
-					service.mLastFakeClipText = fakedClipText;
-				    break;
-				case MSG_DELETE_WEBHOOK:
-					service.deleteWebHook();
-					break;
-				case MSG_CREATE_WEBHOOK:
-					service.createWebHook();
-					break;
-				case MSG_CHECK_TRELLO_CONNECTION:
-					service.checkTrelloConnection();
-					break;
-				case MSG_READ_TRELLO_ACCOUNT_INFO:
-					String token = (String) msg.obj;
-					service.readTrelloAccountInfo(token);
-					break;
-				case MSG_SHUTDOWN_CLIPBOARD_MONITOR:
-					service.shutdownClipboardMonitor();
-					break;
-				case MSG_SHOW_FLOAT_WINDOW:
-					break;
-				default:
-					super.handleMessage(msg);
-				}
-			}
-
-		}
-	}
-
-	private void sendMessageToUI(int type, Object obj) {
-		for (int i = mClients.size() - 1; i >= 0; i--) {
-			try {
-			    Message msg = Message.obtain(null, type);
-			    if (obj != null) {
-			        msg.obj = obj;
-			    }
-				mClients.get(i).send(msg);
-			} catch (RemoteException e) {
-				// The client is dead. Remove it from the list; we are going
-				// through the list from back to front so this is safe to do
-				// inside the loop.
-				mClients.remove(i);
-			}
-		}
-	}
+    final Messenger mMessenger = new Messenger(new IncomingHandler(this));
 
     @Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
+    public IBinder onBind(Intent intent) {
+        return mMessenger.getBinder();
+    }
+
+    static class IncomingHandler extends Handler { // Handler of incoming messages from clients.
+        private final WeakReference<VelloService> mService;
+
+        IncomingHandler(VelloService service) {
+            mService = new WeakReference<VelloService>(service);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            VelloService service = mService.get();
+            if (service != null) {
+                switch (msg.what) {
+                    case MSG_REGISTER_CLIENT:
+                        service.mClients.add(msg.replyTo);
+                        break;
+                    case MSG_UNREGISTER_CLIENT:
+                        service.mClients.remove(msg.replyTo);
+                        break;
+                    case MSG_CHECK_VOCABULARY_BOARD:
+                        service.checkVocabularyBoard();
+                        break;
+                    case MSG_GET_DUE_REVIEW_CARD_LIST:
+                        int startId = msg.arg1;
+                        service.getDueReviewCardList(startId);
+                        break;
+                    case MSG_TRIGGER_QUERY_WORD:
+                        String fakedClipText = (String) msg.obj;
+                        if (!service.mLastFakeClipText.equals("")) {
+                            String cleanedKeyword = fakedClipText.trim().toLowerCase();
+                            if (cleanedKeyword.matches("^[a-z]+$")) {
+                                service.lookUpInDictionary(cleanedKeyword);
+                            }
+                        }
+                        service.mLastFakeClipText = fakedClipText;
+                        break;
+                    case MSG_DELETE_WEBHOOK:
+                        service.deleteWebHook();
+                        break;
+                    case MSG_CREATE_WEBHOOK:
+                        service.createWebHook();
+                        break;
+                    case MSG_CHECK_TRELLO_CONNECTION:
+                        service.checkTrelloConnection();
+                        break;
+                    case MSG_READ_TRELLO_ACCOUNT_USERNAME:
+                        String token = (String) msg.obj;
+                        service.readTrelloAccountUserName(token);
+                        break;
+                    case MSG_SHUTDOWN_CLIPBOARD_MONITOR:
+                        service.shutdownClipboardMonitor();
+                        break;
+                    case MSG_SHOW_FLOAT_WINDOW:
+                        break;
+                    default:
+                        super.handleMessage(msg);
+                }
+            }
+
+        }
+    }
+
+    private void sendMessageToClients(int type, Object obj) {
+        for (int i = mClients.size() - 1; i >= 0; i--) {
+            try {
+                Message msg = Message.obtain(null, type);
+                if (obj != null) {
+                    msg.obj = obj;
+                }
+                mClients.get(i).send(msg);
+            } catch (RemoteException e) {
+                // The client is dead. Remove it from the list; we are going
+                // through the list from back to front so this is safe to do
+                // inside the loop.
+                mClients.remove(i);
+            }
+        }
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
         boolean monitor = false;
         if (intent != null) {
             monitor = intent.getBooleanExtra("monitor", false);
         }
 
-    	if (monitor) {
-			/* use Timer instead now.
+        if (monitor) {
+            /* use Timer instead now.
     		if (mTask == null) {
     			mTask = new MonitorTask();
     		}
     		mTask.start(); */
-			if (mMonitorTimer == null) {
-				mMonitorTimer = new Timer(true);
-			}
-			if (mTimerTask == null) {
-				mTimerTask = new MonitorTimerTask();
-			}
-			mMonitorTimer.scheduleAtFixedRate(mTimerTask, 0, mPrefs.getInt(KEY_MONITOR_INTERVAL, DEF_MONITOR_INTERVAL));
-			showNotification();
-    	} else {
-    		if (VelloConfig.DEBUG_SWITCH) {
-        		Log.d(TAG, "command started---#" + startId);
-        	}
-        	Message m = Message.obtain(null, VelloService.MSG_GET_DUE_REVIEW_CARD_LIST);
-        	m.arg1 = startId;
-        	m.arg2 = flags;
-        	m.obj = intent.getExtras();
-        	try {
-    			mMessenger.send(m);
-    		} catch (RemoteException e) {
-    			e.printStackTrace();
-    		}
-    	}
-    	
-		return START_NOT_STICKY;
-	}
+            if (mMonitorTimer == null) {
+                mMonitorTimer = new Timer(true);
+            }
+            if (mTimerTask == null) {
+                mTimerTask = new MonitorTimerTask();
+            }
+            mMonitorTimer.scheduleAtFixedRate(mTimerTask, 0, mPrefs.getInt(KEY_MONITOR_INTERVAL, DEF_MONITOR_INTERVAL));
+            showNotification();
+        } else {
+            if (VelloConfig.DEBUG_SWITCH) {
+                Log.d(TAG, "command started---#" + startId);
+            }
+            Message m = Message.obtain(null, VelloService.MSG_GET_DUE_REVIEW_CARD_LIST);
+            m.arg1 = startId;
+            m.arg2 = flags;
+            m.obj = intent.getExtras();
+            try {
+                mMessenger.send(m);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
 
-	public static boolean isRunning() {
-		return isRunning;
-	}
+        return START_NOT_STICKY;
+    }
 
-	@Override
-	public void onCreate() {
-		Log.i(TAG, "VelloService Started.");
-		mRequestManager = VelloRequestManager.from(this);
-		mRequestList = new ArrayList<Request>();
-		mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-		mWM = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
-		mCM = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+    public static boolean isRunning() {
+        return isRunning;
+    }
+
+    @Override
+    public void onCreate() {
+        Log.i(TAG, "VelloService Started.");
+        mRequestManager = VelloRequestManager.from(this);
+        mRequestList = new ArrayList<Request>();
+        mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        mWM = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+        mCM = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 //		mCM.addPrimaryClipChangedListener(this);
-		// https://code.google.com/p/android/issues/detail?id=58043
-		// TODO add a option in setting
-		
-		isRunning = true;
-	}
+        // https://code.google.com/p/android/issues/detail?id=58043
+        // TODO add a option in setting
 
-	@Override
-	public void onDestroy() {
-		// Cancel the persistent notification.
+        isRunning = true;
+    }
+
+    @Override
+    public void onDestroy() {
+        // Cancel the persistent notification.
 //		mCM.removePrimaryClipChangedListener(this);
 		/* use Timer instead now
 		if (mTask != null && mTask.isRunning()) {
@@ -274,844 +274,845 @@ public class VelloService extends Service implements RequestListener, Connection
 		}
 		*/
 
-		Log.i(TAG, "VelloService Stopped.");
-		isRunning = false;
-	}
+        Log.i(TAG, "VelloService Stopped.");
+        isRunning = false;
+    }
 
-	protected VelloRequestManager mRequestManager;
-	protected ArrayList<Request> mRequestList;
-	
-	private void archiveWordCard(String idCard) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "archiveWordCard start...");
-		}
-		Request archiveWordCard = VelloRequestFactory
-				.archiveWordCardRequest(idCard);
-		mRequestManager.execute(archiveWordCard, this);
-		mRequestList.add(archiveWordCard);
-	}
+    protected VelloRequestManager mRequestManager;
+    protected ArrayList<Request> mRequestList;
 
-	private void reviewedWordCard(String idCard, int position) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "reviewedWordCard start...");
-		}
-		Request reviewedWordCard = VelloRequestFactory.reviewedWordCardRequest(
-				idCard, position);
-		mRequestManager.execute(reviewedWordCard, this);
-		mRequestList.add(reviewedWordCard);
-	}
+    private void archiveWordCard(String idCard) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "archiveWordCard start...");
+        }
+        Request archiveWordCard = VelloRequestFactory
+                .archiveWordCardRequest(idCard);
+        mRequestManager.execute(archiveWordCard, this);
+        mRequestList.add(archiveWordCard);
+    }
 
-	private void checkVocabularyBoard() {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "checkVocabularyBoard start...");
-		}
-		sendMessageToUI(VelloService.MSG_STATUS_INIT_ACCOUNT_BEGIN, null);
+    private void reviewedWordCard(String idCard, int position) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "reviewedWordCard start...");
+        }
+        Request reviewedWordCard = VelloRequestFactory.reviewedWordCardRequest(
+                idCard, position);
+        mRequestManager.execute(reviewedWordCard, this);
+        mRequestList.add(reviewedWordCard);
+    }
 
-		Request checkVocabularyBoardRequest = VelloRequestFactory.checkVocabularyBoardRequest();
-		mRequestManager.execute(checkVocabularyBoardRequest, this);
-		mRequestList.add(checkVocabularyBoardRequest);
-	}
+    private void checkVocabularyBoard() {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "checkVocabularyBoard start...");
+        }
+        sendMessageToClients(VelloService.MSG_STATUS_INIT_ACCOUNT_BEGIN, null);
 
-	private void createVocabularyBoard() {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "createVocabularyBoard start...");
-		}
-		Request createVocabularyBoardRequest = VelloRequestFactory
-				.createVocabularyBoardRequest();
-		mRequestManager.execute(createVocabularyBoardRequest, this);
-		mRequestList.add(createVocabularyBoardRequest);
-	}
+        Request checkVocabularyBoardRequest = VelloRequestFactory.checkVocabularyBoardRequest();
+        mRequestManager.execute(checkVocabularyBoardRequest, this);
+        mRequestList.add(checkVocabularyBoardRequest);
+    }
 
-	private void createVocabularyList(int position) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "createVocabularyList start...");
-		}
-		Request createVocabularyListRequest = VelloRequestFactory
-				.createVocabularyListRequest(position);
-		mRequestManager.execute(createVocabularyListRequest, this);
-		mRequestList.add(createVocabularyListRequest);
-	}
+    private void createVocabularyBoard() {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "createVocabularyBoard start...");
+        }
+        Request createVocabularyBoardRequest = VelloRequestFactory
+                .createVocabularyBoardRequest();
+        mRequestManager.execute(createVocabularyBoardRequest, this);
+        mRequestList.add(createVocabularyBoardRequest);
+    }
 
-	private void reOpenVocabulayList(int position, String id) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "reOpenVocabulayList start...");
-		}
-		Request reOpenVocabularyListRequest = VelloRequestFactory
-				.reOpenVocabularyListRequest(position, id);
-		mRequestManager.execute(reOpenVocabularyListRequest, this);
-		mRequestList.add(reOpenVocabularyListRequest);
-	}
+    private void createVocabularyList(int position) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "createVocabularyList start...");
+        }
+        Request createVocabularyListRequest = VelloRequestFactory
+                .createVocabularyListRequest(position);
+        mRequestManager.execute(createVocabularyListRequest, this);
+        mRequestList.add(createVocabularyListRequest);
+    }
 
-	private void checkVocabularyLists() {
-		for (int i = 0; i < AccountUtils.VOCABULARY_LISTS_TITLE_ID.length; i++) {
-			if (VelloConfig.DEBUG_SWITCH) {
-				Log.d(TAG, "checkVocabularyLists start..." + i);
-			}
-			Request checkVocabularyListReqest = VelloRequestFactory.checkVocabularyListRequest(i);
+    private void reOpenVocabulayList(int position, String id) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "reOpenVocabulayList start...");
+        }
+        Request reOpenVocabularyListRequest = VelloRequestFactory
+                .reOpenVocabularyListRequest(position, id);
+        mRequestManager.execute(reOpenVocabularyListRequest, this);
+        mRequestList.add(reOpenVocabularyListRequest);
+    }
 
-			mRequestManager.execute(checkVocabularyListReqest, this);
-			mRequestList.add(checkVocabularyListReqest);
-		}
+    private void checkVocabularyLists() {
+        for (int i = 0; i < AccountUtils.VOCABULARY_LISTS_TITLE_ID.length; i++) {
+            if (VelloConfig.DEBUG_SWITCH) {
+                Log.d(TAG, "checkVocabularyLists start..." + i);
+            }
+            Request checkVocabularyListReqest = VelloRequestFactory.checkVocabularyListRequest(i);
 
-	}
+            mRequestManager.execute(checkVocabularyListReqest, this);
+            mRequestList.add(checkVocabularyListReqest);
+        }
 
-	private void configureVocabularyBoard(String id) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "configureVocabularyBoard start...");
-		}
-		Request configureVocabularyBoardRequest = VelloRequestFactory
-				.configureVocabularyBoardRequest(id);
-		mRequestManager.execute(configureVocabularyBoardRequest, this);
-		mRequestList.add(configureVocabularyBoardRequest);
-	}
+    }
 
-	private void getOpenTrelloCardList(int startId, boolean force) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "getOpenTrelloCardList with startId = " + startId + ", force = " + force + " start...");
-		}
+    private void configureVocabularyBoard(String id) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "configureVocabularyBoard start...");
+        }
+        Request configureVocabularyBoardRequest = VelloRequestFactory
+                .configureVocabularyBoardRequest(id);
+        mRequestManager.execute(configureVocabularyBoardRequest, this);
+        mRequestList.add(configureVocabularyBoardRequest);
+    }
 
-		Request getOpenTrelloCardList = VelloRequestFactory.getOpenTrelloCardListRequest(startId, force);
-		mRequestManager.execute(getOpenTrelloCardList, this);
-		mRequestList.add(getOpenTrelloCardList);
+    private void getOpenTrelloCardList(int startId, boolean force) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "getOpenTrelloCardList with startId = " + startId + ", force = " + force + " start...");
+        }
 
-	}
-	
-	private void getDueReviewCardList(int startId) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "getDueReviewCardList with startId = " + startId + " start...");
-		}
-		sendMessageToUI(VelloService.MSG_STATUS_SYNC_BEGIN, null);
-		// step 1: get open trello cards
-		getOpenTrelloCardList(startId, false);
-	}
+        Request getOpenTrelloCardList = VelloRequestFactory.getOpenTrelloCardListRequest(startId, force);
+        mRequestManager.execute(getOpenTrelloCardList, this);
+        mRequestList.add(getOpenTrelloCardList);
 
-	private void queryInRemoteStorage(String keyword, String jsonResponse) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "checkTrelloCardStatusRequest start...");
-		}
-		Request queryInRemoteStorage = VelloRequestFactory.queryInRemoteStorageRequest(keyword, jsonResponse);
-		mRequestManager.execute(queryInRemoteStorage, this);
-		mRequestList.add(queryInRemoteStorage);
-	}
-	
-	private void lookUpInDictionary(String keyword) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "look up [" + keyword + "] in dictionary...");
-		}
-		Request lookUpInDictionary = VelloRequestFactory.lookUpInDictionaryRequest(keyword);
-		mRequestManager.execute(lookUpInDictionary, this);
-		mRequestList.add(lookUpInDictionary);
-	}
+    }
 
-	private void addWordCard(String keyword, String data) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "addWordCard start...");
-		}
-		Request addWordCard = VelloRequestFactory.addWordCardRequest(keyword, data);
-		mRequestManager.execute(addWordCard, this);
-		mRequestList.add(addWordCard);
-	}
+    private void getDueReviewCardList(int startId) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "getDueReviewCardList with startId = " + startId + " start...");
+        }
+        sendMessageToClients(VelloService.MSG_STATUS_SYNC_BEGIN, null);
+        // step 1: get open trello cards
+        getOpenTrelloCardList(startId, false);
+    }
 
-	private void initializeWordCard(String idCard) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "initializeWordCard start...");
-		}
-		Request initializeWordCard = VelloRequestFactory.initializeWordCardRequest(idCard);
-		mRequestManager.execute(initializeWordCard, this);
-		mRequestList.add(initializeWordCard);
-	}
+    private void queryInRemoteStorage(String keyword, String jsonResponse) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "checkTrelloCardStatusRequest start...");
+        }
+        Request queryInRemoteStorage = VelloRequestFactory.queryInRemoteStorageRequest(keyword, jsonResponse);
+        mRequestManager.execute(queryInRemoteStorage, this);
+        mRequestList.add(queryInRemoteStorage);
+    }
 
-	private void reStartWordCard(String idCard) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "reStartWordCard start...");
-		}
-		Request reStartWordCard = VelloRequestFactory
-				.reStartWordCardRequest(idCard);
-		mRequestManager.execute(reStartWordCard, this);
-		mRequestList.add(reStartWordCard);
-	}
-	
-	private void createWebHook() {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "createWebHook start...");
-		}
-		Request createWebHook = VelloRequestFactory.createWebHook();
-		mRequestManager.execute(createWebHook, this);
-		mRequestList.add(createWebHook);
-	}
-	
-	private void deleteWebHook() {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "deleteWebHook start...");
-		}
-		Request setWebHookActive = VelloRequestFactory.deleteWebHook();
-		mRequestManager.execute(setWebHookActive, this);
-		mRequestList.add(setWebHookActive);
-	}
-	
-	private void checkTrelloConnection() {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "checkTrelloConnection start...");
-		}
-		Request checkTrelloConnection = VelloRequestFactory.checkTrelloConnection();
-		mRequestManager.execute(checkTrelloConnection, this);
-		mRequestList.add(checkTrelloConnection);
-	}
-	
-	private void readTrelloAccountInfo(String token) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "readTrelloAccountInfo start...");
-		}
-		Request readTrelloAccountInfo = VelloRequestFactory.readTrelloAccountInfo(token);
-		mRequestManager.execute(readTrelloAccountInfo, this);
-		mRequestList.add(readTrelloAccountInfo);
-	}
-	
-	private void deleteRemoteTrelloCard(TrelloCard card, int startId) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "deleteRemoteTrelloCard start...");
-		}
-		Request deleteRemoteTrelloCard = VelloRequestFactory.deleteRemoteTrelloCard(card, startId);
-		mRequestManager.execute(deleteRemoteTrelloCard, this);
-		mRequestList.add(deleteRemoteTrelloCard);
-	}
-	
-	private void updateRemoteTrelloCard(TrelloCard card, int startId) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "updateRemoteTrelloCard start...");
-		}
-		Request updateRemoteTrelloCard = VelloRequestFactory.updateRemoteTrelloCard(card, startId);
-		mRequestManager.execute(updateRemoteTrelloCard, this);
-		mRequestList.add(updateRemoteTrelloCard);
-	}
-	
-	private void shutdownClipboardMonitor() {
+    private void lookUpInDictionary(String keyword) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "look up [" + keyword + "] in dictionary...");
+        }
+        Request lookUpInDictionary = VelloRequestFactory.lookUpInDictionaryRequest(keyword);
+        mRequestManager.execute(lookUpInDictionary, this);
+        mRequestList.add(lookUpInDictionary);
+    }
+
+    private void addWordCard(String keyword, String data) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "addWordCard start...");
+        }
+        Request addWordCard = VelloRequestFactory.addWordCardRequest(keyword, data);
+        mRequestManager.execute(addWordCard, this);
+        mRequestList.add(addWordCard);
+    }
+
+    private void initializeWordCard(String idCard) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "initializeWordCard start...");
+        }
+        Request initializeWordCard = VelloRequestFactory.initializeWordCardRequest(idCard);
+        mRequestManager.execute(initializeWordCard, this);
+        mRequestList.add(initializeWordCard);
+    }
+
+    private void reStartWordCard(String idCard) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "reStartWordCard start...");
+        }
+        Request reStartWordCard = VelloRequestFactory
+                .reStartWordCardRequest(idCard);
+        mRequestManager.execute(reStartWordCard, this);
+        mRequestList.add(reStartWordCard);
+    }
+
+    private void createWebHook() {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "createWebHook start...");
+        }
+        Request createWebHook = VelloRequestFactory.createWebHook();
+        mRequestManager.execute(createWebHook, this);
+        mRequestList.add(createWebHook);
+    }
+
+    private void deleteWebHook() {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "deleteWebHook start...");
+        }
+        Request setWebHookActive = VelloRequestFactory.deleteWebHook();
+        mRequestManager.execute(setWebHookActive, this);
+        mRequestList.add(setWebHookActive);
+    }
+
+    private void checkTrelloConnection() {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "checkTrelloConnection start...");
+        }
+        Request checkTrelloConnection = VelloRequestFactory.checkTrelloConnection();
+        mRequestManager.execute(checkTrelloConnection, this);
+        mRequestList.add(checkTrelloConnection);
+    }
+
+    private void readTrelloAccountUserName(String token) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "readTrelloAccountUserName start...");
+        }
+        Request readTrelloAccountUserName = VelloRequestFactory.readTrelloAccountUserName(token);
+        mRequestManager.execute(readTrelloAccountUserName, this);
+        mRequestList.add(readTrelloAccountUserName);
+    }
+
+    private void deleteRemoteTrelloCard(TrelloCard card, int startId) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "deleteRemoteTrelloCard start...");
+        }
+        Request deleteRemoteTrelloCard = VelloRequestFactory.deleteRemoteTrelloCard(card, startId);
+        mRequestManager.execute(deleteRemoteTrelloCard, this);
+        mRequestList.add(deleteRemoteTrelloCard);
+    }
+
+    private void updateRemoteTrelloCard(TrelloCard card, int startId) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "updateRemoteTrelloCard start...");
+        }
+        Request updateRemoteTrelloCard = VelloRequestFactory.updateRemoteTrelloCard(card, startId);
+        mRequestManager.execute(updateRemoteTrelloCard, this);
+        mRequestList.add(updateRemoteTrelloCard);
+    }
+
+    private void shutdownClipboardMonitor() {
 		/* use Timer instead now
 		if (mTask != null && mTask.isRunning()) {
 			mTask.cancel();
 		}
 		*/
-		
-		if (mMonitorTimer != null) {
-			mMonitorTimer.cancel();
-			removeNotification();
-		}
-	}
 
-	private void showFloatDictCard(TrelloCard card) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "showFloatDictCard --- " + card.name);
-		}
-		Bundle data = new Bundle();
-		data.putParcelable("changedData", card);
-		StandOutWindow.show(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID);
-		StandOutWindow.sendData(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID, REQ_DATA_CHANGED, data, StandOutWindow.class, StandOutWindow.DEFAULT_ID);
-		Handler handler = new Handler();
-		handler.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				StandOutWindow.closeAll(getApplicationContext(), FloatDictCardWindow.class);
-			}
-		}, VelloConfig.FLOAT_DICT_CARD_DISMISS_TIME);
-	}
-	
-	private void showFloatDictCard(String jsonResponse) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "showFloatDictCard --- " + jsonResponse);
-		}
-		Bundle data = new Bundle();
-		data.putString("jsonResponse", jsonResponse);
-		StandOutWindow.show(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID);
-		StandOutWindow.sendData(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID, REQ_DATA_CHANGED, data, StandOutWindow.class, StandOutWindow.DEFAULT_ID);
-		Handler handler = new Handler();
-		handler.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				StandOutWindow.closeAll(getApplicationContext(), FloatDictCardWindow.class);
-			}
-		}, VelloConfig.FLOAT_DICT_CARD_DISMISS_TIME);
-	}
+        if (mMonitorTimer != null) {
+            mMonitorTimer.cancel();
+            removeNotification();
+        }
+    }
 
-	@SuppressLint("SimpleDateFormat")
-	@Override
-	public void onRequestFinished(Request request, Bundle resultData) {
-		if (mRequestList.contains(request)) {
-			mRequestList.remove(request);
+    private void showFloatDictCard(TrelloCard card) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "showFloatDictCard --- " + card.name);
+        }
+        Bundle data = new Bundle();
+        data.putParcelable("changedData", card);
+        StandOutWindow.show(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID);
+        StandOutWindow.sendData(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID, REQ_DATA_CHANGED, data, StandOutWindow.class, StandOutWindow.DEFAULT_ID);
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                StandOutWindow.closeAll(getApplicationContext(), FloatDictCardWindow.class);
+            }
+        }, VelloConfig.FLOAT_DICT_CARD_DISMISS_TIME);
+    }
 
-			switch (request.getRequestType()) {
-			case VelloRequestFactory.REQUEST_TYPE_REVIEWED_WORDCARD:
-				TrelloCard reviewedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
-				if (reviewedWordCard != null) {
-					// reviewed
+    private void showFloatDictCard(String jsonResponse) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "showFloatDictCard --- " + jsonResponse);
+        }
+        Bundle data = new Bundle();
+        data.putString("jsonResponse", jsonResponse);
+        StandOutWindow.show(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID);
+        StandOutWindow.sendData(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID, REQ_DATA_CHANGED, data, StandOutWindow.class, StandOutWindow.DEFAULT_ID);
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                StandOutWindow.closeAll(getApplicationContext(), FloatDictCardWindow.class);
+            }
+        }, VelloConfig.FLOAT_DICT_CARD_DISMISS_TIME);
+    }
 
-				} else {
-					// reviewed failed
-					// do nothing at present
-				}
-				if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "reviewedWordCard end.");
-				}
-				return;
+    @SuppressLint("SimpleDateFormat")
+    @Override
+    public void onRequestFinished(Request request, Bundle resultData) {
+        if (mRequestList.contains(request)) {
+            mRequestList.remove(request);
 
-			case VelloRequestFactory.REQUEST_TYPE_CHECK_VOCABULARY_BOARD:
-				ArrayList<Board> boardList = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_BOARD_LIST);
-				for (Board board : boardList) {
-					if (board.name.equals(AccountUtils.getVocabularyBoardName(getApplicationContext()))
-							&& board.desc.equals(AccountUtils.getVocabularyBoardVerification())) {
-						// s - 0 find out vocabulary board, check the closed
-						// flag.
+            switch (request.getRequestType()) {
+                case VelloRequestFactory.REQUEST_TYPE_REVIEWED_WORDCARD:
+                    TrelloCard reviewedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+                    if (reviewedWordCard != null) {
+                        // reviewed
 
-						if (!board.closed.equals("true")) {
-							// s - 0.0 vocabulary board is NOT well
-							// configured.
-							configureVocabularyBoard(board.id);
-							return;
-						} else {
-							// s - 0.1 well configured vocabulary board,
-							// save id
-							AccountUtils.setVocabularyBoardId(getApplicationContext(), board.id);
-							checkVocabularyLists();
-							return;
-						}
-					}
-				}
+                    } else {
+                        // reviewed failed
+                        // do nothing at present
+                    }
+                    if (VelloConfig.DEBUG_SWITCH) {
+                        Log.d(TAG, "reviewedWordCard end.");
+                    }
+                    return;
 
-				// s - 1 NO vocabulary board found, need create one
-				createVocabularyBoard();
-				if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "check vocabulary board end.");
-				}
-				return;
+                case VelloRequestFactory.REQUEST_TYPE_CHECK_VOCABULARY_BOARD:
+                    ArrayList<Board> boardList = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_BOARD_LIST);
+                    for (Board board : boardList) {
+                        if (board.name.equals(AccountUtils.getVocabularyBoardName(getApplicationContext()))
+                                && board.desc.equals(AccountUtils.getVocabularyBoardVerification())) {
+                            // s - 0 find out vocabulary board, check the closed
+                            // flag.
 
-			case VelloRequestFactory.REQUEST_TYPE_CONFIGURE_VOCABULARY_BOARD:
-				String boardId = request.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_BOARD_ID);
-				if (resultData != null) {
-					// configure board successfully & save it
-					String id = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_BOARD_ID);
-					AccountUtils.setVocabularyBoardId(getApplicationContext(), id);
-					Log.d(TAG, "configure board successfully! vocabulary board id = " + id);
+                            if (!board.closed.equals("true")) {
+                                // s - 0.0 vocabulary board is NOT well
+                                // configured.
+                                configureVocabularyBoard(board.id);
+                                return;
+                            } else {
+                                // s - 0.1 well configured vocabulary board,
+                                // save id
+                                AccountUtils.setVocabularyBoardId(getApplicationContext(), board.id);
+                                checkVocabularyLists();
+                                return;
+                            }
+                        }
+                    }
 
-					// continue to check vocabulary list if not well formed
-					checkVocabularyLists();
-				} else {
-					// configure board failed, try again
-					configureVocabularyBoard(boardId);
-				}
-				return;
+                    // s - 1 NO vocabulary board found, need create one
+                    createVocabularyBoard();
+                    if (VelloConfig.DEBUG_SWITCH) {
+                        Log.d(TAG, "check vocabulary board end.");
+                    }
+                    return;
 
-			case VelloRequestFactory.REQUEST_TYPE_CHECK_VOCABULARY_LIST:
-				ArrayList<List> listList = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_LIST);
-				int position = request.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
-				for (List list : listList) {
-					if (list.name.equals(AccountUtils.VOCABULARY_LISTS_TITLE_ID[position])) {
-						// get the vocabulary list[position]
-						if (!list.closed.equals("false")) {
-							// list[position] be closed unexpectedly
-							reOpenVocabulayList(position, list.id);
-							return;
-						} else {
-							// list[position]'s status ok, save listId
-							AccountUtils.setVocabularyListId(getApplicationContext(), list.id, position);
-							if (AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
-								sendMessageToUI(VelloService.MSG_STATUS_INIT_ACCOUNT_END, null);
-							}
-							return;
-						}
-					}
-				}
-				
-				// no vocabulary list found
-				createVocabularyList(position);
-				if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "check vocabulary list end.");
-				}
-				return;
+                case VelloRequestFactory.REQUEST_TYPE_CONFIGURE_VOCABULARY_BOARD:
+                    String boardId = request.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_BOARD_ID);
+                    if (resultData != null) {
+                        // configure board successfully & save it
+                        String id = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_BOARD_ID);
+                        AccountUtils.setVocabularyBoardId(getApplicationContext(), id);
+                        Log.d(TAG, "configure board successfully! vocabulary board id = " + id);
 
-			case VelloRequestFactory.REQUEST_TYPE_REOPEN_VOCABULARY_LIST:
-				int positonList = request
-						.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
-				String idList = request
-						.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_ID);
-				if (resultData != null) {
-					// reopen list successfully
-					String id = resultData
-							.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_ID);
-					int pos = resultData
-							.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
-					AccountUtils.setVocabularyListId(getApplicationContext(), id, pos);
-				} else {
-					// reopen failed, try again
-					reOpenVocabulayList(positonList, idList);
-				}
-				return;
+                        // continue to check vocabulary list if not well formed
+                        checkVocabularyLists();
+                    } else {
+                        // configure board failed, try again
+                        configureVocabularyBoard(boardId);
+                    }
+                    return;
 
-			case VelloRequestFactory.REQUEST_TYPE_CREATE_VOCABULARY_LIST:
-				int positionList = request
-						.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
-				if (resultData != null) {
-					// create list successfully
-					String id = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_ID);
-					int pos = request.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
-					AccountUtils.setVocabularyListId(getApplicationContext(), id, pos);
-				} else {
-					// create list failed, try again
-					createVocabularyList(positionList);
-				}
-				if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "create vocabulary list end.");
-				}
-				return;
+                case VelloRequestFactory.REQUEST_TYPE_CHECK_VOCABULARY_LIST:
+                    ArrayList<List> listList = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_LIST);
+                    int position = request.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
+                    for (List list : listList) {
+                        if (list.name.equals(AccountUtils.VOCABULARY_LISTS_TITLE_ID[position])) {
+                            // get the vocabulary list[position]
+                            if (!list.closed.equals("false")) {
+                                // list[position] be closed unexpectedly
+                                reOpenVocabulayList(position, list.id);
+                                return;
+                            } else {
+                                // list[position]'s status ok, save listId
+                                AccountUtils.setVocabularyListId(getApplicationContext(), list.id, position);
+                                if (AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
+                                    sendMessageToClients(VelloService.MSG_STATUS_INIT_ACCOUNT_END, null);
+                                }
+                                return;
+                            }
+                        }
+                    }
 
-			case VelloRequestFactory.REQUEST_TYPE_CREATE_VOCABULARY_BOARD:
-				if (resultData != null) {
-					// create vocabulary board successfully
-					String id = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_BOARD_ID);
+                    // no vocabulary list found
+                    createVocabularyList(position);
+                    if (VelloConfig.DEBUG_SWITCH) {
+                        Log.d(TAG, "check vocabulary list end.");
+                    }
+                    return;
 
-					configureVocabularyBoard(id);
-				} else {
-					// create vocabulary board failed, try again
-					createVocabularyBoard();
-				}
-				return;
-			case VelloRequestFactory.REQUEST_TYPE_LOOK_UP_IN_DICTIONARY:
-			    String keywordInQuery = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
-				String wsResponse = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_DICTIONARY_WS_RESPONSE);
-				if (!wsResponse.equals("null\n")) {
-					showFloatDictCard(wsResponse);
+                case VelloRequestFactory.REQUEST_TYPE_REOPEN_VOCABULARY_LIST:
+                    int positonList = request
+                            .getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
+                    String idList = request
+                            .getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_ID);
+                    if (resultData != null) {
+                        // reopen list successfully
+                        String id = resultData
+                                .getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_ID);
+                        int pos = resultData
+                                .getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
+                        AccountUtils.setVocabularyListId(getApplicationContext(), id, pos);
+                    } else {
+                        // reopen failed, try again
+                        reOpenVocabulayList(positonList, idList);
+                    }
+                    return;
+
+                case VelloRequestFactory.REQUEST_TYPE_CREATE_VOCABULARY_LIST:
+                    int positionList = request
+                            .getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
+                    if (resultData != null) {
+                        // create list successfully
+                        String id = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_LIST_ID);
+                        int pos = request.getInt(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_LIST_POSITION);
+                        AccountUtils.setVocabularyListId(getApplicationContext(), id, pos);
+                    } else {
+                        // create list failed, try again
+                        createVocabularyList(positionList);
+                    }
+                    if (VelloConfig.DEBUG_SWITCH) {
+                        Log.d(TAG, "create vocabulary list end.");
+                    }
+                    return;
+
+                case VelloRequestFactory.REQUEST_TYPE_CREATE_VOCABULARY_BOARD:
+                    if (resultData != null) {
+                        // create vocabulary board successfully
+                        String id = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_VOCABULARY_BOARD_ID);
+
+                        configureVocabularyBoard(id);
+                    } else {
+                        // create vocabulary board failed, try again
+                        createVocabularyBoard();
+                    }
+                    return;
+                case VelloRequestFactory.REQUEST_TYPE_LOOK_UP_IN_DICTIONARY:
+                    String keywordInQuery = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
+                    String wsResponse = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_DICTIONARY_WS_RESPONSE);
+                    if (!wsResponse.equals("null\n")) {
+                        showFloatDictCard(wsResponse);
 //				    addWordCard(keywordInQuery, wsResponse);
-					if (keywordInQuery != null && wsResponse != null) {
-						addWordCard(keywordInQuery, wsResponse);
-					}
-				} else {
-				    // no result in dictionary server.
-					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "no result in dictionary server.");
-					}
-				}
-				
-				return;
+                        if (keywordInQuery != null && wsResponse != null) {
+                            addWordCard(keywordInQuery, wsResponse);
+                        }
+                    } else {
+                        // no result in dictionary server.
+                        if (VelloConfig.DEBUG_SWITCH) {
+                            Log.d(TAG, "no result in dictionary server.");
+                        }
+                    }
 
-			case VelloRequestFactory.REQUEST_TYPE_QUERY_IN_REMOTE_STORAGE:
-				ArrayList<TrelloCard> existedWordCardList = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_CARD_LIST);
-				String keyword = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
-				String jsonResponse = request.getString(VelloRequestFactory.PARAM_EXTRA_DICTIONARY_WS_RESULT);
-				if (existedWordCardList.isEmpty()) {
-					// not exist in remote storage
-					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "not exist in remote storage");
-					}
-					addWordCard(keyword, jsonResponse);
-				} else {
-					// check more to decide
-					// filter to find the right one
-					for (TrelloCard w : existedWordCardList) {
-						if (w.name.equals(keyword)) {
-							// got the right word card
-							// show with user first
+                    return;
 
-							if (w.closed.equals("true")) {
-								// the existed word card has be closed, re-open it.
-								if (VelloConfig.DEBUG_SWITCH) {
-									Log.d(TAG, "re-start existed word card.");
-								}
-								reStartWordCard(w.id);
-							} else {
-								if (w.due.equals("null")) {
-									// the existed word card has not be initialized, initialize it. this is the double check
-									if (VelloConfig.DEBUG_SWITCH) {
-										Log.d(TAG, "initialize existed word card.");
-									}
-									initializeWordCard(w.id);
-								} else {
-									// the existed word is in review process, do nothing at present.
-									if (VelloConfig.DEBUG_SWITCH) {
-										Log.d(TAG, "the existed word is in review.");
-									}
-								}
-							}
-							return;
-						}
-					}
-					// not exist in remote storage
-					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "not exist in remote storage");
-					}
-					addWordCard(keyword, jsonResponse);
-				}
-				return;
+                case VelloRequestFactory.REQUEST_TYPE_QUERY_IN_REMOTE_STORAGE:
+                    ArrayList<TrelloCard> existedWordCardList = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_CARD_LIST);
+                    String keyword = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
+                    String jsonResponse = request.getString(VelloRequestFactory.PARAM_EXTRA_DICTIONARY_WS_RESULT);
+                    if (existedWordCardList.isEmpty()) {
+                        // not exist in remote storage
+                        if (VelloConfig.DEBUG_SWITCH) {
+                            Log.d(TAG, "not exist in remote storage");
+                        }
+                        addWordCard(keyword, jsonResponse);
+                    } else {
+                        // check more to decide
+                        // filter to find the right one
+                        for (TrelloCard w : existedWordCardList) {
+                            if (w.name.equals(keyword)) {
+                                // got the right word card
+                                // show with user first
 
-			case VelloRequestFactory.REQUEST_TYPE_ADD_WORDCARD:
-			    String keywordInAddWordCard = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
-			    String wsResult = request.getString(VelloRequestFactory.PARAM_EXTRA_DICTIONARY_WS_RESULT);
-				TrelloCard addedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
-				if (addedWordCard != null) {
-					initializeWordCard(addedWordCard.id);
-				} else {
-					// add failed, add again
-					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "retry addWordCard...");
-					}
-				    addWordCard(keywordInAddWordCard, wsResult);
-				}
+                                if (w.closed.equals("true")) {
+                                    // the existed word card has be closed, re-open it.
+                                    if (VelloConfig.DEBUG_SWITCH) {
+                                        Log.d(TAG, "re-start existed word card.");
+                                    }
+                                    reStartWordCard(w.id);
+                                } else {
+                                    if (w.due.equals("null")) {
+                                        // the existed word card has not be initialized, initialize it. this is the double check
+                                        if (VelloConfig.DEBUG_SWITCH) {
+                                            Log.d(TAG, "initialize existed word card.");
+                                        }
+                                        initializeWordCard(w.id);
+                                    } else {
+                                        // the existed word is in review process, do nothing at present.
+                                        if (VelloConfig.DEBUG_SWITCH) {
+                                            Log.d(TAG, "the existed word is in review.");
+                                        }
+                                    }
+                                }
+                                return;
+                            }
+                        }
+                        // not exist in remote storage
+                        if (VelloConfig.DEBUG_SWITCH) {
+                            Log.d(TAG, "not exist in remote storage");
+                        }
+                        addWordCard(keyword, jsonResponse);
+                    }
+                    return;
 
-				if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "addWordCard end.");
-				}
+                case VelloRequestFactory.REQUEST_TYPE_ADD_WORDCARD:
+                    String keywordInAddWordCard = request.getString(VelloRequestFactory.PARAM_EXTRA_QUERY_WORD_KEYWORD);
+                    String wsResult = request.getString(VelloRequestFactory.PARAM_EXTRA_DICTIONARY_WS_RESULT);
+                    TrelloCard addedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+                    if (addedWordCard != null) {
+                        initializeWordCard(addedWordCard.id);
+                    } else {
+                        // add failed, add again
+                        if (VelloConfig.DEBUG_SWITCH) {
+                            Log.d(TAG, "retry addWordCard...");
+                        }
+                        addWordCard(keywordInAddWordCard, wsResult);
+                    }
 
-				return;
+                    if (VelloConfig.DEBUG_SWITCH) {
+                        Log.d(TAG, "addWordCard end.");
+                    }
 
-			case VelloRequestFactory.REQUEST_TYPE_RESTART_WORDCARD:
-				TrelloCard restartedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
-				if (restartedWordCard != null) {
-					// restarted
-					// do nothing at present.
-				} else {
-					// restart failed
-					// do nothing at present.
-				}
-				if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "reStartzeWordCard end.");
-				}
-				return;
+                    return;
 
-			case VelloRequestFactory.REQUEST_TYPE_INITIALIZE_WORDCARD:
-				TrelloCard initializedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
-				if (initializedWordCard != null) {
-				} else {
-					// initialized failed
-					// do nothing at present
-				}
-				if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "initializeWordCard end.");
-				}
-				return;
+                case VelloRequestFactory.REQUEST_TYPE_RESTART_WORDCARD:
+                    TrelloCard restartedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+                    if (restartedWordCard != null) {
+                        // restarted
+                        // do nothing at present.
+                    } else {
+                        // restart failed
+                        // do nothing at present.
+                    }
+                    if (VelloConfig.DEBUG_SWITCH) {
+                        Log.d(TAG, "reStartzeWordCard end.");
+                    }
+                    return;
 
-			case VelloRequestFactory.REQUEST_TYPE_GET_OPEN_TRELLO_CARD_LIST:
-				int startId = request.getInt(VelloRequestFactory.PARAM_EXTRA_SERVICE_START_ID);
-				boolean force = request.getBoolean(VelloRequestFactory.PARAM_EXTRA_FORCE_GET_OPEN_TRELLO_CARD);
-				ArrayList<TrelloCard> OpenTrelloCardList = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_CARD_LIST);
+                case VelloRequestFactory.REQUEST_TYPE_INITIALIZE_WORDCARD:
+                    TrelloCard initializedWordCard = resultData.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+                    if (initializedWordCard != null) {
+                    } else {
+                        // initialized failed
+                        // do nothing at present
+                    }
+                    if (VelloConfig.DEBUG_SWITCH) {
+                        Log.d(TAG, "initializeWordCard end.");
+                    }
+                    return;
 
-				if (OpenTrelloCardList.size() > 0) {
-					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "has open trello card, with startId = " + startId + ", force = " + force);
-					}
-					final ContentResolver resolver = getContentResolver();
-					if (!force) {
-						// query and backup all local items that syncInNext=true
-						// or merge
-						// locally later
-						ProviderCriteria criteria = new ProviderCriteria();
-						criteria.addNe(DbWordCard.Columns.DATE_LAST_OPERATION, "");
-						Cursor c = resolver.query(DbWordCard.CONTENT_URI,
-								DbWordCard.PROJECTION,
-								criteria.getWhereClause(),
-								criteria.getWhereParams(),
-								criteria.getOrderClause());
-						if (c != null) {
-							while (c.moveToNext()) {
-								DirtyCard dc = new DirtyCard(c);
-								mDirtyCards.put(dc.id, dc);
-							}
-							c.close();
-							Log.d(TAG, "cursor closed");
-						}
-					}
+                case VelloRequestFactory.REQUEST_TYPE_GET_OPEN_TRELLO_CARD_LIST:
+                    int startId = request.getInt(VelloRequestFactory.PARAM_EXTRA_SERVICE_START_ID);
+                    boolean force = request.getBoolean(VelloRequestFactory.PARAM_EXTRA_FORCE_GET_OPEN_TRELLO_CARD);
+                    ArrayList<TrelloCard> OpenTrelloCardList = resultData.getParcelableArrayList(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_CARD_LIST);
 
-					if (force || !(mDirtyCards.size() > 0)) {
-						// no dirty, commit to local DB directly
-						if (VelloConfig.DEBUG_SWITCH) {
-							Log.d(TAG, "no dirty card, commit to local DB");
-						}
-						try {
-							resolver.delete(DbWordCard.CONTENT_URI, null, null);
+                    if (OpenTrelloCardList.size() > 0) {
+                        if (VelloConfig.DEBUG_SWITCH) {
+                            Log.d(TAG, "has open trello card, with startId = " + startId + ", force = " + force);
+                        }
+                        final ContentResolver resolver = getContentResolver();
+                        if (!force) {
+                            // query and backup all local items that syncInNext=true
+                            // or merge
+                            // locally later
+                            ProviderCriteria criteria = new ProviderCriteria();
+                            criteria.addNe(DbWordCard.Columns.DATE_LAST_OPERATION, "");
+                            Cursor c = resolver.query(DbWordCard.CONTENT_URI,
+                                    DbWordCard.PROJECTION,
+                                    criteria.getWhereClause(),
+                                    criteria.getWhereParams(),
+                                    criteria.getOrderClause());
+                            if (c != null) {
+                                while (c.moveToNext()) {
+                                    DirtyCard dc = new DirtyCard(c);
+                                    mDirtyCards.put(dc.id, dc);
+                                }
+                                c.close();
+                                Log.d(TAG, "cursor closed");
+                            }
+                        }
 
-							ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
-							for (TrelloCard trelloCard : OpenTrelloCardList) {
-								operationList.add(ContentProviderOperation
-										.newInsert(DbWordCard.CONTENT_URI)
-										.withValues(trelloCard.toContentValues())
-										.build());
-							}
-							resolver.applyBatch(VelloProvider.AUTHORITY, operationList);
-							if (VelloConfig.DEBUG_SWITCH) {
-								Log.d(TAG, "...stop command---#" + startId);
-							}
-							sendMessageToUI(VelloService.MSG_STATUS_SYNC_END, null);
-							stopSelf(startId);
-						} catch (RemoteException e) {
-							e.printStackTrace();
-						} catch (OperationApplicationException e) {
-							e.printStackTrace();
-						}
-					}
+                        if (force || !(mDirtyCards.size() > 0)) {
+                            // no dirty, commit to local DB directly
+                            if (VelloConfig.DEBUG_SWITCH) {
+                                Log.d(TAG, "no dirty card, commit to local DB");
+                            }
+                            try {
+                                resolver.delete(DbWordCard.CONTENT_URI, null, null);
 
-					if (mDirtyCards.size() > 0 && !force) {
-						if (VelloConfig.DEBUG_SWITCH) {
-							Log.d(TAG, "dirty card found: " + mDirtyCards.size());
-						}
-						// maybe need merging
-						for (TrelloCard tCard : OpenTrelloCardList) {
-							
-							if (mDirtyCards.containsKey(tCard.id)) {
-								// need merging
-								mMergeCards.put(tCard.id, tCard);
-							}
-						}
+                                ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();
+                                for (TrelloCard trelloCard : OpenTrelloCardList) {
+                                    operationList.add(ContentProviderOperation
+                                            .newInsert(DbWordCard.CONTENT_URI)
+                                            .withValues(trelloCard.toContentValues())
+                                            .build());
+                                }
+                                resolver.applyBatch(VelloProvider.AUTHORITY, operationList);
+                                if (VelloConfig.DEBUG_SWITCH) {
+                                    Log.d(TAG, "...stop command---#" + startId);
+                                }
+                                sendMessageToClients(VelloService.MSG_STATUS_SYNC_END, null);
+                                stopSelf(startId);
+                            } catch (RemoteException e) {
+                                e.printStackTrace();
+                            } catch (OperationApplicationException e) {
+                                e.printStackTrace();
+                            }
+                        }
 
-						if (VelloConfig.DEBUG_SWITCH) {
-							Log.d(TAG, "merge cards num=" + mMergeCards.size());
-						}
+                        if (mDirtyCards.size() > 0 && !force) {
+                            if (VelloConfig.DEBUG_SWITCH) {
+                                Log.d(TAG, "dirty card found: " + mDirtyCards.size());
+                            }
+                            // maybe need merging
+                            for (TrelloCard tCard : OpenTrelloCardList) {
 
-						for (TrelloCard tCard : mMergeCards.values()) {
-							if (VelloConfig.DEBUG_SWITCH) {
-								Log.d(TAG, "to merge card --- " + tCard.id);
-							}
-							DirtyCard dCard = mDirtyCards.get(tCard.id);
-							if (dCard.markDeleted.equals("true")) {
-								// delete remote Trello card
-								deleteRemoteTrelloCard(tCard, startId);
-							} else if (dCard.dateLastActivity.equals(tCard.dateLastActivity)) {
-								// remote has no commit
-								// commit local due, closed, listId to
-								// Trello
-								updateRemoteTrelloCard(upgradeTrelloCard(tCard, dCard, false), startId);
-							} else {
-								// remote has commit
-								// update remote data based on local data
-								updateRemoteTrelloCard(upgradeTrelloCard(tCard, dCard, true), startId);
-							}
-						}
-					}
-				} else {
-					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "has no open trello card");
-					}
-				}
-				return;
+                                if (mDirtyCards.containsKey(tCard.id)) {
+                                    // need merging
+                                    mMergeCards.put(tCard.id, tCard);
+                                }
+                            }
 
-			case VelloRequestFactory.REQUEST_TYPE_ARCHIVE_WORDCARD:
-				TrelloCard closedWordCard = resultData
-						.getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
-				String idCard = request
-						.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_CARD_ID);
-				if (closedWordCard != null
-						&& closedWordCard.closed.equals("true")) {
-					// success, do nothing
-				} else {
-					// retry
-					archiveWordCard(idCard);
-				}
-				return;
-				
-			case VelloRequestFactory.REQUEST_TYPE_CREATE_WEBHOOK:
-				String hookId = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_WEBHOOK_ID);
-				if (hookId != null) {
-					// hook created, save it
-					AccountUtils.setVocabularyBoardWebHookId(getApplicationContext(), hookId);
-					sendMessageToUI(MSG_STATUS_WEBHOOK_CREATED, null);
-					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "webhook created.");
-					}
-					
-				} else {
-					// to create again
-					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "retry --- createWebHook");
-					}
-					createWebHook();
-				}
-				return;
-				
-			case VelloRequestFactory.REQUEST_TYPE_DELETE_WEBHOOK:
-				boolean hasWebhookDeleted = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_REMOTE_MODEL_DELETED);
-				if (hasWebhookDeleted) {
-					// request success
-					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "deleteWebHook success");
-					}
-					sendMessageToUI(VelloService.MSG_STATUS_WEBHOOK_DELETED, null);
-				} else {
-					// request fail, try again
-					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "retry --- deleteWebHook");
-					}
-					deleteWebHook();
-				}
-				return;
-				
-			case VelloRequestFactory.REQUEST_TYPE_CHECK_TRELLO_CONNECTION:
-				boolean hasTrelloConnection = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_CONNECTION);
-				if (hasTrelloConnection) {
-					// valid connection
-					sendMessageToUI(VelloService.MSG_VALID_TRELLO_CONNECTION, null);
-				} else {
-					// invalid connection
-					sendMessageToUI(VelloService.MSG_INVALID_TRELLO_CONNECTION, null);
-				}
-				if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "CheckTrelloConnection end...");
-				}
-				return;
-			case VelloRequestFactory.REQUEST_TYPE_READ_TRELLO_ACCOUNT_INFO:
-				String username = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_ACCOUNT_USERNAME);
-				String token = request.getString(VelloRequestFactory.PARAM_EXTRA_TRELLO_ACCESS_TOKEN);
-				if (username != null && !username.isEmpty()) {
-					sendMessageToUI(VelloService.MSG_RETURN_TRELLO_USERNAME, username);
-				} else {
-					// failed, retry
-					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "retry --- readTrelloAccountInfo");
-					}
-					readTrelloAccountInfo(token);
-				}
-				return;
-				
-			case VelloRequestFactory.REQUEST_TYPE_DELETE_REMOTE_TRELLO_CARD:
-				boolean deleted = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_REMOTE_MODEL_DELETED);
-				TrelloCard deletingCard = (TrelloCard) request.getParcelable(VelloRequestFactory.PARAM_EXTRA_TRELLO_CARD);
-				int startIdTriggerDelete = request.getInt(VelloRequestFactory.PARAM_EXTRA_SERVICE_START_ID);
-				if (deleted) {
-					mMergeCards.remove(deletingCard.id);
-				} else {
-					// retry
-					deleteRemoteTrelloCard(deletingCard, startIdTriggerDelete);
-				}
-				
-				if (mMergeCards.isEmpty()) {
-					// merge ok, go clean full sync
-					getOpenTrelloCardList(startIdTriggerDelete, true);
-				}
-				
-			case VelloRequestFactory.REQUEST_TYPE_UPDATE_REMOTE_TRELLO_CARD:
-				boolean updated = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_REMOTE_TRELLO_CARD_UPDATED);
-				TrelloCard updatingCard = (TrelloCard) request.getParcelable(VelloRequestFactory.PARAM_EXTRA_TRELLO_CARD);
-				int startIdTriggerUpdate = request.getInt(VelloRequestFactory.PARAM_EXTRA_SERVICE_START_ID);
-				if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "updateRemoteTrelloCard returned, with updated=" + updated);
-				}
+                            if (VelloConfig.DEBUG_SWITCH) {
+                                Log.d(TAG, "merge cards num=" + mMergeCards.size());
+                            }
 
-				if (updated) {
-					mMergeCards.remove(updatingCard.id);
-				} else {
-					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "retry updateRemoteTrelloCard");
-					}
-					updateRemoteTrelloCard(updatingCard, startIdTriggerUpdate);
-				}
-				
-				if (mMergeCards.isEmpty()) {
-					// merge ok, go clean full sync
-					getOpenTrelloCardList(startIdTriggerUpdate, true);
-				}
-				
-			default:
-				return;
-			}
-		}
-	}
+                            for (TrelloCard tCard : mMergeCards.values()) {
+                                if (VelloConfig.DEBUG_SWITCH) {
+                                    Log.d(TAG, "to merge card --- " + tCard.id);
+                                }
+                                DirtyCard dCard = mDirtyCards.get(tCard.id);
+                                if (dCard.markDeleted.equals("true")) {
+                                    // delete remote Trello card
+                                    deleteRemoteTrelloCard(tCard, startId);
+                                } else if (dCard.dateLastActivity.equals(tCard.dateLastActivity)) {
+                                    // remote has no commit
+                                    // commit local due, closed, listId to
+                                    // Trello
+                                    updateRemoteTrelloCard(upgradeTrelloCard(tCard, dCard, false), startId);
+                                } else {
+                                    // remote has commit
+                                    // update remote data based on local data
+                                    updateRemoteTrelloCard(upgradeTrelloCard(tCard, dCard, true), startId);
+                                }
+                            }
+                        }
+                    } else {
+                        if (VelloConfig.DEBUG_SWITCH) {
+                            Log.d(TAG, "has no open trello card");
+                        }
+                    }
+                    return;
 
-	@Override
-	public void onRequestConnectionError(Request request, int statusCode) {
-		if (mRequestList.contains(request)) {
-			if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
-				if (request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_CONFIGURE_VOCABULARY_BOARD) {
-					String boardId = request.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_BOARD_ID);
-					AccountUtils.setVocabularyBoardId(getApplicationContext(), boardId);
-					Log.d(TAG, "get a board without ownership, skip configuration! vocabulary board id = " + boardId);
+                case VelloRequestFactory.REQUEST_TYPE_ARCHIVE_WORDCARD:
+                    TrelloCard closedWordCard = resultData
+                            .getParcelable(VelloRequestFactory.BUNDLE_EXTRA_WORDCARD);
+                    String idCard = request
+                            .getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_CARD_ID);
+                    if (closedWordCard != null
+                            && closedWordCard.closed.equals("true")) {
+                        // success, do nothing
+                    } else {
+                        // retry
+                        archiveWordCard(idCard);
+                    }
+                    return;
 
-					// continue to check vocabulary list if not well formed
-					checkVocabularyLists();
-				} else if (request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_GET_OPEN_TRELLO_CARD_LIST) {
-					// force logout and re-login
-					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "invalid token");
-					}
-					AccountUtils.signOut(getApplicationContext());
-					Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-					startActivity(intent);
-				}
-				
-			} else if (statusCode == -1) {
-				if (request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_CHECK_TRELLO_CONNECTION) {
-					sendMessageToUI(VelloService.MSG_INVALID_TRELLO_CONNECTION, null);
-					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "CheckTrelloConnection end...");
-					}
-				} else {
-					sendMessageToUI(VelloService.MSG_STATUS_CONNECTION_TIMEOUT, null);
-				}
-			}
-			Log.d(TAG, "type=" + request.getRequestType() + "; status code=" + statusCode);
-			mRequestList.remove(request);
-		}
-	}
+                case VelloRequestFactory.REQUEST_TYPE_CREATE_WEBHOOK:
+                    String hookId = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_WEBHOOK_ID);
+                    if (hookId != null) {
+                        // hook created, save it
+                        AccountUtils.setVocabularyBoardWebHookId(getApplicationContext(), hookId);
+                        sendMessageToClients(MSG_STATUS_WEBHOOK_CREATED, null);
+                        if (VelloConfig.DEBUG_SWITCH) {
+                            Log.d(TAG, "webhook created.");
+                        }
 
-	@Override
-	public void onRequestDataError(Request request) {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "onRequestDataError --- " + "type=" + request.getRequestType());
-		}
-		if (mRequestList.contains(request)) {
-			mRequestList.remove(request);
-		}
-	}
+                    } else {
+                        // to create again
+                        if (VelloConfig.DEBUG_SWITCH) {
+                            Log.d(TAG, "retry --- createWebHook");
+                        }
+                        createWebHook();
+                    }
+                    return;
 
-	@Override
-	public void onRequestCustomError(Request request, Bundle resultData) {
-		// Never called.
+                case VelloRequestFactory.REQUEST_TYPE_DELETE_WEBHOOK:
+                    boolean hasWebhookDeleted = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_REMOTE_MODEL_DELETED);
+                    if (hasWebhookDeleted) {
+                        // request success
+                        if (VelloConfig.DEBUG_SWITCH) {
+                            Log.d(TAG, "deleteWebHook success");
+                        }
+                        sendMessageToClients(VelloService.MSG_STATUS_WEBHOOK_DELETED, null);
+                    } else {
+                        // request fail, try again
+                        if (VelloConfig.DEBUG_SWITCH) {
+                            Log.d(TAG, "retry --- deleteWebHook");
+                        }
+                        deleteWebHook();
+                    }
+                    return;
 
-	}
+                case VelloRequestFactory.REQUEST_TYPE_CHECK_TRELLO_CONNECTION:
+                    boolean hasTrelloConnection = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_CONNECTION);
+                    if (hasTrelloConnection) {
+                        // valid connection
+                        sendMessageToClients(VelloService.MSG_VALID_TRELLO_CONNECTION, null);
+                    } else {
+                        // invalid connection
+                        sendMessageToClients(VelloService.MSG_INVALID_TRELLO_CONNECTION, null);
+                    }
+                    if (VelloConfig.DEBUG_SWITCH) {
+                        Log.d(TAG, "CheckTrelloConnection end...");
+                    }
+                    return;
+                case VelloRequestFactory.REQUEST_TYPE_READ_TRELLO_ACCOUNT_USERNAME:
+                    String username = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_ACCOUNT_USERNAME);
+                    String token = request.getString(VelloRequestFactory.PARAM_EXTRA_TRELLO_ACCESS_TOKEN);
+                    if (username != null && !username.isEmpty()) {
+                        sendMessageToClients(VelloService.MSG_RETURN_TRELLO_USERNAME, username);
+                    } else {
+                        // failed, retry
+                        if (VelloConfig.DEBUG_SWITCH) {
+                            Log.d(TAG, "retry --- readTrelloAccountUserName");
+                        }
+                        readTrelloAccountUserName(token);
+                    }
+                    return;
 
-	@Override
-	public void connectionErrorDialogCancel(Request request) {
-	}
+                case VelloRequestFactory.REQUEST_TYPE_DELETE_REMOTE_TRELLO_CARD:
+                    boolean deleted = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_REMOTE_MODEL_DELETED);
+                    TrelloCard deletingCard = (TrelloCard) request.getParcelable(VelloRequestFactory.PARAM_EXTRA_TRELLO_CARD);
+                    int startIdTriggerDelete = request.getInt(VelloRequestFactory.PARAM_EXTRA_SERVICE_START_ID);
+                    if (deleted) {
+                        mMergeCards.remove(deletingCard.id);
+                    } else {
+                        // retry
+                        deleteRemoteTrelloCard(deletingCard, startIdTriggerDelete);
+                    }
 
-	@Override
-	public void connectionErrorDialogRetry(Request request) {
-		mRequestManager.execute(request, this);
-		mRequestList.add(request);
-	}
-	
-	/**
-	 * merge wordcard when remote wordcard is NOT the same state
-	 * @param wordCard remote wordcard
-	 * @param dirtyWordCard local changed wordcard
-	 * @return new wordcard merged
-	 */
-	@SuppressLint("SimpleDateFormat")
-	private TrelloCard upgradeTrelloCard(TrelloCard trelloCard, DirtyCard dirtyCard, boolean forcePush) {
-		if (forcePush) {
-			int localPositionInLists = AccountUtils.getVocabularyListPosition(getApplicationContext(), dirtyCard.idList);
-			int remotePostionInLists = AccountUtils.getVocabularyListPosition(getApplicationContext(), trelloCard.idList);
-			int delta = remotePostionInLists - localPositionInLists;
-			if (delta > 0) {
-				int compensation = delta + 1;
-				if (remotePostionInLists + compensation > VelloConfig.VOCABULARY_LIST_POSITION_8TH) {
-					trelloCard.closed = "true";
-				} else {
-					int newPostionInLists = remotePostionInLists + compensation;
-					trelloCard.idList = AccountUtils.getVocabularyListId(getApplicationContext(), newPostionInLists);
-					Calendar rightNow = Calendar.getInstance();
-					long rightNowUnixTime = rightNow.getTimeInMillis();
-					long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
-					long deltaTime = VelloConfig.VOCABULARY_LIST_DUE_DELTA[newPostionInLists];
-					long newDueUnixTime = rightNowUnixTimeGMT + deltaTime;
-					SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-					Date newDueDate = new Date(newDueUnixTime);
-					String stringNewDueDate = format.format(newDueDate);
-					trelloCard.due = stringNewDueDate;
-				}
-			}
-		} else {
-			trelloCard.idList = dirtyCard.idList;
-			trelloCard.due = dirtyCard.due;
-			trelloCard.closed = dirtyCard.closed;
-		}
-		
-		return trelloCard;
-	}
-	
-	private void showNotification() {
+                    if (mMergeCards.isEmpty()) {
+                        // merge ok, go clean full sync
+                        getOpenTrelloCardList(startIdTriggerDelete, true);
+                    }
+
+                case VelloRequestFactory.REQUEST_TYPE_UPDATE_REMOTE_TRELLO_CARD:
+                    boolean updated = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_REMOTE_TRELLO_CARD_UPDATED);
+                    TrelloCard updatingCard = (TrelloCard) request.getParcelable(VelloRequestFactory.PARAM_EXTRA_TRELLO_CARD);
+                    int startIdTriggerUpdate = request.getInt(VelloRequestFactory.PARAM_EXTRA_SERVICE_START_ID);
+                    if (VelloConfig.DEBUG_SWITCH) {
+                        Log.d(TAG, "updateRemoteTrelloCard returned, with updated=" + updated);
+                    }
+
+                    if (updated) {
+                        mMergeCards.remove(updatingCard.id);
+                    } else {
+                        if (VelloConfig.DEBUG_SWITCH) {
+                            Log.d(TAG, "retry updateRemoteTrelloCard");
+                        }
+                        updateRemoteTrelloCard(updatingCard, startIdTriggerUpdate);
+                    }
+
+                    if (mMergeCards.isEmpty()) {
+                        // merge ok, go clean full sync
+                        getOpenTrelloCardList(startIdTriggerUpdate, true);
+                    }
+
+                default:
+                    return;
+            }
+        }
+    }
+
+    @Override
+    public void onRequestConnectionError(Request request, int statusCode) {
+        if (mRequestList.contains(request)) {
+            if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
+                if (request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_CONFIGURE_VOCABULARY_BOARD) {
+                    String boardId = request.getString(VelloRequestFactory.PARAM_EXTRA_VOCABULARY_BOARD_ID);
+                    AccountUtils.setVocabularyBoardId(getApplicationContext(), boardId);
+                    Log.d(TAG, "get a board without ownership, skip configuration! vocabulary board id = " + boardId);
+
+                    // continue to check vocabulary list if not well formed
+                    checkVocabularyLists();
+                } else if (request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_GET_OPEN_TRELLO_CARD_LIST) {
+                    // force logout and re-login
+                    if (VelloConfig.DEBUG_SWITCH) {
+                        Log.d(TAG, "invalid token");
+                    }
+                    AccountUtils.signOut(getApplicationContext());
+                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    startActivity(intent);
+                }
+
+            } else if (statusCode == -1) {
+                if (request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_CHECK_TRELLO_CONNECTION) {
+                    sendMessageToClients(VelloService.MSG_INVALID_TRELLO_CONNECTION, null);
+                    if (VelloConfig.DEBUG_SWITCH) {
+                        Log.d(TAG, "CheckTrelloConnection end...");
+                    }
+                } else {
+                    sendMessageToClients(VelloService.MSG_STATUS_CONNECTION_TIMEOUT, null);
+                }
+            }
+            Log.d(TAG, "type=" + request.getRequestType() + "; status code=" + statusCode);
+            mRequestList.remove(request);
+        }
+    }
+
+    @Override
+    public void onRequestDataError(Request request) {
+        if (VelloConfig.DEBUG_SWITCH) {
+            Log.d(TAG, "onRequestDataError --- " + "type=" + request.getRequestType());
+        }
+        if (mRequestList.contains(request)) {
+            mRequestList.remove(request);
+        }
+    }
+
+    @Override
+    public void onRequestCustomError(Request request, Bundle resultData) {
+        // Never called.
+
+    }
+
+    @Override
+    public void connectionErrorDialogCancel(Request request) {
+    }
+
+    @Override
+    public void connectionErrorDialogRetry(Request request) {
+        mRequestManager.execute(request, this);
+        mRequestList.add(request);
+    }
+
+    /**
+     * merge wordcard when remote wordcard is NOT the same state
+     *
+     * @param trelloCard remote wordcard
+     * @param dirtyCard  local changed wordcard
+     * @return new wordcard merged
+     */
+    @SuppressLint("SimpleDateFormat")
+    private TrelloCard upgradeTrelloCard(TrelloCard trelloCard, DirtyCard dirtyCard, boolean forcePush) {
+        if (forcePush) {
+            int localPositionInLists = AccountUtils.getVocabularyListPosition(getApplicationContext(), dirtyCard.idList);
+            int remotePostionInLists = AccountUtils.getVocabularyListPosition(getApplicationContext(), trelloCard.idList);
+            int delta = remotePostionInLists - localPositionInLists;
+            if (delta > 0) {
+                int compensation = delta + 1;
+                if (remotePostionInLists + compensation > VelloConfig.VOCABULARY_LIST_POSITION_8TH) {
+                    trelloCard.closed = "true";
+                } else {
+                    int newPostionInLists = remotePostionInLists + compensation;
+                    trelloCard.idList = AccountUtils.getVocabularyListId(getApplicationContext(), newPostionInLists);
+                    Calendar rightNow = Calendar.getInstance();
+                    long rightNowUnixTime = rightNow.getTimeInMillis();
+                    long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
+                    long deltaTime = VelloConfig.VOCABULARY_LIST_DUE_DELTA[newPostionInLists];
+                    long newDueUnixTime = rightNowUnixTimeGMT + deltaTime;
+                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                    Date newDueDate = new Date(newDueUnixTime);
+                    String stringNewDueDate = format.format(newDueDate);
+                    trelloCard.due = stringNewDueDate;
+                }
+            }
+        } else {
+            trelloCard.idList = dirtyCard.idList;
+            trelloCard.due = dirtyCard.due;
+            trelloCard.closed = dirtyCard.closed;
+        }
+
+        return trelloCard;
+    }
+
+    private void showNotification() {
         Notification notif = new Notification(R.drawable.ic_stat_vaa, "VAA clipboard monitor is started", System.currentTimeMillis());
         notif.flags |= (Notification.FLAG_ONGOING_EVENT | Notification.FLAG_NO_CLEAR);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
@@ -1119,62 +1120,64 @@ public class VelloService extends Service implements RequestListener, Connection
         // Use layout id because it's unique
         mNM.notify(R.string.notif_clip_monitor_service_content_title, notif);
     }
-	
-	private void removeNotification() {
-		mNM.cancel(R.string.notif_clip_monitor_service_content_title);
-	}
-	
-	/**
-	 * Monitor task: monitor new text clips in global system clipboard
-	 * implemented with Timer
-	 */
-	private class MonitorTimerTask extends TimerTask {
 
-		@Override
-		public void run() {
-			if (mCM.hasText()) {
-				String clipText = mCM.getText().toString();
-				if (!clipText.equals(mLastFakeClipText)) {
-					FakingTask();
-				}
-			}
-		}
+    private void removeNotification() {
+        mNM.cancel(R.string.notif_clip_monitor_service_content_title);
+    }
 
-	}
-	
-	/**
+    /**
+     * Monitor task: monitor new text clips in global system clipboard
+     * implemented with Timer
+     */
+    private class MonitorTimerTask extends TimerTask {
+
+        @Override
+        public void run() {
+            if (mCM.hasText()) {
+                String clipText = mCM.getText().toString();
+                if (!clipText.equals(mLastFakeClipText)) {
+                    FakingTask();
+                }
+            }
+        }
+
+    }
+
+    /**
      * Monitor task: monitor new text clips in global system clipboard
      */
     private class MonitorTask extends Thread {
 
         private volatile boolean mKeepRunning = false;
-        
+
         public MonitorTask() {
             super("ClipboardMonitor");
         }
 
         public boolean isRunning() {
-        	return mKeepRunning;
+            return mKeepRunning;
         }
 
-        /** Cancel task */
+        /**
+         * Cancel task
+         */
         public void cancel() {
-        	removeNotification();
+            removeNotification();
             mKeepRunning = false;
             interrupt();
         }
 
         @Override
         public void run() {
-			showNotification();
+            showNotification();
             mKeepRunning = true;
             while (true) {
-				if (mCM.hasText()) {
-					String clipText = mCM.getText().toString();
-					if (!clipText.equals(mLastFakeClipText)) {
-						FakingTask();
-					}
-				}
+                if (mCM.hasText()) {
+                    String clipText = mCM.getText().toString();
+                    if (!clipText.equals(mLastFakeClipText)) {
+                        FakingTask();
+                    }
+                }
 
                 try {
                     Thread.sleep(mPrefs.getInt(KEY_MONITOR_INTERVAL, DEF_MONITOR_INTERVAL));
@@ -1186,25 +1189,25 @@ public class VelloService extends Service implements RequestListener, Connection
             }
         }
     }
-    
-    private void FakingTask() {
-		try {
-			String queryClipText = mCM.getText().toString();
-			String fakedClipText = queryClipText + " ";
-			mCM.setText(fakedClipText);
-			Message msg = Message.obtain(null, MSG_TRIGGER_QUERY_WORD, fakedClipText);
-			mMessenger.send(msg);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-	}
 
-	@Override
-	public void onPrimaryClipChanged() {
-		ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-		String pasteData = "";
-		ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
-		pasteData = item.getText().toString();
-		Toast.makeText(getApplicationContext(), "clipboard changed --- pasteData=" + pasteData, Toast.LENGTH_SHORT).show();
-	}
+    private void FakingTask() {
+        try {
+            String queryClipText = mCM.getText().toString();
+            String fakedClipText = queryClipText + " ";
+            mCM.setText(fakedClipText);
+            Message msg = Message.obtain(null, MSG_TRIGGER_QUERY_WORD, fakedClipText);
+            mMessenger.send(msg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onPrimaryClipChanged() {
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        String pasteData = "";
+        ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
+        pasteData = item.getText().toString();
+        Toast.makeText(getApplicationContext(), "clipboard changed --- pasteData=" + pasteData, Toast.LENGTH_SHORT).show();
+    }
 }

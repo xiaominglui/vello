@@ -4,7 +4,7 @@ package com.mili.xiaominglui.app.vello.data.service;
 import com.foxykeep.datadroid.service.RequestService;
 import com.mili.xiaominglui.app.vello.data.operation.CheckTrelloConnectionOperation;
 import com.mili.xiaominglui.app.vello.data.operation.DeleteRemoteTrelloCardOperation;
-import com.mili.xiaominglui.app.vello.data.operation.ReadTrelloAccountInfoOperation;
+import com.mili.xiaominglui.app.vello.data.operation.ReadTrelloAccountUserNameOperation;
 import com.mili.xiaominglui.app.vello.data.operation.deleteWebHookOperation;
 import com.mili.xiaominglui.app.vello.data.operation.AddWordCardOperation;
 import com.mili.xiaominglui.app.vello.data.operation.ArchiveWordCardOperation;
@@ -48,7 +48,7 @@ public class VelloRequestService extends RequestService {
             case VelloRequestFactory.REQUEST_TYPE_CREATE_VOCABULARY_BOARD:
                 return new CreateVocabularyBoardOperation();
             case VelloRequestFactory.REQUEST_TYPE_GET_OPEN_TRELLO_CARD_LIST:
-            	return new GetOpenTrelloCardListOperation();
+                return new GetOpenTrelloCardListOperation();
             case VelloRequestFactory.REQUEST_TYPE_QUERY_IN_REMOTE_STORAGE:
                 return new QueryInRemoteStorageOperation();
             case VelloRequestFactory.REQUEST_TYPE_ADD_WORDCARD:
@@ -60,23 +60,23 @@ public class VelloRequestService extends RequestService {
             case VelloRequestFactory.REQUEST_TYPE_REVIEWED_WORDCARD:
                 return new ReviewedWordCardOperation();
             case VelloRequestFactory.REQUEST_TYPE_ARCHIVE_WORDCARD:
-            	return new ArchiveWordCardOperation();
+                return new ArchiveWordCardOperation();
             case VelloRequestFactory.REQUEST_TYPE_UPGRADE_WORDCARD:
-            	return new UpgradeWordCardOperation();
+                return new UpgradeWordCardOperation();
             case VelloRequestFactory.REQUEST_TYPE_LOOK_UP_IN_DICTIONARY:
-            	return new LookUpInDictionaryOperation();
+                return new LookUpInDictionaryOperation();
             case VelloRequestFactory.REQUEST_TYPE_CREATE_WEBHOOK:
-            	return new CreateWebHookOperation();
+                return new CreateWebHookOperation();
             case VelloRequestFactory.REQUEST_TYPE_DELETE_WEBHOOK:
-            	return new deleteWebHookOperation();
+                return new deleteWebHookOperation();
             case VelloRequestFactory.REQUEST_TYPE_CHECK_TRELLO_CONNECTION:
-            	return new CheckTrelloConnectionOperation();
-            case VelloRequestFactory.REQUEST_TYPE_READ_TRELLO_ACCOUNT_INFO:
-            	return new ReadTrelloAccountInfoOperation();
+                return new CheckTrelloConnectionOperation();
+            case VelloRequestFactory.REQUEST_TYPE_READ_TRELLO_ACCOUNT_USERNAME:
+                return new ReadTrelloAccountUserNameOperation();
             case VelloRequestFactory.REQUEST_TYPE_DELETE_REMOTE_TRELLO_CARD:
-            	return new DeleteRemoteTrelloCardOperation();
+                return new DeleteRemoteTrelloCardOperation();
             case VelloRequestFactory.REQUEST_TYPE_UPDATE_REMOTE_TRELLO_CARD:
-            	return new UpdateRemoteTrelloCardOperation();
+                return new UpdateRemoteTrelloCardOperation();
         }
         return null;
     }

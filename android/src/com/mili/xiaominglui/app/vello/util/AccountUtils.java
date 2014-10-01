@@ -60,7 +60,13 @@ public class AccountUtils {
     }
 
     public static boolean isAuthenticated(final Context context) {
-        return !TextUtils.isEmpty(getChosenAccountName(context));
+        boolean authenticated = false;
+        AccountManager accountManager = AccountManager.get(context);
+        Account[] accounts = accountManager.getAccountsByType(Constants.ACCOUNT_TYPE);
+        for (Account account : accounts) {
+            authenticated = !TextUtils.isEmpty(accountManager.peekAuthToken(account, Constants.ACCOUNT_TYPE));
+        }
+        return authenticated;
     }
 
     public static void startAuthenticationFlow(final Context context, final Intent finishIntent) {
@@ -69,14 +75,14 @@ public class AccountUtils {
         loginFlowIntent.putExtra(AccountActivity.EXTRA_FINISH_INTENT, finishIntent);
         context.startActivity(loginFlowIntent);
     }
-    
+
     public static interface AuthenticateCallback {
-        public boolean shouldCancelAuthentication();
-        public void onAuthTokenAvailable(String authToken);
+        public void onAuthenticated(String username);
+        public void onOperationCanceled();
     }
 
     public static void authAndAddTrelloAccount(Activity activity, AuthenticateCallback callback, int activityRequestCode, Account account) {
-    	AccountManager.get(activity).addAccount(
+        AccountManager.get(activity).addAccount(
                 account.type,
                 Constants.AUTHTOKEN_TYPE,
                 null,
@@ -86,9 +92,9 @@ public class AccountUtils {
                 null);
     }
 
-	public static void removeTrelloAccount(final Context context, Account account) {
-		AccountManager.get(context).removeAccount(account, null, null);
-	}
+    public static void removeTrelloAccount(final Context context, Account account) {
+        AccountManager.get(context).removeAccount(account, null, null);
+    }
 
     private static AccountManagerCallback<Bundle> getAccountManagerCallback(
             final AuthenticateCallback callback, final Account account,
@@ -96,10 +102,6 @@ public class AccountUtils {
             final int activityRequestCode) {
         return new AccountManagerCallback<Bundle>() {
             public void run(AccountManagerFuture<Bundle> future) {
-                if (callback != null && callback.shouldCancelAuthentication()) {
-                    return;
-                }
-
                 try {
                     Bundle bundle = future.getResult();
 
@@ -108,37 +110,36 @@ public class AccountUtils {
                         intent.setFlags(intent.getFlags() & ~Intent.FLAG_ACTIVITY_NEW_TASK);
                         activity.startActivityForResult(intent, activityRequestCode);
 
-                    } else if (bundle.containsKey(AccountManager.KEY_PASSWORD) && bundle.containsKey(AccountManager.KEY_ACCOUNT_NAME)) {
-                        final String token = bundle.getString(AccountManager.KEY_PASSWORD);
+                    } else if (bundle.containsKey(AccountManager.KEY_ACCOUNT_NAME)) {
                         final String username = bundle.getString(AccountManager.KEY_ACCOUNT_NAME);
-                        addAccount(context, username, Constants.ACCOUNT_TYPE);
-                        setAuthToken(context, token);
-                        setChosenAccountName(context, username);
                         if (callback != null) {
-                            callback.onAuthTokenAvailable(token);
+                            callback.onAuthenticated(username);
                         }
                     }
                 } catch (OperationCanceledException e) {
-                    Log.e(TAG, "Authentication error " + e);
+                    e.printStackTrace();
+                    if (callback != null) {
+                        callback.onOperationCanceled();
+                    }
                 } catch (AuthenticatorException e) {
-                	Log.e(TAG, "Authentication error " + e);
-				} catch (IOException e) {
-					Log.e(TAG, "Authentication error " + e);
-				}
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    Log.e(TAG, "Authentication error " + e);
+                }
             }
         };
     }
-    
+
     public static String getVocabularyBoardWebHookId(final Context context) {
-    	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-    	return sp.getString(PREF_VOCABULARY_BOARD_WEB_HOOK_ID, "");
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        return sp.getString(PREF_VOCABULARY_BOARD_WEB_HOOK_ID, "");
     }
-    
+
     public static void setVocabularyBoardWebHookId(final Context context, String hookId) {
-    	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-    	sp.edit().putString(PREF_VOCABULARY_BOARD_WEB_HOOK_ID, hookId).commit();
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+        sp.edit().putString(PREF_VOCABULARY_BOARD_WEB_HOOK_ID, hookId).commit();
     }
-    
+
     public static String getVocabularyBoardId(final Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         return sp.getString(PREF_VOCABULARY_BOARD_ID, "");
@@ -158,9 +159,28 @@ public class AccountUtils {
         return PREF_VOCABULARY_BOARD_VERIFICATION_STRING;
     }
 
-    public static String getChosenAccountName(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getString(PREF_CHOSEN_ACCOUNT, "");
+    public static String getAccountName(final Context context) {
+        String username = "";
+        AccountManager accountManager = AccountManager.get(context);
+        Account[] accounts = accountManager.getAccountsByType(Constants.ACCOUNT_TYPE);
+        for (Account account : accounts) {
+            if (!TextUtils.isEmpty(accountManager.peekAuthToken(account, Constants.ACCOUNT_TYPE))) {
+                username = account.name;
+            }
+        }
+        return username;
+    }
+
+    public static Account getAccount(final Context context) {
+        Account result = null;
+        AccountManager accountManager = AccountManager.get(context);
+        Account[] accounts = accountManager.getAccountsByType(Constants.ACCOUNT_TYPE);
+        for (Account account : accounts) {
+            if (!TextUtils.isEmpty(accountManager.peekAuthToken(account, Constants.ACCOUNT_TYPE))) {
+                result = account;
+            }
+        }
+        return result;
     }
 
     public static String getVocabularyListId(final Context context, final int position) {
@@ -196,35 +216,35 @@ public class AccountUtils {
         final Account account = new Account(name, type);
         am.addAccountExplicitly(account, "", null);
     }
-    
+
     public static String getAuthToken(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getString(PREF_AUTH_TOKEN, "");
+        AccountManager am = AccountManager.get(context);
+        return am.peekAuthToken(getAccount(context), Constants.ACCOUNT_TYPE);
     }
 
-    public static void setAuthToken(final Context context, final String authToken) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putString(PREF_AUTH_TOKEN, authToken).commit();
+    public static void setAuthToken(final Context context, final String name, final String type, final String authToken) {
+        AccountManager am = AccountManager.get(context);
+        final Account account = new Account(name, type);
+        am.setAuthToken(account,type, authToken);
     }
 
     public static void invalidateAuthToken(final Context context) {
         AccountManager am = AccountManager.get(context);
         am.invalidateAuthToken(Constants.ACCOUNT_TYPE, getAuthToken(context));
-        setAuthToken(context, "");
     }
 
     public static void signOut(final Context context) {
         invalidateAuthToken(context);
-        Account account = new Account(getChosenAccountName(context), Constants.AUTHTOKEN_TYPE);
+        Account account = new Account(getAccountName(context), Constants.AUTHTOKEN_TYPE);
         removeTrelloAccount(context, account);
-        
+
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
         sp.edit().clear().commit();
-        
+
         CookieSyncManager.createInstance(context);
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.removeAllCookie();
 
-		context.getContentResolver().delete(VelloContent.CONTENT_URI, null, null);
+        context.getContentResolver().delete(VelloContent.CONTENT_URI, null, null);
     }
 }

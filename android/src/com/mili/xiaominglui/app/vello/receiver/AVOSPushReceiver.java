@@ -81,7 +81,7 @@ public class AVOSPushReceiver extends BroadcastReceiver {
 							Log.d(TAG, "action create --- name=" + cardName);
 						}
 
-						SyncHelper.requestManualSync(new Account(AccountUtils.getChosenAccountName(context), Constants.ACCOUNT_TYPE));
+						SyncHelper.requestManualSync(new Account(AccountUtils.getAccountName(context), Constants.ACCOUNT_TYPE));
 
 					} else if (actionType.equals(WSConfig.WS_TRELLO_ACTION_TYPE_UPDATECARD)) {
 						// updateCard action
@@ -94,7 +94,7 @@ public class AVOSPushReceiver extends BroadcastReceiver {
 							if (VelloConfig.DEBUG_SWITCH) {
 								Log.d(TAG, "action recalled --- name=" + cardName);
 							}
-							SyncHelper.requestManualSync(new Account(AccountUtils.getChosenAccountName(context), Constants.ACCOUNT_TYPE));
+							SyncHelper.requestManualSync(new Account(AccountUtils.getAccountName(context), Constants.ACCOUNT_TYPE));
 						} else if (jsonActionDataOld.has(JSONTag.CARD_ELEM_DUE)) {
 							// sub-type: change due
 						} else if (jsonActionDataOld.has(JSONTag.CARD_ELEM_CLOSED)) {
@@ -102,7 +102,7 @@ public class AVOSPushReceiver extends BroadcastReceiver {
 							if (VelloConfig.DEBUG_SWITCH) {
 								Log.d(TAG, "action closed --- name=" + cardName);
 							}
-							SyncHelper.requestManualSync(new Account(AccountUtils.getChosenAccountName(context), Constants.ACCOUNT_TYPE));
+							SyncHelper.requestManualSync(new Account(AccountUtils.getAccountName(context), Constants.ACCOUNT_TYPE));
 						} else {
 							Log.i(TAG, "unknow sub-type of UPDATECARD, data = " + jsonActionData.toString());
 						}

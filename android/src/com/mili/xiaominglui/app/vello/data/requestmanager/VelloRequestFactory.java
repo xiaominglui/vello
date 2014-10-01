@@ -25,7 +25,7 @@ public final class VelloRequestFactory {
     public static final int REQUEST_TYPE_CREATE_WEBHOOK = 17;
     public static final int REQUEST_TYPE_DELETE_WEBHOOK = 19;
     public static final int REQUEST_TYPE_CHECK_TRELLO_CONNECTION = 20;
-    public static final int REQUEST_TYPE_READ_TRELLO_ACCOUNT_INFO = 21;
+    public static final int REQUEST_TYPE_READ_TRELLO_ACCOUNT_USERNAME = 21;
     public static final int REQUEST_TYPE_DELETE_REMOTE_TRELLO_CARD = 23;
     public static final int REQUEST_TYPE_UPDATE_REMOTE_TRELLO_CARD = 24;
 
@@ -185,9 +185,9 @@ public final class VelloRequestFactory {
 		return request;
 	}
 	
-	public static Request readTrelloAccountInfo(String access_token) {
-		Request request = new Request(REQUEST_TYPE_READ_TRELLO_ACCOUNT_INFO);
-		request.put(PARAM_EXTRA_TRELLO_ACCESS_TOKEN, access_token);
+	public static Request readTrelloAccountUserName(String accessToken) {
+		Request request = new Request(REQUEST_TYPE_READ_TRELLO_ACCOUNT_USERNAME);
+		request.put(PARAM_EXTRA_TRELLO_ACCESS_TOKEN, accessToken);
 		request.setMemoryCacheEnabled(true);
 		return request;
 	}

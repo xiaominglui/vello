@@ -6,7 +6,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import wei.mark.standout.StandOutWindow;
 
 import android.accounts.Account;
 import android.app.Notification;
@@ -35,8 +34,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.FrameLayout;
-import android.widget.FrameLayout.LayoutParams;
 
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -56,7 +53,6 @@ import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 public class MainActivity extends BaseActivity implements ReviewViewFragment.onStatusChangedListener, ConnectionTimeOutFragment.ConnectionTimeOutFragmentEventListener {
 	private static final String TAG = MainActivity.class.getSimpleName();
 	
-	private static final int CONTENT_VIEW_ID = 666;
 	private Drawable oldBackground = null;
 	private int currentColor = 0xFF666666;
 	private boolean isInFront;
@@ -204,13 +200,10 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
             return;
         }
         mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        setContentView(R.layout.activity_main);
 
-        FrameLayout frame = new FrameLayout(this);
-        frame.setId(CONTENT_VIEW_ID);
-        setContentView(frame, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        
         FragmentManager fm = getSupportFragmentManager();
-		fm.beginTransaction().add(CONTENT_VIEW_ID, ReviewViewFragment.newInstance()).commit();
+		fm.beginTransaction().add(R.id.fragment_container_master, ReviewViewFragment.newInstance()).commit();
 
 		handleIntent(getIntent());
 		doBindService();
@@ -242,8 +235,8 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 
 	@Override
 	protected void onDestroy() {
+        doUnbindService();
 		super.onDestroy();
-		doUnbindService();
 	}
 	
 	@Override
@@ -375,7 +368,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	}
 
 	private void triggerRefresh() {
-		SyncHelper.requestManualSync(new Account(AccountUtils.getChosenAccountName(this), Constants.ACCOUNT_TYPE));
+		SyncHelper.requestManualSync(new Account(AccountUtils.getAccountName(this), Constants.ACCOUNT_TYPE));
 	}
 	
 	private void changeColor(int newColor) {
@@ -424,20 +417,18 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	}
 	private void preInitAccount() {
 		FragmentManager fm = getSupportFragmentManager();
-		fm.beginTransaction().replace(CONTENT_VIEW_ID, new ProgressFragment()).commit();
+		fm.beginTransaction().replace(R.id.fragment_container_master, new ProgressFragment()).commit();
 	}
 	
 	private void postInitAccount() {
-		Account account = new Account(AccountUtils.getChosenAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
-		ContentResolver.setIsSyncable(account, VelloProvider.AUTHORITY, 1);
-		ContentResolver.setSyncAutomatically(account, VelloProvider.AUTHORITY, true);
-		ContentResolver.setMasterSyncAutomatically(true);
-		
+		ContentResolver.setIsSyncable(AccountUtils.getAccount(getApplicationContext()), VelloProvider.AUTHORITY, 1);
+		ContentResolver.setSyncAutomatically(AccountUtils.getAccount(getApplicationContext()), VelloProvider.AUTHORITY, true);
+
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 		int syncFreqValue = Integer.valueOf(settings.getString(SettingsActivity.KEY_PREF_SYNC_FREQ, "24"));
 		if (syncFreqValue > 0) {
 			Bundle extras = new Bundle();
-			ContentResolver.addPeriodicSync(account, VelloProvider.AUTHORITY, extras, syncFreqValue * 60 * 60);
+			ContentResolver.addPeriodicSync(AccountUtils.getAccount(getApplicationContext()), VelloProvider.AUTHORITY, extras, syncFreqValue * 60 * 60);
 		}
 		
 		triggerRefresh();
@@ -449,7 +440,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 		}
 		if (isInFront) {
 			FragmentManager fm = getSupportFragmentManager();
-			fm.beginTransaction().replace(CONTENT_VIEW_ID, new ProgressFragment()).commit();
+			fm.beginTransaction().replace(R.id.fragment_container_master, new ProgressFragment()).commit();
 		}
 	}
 	
@@ -497,7 +488,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				mNM.notify(0, noti);
 				if (isInFront) {
 					FragmentManager fm = getSupportFragmentManager();
-					fm.beginTransaction().replace(CONTENT_VIEW_ID, ReviewViewFragment.newInstance()).commit();
+					fm.beginTransaction().replace(R.id.fragment_container_master, ReviewViewFragment.newInstance()).commit();
 				}
 			} else {
 				// no word need recalling
@@ -513,13 +504,13 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 		}
 		if (isInFront) {
 			FragmentManager fm = getSupportFragmentManager();
-			fm.beginTransaction().replace(CONTENT_VIEW_ID, SyncBlankViewFragment.newInstance()).commit();
+			fm.beginTransaction().replace(R.id.fragment_container_master, SyncBlankViewFragment.newInstance()).commit();
 		}
 	}
 	
 	private void preAuthTokenRevoke() {
 		FragmentManager fm = getSupportFragmentManager();
-		fm.beginTransaction().replace(CONTENT_VIEW_ID, new ProgressFragment()).commit();
+		fm.beginTransaction().replace(R.id.fragment_container_master, new ProgressFragment()).commit();
 	}
 	
 	private void showConnectionTimeoutView() {
@@ -528,7 +519,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 		}
 		if (isInFront) {
 			FragmentManager fm = getSupportFragmentManager();
-			fm.beginTransaction().replace(CONTENT_VIEW_ID, ConnectionTimeOutFragment.newInstance()).commit();
+			fm.beginTransaction().replace(R.id.fragment_container_master, ConnectionTimeOutFragment.newInstance()).commit();
 		}
 	}
 	
