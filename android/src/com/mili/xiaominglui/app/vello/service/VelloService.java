@@ -86,39 +86,34 @@ public class VelloService extends Service implements RequestListener, Connection
     public static final int MSG_UNREGISTER_CLIENT = -1;
     public static final int MSG_REGISTER_CLIENT = 0;
 
-    public static final int MSG_SPINNER_ON = 1;
-    public static final int MSG_SPINNER_OFF = 2;
-    public static final int MSG_DIALOG_BAD_DATA_ERROR_SHOW = 3;
-    public static final int MSG_SHOW_RESULT_WORDCARD = 5;
-    public static final int MSG_VALID_TRELLO_CONNECTION = 6;
-    public static final int MSG_INVALID_TRELLO_CONNECTION = 7;
-    public static final int MSG_SHOW_FLOAT_WINDOW = 8;
+    public static final int MSG_DIALOG_BAD_DATA_ERROR_SHOW = 0;
+    public static final int MSG_SHOW_RESULT_WORDCARD = 1;
+    public static final int MSG_VALID_TRELLO_CONNECTION = 2;
+    public static final int MSG_INVALID_TRELLO_CONNECTION = 3;
+    public static final int MSG_SHOW_FLOAT_WINDOW = 4;
 
-    public static final int MSG_STATUS_WEBHOOK_DELETED = 16;
-    public static final int MSG_STATUS_WEBHOOK_CREATED = 17;
+    public static final int MSG_STATUS_WEBHOOK_DELETED = 5;
+    public static final int MSG_STATUS_WEBHOOK_CREATED = 6;
 
-    public static final int MSG_STATUS_INIT_ACCOUNT_BEGIN = 50;
-    public static final int MSG_STATUS_INIT_ACCOUNT_END = 51;
-    public static final int MSG_STATUS_SYNC_BEGIN = 52;
-    public static final int MSG_STATUS_SYNC_END = 53;
-    public static final int MSG_STATUS_SYNC_BLANK = 54;
-    public static final int MSG_STATUS_CONNECTION_TIMEOUT = 55;
-    public static final int MSG_STATUS_REVOKE_BEGIN = 56;
-    public static final int MSG_STATUS_REVOKE_END = 57;
+    public static final int MSG_STATUS_INIT_ACCOUNT_BEGIN = 7;
+    public static final int MSG_STATUS_INIT_ACCOUNT_END = 8;
+    public static final int MSG_STATUS_SYNC_BEGIN = 9;
+    public static final int MSG_STATUS_SYNC_END = 10;
+    public static final int MSG_STATUS_SYNC_BLANK = 11;
+    public static final int MSG_STATUS_CONNECTION_TIMEOUT = 12;
+    public static final int MSG_STATUS_REVOKE_BEGIN = 13;
 
-    public static final int MSG_CHECK_VOCABULARY_BOARD = 100;
-    public static final int MSG_GET_DUE_REVIEW_CARD_LIST = 101;
-    public static final int MSG_CLOSE_WORDCARD = 104;
-    public static final int MSG_SYNC_LOCAL_CACHE = 106;
-    public static final int MSG_TRIGGER_QUERY_WORD = 107;
-    public static final int MSG_CREATE_WEBHOOK = 108;
-    public static final int MSG_DELETE_WEBHOOK = 109;
-    public static final int MSG_CHECK_TRELLO_CONNECTION = 110;
-    public static final int MSG_READ_TRELLO_ACCOUNT_USERNAME = 111;
-    public static final int MSG_RETURN_TRELLO_USERNAME = 112;
-    public static final int MSG_SHUTDOWN_CLIPBOARD_MONITOR = 113;
+    public static final int MSG_CHECK_VOCABULARY_BOARD = 14;
+    public static final int MSG_GET_DUE_REVIEW_CARD_LIST = 15;
+    public static final int MSG_TRIGGER_QUERY_WORD = 16;
+    public static final int MSG_CREATE_WEBHOOK = 17;
+    public static final int MSG_DELETE_WEBHOOK = 18;
+    public static final int MSG_CHECK_TRELLO_CONNECTION = 19;
+    public static final int MSG_READ_TRELLO_ACCOUNT_USERNAME = 20;
+    public static final int MSG_RETURN_TRELLO_USERNAME = 21;
+    public static final int MSG_SHUTDOWN_CLIPBOARD_MONITOR = 22;
 
-    public static final int REQ_DATA_CHANGED = 200;
+    public static final int REQ_DATA_CHANGED = 23;
 
     final Messenger mMessenger = new Messenger(new IncomingHandler(this));
 
@@ -291,16 +286,6 @@ public class VelloService extends Service implements RequestListener, Connection
         mRequestList.add(archiveWordCard);
     }
 
-    private void reviewedWordCard(String idCard, int position) {
-        if (VelloConfig.DEBUG_SWITCH) {
-            Log.d(TAG, "reviewedWordCard start...");
-        }
-        Request reviewedWordCard = VelloRequestFactory.reviewedWordCardRequest(
-                idCard, position);
-        mRequestManager.execute(reviewedWordCard, this);
-        mRequestList.add(reviewedWordCard);
-    }
-
     private void checkVocabularyBoard() {
         if (VelloConfig.DEBUG_SWITCH) {
             Log.d(TAG, "checkVocabularyBoard start...");
@@ -380,7 +365,6 @@ public class VelloService extends Service implements RequestListener, Connection
         if (VelloConfig.DEBUG_SWITCH) {
             Log.d(TAG, "getDueReviewCardList with startId = " + startId + " start...");
         }
-        sendMessageToClients(VelloService.MSG_STATUS_SYNC_BEGIN, null);
         // step 1: get open trello cards
         getOpenTrelloCardList(startId, false);
     }
@@ -614,6 +598,9 @@ public class VelloService extends Service implements RequestListener, Connection
                                 AccountUtils.setVocabularyListId(getApplicationContext(), list.id, position);
                                 if (AccountUtils.isVocabularyBoardWellFormed(getApplicationContext())) {
                                     sendMessageToClients(VelloService.MSG_STATUS_INIT_ACCOUNT_END, null);
+                                    if (VelloConfig.DEBUG_SWITCH) {
+                                        Log.d(TAG, "check vocabulary list end.");
+                                    }
                                 }
                                 return;
                             }
@@ -622,9 +609,6 @@ public class VelloService extends Service implements RequestListener, Connection
 
                     // no vocabulary list found
                     createVocabularyList(position);
-                    if (VelloConfig.DEBUG_SWITCH) {
-                        Log.d(TAG, "check vocabulary list end.");
-                    }
                     return;
 
                 case VelloRequestFactory.REQUEST_TYPE_REOPEN_VOCABULARY_LIST:
@@ -885,7 +869,10 @@ public class VelloService extends Service implements RequestListener, Connection
                     } else {
                         if (VelloConfig.DEBUG_SWITCH) {
                             Log.d(TAG, "has no open trello card");
+                            Log.d(TAG, "...stop command---#" + startId);
                         }
+                        sendMessageToClients(VelloService.MSG_STATUS_SYNC_END, null);
+                        stopSelf(startId);
                     }
                     return;
 

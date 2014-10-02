@@ -32,15 +32,11 @@ public final class VelloRequestFactory {
     // Response data
     public static final String BUNDLE_EXTRA_TRELLO_BOARD_LIST = "com.mili.xiaominglui.app.vello.extra.trello.board.list";
     public static final String BUNDLE_EXTRA_TRELLO_CARD_LIST = "com.mili.xiaominglui.app.vello.extra.trello.card.list";
-    public static final String BUNDLE_EXTRA_REVIEW_CARD_LIST = "com.mili.xiaominglui.app.vello.extra.review.card.list";
-    public static final String BUNDLE_EXTRA_DIRTY_CARD_LIST = "com.mili.xiaominglui.app.vello.extra.dirty.card.list";
     public static final String BUNDLE_EXTRA_WORDCARD = "com.mili.xiaominglui.app.vello.extra.wordCard";
-    public static final String BUNDLE_EXTRA_WORDLIST = "com.mili.xiaominglui.app.vello.extra.wordList";
     public static final String BUNDLE_EXTRA_VOCABULARY_BOARD_ID = "com.mili.xiaominglui.app.vello.extra.boardId";
     public static final String BUNDLE_EXTRA_VOCABULARY_LIST_LIST = "com.mili.xiaominglui.app.vello.extra.listList";
     public static final String BUNDLE_EXTRA_VOCABULARY_LIST_ID = "com.mili.xiaominglui.app.vello.extra.listId";
     public static final String BUNDLE_EXTRA_DICTIONARY_WS_RESPONSE = "com.mili.xiaominglui.app.vello.extra.ws.dictionary";
-    public static final String BUNDLE_EXTRA_RESULT_STATUS = "com.mili.xiaominglui.app.vello.extra.status";
     public static final String BUNDLE_EXTRA_WEBHOOK_ID = "com.mili.xiaominglui.app.vello.extra.webhook.id";
     public static final String BUNDLE_EXTRA_HAS_AUTH_TOKEN_REVOKED = "com.mili.xiaominglui.app.vello.extra.token_revoked";
     public static final String BUNDLE_EXTRA_REMOTE_MODEL_DELETED = "com.mili.xiaominglui.app.vello.extra.trello.model.deleted";
@@ -55,10 +51,8 @@ public final class VelloRequestFactory {
     public static final String PARAM_EXTRA_VOCABULARY_CARD_ID = "com.mili.xiaominglui.app.vello.extra.cardId";
     public static final String PARAM_EXTRA_QUERY_WORD_KEYWORD = "com.mili.xiaominglui.app.vello.extra.keyword";
     public static final String PARAM_EXTRA_DICTIONARY_WS_RESULT = "com.mili.xiaominglui.app.vello.extra.ws.result";
-    public static final String PARAM_EXTRA_DATE_LAST_ACTIVITY = "com.mili.xiaominglui.app.vello.extra.dateLastActivity";
     public static final String PARAM_EXTRA_TRELLO_ACCESS_TOKEN = "com.mili.xiaominglui.app.vello.extra.trello.token";
     public static final String PARAM_EXTRA_SERVICE_START_ID = "com.mili.xiaominglui.app.vello.extra.service.startid";
-    public static final String PARAM_EXTRA_DIRTY_CARD = "com.mili.xiaominglui.app.vello.extra.dirty.card";
     public static final String PARAM_EXTRA_TRELLO_CARD = "com.mili.xiaominglui.app.vello.extra.trello.card";
     public static final String PARAM_EXTRA_FORCE_GET_OPEN_TRELLO_CARD = "com.mili.xiaominglui.app.vello.extra.force.get.open.trello.card";
 
@@ -152,14 +146,6 @@ public final class VelloRequestFactory {
         return request;
     }
 
-    public static Request reviewedWordCardRequest(String idCard, int position) {
-        Request request = new Request(REQUEST_TYPE_REVIEWED_WORDCARD);
-        request.put(PARAM_EXTRA_VOCABULARY_CARD_ID, idCard);
-        request.put(PARAM_EXTRA_VOCABULARY_LIST_POSITION, position);
-        request.setMemoryCacheEnabled(true);
-        return request;
-    }
-    
 	public static Request archiveWordCardRequest(String idCard) {
 		Request request = new Request(REQUEST_TYPE_ARCHIVE_WORDCARD);
 		request.put(PARAM_EXTRA_VOCABULARY_CARD_ID, idCard);

@@ -38,6 +38,7 @@ import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.authenticator.TrelloAuthApi;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
+import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
@@ -267,13 +268,17 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, username);
         setAccountAuthenticatorResult(intent.getExtras());
 
+        // remove account related old info.
+        mCookieManager.removeAllCookie();
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        sp.edit().clear().apply();
+
         SuperToast superToast = new SuperToast(this);
         superToast.setDuration(SuperToast.DURATION_MEDIUM);
         superToast.setBackgroundResource(SuperToast.BACKGROUND_GREENTRANSLUCENT);
         superToast.setTextColor(Color.WHITE);
         superToast.setText(getString(R.string.toast_auth_finished));
         superToast.show();
-        mCookieManager.removeAllCookie();
         finish();
     }
 

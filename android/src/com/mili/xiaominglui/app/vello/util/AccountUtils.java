@@ -234,17 +234,6 @@ public class AccountUtils {
     }
 
     public static void signOut(final Context context) {
-        invalidateAuthToken(context);
-        Account account = new Account(getAccountName(context), Constants.AUTHTOKEN_TYPE);
-        removeTrelloAccount(context, account);
-
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().clear().commit();
-
-        CookieSyncManager.createInstance(context);
-        CookieManager cookieManager = CookieManager.getInstance();
-        cookieManager.removeAllCookie();
-
-        context.getContentResolver().delete(VelloContent.CONTENT_URI, null, null);
+        removeTrelloAccount(context, getAccount(context));
     }
 }

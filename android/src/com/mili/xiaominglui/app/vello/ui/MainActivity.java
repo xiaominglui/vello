@@ -87,7 +87,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				if (VelloConfig.DEBUG_SWITCH) {
 					Log.d(TAG, "status_init_account_end");
 				}
-				theActivity.postInitAccount();
+//				theActivity.postInitAccount();
 			case VelloService.MSG_STATUS_SYNC_BEGIN:
 				theActivity.preSync();
 				break;
@@ -431,7 +431,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			ContentResolver.addPeriodicSync(AccountUtils.getAccount(getApplicationContext()), VelloProvider.AUTHORITY, extras, syncFreqValue * 60 * 60);
 		}
 		
-		triggerRefresh();
+//		triggerRefresh();
 	}
 	
 	private void preSync() {
