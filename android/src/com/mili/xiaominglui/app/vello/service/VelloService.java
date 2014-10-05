@@ -82,7 +82,6 @@ public class VelloService extends Service implements RequestListener, Connection
     // Keeps track of all current registered clients.
     ArrayList<Messenger> mClients = new ArrayList<Messenger>();
 
-    int mValue = 0; // Holds last value set by a client.
     public static final int MSG_UNREGISTER_CLIENT = -1;
     public static final int MSG_REGISTER_CLIENT = 0;
 
@@ -149,7 +148,7 @@ public class VelloService extends Service implements RequestListener, Connection
                         break;
                     case MSG_TRIGGER_QUERY_WORD:
                         String fakedClipText = (String) msg.obj;
-                        if (!service.mLastFakeClipText.equals("")) {
+                        if (fakedClipText != null && !service.mLastFakeClipText.equals("")) {
                             String cleanedKeyword = fakedClipText.trim().toLowerCase();
                             if (cleanedKeyword.matches("^[a-z]+$")) {
                                 service.lookUpInDictionary(cleanedKeyword);
@@ -192,9 +191,6 @@ public class VelloService extends Service implements RequestListener, Connection
                 }
                 mClients.get(i).send(msg);
             } catch (RemoteException e) {
-                // The client is dead. Remove it from the list; we are going
-                // through the list from back to front so this is safe to do
-                // inside the loop.
                 mClients.remove(i);
             }
         }
@@ -221,6 +217,7 @@ public class VelloService extends Service implements RequestListener, Connection
             }
             mMonitorTimer.scheduleAtFixedRate(mTimerTask, 0, mPrefs.getInt(KEY_MONITOR_INTERVAL, DEF_MONITOR_INTERVAL));
             showNotification();
+            return START_REDELIVER_INTENT;
         } else {
             if (VelloConfig.DEBUG_SWITCH) {
                 Log.d(TAG, "command started---#" + startId);
@@ -234,9 +231,8 @@ public class VelloService extends Service implements RequestListener, Connection
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
+            return START_NOT_STICKY;
         }
-
-        return START_NOT_STICKY;
     }
 
     public static boolean isRunning() {
@@ -268,7 +264,7 @@ public class VelloService extends Service implements RequestListener, Connection
 			mTask.cancel();
 		}
 		*/
-
+        shutdownClipboardMonitor();
         Log.i(TAG, "VelloService Stopped.");
         isRunning = false;
     }
@@ -992,7 +988,6 @@ public class VelloService extends Service implements RequestListener, Connection
                     }
 
                 default:
-                    return;
             }
         }
     }
@@ -1086,8 +1081,7 @@ public class VelloService extends Service implements RequestListener, Connection
                     long newDueUnixTime = rightNowUnixTimeGMT + deltaTime;
                     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                     Date newDueDate = new Date(newDueUnixTime);
-                    String stringNewDueDate = format.format(newDueDate);
-                    trelloCard.due = stringNewDueDate;
+                    trelloCard.due = format.format(newDueDate);
                 }
             }
         } else {
@@ -1128,53 +1122,6 @@ public class VelloService extends Service implements RequestListener, Connection
             }
         }
 
-    }
-
-    /**
-     * Monitor task: monitor new text clips in global system clipboard
-     */
-    private class MonitorTask extends Thread {
-
-        private volatile boolean mKeepRunning = false;
-
-        public MonitorTask() {
-            super("ClipboardMonitor");
-        }
-
-        public boolean isRunning() {
-            return mKeepRunning;
-        }
-
-        /**
-         * Cancel task
-         */
-        public void cancel() {
-            removeNotification();
-            mKeepRunning = false;
-            interrupt();
-        }
-
-        @Override
-        public void run() {
-            showNotification();
-            mKeepRunning = true;
-            while (true) {
-                if (mCM.hasText()) {
-                    String clipText = mCM.getText().toString();
-                    if (!clipText.equals(mLastFakeClipText)) {
-                        FakingTask();
-                    }
-                }
-
-                try {
-                    Thread.sleep(mPrefs.getInt(KEY_MONITOR_INTERVAL, DEF_MONITOR_INTERVAL));
-                } catch (InterruptedException ignored) {
-                }
-                if (!mKeepRunning) {
-                    break;
-                }
-            }
-        }
     }
 
     private void FakingTask() {

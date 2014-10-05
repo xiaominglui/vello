@@ -234,6 +234,9 @@ public class AccountUtils {
     }
 
     public static void signOut(final Context context) {
-        removeTrelloAccount(context, getAccount(context));
+        Account account = getAccount(context);
+        if ( account != null) {
+            removeTrelloAccount(context, account);
+        }
     }
 }
