@@ -14,7 +14,6 @@ import org.apache.http.HttpStatus;
 
 import wei.mark.standout.StandOutWindow;
 
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -199,26 +198,23 @@ public class VelloService extends Service implements RequestListener, Connection
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         boolean monitor = false;
+        boolean sync = false;
         if (intent != null) {
             monitor = intent.getBooleanExtra("monitor", false);
+            sync = intent.getBooleanExtra("sync", false);
         }
 
         if (monitor) {
-            /* use Timer instead now.
-    		if (mTask == null) {
-    			mTask = new MonitorTask();
-    		}
-    		mTask.start(); */
             if (mMonitorTimer == null) {
-                mMonitorTimer = new Timer(true);
+                mMonitorTimer = new Timer(false);
             }
             if (mTimerTask == null) {
                 mTimerTask = new MonitorTimerTask();
             }
             mMonitorTimer.scheduleAtFixedRate(mTimerTask, 0, mPrefs.getInt(KEY_MONITOR_INTERVAL, DEF_MONITOR_INTERVAL));
             showNotification();
-            return START_REDELIVER_INTENT;
-        } else {
+        }
+        if (sync) {
             if (VelloConfig.DEBUG_SWITCH) {
                 Log.d(TAG, "command started---#" + startId);
             }
@@ -231,8 +227,8 @@ public class VelloService extends Service implements RequestListener, Connection
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-            return START_NOT_STICKY;
         }
+        return START_NOT_STICKY;
     }
 
     public static boolean isRunning() {
@@ -259,14 +255,10 @@ public class VelloService extends Service implements RequestListener, Connection
     public void onDestroy() {
         // Cancel the persistent notification.
 //		mCM.removePrimaryClipChangedListener(this);
-		/* use Timer instead now
-		if (mTask != null && mTask.isRunning()) {
-			mTask.cancel();
-		}
-		*/
-        shutdownClipboardMonitor();
+
         Log.i(TAG, "VelloService Stopped.");
         isRunning = false;
+        shutdownClipboardMonitor();
     }
 
     protected VelloRequestManager mRequestManager;
@@ -361,6 +353,7 @@ public class VelloService extends Service implements RequestListener, Connection
         if (VelloConfig.DEBUG_SWITCH) {
             Log.d(TAG, "getDueReviewCardList with startId = " + startId + " start...");
         }
+        sendMessageToClients(VelloService.MSG_STATUS_SYNC_BEGIN, null);
         // step 1: get open trello cards
         getOpenTrelloCardList(startId, false);
     }
@@ -466,14 +459,9 @@ public class VelloService extends Service implements RequestListener, Connection
     }
 
     private void shutdownClipboardMonitor() {
-		/* use Timer instead now
-		if (mTask != null && mTask.isRunning()) {
-			mTask.cancel();
-		}
-		*/
-
         if (mMonitorTimer != null) {
             mMonitorTimer.cancel();
+            mMonitorTimer.purge();
             removeNotification();
         }
     }
@@ -512,7 +500,6 @@ public class VelloService extends Service implements RequestListener, Connection
         }, VelloConfig.FLOAT_DICT_CARD_DISMISS_TIME);
     }
 
-    @SuppressLint("SimpleDateFormat")
     @Override
     public void onRequestFinished(Request request, Bundle resultData) {
         if (mRequestList.contains(request)) {
@@ -668,7 +655,6 @@ public class VelloService extends Service implements RequestListener, Connection
                             Log.d(TAG, "no result in dictionary server.");
                         }
                     }
-
                     return;
 
                 case VelloRequestFactory.REQUEST_TYPE_QUERY_IN_REMOTE_STORAGE:
@@ -777,9 +763,7 @@ public class VelloService extends Service implements RequestListener, Connection
                         }
                         final ContentResolver resolver = getContentResolver();
                         if (!force) {
-                            // query and backup all local items that syncInNext=true
-                            // or merge
-                            // locally later
+                            // query and backup all items modified locally
                             ProviderCriteria criteria = new ProviderCriteria();
                             criteria.addNe(DbWordCard.Columns.DATE_LAST_OPERATION, "");
                             Cursor c = resolver.query(DbWordCard.CONTENT_URI,
@@ -839,7 +823,7 @@ public class VelloService extends Service implements RequestListener, Connection
                             }
 
                             if (VelloConfig.DEBUG_SWITCH) {
-                                Log.d(TAG, "merge cards num=" + mMergeCards.size());
+                                Log.d(TAG, "merge cards num = " + mMergeCards.size());
                             }
 
                             for (TrelloCard tCard : mMergeCards.values()) {
@@ -970,7 +954,7 @@ public class VelloService extends Service implements RequestListener, Connection
                     TrelloCard updatingCard = (TrelloCard) request.getParcelable(VelloRequestFactory.PARAM_EXTRA_TRELLO_CARD);
                     int startIdTriggerUpdate = request.getInt(VelloRequestFactory.PARAM_EXTRA_SERVICE_START_ID);
                     if (VelloConfig.DEBUG_SWITCH) {
-                        Log.d(TAG, "updateRemoteTrelloCard returned, with updated=" + updated);
+                        Log.d(TAG, "updateRemoteTrelloCard returned, with updated = " + updated);
                     }
 
                     if (updated) {
@@ -1061,7 +1045,6 @@ public class VelloService extends Service implements RequestListener, Connection
      * @param dirtyCard  local changed wordcard
      * @return new wordcard merged
      */
-    @SuppressLint("SimpleDateFormat")
     private TrelloCard upgradeTrelloCard(TrelloCard trelloCard, DirtyCard dirtyCard, boolean forcePush) {
         if (forcePush) {
             int localPositionInLists = AccountUtils.getVocabularyListPosition(getApplicationContext(), dirtyCard.idList);
@@ -1114,6 +1097,9 @@ public class VelloService extends Service implements RequestListener, Connection
 
         @Override
         public void run() {
+            if (VelloConfig.DEBUG_SWITCH) {
+                Log.d(TAG, "MonitorTimerTask run()...");
+            }
             if (mCM.hasText()) {
                 String clipText = mCM.getText().toString();
                 if (!clipText.equals(mLastFakeClipText)) {
