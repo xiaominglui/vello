@@ -24,6 +24,7 @@ import android.widget.TextView;
 
 import com.atermenji.android.iconictextview.IconicTextView;
 import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
+import com.joanzapata.android.iconify.Iconify;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
@@ -104,6 +105,11 @@ public class ReviewCard extends Card {
         //Retrieve elements
         TextView mTitleTextView = (TextView) parent.findViewById(R.id.review_card_inner_title);
         TextView mSecondaryTitleTextView = (TextView) parent.findViewById(R.id.review_card_inner_subtitle);
+
+//        TextView mReviewed = (TextView) parent.findViewById(R.id.reviewed);
+//        TextView mRelearn = (TextView) parent.findViewById(R.id.relearn);
+//        Iconify.addIcons(mReviewed);
+//        Iconify.addIcons(mRelearn);
 
         if (mTitleTextView != null)
             mTitleTextView.setText(mainTitle);
