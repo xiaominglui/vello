@@ -1,18 +1,17 @@
 package com.mili.xiaominglui.app.vello.ui;
 
+import android.app.Fragment;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.actionbarsherlock.app.SherlockFragment;
 import com.atermenji.android.iconictextview.IconicTextView;
 import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
 import com.mili.xiaominglui.app.vello.R;
 
-public class SyncBlankViewFragment extends SherlockFragment {
+public class SyncBlankViewFragment extends Fragment {
 	
 	public static Fragment newInstance() {
 		Fragment f = new SyncBlankViewFragment();

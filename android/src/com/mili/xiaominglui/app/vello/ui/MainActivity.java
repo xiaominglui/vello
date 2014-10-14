@@ -8,6 +8,7 @@ import java.util.TimeZone;
 
 
 import android.accounts.Account;
+import android.app.FragmentManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -31,7 +32,6 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -43,6 +43,7 @@ import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
+import com.mili.xiaominglui.app.vello.fragment.ReviewViewFragment;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.syncadapter.SyncHelper;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
@@ -203,7 +204,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
         mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         setContentView(R.layout.activity_main);
 
-        FragmentManager fm = getSupportFragmentManager();
+        FragmentManager fm = getFragmentManager();
 		fm.beginTransaction().add(R.id.fragment_container_master, ReviewViewFragment.newInstance()).commit();
 
 		handleIntent(getIntent());
@@ -417,7 +418,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 
 	}
 	private void preInitAccount() {
-		FragmentManager fm = getSupportFragmentManager();
+		FragmentManager fm = getFragmentManager();
 		fm.beginTransaction().replace(R.id.fragment_container_master, new ProgressFragment()).commit();
 	}
 	
@@ -440,7 +441,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			Log.d(TAG, "preSync");
 		}
 		if (isInFront) {
-			FragmentManager fm = getSupportFragmentManager();
+			FragmentManager fm = getFragmentManager();
 			fm.beginTransaction().replace(R.id.fragment_container_master, new ProgressFragment()).commit();
 		}
 	}
@@ -488,7 +489,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 
 				mNM.notify(0, noti);
 				if (isInFront) {
-					FragmentManager fm = getSupportFragmentManager();
+					FragmentManager fm = getFragmentManager();
 					fm.beginTransaction().replace(R.id.fragment_container_master, ReviewViewFragment.newInstance()).commit();
 				}
 			} else {
@@ -504,13 +505,13 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			Log.d(TAG, "showSyncBlank called, with isInFront=" + isInFront);
 		}
 		if (isInFront) {
-			FragmentManager fm = getSupportFragmentManager();
+			FragmentManager fm = getFragmentManager();
 			fm.beginTransaction().replace(R.id.fragment_container_master, SyncBlankViewFragment.newInstance()).commit();
 		}
 	}
 	
 	private void preAuthTokenRevoke() {
-		FragmentManager fm = getSupportFragmentManager();
+		FragmentManager fm = getFragmentManager();
 		fm.beginTransaction().replace(R.id.fragment_container_master, new ProgressFragment()).commit();
 	}
 	
@@ -519,7 +520,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			Log.d(TAG, "showConnectionTimeoutView called, with isInFront=" + isInFront);
 		}
 		if (isInFront) {
-			FragmentManager fm = getSupportFragmentManager();
+			FragmentManager fm = getFragmentManager();
 			fm.beginTransaction().replace(R.id.fragment_container_master, ConnectionTimeOutFragment.newInstance()).commit();
 		}
 	}

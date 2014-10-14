@@ -45,8 +45,8 @@ import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbDictCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
-import com.mili.xiaominglui.app.vello.ui.DictCard;
-import com.mili.xiaominglui.app.vello.ui.ReviewCard;
+import com.mili.xiaominglui.app.vello.card.DictCard;
+import com.mili.xiaominglui.app.vello.card.ReviewCard;
 
 public class ReviewViewFragment extends BaseListFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnLongClickListener, Callback, DialogInterface.OnClickListener {
     private static final String TAG = ReviewViewFragment.class.getSimpleName();
@@ -95,8 +95,8 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
-        setHasOptionsMenu(true);
+//        setRetainInstance(true);
+//        setHasOptionsMenu(true);
     }
 
     @Override
@@ -174,8 +174,8 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mCards.clear();
-        mCardList = (CardListView) getActivity().findViewById(R.id.card_list);
+//        mCards.clear();
+//        mCardList = (CardListView) getActivity().findViewById(R.id.card_list);
         if (mIsSearching) {
             // in Dictionary Mode
             if (data == null)
@@ -189,43 +189,49 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             }
         } else {
             // in Review Mode
-            for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
-                ReviewCard rc = new ReviewCard(getActivity().getApplicationContext(), data);
-                rc.setId(rc.trelloCard.id);
-                rc.init();
-                mCards.add(rc);
-                mCardArrayAdapter = new CardArrayAdapter(getActivity(), mCards);
-                // Enable undo controller!
-                mCardArrayAdapter.setEnableUndo(true);
-
-                if (mCardList != null) {
-                    mCardList.setAdapter(mCardArrayAdapter);
-                }
+            if (getActivity() == null) {
+                return;
             }
+
+            mAdapter.swapCursor(data);
+            displayList();
+//            for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
+//                ReviewCard rc = new ReviewCard(getActivity().getApplicationContext(), data);
+//                rc.setId(rc.trelloCard.id);
+//                rc.init();
+//                mCards.add(rc);
+//                mCardArrayAdapter = new CardArrayAdapter(getActivity(), mCards);
+//                // Enable undo controller!
+//                mCardArrayAdapter.setEnableUndo(true);
+//
+//                if (mCardList != null) {
+//                    mCardList.setAdapter(mCardArrayAdapter);
+//                }
+//            }
         }
 
-        View empty = getActivity().findViewById(R.id.emptyView);
-        empty.setOnTouchListener(new ViewGroup.OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        return true;
-                    case MotionEvent.ACTION_MOVE:
-                        return true;
-                    case MotionEvent.ACTION_UP:
-                        mListener.syncOnAllRecalled();
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-        });
-        IconicTextView iconicTextView = (IconicTextView) getActivity().findViewById(R.id.iconic_all_recalled);
-        iconicTextView.setIcon(FontAwesomeIcon.OK);
-        iconicTextView.setTextColor(Color.GRAY);
-        mCardList.setEmptyView(empty);
+//        View empty = getActivity().findViewById(R.id.emptyView);
+//        empty.setOnTouchListener(new ViewGroup.OnTouchListener() {
+//
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                switch (event.getAction()) {
+//                    case MotionEvent.ACTION_DOWN:
+//                        return true;
+//                    case MotionEvent.ACTION_MOVE:
+//                        return true;
+//                    case MotionEvent.ACTION_UP:
+//                        mListener.syncOnAllRecalled();
+//                        return true;
+//                    default:
+//                        return false;
+//                }
+//            }
+//        });
+//        IconicTextView iconicTextView = (IconicTextView) getActivity().findViewById(R.id.iconic_all_recalled);
+//        iconicTextView.setIcon(FontAwesomeIcon.OK);
+//        iconicTextView.setTextColor(Color.GRAY);
+//        mCardList.setEmptyView(empty);
     }
 
     @Override
@@ -233,6 +239,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         if (VelloConfig.DEBUG_SWITCH) {
             Log.d(TAG, "onLoaderReset");
         }
+        mAdapter.swapCursor(null);
     }
 
     private void asyncMarkDeleteWordRemotely(final Integer[] wordIds) {

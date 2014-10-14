@@ -1,4 +1,4 @@
-package com.mili.xiaominglui.app.vello.ui;
+package com.mili.xiaominglui.app.vello.card;
 
 
 import it.gmariotti.cardslib.library.internal.Card;
@@ -28,6 +28,8 @@ import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
+import com.mili.xiaominglui.app.vello.ui.ReviewCardHeader;
+import com.mili.xiaominglui.app.vello.ui.ReviewExpandCard;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class ReviewCard extends Card {
@@ -41,6 +43,14 @@ public class ReviewCard extends Card {
 	public String dateLastOperation;
 	
 	public int idInLocalDB;
+
+    public String mainTitle;
+    public String secondaryTitle;
+
+    public ReviewCard(Context context) {
+        super(context, R.layout.review_card_inner_content);
+
+    }
 	
 	public ReviewCard(Context context, Cursor c) {
 		super(context, R.layout.card_review_inner_content);
@@ -91,19 +101,28 @@ public class ReviewCard extends Card {
 	
 	@Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
-        iconicLifeSign = (IconicTextView) parent.findViewById(R.id.life_sign);
-        textViewLifeCount = (TextView) parent.findViewById(R.id.life_count);
-        
-        if (iconicLifeSign != null) {
-        	iconicLifeSign.setIcon(FontAwesomeIcon.CHECK);
-        	iconicLifeSign.setTextColor(Color.GRAY);
-        }
+        //Retrieve elements
+        TextView mTitleTextView = (TextView) parent.findViewById(R.id.review_card_inner_title);
+        TextView mSecondaryTitleTextView = (TextView) parent.findViewById(R.id.review_card_inner_subtitle);
 
-        if (textViewLifeCount != null) {
-        	int positionList = AccountUtils.getVocabularyListPosition(mContext, trelloCard.idList);
-        	textViewLifeCount.setText(String.valueOf(positionList) + "/9");
-			textViewLifeCount.setTextColor(Color.GRAY);
-        }
+        if (mTitleTextView != null)
+            mTitleTextView.setText(mainTitle);
+
+        if (mSecondaryTitleTextView != null)
+            mSecondaryTitleTextView.setText(secondaryTitle);
+//        iconicLifeSign = (IconicTextView) parent.findViewById(R.id.life_sign);
+//        textViewLifeCount = (TextView) parent.findViewById(R.id.life_count);
+//
+//        if (iconicLifeSign != null) {
+//        	iconicLifeSign.setIcon(FontAwesomeIcon.CHECK);
+//        	iconicLifeSign.setTextColor(Color.GRAY);
+//        }
+//
+//        if (textViewLifeCount != null) {
+//        	int positionList = AccountUtils.getVocabularyListPosition(mContext, trelloCard.idList);
+//        	textViewLifeCount.setText(String.valueOf(positionList) + "/9");
+//			textViewLifeCount.setTextColor(Color.GRAY);
+//        }
 		
 	}
 	

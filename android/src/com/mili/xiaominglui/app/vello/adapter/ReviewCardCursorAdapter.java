@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.mili.xiaominglui.app.vello.R;
+import com.mili.xiaominglui.app.vello.card.ReviewCard;
+import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
 
 import java.util.List;
 
@@ -27,6 +29,13 @@ public class ReviewCardCursorAdapter extends CardCursorAdapter {
 
     @Override
     protected Card getCardFromCursor(Cursor cursor) {
-        return null;
+        ReviewCard card = new ReviewCard(super.getContext());
+        setCardFromCursor(card, cursor);
+        return card;
+    }
+
+    private void setCardFromCursor(ReviewCard card, Cursor cursor) {
+        card.mainTitle = cursor.getString(VelloContent.DbWordCard.Columns.NAME.getIndex());
+        card.secondaryTitle = "hello world!";
     }
 }

@@ -1,4 +1,4 @@
-package com.mili.xiaominglui.app.vello.ui;
+package com.mili.xiaominglui.app.vello.card;
 
 import android.content.Context;
 import it.gmariotti.cardslib.library.internal.Card;
