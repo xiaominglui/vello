@@ -47,6 +47,8 @@ public class ReviewCard extends Card {
 
     public String mainTitle;
     public String secondaryTitle;
+    public int errorResourceIdThumb;
+    public String urlResourceThumb;
 
     public ReviewCard(Context context) {
         super(context, R.layout.review_card_inner_content);

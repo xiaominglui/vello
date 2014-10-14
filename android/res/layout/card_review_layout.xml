@@ -17,6 +17,7 @@
         <it.gmariotti.cardslib.library.view.component.CardThumbnailView
             android:id="@+id/card_thumbnail_layout"
             style="@style/card_thumbnail_outer_layout"
+            card:card_thumbnail_layout_resourceID="@layout/review_card_thumbnail_layout"
             android:layout_width="wrap_content"
             android:layout_height="match_parent" />
 
