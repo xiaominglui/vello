@@ -1,6 +1,7 @@
 package com.mili.xiaominglui.app.vello.card;
 
 
+import at.markushi.ui.CircleButton;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 
@@ -20,6 +21,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.IconTextView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.atermenji.android.iconictextview.IconicTextView;
@@ -108,8 +111,8 @@ public class ReviewCard extends Card {
         TextView mTitleTextView = (TextView) parent.findViewById(R.id.review_card_inner_title);
         TextView mSecondaryTitleTextView = (TextView) parent.findViewById(R.id.review_card_inner_subtitle);
 
-//        TextView mReviewed = (TextView) parent.findViewById(R.id.reviewed);
-//        TextView mRelearn = (TextView) parent.findViewById(R.id.relearn);
+        CircleButton mReviewed = (CircleButton) parent.findViewById(R.id.reviewed);
+        CircleButton mRelearn = (CircleButton) parent.findViewById(R.id.relearn);
 //        Iconify.addIcons(mReviewed);
 //        Iconify.addIcons(mRelearn);
 

@@ -52,7 +52,7 @@ public class ReviewCardCursorAdapter extends CardCursorAdapter {
 
     private void setCardFromCursor(ReviewCard card, Cursor cursor) {
         card.mainTitle = cursor.getString(VelloContent.DbWordCard.Columns.NAME.getIndex());
-        card.secondaryTitle = "hello world!";
+        card.secondaryTitle = "";
         String jsonString = cursor.getString(VelloContent.DbWordCard.Columns.DESC.getIndex());
 
         JsonParser parser = new JsonParser();

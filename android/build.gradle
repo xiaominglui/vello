@@ -10,6 +10,7 @@ dependencies {
     compile project(':libprojects:standout')
     compile 'com.github.gabrielemariotti.cards:library:1.9.1'
     compile 'com.joanzapata.android:android-iconify:1.0.6'
+    compile 'com.github.markushi:circlebutton:1.1'
 }
 
 android {
