@@ -7,18 +7,17 @@
     android:orientation="vertical">
 
     <!-- Card visible layout -->
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/card_main_layout"
         style="@style/card.main_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:layout_height="match_parent">
 
         <it.gmariotti.cardslib.library.view.component.CardThumbnailView
             android:id="@+id/card_thumbnail_layout"
             style="@style/card_thumbnail_outer_layout"
             card:card_thumbnail_layout_resourceID="@layout/review_card_thumbnail_layout"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
         <LinearLayout
@@ -42,7 +41,7 @@
 
         </LinearLayout>
 
-    </LinearLayout>
+    </FrameLayout>
     <!-- Compound view for Shadow
            If you want to customize this element use attr card:card_shadow_layout_resourceID -->
     <it.gmariotti.cardslib.library.view.component.CardShadowView

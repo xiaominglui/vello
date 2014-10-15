@@ -12,6 +12,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.card.ReviewCard;
+import com.mili.xiaominglui.app.vello.data.model.MiliDictionaryItem;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
 
 import java.util.List;
@@ -38,26 +39,25 @@ public class ReviewCardCursorAdapter extends CardCursorAdapter {
         setCardFromCursor(card, cursor);
 
         //Add the thumbnail
-        CardThumbnail thumb = new CardThumbnail(mContext);
-        if (card.urlResourceThumb != null && !TextUtils.isEmpty(card.urlResourceThumb)) {
+        if (!TextUtils.isEmpty(card.urlResourceThumb)) {
+            CardThumbnail thumb = new CardThumbnail(mContext);
             thumb.setUrlResource(card.urlResourceThumb);
             thumb.setErrorResource(card.errorResourceIdThumb);
-        } else {
-            thumb.setDrawableResource(card.errorResourceIdThumb);
+            card.addCardThumbnail(thumb);
         }
-        card.addCardThumbnail(thumb);
 
         return card;
     }
 
     private void setCardFromCursor(ReviewCard card, Cursor cursor) {
-        card.mainTitle = cursor.getString(VelloContent.DbWordCard.Columns.NAME.getIndex());
-        card.secondaryTitle = "";
         String jsonString = cursor.getString(VelloContent.DbWordCard.Columns.DESC.getIndex());
-
-        JsonParser parser = new JsonParser();
-        JsonObject jsonObject = parser.parse(jsonString).getAsJsonObject();
-        card.urlResourceThumb = jsonObject.get("pic").getAsString();
-        card.errorResourceIdThumb = R.drawable.ic_launcher;
+        Gson gson = new Gson();
+        MiliDictionaryItem item = gson.fromJson(jsonString, MiliDictionaryItem.class);
+        if (item != null) {
+            card.mainTitle = item.spell;
+            card.secondaryTitle = "";
+            card.urlResourceThumb = item.pic;
+            card.errorResourceIdThumb = R.drawable.ic_launcher;
+        }
     }
 }
