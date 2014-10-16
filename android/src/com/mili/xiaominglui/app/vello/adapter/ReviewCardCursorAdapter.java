@@ -14,6 +14,7 @@ import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.card.ReviewCard;
 import com.mili.xiaominglui.app.vello.data.model.MiliDictionaryItem;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
+import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 import java.util.List;
 
@@ -44,6 +45,27 @@ public class ReviewCardCursorAdapter extends CardCursorAdapter {
             thumb.setUrlResource(card.urlResourceThumb);
             thumb.setErrorResource(card.errorResourceIdThumb);
             card.addCardThumbnail(thumb);
+        } else {
+            switch (card.reviewProgress) {
+                case 0:
+                case 1:
+                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color1);
+                    break;
+                case 2:
+                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color3);
+                    break;
+                case 3:
+                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color4);
+                    break;
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color5);
+                    break;
+
+            }
         }
 
         return card;
@@ -51,6 +73,8 @@ public class ReviewCardCursorAdapter extends CardCursorAdapter {
 
     private void setCardFromCursor(ReviewCard card, Cursor cursor) {
         String jsonString = cursor.getString(VelloContent.DbWordCard.Columns.DESC.getIndex());
+        String idList = cursor.getString(VelloContent.DbWordCard.Columns.LIST_ID.getIndex());
+        card.reviewProgress = AccountUtils.getVocabularyListPosition(mContext, idList);
         Gson gson = new Gson();
         MiliDictionaryItem item = gson.fromJson(jsonString, MiliDictionaryItem.class);
         if (item != null) {

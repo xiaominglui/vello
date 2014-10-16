@@ -52,6 +52,7 @@ public class ReviewCard extends Card {
     public String secondaryTitle;
     public int errorResourceIdThumb;
     public String urlResourceThumb;
+    public int reviewProgress;
 
     public ReviewCard(Context context) {
         super(context, R.layout.review_card_inner_content);
@@ -111,8 +112,8 @@ public class ReviewCard extends Card {
         TextView mTitleTextView = (TextView) parent.findViewById(R.id.review_card_inner_title);
         TextView mSecondaryTitleTextView = (TextView) parent.findViewById(R.id.review_card_inner_subtitle);
 
-        CircleButton mReviewed = (CircleButton) parent.findViewById(R.id.reviewed);
-        CircleButton mRelearn = (CircleButton) parent.findViewById(R.id.relearn);
+//        CircleButton mReviewed = (CircleButton) parent.findViewById(R.id.reviewed);
+//        CircleButton mRelearn = (CircleButton) parent.findViewById(R.id.relearn);
 //        Iconify.addIcons(mReviewed);
 //        Iconify.addIcons(mRelearn);
 
