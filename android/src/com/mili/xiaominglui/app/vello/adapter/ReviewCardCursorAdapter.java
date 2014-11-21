@@ -82,6 +82,7 @@ public class ReviewCardCursorAdapter extends CardCursorAdapter {
             card.secondaryTitle = "";
             card.urlResourceThumb = item.pic;
             card.errorResourceIdThumb = R.drawable.ic_launcher;
+            card.init();
         }
     }
 }

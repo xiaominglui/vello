@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.IconTextView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.atermenji.android.iconictextview.IconicTextView;
 import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
@@ -71,71 +72,49 @@ public class ReviewCard extends Card {
 	
 	public void init() {
 		CardHeader header = new ReviewCardHeader(mContext);
-		header.setTitle(trelloCard.name);
+		header.setTitle(mainTitle);
 		header.setButtonExpandVisible(true);
-		addCardHeader(header);
-		
-		
-		ReviewExpandCard expand = new ReviewExpandCard(mContext, trelloCard.desc);
-		expand.setTitle(trelloCard.desc);
-		addCardExpand(expand);
-		
-		setClickable(false);
-		setLongClickable(false);
-		setSwipeable(true);
-		
-		setOnSwipeListener(new OnSwipeListener() {
-			@Override
-			public void onSwipe(Card card) {
-				asyncMarkRecalledWord(card);
-			}
-		});
 
-		setOnUndoSwipeListListener(new OnUndoSwipeListListener() {
-			@Override
-			public void onUndoSwipe(Card card) {
-				asyncUnmarkRecalledWord(card);
-			}
-		});
-		
-		setOnExpandAnimatorEndListener(new Card.OnExpandAnimatorEndListener() {
+        header.setOtherButtonVisible(true);
+
+        //Add a callback
+        header.setOtherButtonClickListener(new CardHeader.OnClickCardHeaderOtherButtonListener() {
             @Override
-            public void onExpandEnd(Card card) {
-            	setSwipeable(false);
+            public void onButtonItemClick(Card card, View view) {
+                Toast.makeText(mContext, "Click on Other Button", Toast.LENGTH_LONG).show();
             }
         });
-	}
-	
-	@Override
-    public void setupInnerViewElements(ViewGroup parent, View view) {
-        //Retrieve elements
-        TextView mTitleTextView = (TextView) parent.findViewById(R.id.review_card_inner_title);
-        TextView mSecondaryTitleTextView = (TextView) parent.findViewById(R.id.review_card_inner_subtitle);
+		addCardHeader(header);
 
-//        CircleButton mReviewed = (CircleButton) parent.findViewById(R.id.reviewed);
-//        CircleButton mRelearn = (CircleButton) parent.findViewById(R.id.relearn);
-//        Iconify.addIcons(mReviewed);
-//        Iconify.addIcons(mRelearn);
 
-        if (mTitleTextView != null)
-            mTitleTextView.setText(mainTitle);
-
-        if (mSecondaryTitleTextView != null)
-            mSecondaryTitleTextView.setText(secondaryTitle);
-//        iconicLifeSign = (IconicTextView) parent.findViewById(R.id.life_sign);
-//        textViewLifeCount = (TextView) parent.findViewById(R.id.life_count);
+//		ReviewExpandCard expand = new ReviewExpandCard(mContext, trelloCard.desc);
+//		expand.setTitle(trelloCard.desc);
+//		addCardExpand(expand);
 //
-//        if (iconicLifeSign != null) {
-//        	iconicLifeSign.setIcon(FontAwesomeIcon.CHECK);
-//        	iconicLifeSign.setTextColor(Color.GRAY);
-//        }
+//		setClickable(false);
+//		setLongClickable(false);
+//		setSwipeable(true);
 //
-//        if (textViewLifeCount != null) {
-//        	int positionList = AccountUtils.getVocabularyListPosition(mContext, trelloCard.idList);
-//        	textViewLifeCount.setText(String.valueOf(positionList) + "/9");
-//			textViewLifeCount.setTextColor(Color.GRAY);
-//        }
-		
+//		setOnSwipeListener(new OnSwipeListener() {
+//			@Override
+//			public void onSwipe(Card card) {
+//				asyncMarkRecalledWord(card);
+//			}
+//		});
+//
+//		setOnUndoSwipeListListener(new OnUndoSwipeListListener() {
+//			@Override
+//			public void onUndoSwipe(Card card) {
+//				asyncUnmarkRecalledWord(card);
+//			}
+//		});
+//
+//		setOnExpandAnimatorEndListener(new Card.OnExpandAnimatorEndListener() {
+//            @Override
+//            public void onExpandEnd(Card card) {
+//            	setSwipeable(false);
+//            }
+//        });
 	}
 	
 	@Override
