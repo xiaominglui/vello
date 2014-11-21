@@ -73,17 +73,7 @@ public class ReviewCard extends Card {
 	public void init() {
 		CardHeader header = new ReviewCardHeader(mContext);
 		header.setTitle(mainTitle);
-		header.setButtonExpandVisible(true);
 
-        header.setOtherButtonVisible(true);
-
-        //Add a callback
-        header.setOtherButtonClickListener(new CardHeader.OnClickCardHeaderOtherButtonListener() {
-            @Override
-            public void onButtonItemClick(Card card, View view) {
-                Toast.makeText(mContext, "Click on Other Button", Toast.LENGTH_LONG).show();
-            }
-        });
 		addCardHeader(header);
 
 
@@ -116,8 +106,28 @@ public class ReviewCard extends Card {
 //            }
 //        });
 	}
-	
-	@Override
+
+    @Override
+    public void setupInnerViewElements(ViewGroup parent, View view) {
+        CircleButton reviewedButton = (CircleButton) parent.findViewById(R.id.reviewed);
+        CircleButton relearnButton = (CircleButton) parent.findViewById(R.id.relearn);
+
+        reviewedButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(mContext, "reviewedButton clicked", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        relearnButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(mContext, "relearnButton clicked", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @Override
     public int getType() {
         return 0;
     }

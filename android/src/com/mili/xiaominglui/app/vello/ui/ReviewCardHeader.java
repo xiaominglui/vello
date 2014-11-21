@@ -9,7 +9,7 @@ import it.gmariotti.cardslib.library.internal.CardHeader;
 public class ReviewCardHeader extends CardHeader {
 	
 	public ReviewCardHeader(Context context) {
-		super(context, R.layout.inner_review_header);
+		super(context, R.layout.review_card_inner_header);
 	}
 
 }
