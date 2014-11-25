@@ -47,10 +47,14 @@ public class ReviewCard extends Card {
 	public String markDeleted;
 	public String dateLastOperation;
 	
-	public int idInLocalDB;
+
 
     public String mainTitle;
     public String secondaryTitle;
+    public String idList;
+    public int idInLocalDB;
+    public int position;
+
     public int errorResourceIdThumb;
     public String urlResourceThumb;
     public int reviewProgress;
@@ -67,7 +71,6 @@ public class ReviewCard extends Card {
 		markDeleted = c.getString(DbWordCard.Columns.MARKDELETED.getIndex());
 		dateLastOperation = c.getString(DbWordCard.Columns.DATE_LAST_OPERATION.getIndex());
 		
-		idInLocalDB = c.getInt(DbWordCard.Columns.ID.getIndex());
 	}
 	
 	public void init() {
@@ -115,7 +118,8 @@ public class ReviewCard extends Card {
         reviewedButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(mContext, "reviewedButton clicked", Toast.LENGTH_SHORT).show();
+                asyncMarkRecalledWord();
+                Toast.makeText(mContext, mainTitle + " recalled", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -166,58 +170,58 @@ public class ReviewCard extends Card {
 					cv.put(DbWordCard.Columns.DATE_LAST_OPERATION.getName(), "");
 					Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI, ((ReviewCard)reviewCard).idInLocalDB);
 					mContext.getContentResolver().update(uri, cv, null, null);
+                    mContext.getContentResolver().notifyChange(uri, null);
 				}
 				return null;
 			}
 		};
-		unmarkTask.execute(reviewCard);
+		unmarkTask.execute();
 	}
 	
 	@SuppressLint("SimpleDateFormat")
-	private void asyncMarkRecalledWord(final Card reviewCards) {
-		final AsyncTask<Card, Void, Void> markTask = new AsyncTask<Card, Void, Void>() {
+	private void asyncMarkRecalledWord() {
+		final AsyncTask<Void, Void, Void> markTask = new AsyncTask<Void, Void, Void>() {
 
-			@Override
-			protected Void doInBackground(Card... reviewCards) {
-				for (final Card reviewCard : reviewCards) {
-					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "mark Card#"
-								+ ((ReviewCard) reviewCard).idInLocalDB
-								+ "recalled. --- "
-								+ ((ReviewCard) reviewCard).trelloCard.name);
-					}
-					ContentValues cv = new ContentValues();
+            @Override
+			protected Void doInBackground(Void... voids) {
+                if (VelloConfig.DEBUG_SWITCH) {
+                    Log.d(TAG, "mark Card#"
+                            + idInLocalDB
+                            + "recalled. --- "
+                            + mainTitle);
+                }
+                ContentValues cv = new ContentValues();
 
-					int positionList = AccountUtils.getVocabularyListPosition(mContext, ((ReviewCard) reviewCard).trelloCard.idList);
-					SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-					Calendar rightNow = Calendar.getInstance();
-					long rightNowUnixTime = rightNow.getTimeInMillis();
+                int positionList = AccountUtils.getVocabularyListPosition(mContext, idList);
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                Calendar rightNow = Calendar.getInstance();
+                long rightNowUnixTime = rightNow.getTimeInMillis();
 
-					if (positionList == VelloConfig.VOCABULARY_LIST_POSITION_8TH) {
-						cv.put(DbWordCard.Columns.CLOSED.getName(), "true");
-					} else {
-						long rightNowUnixTimeGMT = rightNowUnixTime
-								- TimeZone.getDefault().getRawOffset();
-						long delta = VelloConfig.VOCABULARY_LIST_DUE_DELTA[positionList];
-						long dueUnixTime = rightNowUnixTimeGMT + delta;
+                if (positionList == VelloConfig.VOCABULARY_LIST_POSITION_8TH) {
+                    cv.put(DbWordCard.Columns.CLOSED.getName(), "true");
+                } else {
+                    long rightNowUnixTimeGMT = rightNowUnixTime
+                            - TimeZone.getDefault().getRawOffset();
+                    long delta = VelloConfig.VOCABULARY_LIST_DUE_DELTA[positionList];
+                    long dueUnixTime = rightNowUnixTimeGMT + delta;
 
-						Date dueDate = new Date(dueUnixTime);
-						String stringDueDate = format.format(dueDate);
-						cv.put(DbWordCard.Columns.DUE.getName(), stringDueDate);
+                    Date dueDate = new Date(dueUnixTime);
+                    String stringDueDate = format.format(dueDate);
+                    cv.put(DbWordCard.Columns.DUE.getName(), stringDueDate);
 
-						String newIdList = AccountUtils.getVocabularyListId(mContext, positionList + 1);
-						cv.put(DbWordCard.Columns.LIST_ID.getName(), newIdList);
-					}
+                    String newIdList = AccountUtils.getVocabularyListId(mContext, positionList + 1);
+                    cv.put(DbWordCard.Columns.LIST_ID.getName(), newIdList);
+                }
 
-					Date rightNowDate = new Date(rightNowUnixTime);
-					String stringRightNow = format.format(rightNowDate);
-					cv.put(DbWordCard.Columns.DATE_LAST_OPERATION.getName(), stringRightNow);
-					Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI, ((ReviewCard) reviewCard).idInLocalDB);
-					mContext.getContentResolver().update(uri, cv, null, null);
-				}
-				return null;
-			}
+                Date rightNowDate = new Date(rightNowUnixTime);
+                String stringRightNow = format.format(rightNowDate);
+                cv.put(DbWordCard.Columns.DATE_LAST_OPERATION.getName(), stringRightNow);
+                Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI, idInLocalDB);
+                mContext.getContentResolver().update(uri, cv, null, null);
+                mContext.getContentResolver().notifyChange(uri, null);
+                return null;
+            }
 		};
-		markTask.execute(reviewCards);
+		markTask.execute();
 	}
 }

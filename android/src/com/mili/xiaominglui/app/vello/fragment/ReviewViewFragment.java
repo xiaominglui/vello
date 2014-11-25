@@ -30,6 +30,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -53,6 +54,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
 
     ReviewCardCursorAdapter mAdapter;
     CardListView mListView;
+    ActionMode mActionMode;
 
     private CardListView mCardList;
     private ArrayList<Card> mCards;
@@ -79,6 +81,14 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         public void syncOnAllRecalled();
 
         public void onWordRecalled();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if (mActionMode!=null){
+            mActionMode.finish();
+        }
     }
 
     @Override
@@ -128,6 +138,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         mListView = (CardListView) getActivity().findViewById(R.id.list_cursor);
         if (mListView != null) {
             mListView.setAdapter(mAdapter);
+            mListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL );
         }
 
         // Force start background query to load sessions
