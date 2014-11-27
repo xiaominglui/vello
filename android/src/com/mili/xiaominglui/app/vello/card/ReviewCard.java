@@ -59,8 +59,13 @@ public class ReviewCard extends Card {
     public String urlResourceThumb;
     public int reviewProgress;
 
+    private OnClickReviewCardReviewedButtonListener mReviewedButtonOnClickListener;
+    private OnClickReviewCardReleanButtonListener mReleanButtonOnClickListener;
+    private Card mCard;
+
     public ReviewCard(Context context) {
         super(context, R.layout.review_card_inner_content);
+        mCard = this;
 
     }
 	
@@ -72,6 +77,20 @@ public class ReviewCard extends Card {
 		dateLastOperation = c.getString(DbWordCard.Columns.DATE_LAST_OPERATION.getIndex());
 		
 	}
+
+    /**
+     * Interface to handle callbacks when Reviewed Button is clicked
+     */
+    public interface OnClickReviewCardReviewedButtonListener {
+        public void onButtonItemClick(Card card, View view);
+    }
+
+    /**
+     * Interface to handle callbacks when Relean Button is clicked
+     */
+    public interface OnClickReviewCardReleanButtonListener {
+        public void onButtonItemClick(Card card, View view);
+    }
 	
 	public void init() {
 		CardHeader header = new ReviewCardHeader(mContext);
@@ -110,25 +129,40 @@ public class ReviewCard extends Card {
 //        });
 	}
 
+    public void setReviewedButtonOnClickListener(OnClickReviewCardReviewedButtonListener listener) {
+        mReviewedButtonOnClickListener = listener;
+    }
+
+    public void setmReleanButtonOnClickListener(OnClickReviewCardReleanButtonListener listener) {
+        mReleanButtonOnClickListener = listener;
+    }
+
     @Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
         CircleButton reviewedButton = (CircleButton) parent.findViewById(R.id.reviewed);
         CircleButton relearnButton = (CircleButton) parent.findViewById(R.id.relearn);
 
-        reviewedButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                asyncMarkRecalledWord();
-                Toast.makeText(mContext, mainTitle + " recalled", Toast.LENGTH_SHORT).show();
-            }
-        });
+        if (mReleanButtonOnClickListener != null) {
+            relearnButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (mReleanButtonOnClickListener != null) {
+                        mReleanButtonOnClickListener.onButtonItemClick(mCard, view);
+                    }
+                }
+            });
+        }
 
-        relearnButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(mContext, "relearnButton clicked", Toast.LENGTH_SHORT).show();
-            }
-        });
+        if (mReviewedButtonOnClickListener != null) {
+            reviewedButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (mReviewedButtonOnClickListener != null) {
+                        mReviewedButtonOnClickListener.onButtonItemClick(mCard, view);
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -170,7 +204,6 @@ public class ReviewCard extends Card {
 					cv.put(DbWordCard.Columns.DATE_LAST_OPERATION.getName(), "");
 					Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI, ((ReviewCard)reviewCard).idInLocalDB);
 					mContext.getContentResolver().update(uri, cv, null, null);
-                    mContext.getContentResolver().notifyChange(uri, null);
 				}
 				return null;
 			}
@@ -179,7 +212,7 @@ public class ReviewCard extends Card {
 	}
 	
 	@SuppressLint("SimpleDateFormat")
-	private void asyncMarkRecalledWord() {
+	public void asyncMarkRecalledWord() {
 		final AsyncTask<Void, Void, Void> markTask = new AsyncTask<Void, Void, Void>() {
 
             @Override
@@ -218,7 +251,6 @@ public class ReviewCard extends Card {
                 cv.put(DbWordCard.Columns.DATE_LAST_OPERATION.getName(), stringRightNow);
                 Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI, idInLocalDB);
                 mContext.getContentResolver().update(uri, cv, null, null);
-                mContext.getContentResolver().notifyChange(uri, null);
                 return null;
             }
 		};

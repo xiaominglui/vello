@@ -2,6 +2,8 @@ package com.mili.xiaominglui.app.vello.fragment;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
+import it.gmariotti.cardslib.library.internal.CardThumbnail;
+import it.gmariotti.cardslib.library.internal.dismissanimation.SwipeDismissAnimation;
 import it.gmariotti.cardslib.library.view.CardListView;
 
 import java.text.SimpleDateFormat;
@@ -40,25 +42,30 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.atermenji.android.iconictextview.IconicTextView;
 import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
+import com.google.gson.Gson;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.adapter.ReviewCardCursorAdapter;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
+import com.mili.xiaominglui.app.vello.data.model.MiliDictionaryItem;
+import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbDictCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
 import com.mili.xiaominglui.app.vello.card.DictCard;
 import com.mili.xiaominglui.app.vello.card.ReviewCard;
+import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class ReviewViewFragment extends BaseListFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnLongClickListener, Callback, DialogInterface.OnClickListener {
     private static final String TAG = ReviewViewFragment.class.getSimpleName();
 
-    ReviewCardCursorAdapter mAdapter;
+//    ReviewCardCursorAdapter mAdapter;
     CardListView mListView;
     ActionMode mActionMode;
 
     private CardListView mCardList;
     private ArrayList<Card> mCards;
-    private CardArrayAdapter mCardArrayAdapter;
+    protected CardArrayAdapter mCardArrayAdapter;
+    SwipeDismissAnimation dismissAnimation;
 
     private onStatusChangedListener mListener;
 
@@ -133,16 +140,99 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
 
     private void init() {
 
-        mAdapter = new ReviewCardCursorAdapter(getActivity());
+//        mAdapter = new ReviewCardCursorAdapter(getActivity());
 
-        mListView = (CardListView) getActivity().findViewById(R.id.list_cursor);
-        if (mListView != null) {
-            mListView.setAdapter(mAdapter);
-            mListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL );
-        }
+//        mListView = (CardListView) getActivity().findViewById(R.id.list_cursor);
+//        if (mListView != null) {
+//            mListView.setAdapter(mAdapter);
+//            mListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL );
+//        }
 
         // Force start background query to load sessions
         getLoaderManager().restartLoader(0, null, this);
+    }
+
+    private void initReviewCards(Cursor data) {
+        ArrayList<Card> cards = new ArrayList<Card>();
+
+        for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
+            ReviewCard card =  initReviewCard(data);
+            cards.add(card);
+        }
+
+        mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
+
+        dismissAnimation = (SwipeDismissAnimation) new SwipeDismissAnimation(getActivity()).
+                setup(mCardArrayAdapter);
+
+        mListView = (CardListView) getActivity().findViewById(R.id.list_cursor);
+        if (mListView != null) {
+            mListView.setAdapter(mCardArrayAdapter);
+        }
+    }
+
+    private ReviewCard initReviewCard(Cursor data) {
+        ReviewCard card = new ReviewCard(getActivity().getApplicationContext());
+        setCardFromCursor(card, data);
+
+        card.setReviewedButtonOnClickListener(new ReviewCard.OnClickReviewCardReviewedButtonListener() {
+            @Override
+            public void onButtonItemClick(Card card, View view) {
+                dismissAnimation.animateDismiss(card);
+                ((ReviewCard) card).asyncMarkRecalledWord();
+            }
+        });
+
+        //Add the thumbnail
+        if (!TextUtils.isEmpty(card.urlResourceThumb)) {
+            CardThumbnail thumb = new CardThumbnail(getActivity().getApplicationContext());
+            thumb.setUrlResource(card.urlResourceThumb);
+            thumb.setErrorResource(card.errorResourceIdThumb);
+            card.addCardThumbnail(thumb);
+        } else {
+            switch (card.reviewProgress) {
+                case 0:
+                case 1:
+                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color1);
+                    break;
+                case 2:
+                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color3);
+                    break;
+                case 3:
+                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color4);
+                    break;
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color5);
+                    break;
+
+            }
+        }
+
+        return card;
+
+    }
+
+    private void setCardFromCursor(ReviewCard card, Cursor cursor) {
+        String jsonString = cursor.getString(VelloContent.DbWordCard.Columns.DESC.getIndex());
+
+        Gson gson = new Gson();
+        MiliDictionaryItem item = gson.fromJson(jsonString, MiliDictionaryItem.class);
+        if (item != null) {
+            String idList = cursor.getString(VelloContent.DbWordCard.Columns.LIST_ID.getIndex());
+            card.position = cursor.getPosition();
+            card.mainTitle = item.spell;
+            card.secondaryTitle = "";
+            card.idList = idList;
+            card.reviewProgress = AccountUtils.getVocabularyListPosition(getActivity().getApplicationContext(), idList);
+            card.idInLocalDB = cursor.getInt(VelloContent.DbWordCard.Columns.ID.getIndex());
+            card.urlResourceThumb = item.pic;
+            card.errorResourceIdThumb = R.drawable.ic_launcher;
+            card.init();
+        }
     }
 
     @Override
@@ -204,7 +294,8 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
                 return;
             }
 
-            mAdapter.swapCursor(data);
+            initReviewCards(data);
+//            mAdapter.swapCursor(data);
             displayList();
 //            for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
 //                ReviewCard rc = new ReviewCard(getActivity().getApplicationContext(), data);
@@ -250,7 +341,8 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         if (VelloConfig.DEBUG_SWITCH) {
             Log.d(TAG, "onLoaderReset");
         }
-        mAdapter.swapCursor(null);
+        // TODO
+//        mAdapter.swapCursor(null);
     }
 
     private void asyncMarkDeleteWordRemotely(final Integer[] wordIds) {
