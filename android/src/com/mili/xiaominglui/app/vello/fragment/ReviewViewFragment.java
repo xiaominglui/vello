@@ -5,6 +5,7 @@ import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardThumbnail;
 import it.gmariotti.cardslib.library.internal.dismissanimation.SwipeDismissAnimation;
 import it.gmariotti.cardslib.library.view.CardListView;
+import it.gmariotti.cardslib.library.view.listener.UndoBarController;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -58,12 +60,9 @@ import com.mili.xiaominglui.app.vello.util.AccountUtils;
 public class ReviewViewFragment extends BaseListFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnLongClickListener, Callback, DialogInterface.OnClickListener {
     private static final String TAG = ReviewViewFragment.class.getSimpleName();
 
-//    ReviewCardCursorAdapter mAdapter;
     CardListView mListView;
     ActionMode mActionMode;
 
-    private CardListView mCardList;
-    private ArrayList<Card> mCards;
     protected CardArrayAdapter mCardArrayAdapter;
     SwipeDismissAnimation dismissAnimation;
 
@@ -125,28 +124,19 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root= inflater.inflate(R.layout.fragment_list_cursor, container, false);
         setupListFragment(root);
-//		mCards = new ArrayList<Card>();
-//		return inflater.inflate(R.layout.fragment_review, container, false);
         return root;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-//		getLoaderManager().initLoader(0, null, this);
         hideList(false);
         init();
     }
 
     private void init() {
 
-//        mAdapter = new ReviewCardCursorAdapter(getActivity());
-
-//        mListView = (CardListView) getActivity().findViewById(R.id.list_cursor);
-//        if (mListView != null) {
-//            mListView.setAdapter(mAdapter);
-//            mListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL );
-//        }
+        mListView = (CardListView) getActivity().findViewById(R.id.list_cursor);
 
         // Force start background query to load sessions
         getLoaderManager().restartLoader(0, null, this);
@@ -157,15 +147,29 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
 
         for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
             ReviewCard card =  initReviewCard(data);
+            card.setId(card.trelloID);
             cards.add(card);
         }
 
         mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
 
-        dismissAnimation = (SwipeDismissAnimation) new SwipeDismissAnimation(getActivity()).
-                setup(mCardArrayAdapter);
+        mCardArrayAdapter.setUndoBarUIElements(new UndoBarController.DefaultUndoBarUIElements(){
+            @Override
+            public SwipeDirectionEnabled isEnabledUndoBarSwipeAction() {
+                return SwipeDirectionEnabled.TOPBOTTOM;
+            }
 
-        mListView = (CardListView) getActivity().findViewById(R.id.list_cursor);
+            @Override
+            public AnimationType getAnimationType() {
+                return AnimationType.TOPBOTTOM;
+            }
+        });
+
+        //Enable undo controller!
+        mCardArrayAdapter.setEnableUndo(true);
+
+        dismissAnimation = (SwipeDismissAnimation) new SwipeDismissAnimation(getActivity()).setup(mCardArrayAdapter);
+
         if (mListView != null) {
             mListView.setAdapter(mCardArrayAdapter);
         }
@@ -179,7 +183,6 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             @Override
             public void onButtonItemClick(Card card, View view) {
                 dismissAnimation.animateDismiss(card);
-                ((ReviewCard) card).asyncMarkRecalledWord();
             }
         });
 
@@ -224,6 +227,9 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         if (item != null) {
             String idList = cursor.getString(VelloContent.DbWordCard.Columns.LIST_ID.getIndex());
             card.position = cursor.getPosition();
+            card.trelloID = cursor.getString(DbWordCard.Columns.CARD_ID.getIndex());
+            card.closed = cursor.getString(DbWordCard.Columns.CLOSED.getIndex());
+            card.due = cursor.getString(DbWordCard.Columns.DUE.getIndex());
             card.mainTitle = item.spell;
             card.secondaryTitle = "";
             card.idList = idList;

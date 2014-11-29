@@ -54,6 +54,9 @@ public class ReviewCard extends Card {
     public String idList;
     public int idInLocalDB;
     public int position;
+    public String trelloID;
+    public String closed;
+    public String due;
 
     public int errorResourceIdThumb;
     public String urlResourceThumb;
@@ -98,6 +101,29 @@ public class ReviewCard extends Card {
 
 		addCardHeader(header);
 
+        setSwipeable(true);
+        setOnSwipeListener(new OnSwipeListener() {
+            @Override
+            public void onSwipe(Card card) {
+                Toast.makeText(getContext(), "Removed card=", Toast.LENGTH_SHORT).show();
+                asyncMarkRecalledWord();
+            }
+        });
+
+        setOnUndoSwipeListListener(new OnUndoSwipeListListener() {
+            @Override
+            public void onUndoSwipe(Card card) {
+                Toast.makeText(getContext(), "Undo card=", Toast.LENGTH_SHORT).show();
+                asyncUnmarkRecalledWord();
+            }
+        });
+
+        setOnUndoHideSwipeListListener(new OnUndoHideSwipeListListener() {
+            @Override
+            public void onUndoHideSwipe(Card card) {
+                Toast.makeText(getContext(), "Hide undo card="  , Toast.LENGTH_SHORT).show();
+            }
+        });
 
 //		ReviewExpandCard expand = new ReviewExpandCard(mContext, trelloCard.desc);
 //		expand.setTitle(trelloCard.desc);
@@ -185,26 +211,24 @@ public class ReviewCard extends Card {
 		return cv;
 	}
 	
-	private void asyncUnmarkRecalledWord(final Card reviewCard) {
-		final AsyncTask<Card, Void, Void> unmarkTask = new AsyncTask<Card, Void, Void>() {
+	private void asyncUnmarkRecalledWord() {
+		final AsyncTask<Void, Void, Void> unmarkTask = new AsyncTask<Void, Void, Void>() {
 
 			@Override
-			protected Void doInBackground(Card... reviewCards) {
-				for (final Card reviewCard : reviewCards) {
-					if (VelloConfig.DEBUG_SWITCH) {
-						Log.d(TAG, "unmark Card#"
-								+ ((ReviewCard) reviewCard).idInLocalDB
-								+ "recalled. --- "
-								+ ((ReviewCard) reviewCard).trelloCard.name);
-					}
-					ContentValues cv = new ContentValues();
-					cv.put(DbWordCard.Columns.CLOSED.getName(), ((ReviewCard)reviewCard).trelloCard.closed);
-					cv.put(DbWordCard.Columns.DUE.getName(), ((ReviewCard)reviewCard).trelloCard.due);
-					cv.put(DbWordCard.Columns.LIST_ID.getName(), ((ReviewCard)reviewCard).trelloCard.idList);
-					cv.put(DbWordCard.Columns.DATE_LAST_OPERATION.getName(), "");
-					Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI, ((ReviewCard)reviewCard).idInLocalDB);
-					mContext.getContentResolver().update(uri, cv, null, null);
-				}
+			protected Void doInBackground(Void... voids) {
+                if (VelloConfig.DEBUG_SWITCH) {
+                    Log.d(TAG, "unmark Card#"
+                            + idInLocalDB
+                            + "recalled. --- "
+                            + mainTitle);
+                }
+                ContentValues cv = new ContentValues();
+                cv.put(DbWordCard.Columns.CLOSED.getName(), closed);
+                cv.put(DbWordCard.Columns.DUE.getName(), due);
+                cv.put(DbWordCard.Columns.LIST_ID.getName(), idList);
+                cv.put(DbWordCard.Columns.DATE_LAST_OPERATION.getName(), "");
+                Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI, idInLocalDB);
+                mContext.getContentResolver().update(uri, cv, null, null);
 				return null;
 			}
 		};
