@@ -36,6 +36,7 @@
     <string name="title_search_query">Search for \"&lt;b&gt;<xliff:g id="query">%1$s</xliff:g>&lt;b&gt;\"</string>
     <string name="title_settings">设置</string>
     <string name="title_about">关于</string>
+    <string name="title_delete_word">删除单词</string>
     <string name="title_listview_empty">干得好！回顾任务完成！</string>
     <string name="title_listview_hint_sync">点击立即同步单词</string>
     <string name="title_sync_blank">当前没有需要回顾的单词</string>

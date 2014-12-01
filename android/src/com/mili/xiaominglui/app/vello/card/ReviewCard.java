@@ -4,6 +4,7 @@ package com.mili.xiaominglui.app.vello.card;
 import at.markushi.ui.CircleButton;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardHeader;
+import it.gmariotti.cardslib.library.internal.base.BaseCard;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -19,6 +20,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.IconTextView;
@@ -98,6 +100,14 @@ public class ReviewCard extends Card {
 	public void init() {
 		CardHeader header = new ReviewCardHeader(mContext);
 		header.setTitle(mainTitle);
+
+        //Add a popup menu. This method set OverFlow button to visible
+        header.setPopupMenu(R.menu.popup_reviewcard, new CardHeader.OnClickCardHeaderPopupMenuListener() {
+            @Override
+            public void onMenuItemClick(BaseCard card, MenuItem item) {
+                Toast.makeText(getContext(), "Click on " + item.getTitle(), Toast.LENGTH_SHORT).show();
+            }
+        });
 
 		addCardHeader(header);
 
