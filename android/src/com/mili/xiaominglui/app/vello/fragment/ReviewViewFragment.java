@@ -347,34 +347,11 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         if (VelloConfig.DEBUG_SWITCH) {
             Log.d(TAG, "onLoaderReset");
         }
-        // TODO
+        mCardArrayAdapter.notifyDataSetInvalidated();
 //        mAdapter.swapCursor(null);
     }
 
-    private void asyncMarkDeleteWordRemotely(final Integer[] wordIds) {
-        final AsyncTask<Integer, Void, Void> deleteTask = new AsyncTask<Integer, Void, Void>() {
-            @Override
-            protected Void doInBackground(Integer... ids) {
-                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                for (final int id : ids) {
-                    Calendar rightNow = Calendar.getInstance();
-                    long rightNowUnixTime = rightNow.getTimeInMillis();
-                    Date rightNowDate = new Date(rightNowUnixTime);
-                    String stringRightNow = format.format(rightNowDate);
-                    ContentValues cv = new ContentValues();
-                    cv.put(DbWordCard.Columns.MARKDELETED.getName(), "true");
-                    cv.put(DbWordCard.Columns.DATE_LAST_OPERATION.getName(),
-                            stringRightNow);
-                    Uri uri = ContentUris.withAppendedId(
-                            DbWordCard.CONTENT_URI, id);
-                    getActivity().getContentResolver().update(uri, cv, null,
-                            null);
-                }
-                return null;
-            }
-        };
-        deleteTask.execute(wordIds);
-    }
+
 
     void onQueryTextChange(String newText) {
         mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;

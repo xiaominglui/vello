@@ -105,7 +105,13 @@ public class ReviewCard extends Card {
         header.setPopupMenu(R.menu.popup_reviewcard, new CardHeader.OnClickCardHeaderPopupMenuListener() {
             @Override
             public void onMenuItemClick(BaseCard card, MenuItem item) {
-                Toast.makeText(getContext(), "Click on " + item.getTitle(), Toast.LENGTH_SHORT).show();
+                int id = item.getItemId();
+                switch (id) {
+                    case R.id.action_delete:
+                        Toast.makeText(getContext(), "Click on  delete action item --- " + mainTitle, Toast.LENGTH_SHORT).show();
+                        asyncMarkDeleteWordRemotely();
+                        break;
+                }
             }
         });
 
@@ -115,7 +121,7 @@ public class ReviewCard extends Card {
         setOnSwipeListener(new OnSwipeListener() {
             @Override
             public void onSwipe(Card card) {
-                Toast.makeText(getContext(), "Removed card=", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Removed card: " + mainTitle, Toast.LENGTH_SHORT).show();
                 asyncMarkRecalledWord();
             }
         });
@@ -123,7 +129,7 @@ public class ReviewCard extends Card {
         setOnUndoSwipeListListener(new OnUndoSwipeListListener() {
             @Override
             public void onUndoSwipe(Card card) {
-                Toast.makeText(getContext(), "Undo card=", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Undo card: " + mainTitle, Toast.LENGTH_SHORT).show();
                 asyncUnmarkRecalledWord();
             }
         });
@@ -220,6 +226,27 @@ public class ReviewCard extends Card {
 
 		return cv;
 	}
+
+    private void asyncMarkDeleteWordRemotely() {
+        final AsyncTask<Void, Void, Void> deleteTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                Calendar rightNow = Calendar.getInstance();
+                long rightNowUnixTime = rightNow.getTimeInMillis();
+                Date rightNowDate = new Date(rightNowUnixTime);
+                String stringRightNow = format.format(rightNowDate);
+                ContentValues cv = new ContentValues();
+                cv.put(DbWordCard.Columns.MARKDELETED.getName(), "true");
+                cv.put(DbWordCard.Columns.DATE_LAST_OPERATION.getName(),
+                        stringRightNow);
+                Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI, idInLocalDB);
+                getContext().getContentResolver().update(uri, cv, null, null);
+                return null;
+            }
+        };
+        deleteTask.execute();
+    }
 	
 	private void asyncUnmarkRecalledWord() {
 		final AsyncTask<Void, Void, Void> unmarkTask = new AsyncTask<Void, Void, Void>() {

@@ -4,6 +4,6 @@
         android:id="@+id/action_delete"
         android:orderInCategory="100"
         android:showAsAction="always"
-        android:title="Item1" />
+        android:title="@string/title_delete_word" />
 
 </menu>
