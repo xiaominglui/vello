@@ -68,9 +68,12 @@ public class ReviewCard extends Card {
     private OnClickReviewCardReleanButtonListener mReleanButtonOnClickListener;
     private Card mCard;
 
+    private boolean deleted;
+
     public ReviewCard(Context context) {
         super(context, R.layout.review_card_inner_content);
         mCard = this;
+        deleted = false;
 
     }
 	
@@ -96,24 +99,14 @@ public class ReviewCard extends Card {
     public interface OnClickReviewCardReleanButtonListener {
         public void onButtonItemClick(Card card, View view);
     }
+
+    public void markDeleted() {
+        deleted = true;
+    }
 	
 	public void init() {
 		CardHeader header = new ReviewCardHeader(mContext);
 		header.setTitle(mainTitle);
-
-        //Add a popup menu. This method set OverFlow button to visible
-        header.setPopupMenu(R.menu.popup_reviewcard, new CardHeader.OnClickCardHeaderPopupMenuListener() {
-            @Override
-            public void onMenuItemClick(BaseCard card, MenuItem item) {
-                int id = item.getItemId();
-                switch (id) {
-                    case R.id.action_delete:
-                        Toast.makeText(getContext(), "Click on  delete action item --- " + mainTitle, Toast.LENGTH_SHORT).show();
-                        asyncMarkDeleteWordRemotely();
-                        break;
-                }
-            }
-        });
 
 		addCardHeader(header);
 
@@ -121,8 +114,14 @@ public class ReviewCard extends Card {
         setOnSwipeListener(new OnSwipeListener() {
             @Override
             public void onSwipe(Card card) {
-                Toast.makeText(getContext(), "Removed card: " + mainTitle, Toast.LENGTH_SHORT).show();
-                asyncMarkRecalledWord();
+                if (deleted) {
+                    Toast.makeText(getContext(), "Delete card: " + mainTitle, Toast.LENGTH_SHORT).show();
+                    asyncMarkRecalledWord();
+                    asyncMarkDeleteWordRemotely();
+                } else {
+                    Toast.makeText(getContext(), "Recall card: " + mainTitle, Toast.LENGTH_SHORT).show();
+                    asyncMarkRecalledWord();
+                }
             }
         });
 
@@ -137,7 +136,6 @@ public class ReviewCard extends Card {
         setOnUndoHideSwipeListListener(new OnUndoHideSwipeListListener() {
             @Override
             public void onUndoHideSwipe(Card card) {
-                Toast.makeText(getContext(), "Hide undo card="  , Toast.LENGTH_SHORT).show();
             }
         });
 

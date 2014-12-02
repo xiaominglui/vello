@@ -2,7 +2,9 @@ package com.mili.xiaominglui.app.vello.fragment;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
+import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.CardThumbnail;
+import it.gmariotti.cardslib.library.internal.base.BaseCard;
 import it.gmariotti.cardslib.library.internal.dismissanimation.SwipeDismissAnimation;
 import it.gmariotti.cardslib.library.view.CardListView;
 import it.gmariotti.cardslib.library.view.listener.UndoBarController;
@@ -178,6 +180,21 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
     private ReviewCard initReviewCard(Cursor data) {
         ReviewCard card = new ReviewCard(getActivity().getApplicationContext());
         setCardFromCursor(card, data);
+
+        CardHeader header = card.getCardHeader();
+        //Add a popup menu. This method set OverFlow button to visible
+        header.setPopupMenu(R.menu.popup_reviewcard, new CardHeader.OnClickCardHeaderPopupMenuListener() {
+            @Override
+            public void onMenuItemClick(BaseCard card, android.view.MenuItem item) {
+                int id = item.getItemId();
+                switch (id) {
+                    case R.id.action_delete:
+                        ((ReviewCard) card).markDeleted();
+                        dismissAnimation.animateDismiss((Card)card);
+                        break;
+                }
+            }
+        });
 
         card.setReviewedButtonOnClickListener(new ReviewCard.OnClickReviewCardReviewedButtonListener() {
             @Override
