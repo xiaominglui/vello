@@ -2,11 +2,14 @@ package com.mili.xiaominglui.app.vello.fragment;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
+import it.gmariotti.cardslib.library.internal.CardExpand;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.CardThumbnail;
+import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
 import it.gmariotti.cardslib.library.internal.base.BaseCard;
 import it.gmariotti.cardslib.library.internal.dismissanimation.SwipeDismissAnimation;
 import it.gmariotti.cardslib.library.view.CardListView;
+import it.gmariotti.cardslib.library.view.CardView;
 import it.gmariotti.cardslib.library.view.listener.UndoBarController;
 
 import java.text.SimpleDateFormat;
@@ -20,6 +23,7 @@ import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Loader;
@@ -35,6 +39,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -48,6 +53,7 @@ import com.atermenji.android.iconictextview.IconicTextView;
 import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
 import com.google.gson.Gson;
 import com.mili.xiaominglui.app.vello.R;
+import com.mili.xiaominglui.app.vello.adapter.ReviewCardArrayAdapter;
 import com.mili.xiaominglui.app.vello.adapter.ReviewCardCursorAdapter;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.MiliDictionaryItem;
@@ -153,7 +159,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             cards.add(card);
         }
 
-        mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
+        mCardArrayAdapter = new ReviewCardArrayAdapter(getActivity(), cards);
 
         mCardArrayAdapter.setUndoBarUIElements(new UndoBarController.DefaultUndoBarUIElements(){
             @Override
@@ -189,17 +195,24 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
                 int id = item.getItemId();
                 switch (id) {
                     case R.id.action_delete:
-                        ((ReviewCard) card).markDeleted();
+                        dismissAnimation.setDismissRight(false);
                         dismissAnimation.animateDismiss((Card)card);
+                        ((ReviewCard) card).markDeleted();
                         break;
                 }
             }
         });
 
-        card.setReviewedButtonOnClickListener(new ReviewCard.OnClickReviewCardReviewedButtonListener() {
+        card.setReviewCardButtonsOnClickListener(new ReviewCard.OnClickReviewCardButtonsListener() {
             @Override
-            public void onButtonItemClick(Card card, View view) {
+            public void onReviewedButtonClicked(Card card, View view) {
+                dismissAnimation.setDismissRight(true);
                 dismissAnimation.animateDismiss(card);
+            }
+
+            @Override
+            public void onRecallButtonClicked(Card card, View view) {
+
             }
         });
 
@@ -232,7 +245,32 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             }
         }
 
+        //This provides a simple (and useless) expand area
+        CardExpandInside expand = new CardExpandInside(getActivity());
+        card.addCardExpand(expand);
+        CardView cardView = card.getCardView();
+
+
         return card;
+
+    }
+
+    class CardExpandInside extends CardExpand {
+
+        public CardExpandInside(Context context) {
+            super(context,R.layout.carddemo_example_expandinside_expand_layout);
+        }
+
+        @Override
+        public void setupInnerViewElements(ViewGroup parent, View view) {
+
+            ImageView img = (ImageView) view.findViewById(R.id.carddemo_inside_image);
+
+            //It is just an example. You should load your images in an async way
+            if (img!=null){
+                img.setImageResource(R.drawable.rose);
+            }
+        }
 
     }
 

@@ -12,6 +12,7 @@
     <!-- Card -->
     <dimen name="card_base_empty_height">24dp</dimen>
     <dimen name="card_background_default_radius">2dip</dimen>
+    <dimen name="card_rose">250dp</dimen>
 
     <!-- Main -->
     <dimen name="card_main_layout_view_margin_top">0dp</dimen>

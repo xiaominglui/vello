@@ -29,9 +29,6 @@ import it.gmariotti.cardslib.library.internal.CardCursorMultiChoiceAdapter;
 import it.gmariotti.cardslib.library.internal.CardThumbnail;
 import it.gmariotti.cardslib.library.view.CardView;
 
-/**
- * Created by xiaominglui on 10/13/14.
- */
 public class ReviewCardCursorAdapter extends CardCursorMultiChoiceAdapter {
 
 

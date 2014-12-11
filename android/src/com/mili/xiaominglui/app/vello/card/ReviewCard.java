@@ -64,8 +64,7 @@ public class ReviewCard extends Card {
     public String urlResourceThumb;
     public int reviewProgress;
 
-    private OnClickReviewCardReviewedButtonListener mReviewedButtonOnClickListener;
-    private OnClickReviewCardReleanButtonListener mReleanButtonOnClickListener;
+    private OnClickReviewCardButtonsListener mReviewCardButtonsOnClickListener;
     private Card mCard;
 
     private boolean deleted;
@@ -89,15 +88,9 @@ public class ReviewCard extends Card {
     /**
      * Interface to handle callbacks when Reviewed Button is clicked
      */
-    public interface OnClickReviewCardReviewedButtonListener {
-        public void onButtonItemClick(Card card, View view);
-    }
-
-    /**
-     * Interface to handle callbacks when Relean Button is clicked
-     */
-    public interface OnClickReviewCardReleanButtonListener {
-        public void onButtonItemClick(Card card, View view);
+    public interface OnClickReviewCardButtonsListener {
+        public void onReviewedButtonClicked(Card card, View view);
+        public void onRecallButtonClicked(Card card, View view);
     }
 
     public void markDeleted() {
@@ -169,12 +162,8 @@ public class ReviewCard extends Card {
 //        });
 	}
 
-    public void setReviewedButtonOnClickListener(OnClickReviewCardReviewedButtonListener listener) {
-        mReviewedButtonOnClickListener = listener;
-    }
-
-    public void setmReleanButtonOnClickListener(OnClickReviewCardReleanButtonListener listener) {
-        mReleanButtonOnClickListener = listener;
+    public void setReviewCardButtonsOnClickListener(OnClickReviewCardButtonsListener listener) {
+        mReviewCardButtonsOnClickListener = listener;
     }
 
     @Override
@@ -182,23 +171,23 @@ public class ReviewCard extends Card {
         CircleButton reviewedButton = (CircleButton) parent.findViewById(R.id.reviewed);
         CircleButton relearnButton = (CircleButton) parent.findViewById(R.id.relearn);
 
-        if (mReleanButtonOnClickListener != null) {
+        if (mReviewCardButtonsOnClickListener != null) {
             relearnButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (mReleanButtonOnClickListener != null) {
-                        mReleanButtonOnClickListener.onButtonItemClick(mCard, view);
+                    if (mReviewCardButtonsOnClickListener != null) {
+                        mReviewCardButtonsOnClickListener.onRecallButtonClicked(mCard, view);
                     }
                 }
             });
         }
 
-        if (mReviewedButtonOnClickListener != null) {
+        if (mReviewCardButtonsOnClickListener != null) {
             reviewedButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (mReviewedButtonOnClickListener != null) {
-                        mReviewedButtonOnClickListener.onButtonItemClick(mCard, view);
+                    if (mReviewCardButtonsOnClickListener != null) {
+                        mReviewCardButtonsOnClickListener.onReviewedButtonClicked(mCard, view);
                     }
                 }
             });
