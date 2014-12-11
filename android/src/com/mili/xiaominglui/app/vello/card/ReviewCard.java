@@ -68,11 +68,13 @@ public class ReviewCard extends Card {
     private Card mCard;
 
     private boolean deleted;
+    private boolean relearned;
 
     public ReviewCard(Context context) {
         super(context, R.layout.review_card_inner_content);
         mCard = this;
         deleted = false;
+        relearned = false;
 
     }
 	
@@ -96,6 +98,10 @@ public class ReviewCard extends Card {
     public void markDeleted() {
         deleted = true;
     }
+
+    public void markRelearned() {
+        relearned = true;
+    }
 	
 	public void init() {
 		CardHeader header = new ReviewCardHeader(mContext);
@@ -111,6 +117,9 @@ public class ReviewCard extends Card {
                     Toast.makeText(getContext(), "Delete card: " + mainTitle, Toast.LENGTH_SHORT).show();
                     asyncMarkRecalledWord();
                     asyncMarkDeleteWordRemotely();
+                } else if (relearned) {
+                    // relearned TODO
+                    Toast.makeText(getContext(), "Relearned card: " + mainTitle, Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(getContext(), "Recall card: " + mainTitle, Toast.LENGTH_SHORT).show();
                     asyncMarkRecalledWord();

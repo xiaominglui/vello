@@ -196,8 +196,8 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
                 switch (id) {
                     case R.id.action_delete:
                         dismissAnimation.setDismissRight(false);
-                        dismissAnimation.animateDismiss((Card)card);
                         ((ReviewCard) card).markDeleted();
+                        dismissAnimation.animateDismiss((Card)card);
                         break;
                 }
             }
@@ -212,7 +212,16 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
 
             @Override
             public void onRecallButtonClicked(Card card, View view) {
-
+                boolean expanded = card.isExpanded();
+                if (!expanded) {
+                    card.doExpand();
+                    card.setExpanded(true);
+                } else {
+                    // dismiss
+                    dismissAnimation.setDismissRight(true);
+                    ((ReviewCard) card).markRelearned();
+                    dismissAnimation.animateDismiss(card);
+                }
             }
         });
 
@@ -248,8 +257,6 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         //This provides a simple (and useless) expand area
         CardExpandInside expand = new CardExpandInside(getActivity());
         card.addCardExpand(expand);
-        CardView cardView = card.getCardView();
-
 
         return card;
 
