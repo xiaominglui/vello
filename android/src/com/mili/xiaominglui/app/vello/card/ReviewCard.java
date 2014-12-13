@@ -43,6 +43,7 @@ public class ReviewCard extends Card {
 	private static final String TAG = ReviewCard.class.getSimpleName();
     protected IconicTextView iconicLifeSign;
 	protected TextView textViewLifeCount;
+    private CircleButton mReviewButton;
 	
 	public TrelloCard trelloCard;
 	
@@ -171,36 +172,40 @@ public class ReviewCard extends Card {
 //        });
 	}
 
+    public void setReviewButtionStatus(boolean relearned) {
+        if (relearned) {
+            mReviewButton.setImageResource(R.drawable.ic_action_close);
+            if (mReviewCardButtonsOnClickListener != null) {
+                mReviewButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mReviewCardButtonsOnClickListener.onReviewedButtonClicked(mCard, view);
+                    }
+                });
+            }
+
+        } else {
+            mReviewButton.setImageResource(R.drawable.ic_action_done);
+            if (mReviewCardButtonsOnClickListener != null) {
+                mReviewButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mReviewCardButtonsOnClickListener.onRecallButtonClicked(mCard, view);
+                    }
+                });
+            }
+
+        }
+    }
+
     public void setReviewCardButtonsOnClickListener(OnClickReviewCardButtonsListener listener) {
         mReviewCardButtonsOnClickListener = listener;
     }
 
     @Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
-        CircleButton reviewedButton = (CircleButton) parent.findViewById(R.id.reviewed);
-        CircleButton relearnButton = (CircleButton) parent.findViewById(R.id.relearn);
-
-        if (mReviewCardButtonsOnClickListener != null) {
-            relearnButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (mReviewCardButtonsOnClickListener != null) {
-                        mReviewCardButtonsOnClickListener.onRecallButtonClicked(mCard, view);
-                    }
-                }
-            });
-        }
-
-        if (mReviewCardButtonsOnClickListener != null) {
-            reviewedButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (mReviewCardButtonsOnClickListener != null) {
-                        mReviewCardButtonsOnClickListener.onReviewedButtonClicked(mCard, view);
-                    }
-                }
-            });
-        }
+        mReviewButton = (CircleButton) parent.findViewById(R.id.review);
+        setReviewButtionStatus(relearned);
     }
 
     @Override

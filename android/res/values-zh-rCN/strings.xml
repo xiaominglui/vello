@@ -31,7 +31,7 @@
     <string name="notif_sync_content_title">开始同步…</string>
     <string name="notif_clip_monitor_service_content_title">复制查询已启用</string>
     <string name="notif_clip_monitor_service_content_text">点击开始回顾。</string>
-    <string name="title_review">回顾生词</string>
+    <string name="title_review">回顾</string>
     <string name="title_search">查询</string>
     <string name="title_search_query">Search for \"&lt;b&gt;<xliff:g id="query">%1$s</xliff:g>&lt;b&gt;\"</string>
     <string name="title_settings">设置</string>

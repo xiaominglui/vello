@@ -42,7 +42,7 @@
     <string name="title_connection_timeout_hint_retry">Touch to retry now.</string>
     <string name="title_phonetics_uk">UK</string>
     <string name="title_phonetics_us">US</string>
-    <string name="title_review">Recall Words</string>
+    <string name="title_review">Recall </string>
     <string name="title_delete_word">Delete word</string>
     <string name="about_eula">End User License Agreement</string>
     <string name="about_licenses">Open Source Licenses</string>

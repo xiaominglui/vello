@@ -187,18 +187,39 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         ReviewCard card = new ReviewCard(getActivity().getApplicationContext());
         setCardFromCursor(card, data);
 
-        CardHeader header = card.getCardHeader();
-        //Add a popup menu. This method set OverFlow button to visible
-        header.setPopupMenu(R.menu.popup_reviewcard, new CardHeader.OnClickCardHeaderPopupMenuListener() {
+//        CardHeader header = card.getCardHeader();
+//        //Add a popup menu. This method set OverFlow button to visible
+//        header.setPopupMenu(R.menu.popup_reviewcard, new CardHeader.OnClickCardHeaderPopupMenuListener() {
+//            @Override
+//            public void onMenuItemClick(BaseCard card, android.view.MenuItem item) {
+//                int id = item.getItemId();
+//                switch (id) {
+//                    case R.id.action_delete:
+//                        dismissAnimation.setDismissRight(false);
+//                        ((ReviewCard) card).markDeleted();
+//                        dismissAnimation.animateDismiss((Card)card);
+//                        break;
+//                }
+//            }
+//        });
+
+        card.setOnLongClickListener(new Card.OnLongCardClickListener() {
             @Override
-            public void onMenuItemClick(BaseCard card, android.view.MenuItem item) {
-                int id = item.getItemId();
-                switch (id) {
-                    case R.id.action_delete:
-                        dismissAnimation.setDismissRight(false);
-                        ((ReviewCard) card).markDeleted();
-                        dismissAnimation.animateDismiss((Card)card);
-                        break;
+            public boolean onLongClick(Card card, View view) {
+                Toast.makeText(getActivity().getApplicationContext(), "long clicked", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+
+        card.setOnClickListener(new Card.OnCardClickListener() {
+            @Override
+            public void onClick(Card card, View view) {
+                boolean expanded = card.isExpanded();
+                if (!expanded) {
+                    card.doExpand();
+                    card.setExpanded(true);
+                    ((ReviewCard) card).markRelearned();
+                    ((ReviewCard) card).setReviewButtionStatus(true);
                 }
             }
         });
@@ -212,16 +233,9 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
 
             @Override
             public void onRecallButtonClicked(Card card, View view) {
-                boolean expanded = card.isExpanded();
-                if (!expanded) {
-                    card.doExpand();
-                    card.setExpanded(true);
-                } else {
-                    // dismiss
-                    dismissAnimation.setDismissRight(true);
-                    ((ReviewCard) card).markRelearned();
-                    dismissAnimation.animateDismiss(card);
-                }
+                dismissAnimation.setDismissRight(true);
+                ((ReviewCard) card).markRelearned();
+                dismissAnimation.animateDismiss(card);
             }
         });
 
