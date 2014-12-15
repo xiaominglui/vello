@@ -3,7 +3,9 @@ package com.mili.xiaominglui.app.vello.card;
 
 import at.markushi.ui.CircleButton;
 import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardExpand;
 import it.gmariotti.cardslib.library.internal.CardHeader;
+import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
 import it.gmariotti.cardslib.library.internal.base.BaseCard;
 
 import java.text.SimpleDateFormat;
@@ -141,6 +143,28 @@ public class ReviewCard extends Card {
             public void onUndoHideSwipe(Card card) {
             }
         });
+
+        ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().highlightView(false).setupCardElement(ViewToClickToExpand.CardElementUI.HEADER);
+        setViewToClickToExpand(viewToClickToExpand);
+
+        setOnExpandAnimatorStartListener(new Card.OnExpandAnimatorStartListener() {
+            @Override
+            public void onExpandStart(Card card) {
+                ((ReviewCard) card).markRelearned();
+
+            }
+        });
+
+        setOnExpandAnimatorEndListener(new Card.OnExpandAnimatorEndListener() {
+            @Override
+            public void onExpandEnd(Card card) {
+                ((ReviewCard) card).setReviewButtionStatus(true);
+            }
+        });
+
+        //This provides a simple (and useless) expand area
+        ReviewCardExpand expand = new ReviewCardExpand(mContext);
+        addCardExpand(expand);
 
 //		ReviewExpandCard expand = new ReviewExpandCard(mContext, trelloCard.desc);
 //		expand.setTitle(trelloCard.desc);
@@ -318,4 +342,23 @@ public class ReviewCard extends Card {
 		};
 		markTask.execute();
 	}
+
+    class ReviewCardExpand extends CardExpand {
+
+        public ReviewCardExpand(Context context) {
+            super(context,R.layout.card_review_expand_layout);
+        }
+
+        @Override
+        public void setupInnerViewElements(ViewGroup parent, View view) {
+
+            ImageView img = (ImageView) view.findViewById(R.id.carddemo_inside_image);
+
+            //It is just an example. You should load your images in an async way
+            if (img!=null){
+                img.setImageResource(R.drawable.rose);
+            }
+        }
+
+    }
 }

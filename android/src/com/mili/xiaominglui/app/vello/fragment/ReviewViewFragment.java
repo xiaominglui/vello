@@ -3,13 +3,10 @@ package com.mili.xiaominglui.app.vello.fragment;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardExpand;
-import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.CardThumbnail;
 import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
-import it.gmariotti.cardslib.library.internal.base.BaseCard;
 import it.gmariotti.cardslib.library.internal.dismissanimation.SwipeDismissAnimation;
 import it.gmariotti.cardslib.library.view.CardListView;
-import it.gmariotti.cardslib.library.view.CardView;
 import it.gmariotti.cardslib.library.view.listener.UndoBarController;
 
 import java.text.SimpleDateFormat;
@@ -21,26 +18,19 @@ import java.util.TimeZone;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.LoaderManager;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.database.Cursor;
-import android.graphics.Color;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -49,12 +39,9 @@ import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.ActionMode.Callback;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
-import com.atermenji.android.iconictextview.IconicTextView;
-import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
 import com.google.gson.Gson;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.adapter.ReviewCardArrayAdapter;
-import com.mili.xiaominglui.app.vello.adapter.ReviewCardCursorAdapter;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.MiliDictionaryItem;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
@@ -211,19 +198,6 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             }
         });
 
-        card.setOnClickListener(new Card.OnCardClickListener() {
-            @Override
-            public void onClick(Card card, View view) {
-                boolean expanded = card.isExpanded();
-                if (!expanded) {
-                    card.doExpand();
-                    card.setExpanded(true);
-                    ((ReviewCard) card).markRelearned();
-                    ((ReviewCard) card).setReviewButtionStatus(true);
-                }
-            }
-        });
-
         card.setReviewCardButtonsOnClickListener(new ReviewCard.OnClickReviewCardButtonsListener() {
             @Override
             public void onReviewedButtonClicked(Card card, View view) {
@@ -268,30 +242,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             }
         }
 
-        //This provides a simple (and useless) expand area
-        CardExpandInside expand = new CardExpandInside(getActivity());
-        card.addCardExpand(expand);
-
         return card;
-
-    }
-
-    class CardExpandInside extends CardExpand {
-
-        public CardExpandInside(Context context) {
-            super(context,R.layout.carddemo_example_expandinside_expand_layout);
-        }
-
-        @Override
-        public void setupInnerViewElements(ViewGroup parent, View view) {
-
-            ImageView img = (ImageView) view.findViewById(R.id.carddemo_inside_image);
-
-            //It is just an example. You should load your images in an async way
-            if (img!=null){
-                img.setImageResource(R.drawable.rose);
-            }
-        }
 
     }
 
@@ -424,6 +375,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             Log.d(TAG, "onLoaderReset");
         }
         mCardArrayAdapter.notifyDataSetInvalidated();
+        mCardArrayAdapter.clear();
 //        mAdapter.swapCursor(null);
     }
 
