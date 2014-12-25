@@ -6,7 +6,6 @@ import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardExpand;
 import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
-import it.gmariotti.cardslib.library.internal.base.BaseCard;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -18,28 +17,26 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.text.TextUtils;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.IconTextView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.atermenji.android.iconictextview.IconicTextView;
-import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
-import com.joanzapata.android.iconify.Iconify;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
+import com.mili.xiaominglui.app.vello.data.model.MiliDictionaryItem;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.ui.ReviewCardHeader;
-import com.mili.xiaominglui.app.vello.ui.ReviewExpandCard;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
+
+import org.w3c.dom.Text;
 
 public class ReviewCard extends Card {
 	private static final String TAG = ReviewCard.class.getSimpleName();
@@ -62,6 +59,7 @@ public class ReviewCard extends Card {
     public String trelloID;
     public String closed;
     public String due;
+    public MiliDictionaryItem dictItem;
 
     public int errorResourceIdThumb;
     public String urlResourceThumb;
@@ -163,7 +161,7 @@ public class ReviewCard extends Card {
         });
 
         //This provides a simple (and useless) expand area
-        ReviewCardExpand expand = new ReviewCardExpand(mContext);
+        ReviewCardExpand expand = new ReviewCardExpand(mContext, dictItem);
         addCardExpand(expand);
 
 //		ReviewExpandCard expand = new ReviewExpandCard(mContext, trelloCard.desc);
@@ -344,19 +342,23 @@ public class ReviewCard extends Card {
 	}
 
     class ReviewCardExpand extends CardExpand {
+        private MiliDictionaryItem mData;
 
-        public ReviewCardExpand(Context context) {
+        public ReviewCardExpand(Context context, MiliDictionaryItem data) {
             super(context,R.layout.card_review_expand_layout);
+            mData = data;
         }
 
         @Override
         public void setupInnerViewElements(ViewGroup parent, View view) {
 
-            ImageView img = (ImageView) view.findViewById(R.id.carddemo_inside_image);
+            View root = view.findViewById(R.id.card_review_expand);
+
+            TextView tv = (TextView) root.findViewById(R.id.tv);
 
             //It is just an example. You should load your images in an async way
-            if (img!=null){
-                img.setImageResource(R.drawable.rose);
+            if (mData != null){
+                tv.setText(mData.spell);
             }
         }
 

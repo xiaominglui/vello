@@ -257,6 +257,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             card.trelloID = cursor.getString(DbWordCard.Columns.CARD_ID.getIndex());
             card.closed = cursor.getString(DbWordCard.Columns.CLOSED.getIndex());
             card.due = cursor.getString(DbWordCard.Columns.DUE.getIndex());
+            card.dictItem = item;
             card.mainTitle = item.spell;
             card.secondaryTitle = "";
             card.idList = idList;
