@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.atermenji.android.iconictextview.IconicTextView;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
+import com.mili.xiaominglui.app.vello.data.model.Acceptation;
 import com.mili.xiaominglui.app.vello.data.model.MiliDictionaryItem;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
@@ -358,7 +359,14 @@ public class ReviewCard extends Card {
 
             //It is just an example. You should load your images in an async way
             if (mData != null){
-                tv.setText(mData.spell);
+                if (mData.accettation.length > 0) {
+                    StringBuilder sb = new StringBuilder();
+                    for (Acceptation accep : mData.accettation) {
+                        sb.append(accep.accep);
+                        sb.append("\n");
+                    }
+                    tv.setText(sb.toString());
+                }
             }
         }
 
