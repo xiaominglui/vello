@@ -42,6 +42,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.google.gson.Gson;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.adapter.ReviewCardArrayAdapter;
+import com.mili.xiaominglui.app.vello.card.ReviewCardThumbnail;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.MiliDictionaryItem;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
@@ -215,9 +216,8 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
 
         //Add the thumbnail
         if (!TextUtils.isEmpty(card.urlResourceThumb)) {
-            CardThumbnail thumb = new CardThumbnail(getActivity().getApplicationContext());
-            thumb.setUrlResource(card.urlResourceThumb);
-            thumb.setErrorResource(card.errorResourceIdThumb);
+            ReviewCardThumbnail thumb = new ReviewCardThumbnail(getActivity().getApplicationContext(), card.urlResourceThumb);
+            thumb.setExternalUsage(true);
             card.addCardThumbnail(thumb);
         } else {
             switch (card.reviewProgress) {
