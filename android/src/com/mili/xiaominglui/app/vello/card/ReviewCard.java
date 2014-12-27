@@ -21,9 +21,11 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,7 +33,10 @@ import com.atermenji.android.iconictextview.IconicTextView;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.Acceptation;
+import com.mili.xiaominglui.app.vello.data.model.Definition;
 import com.mili.xiaominglui.app.vello.data.model.MiliDictionaryItem;
+import com.mili.xiaominglui.app.vello.data.model.Phonetics;
+import com.mili.xiaominglui.app.vello.data.model.Pronunciation;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.ui.ReviewCardHeader;
@@ -355,20 +360,49 @@ public class ReviewCard extends Card {
 
             View root = view.findViewById(R.id.card_review_expand);
 
-            TextView tv = (TextView) root.findViewById(R.id.tv);
+            LinearLayout linearLayoutPhoneticArea = (LinearLayout) root.findViewById(R.id.phonetics_area);
+            LinearLayout linearLayoutDefinitionArea = (LinearLayout) root.findViewById(R.id.definition_area);
 
             //It is just an example. You should load your images in an async way
             if (mData != null){
-                if (mData.accettation.length > 0) {
-                    StringBuilder sb = new StringBuilder();
-                    for (Acceptation accep : mData.accettation) {
-                        sb.append(accep.accep);
-                        sb.append("\n");
+                linearLayoutPhoneticArea.removeAllViews();
+                linearLayoutDefinitionArea.removeAllViews();
+
+                if (mData.pron != null && mData.pron.length > 0) {
+                    for (Pronunciation pronunciation : mData.pron) {
+                        View phoneticsView = LayoutInflater.from(mContext).inflate(R.layout.phonetics_item, null);
+                        LinearLayout phoneticsGroup = (LinearLayout) phoneticsView.findViewById(R.id.phonetics_group);
+                        String phoneticsType = "";
+                        if (pronunciation.type.equals("en")) {
+                            phoneticsType = mContext.getResources().getString(R.string.title_phonetics_uk);
+                        } else if (pronunciation.type.equals("us")) {
+                            phoneticsType = mContext.getResources().getString(R.string.title_phonetics_us);
+                        }
+
+                        ((TextView) phoneticsView.findViewById(R.id.phonetics_type)).setText(phoneticsType);
+                        ((TextView) phoneticsView.findViewById(R.id.phonetics_symbol)).setText("[" + pronunciation.ps + "]");
+			/*
+			 * remove sound icon in word card at present ((IconicTextView)
+			 * phoneticsView
+			 * .findViewById(R.id.phonetics_sound)).setIcon(FontAwesomeIcon
+			 * .VOLUME_UP); ((IconicTextView)
+			 * phoneticsView.findViewById(R.id.phonetics_sound
+			 * )).setTextColor(Color.GRAY);
+			 */
+                        linearLayoutPhoneticArea.addView(phoneticsGroup);
                     }
-                    tv.setText(sb.toString());
+                }
+
+                if (mData.accettation != null && mData.accettation.length > 0) {
+                    for (Acceptation acce : mData.accettation) {
+                        View definitionView = LayoutInflater.from(mContext).inflate(R.layout.definition_item, null);
+                        LinearLayout definiitionGroup = (LinearLayout) definitionView.findViewById(R.id.definition_group);
+                        ((TextView) definitionView.findViewById(R.id.pos)).setText(acce.pos);
+                        ((TextView) definitionView.findViewById(R.id.definiens)).setText(acce.accep);
+                        linearLayoutDefinitionArea.addView(definiitionGroup);
+                    }
                 }
             }
         }
-
     }
 }
