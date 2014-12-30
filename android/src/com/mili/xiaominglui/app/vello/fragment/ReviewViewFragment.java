@@ -375,7 +375,6 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         if (VelloConfig.DEBUG_SWITCH) {
             Log.d(TAG, "onLoaderReset");
         }
-        mCardArrayAdapter.notifyDataSetInvalidated();
         mCardArrayAdapter.clear();
 //        mAdapter.swapCursor(null);
     }
