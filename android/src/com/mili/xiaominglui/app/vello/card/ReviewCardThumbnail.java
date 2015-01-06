@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.mili.xiaominglui.app.vello.R;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
@@ -18,6 +19,7 @@ public class ReviewCardThumbnail extends CardThumbnail {
         super(context);
         mImageUrl = imageUrl;
         mOptions = new DisplayImageOptions.Builder()
+                .showImageOnLoading(R.drawable.ic_stat_vaa)
                 .cacheInMemory(true)
                 .build();
     }
