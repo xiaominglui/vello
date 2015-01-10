@@ -37,13 +37,11 @@
 
         <TextView
             android:id="@+id/card_header_inner_simple_title"
-            style="@style/card.header_float_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <TextView
             android:id="@+id/float_card_header_inner_meaning"
-            style="@style/card.header_float_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>

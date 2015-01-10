@@ -27,13 +27,11 @@
 
     <TextView
         android:id="@+id/carddemo_myapps_main_inner_title"
-        style="@style/carddemo_myapps_main_inner_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
     <TextView
         android:id="@+id/carddemo_myapps_main_inner_secondaryTitle"
-        style="@style/carddemo_myapps_main_inner_secondarytitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
