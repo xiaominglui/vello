@@ -215,26 +215,26 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             thumb.setExternalUsage(true);
             card.addCardThumbnail(thumb);
         } else {
-            switch (card.reviewProgress) {
-                case 0:
-                case 1:
-                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color1);
-                    break;
-                case 2:
-                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color3);
-                    break;
-                case 3:
-                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color4);
-                    break;
-                case 4:
-                case 5:
-                case 6:
-                case 7:
-                case 8:
-                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color5);
-                    break;
-
-            }
+//            switch (card.reviewProgress) {
+//                case 0:
+//                case 1:
+//                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color1);
+//                    break;
+//                case 2:
+//                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color3);
+//                    break;
+//                case 3:
+//                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color4);
+//                    break;
+//                case 4:
+//                case 5:
+//                case 6:
+//                case 7:
+//                case 8:
+//                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color5);
+//                    break;
+//
+//            }
         }
 
         return card;

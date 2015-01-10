@@ -17,6 +17,8 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.media.AsyncPlayer;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.text.TextUtils;
@@ -30,7 +32,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.atermenji.android.iconictextview.IconicTextView;
+import com.malinskiy.materialicons.widget.IconTextView;
 import com.mili.xiaominglui.app.vello.R;
+import com.mili.xiaominglui.app.vello.VaaApplication;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.Acceptation;
 import com.mili.xiaominglui.app.vello.data.model.Definition;
@@ -111,6 +115,7 @@ public class ReviewCard extends Card {
     }
 	
 	public void init() {
+        setShadow(false);
 		CardHeader header = new ReviewCardHeader(mContext);
 		header.setTitle(mainTitle);
 
@@ -369,7 +374,7 @@ public class ReviewCard extends Card {
                 linearLayoutDefinitionArea.removeAllViews();
 
                 if (mData.pron != null && mData.pron.length > 0) {
-                    for (Pronunciation pronunciation : mData.pron) {
+                    for (final Pronunciation pronunciation : mData.pron) {
                         View phoneticsView = LayoutInflater.from(mContext).inflate(R.layout.phonetics_item, null);
                         LinearLayout phoneticsGroup = (LinearLayout) phoneticsView.findViewById(R.id.phonetics_group);
                         String phoneticsType = "";
@@ -381,14 +386,20 @@ public class ReviewCard extends Card {
 
                         ((TextView) phoneticsView.findViewById(R.id.phonetics_type)).setText(phoneticsType);
                         ((TextView) phoneticsView.findViewById(R.id.phonetics_symbol)).setText("[" + pronunciation.ps + "]");
-			/*
-			 * remove sound icon in word card at present ((IconicTextView)
-			 * phoneticsView
-			 * .findViewById(R.id.phonetics_sound)).setIcon(FontAwesomeIcon
-			 * .VOLUME_UP); ((IconicTextView)
-			 * phoneticsView.findViewById(R.id.phonetics_sound
-			 * )).setTextColor(Color.GRAY);
-			 */
+                        IconTextView soundIcon = (IconTextView) phoneticsView.findViewById(R.id.phonetics_sound);
+                        if (!TextUtils.isEmpty(pronunciation.link)) {
+                            soundIcon.setVisibility(View.VISIBLE);
+
+                            phoneticsView.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    VaaApplication.getAsyncPlayer().play(mContext, Uri.parse(pronunciation.link), false, AudioManager.STREAM_MUSIC);
+                                }
+                            });
+                            } else {
+                            soundIcon.setVisibility(View.GONE);
+                        }
+
                         linearLayoutPhoneticArea.addView(phoneticsGroup);
                     }
                 }

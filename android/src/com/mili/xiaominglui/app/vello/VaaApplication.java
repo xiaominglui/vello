@@ -6,6 +6,7 @@ import org.acra.ReportField;
 import org.acra.annotation.ReportsCrashes;
 
 import android.app.Application;
+import android.media.AsyncPlayer;
 
 import com.avos.avoscloud.AVOSCloud;
 import com.mili.xiaominglui.app.vello.util.ACRATrelloSender;
@@ -17,6 +18,8 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
         customReportContent = {ReportField.LOGCAT},
         logcatArguments = { "-t", "100", "-v", "long", "*:E" })
 public class VaaApplication extends Application {
+    private static final String TAG = VaaApplication.class.getSimpleName();
+    private static AsyncPlayer mAsyncPlayer;
     @Override
     public void onCreate() {
         ACRA.init(this);
@@ -29,7 +32,22 @@ public class VaaApplication extends Application {
 
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
         ImageLoader.getInstance().init(config);
-        
+
+        if (mAsyncPlayer == null) {
+            mAsyncPlayer = new AsyncPlayer(TAG);
+        }
+
         super.onCreate();
+    }
+
+    public static AsyncPlayer getAsyncPlayer() {
+        return mAsyncPlayer;
+    }
+
+    @Override
+    public void onTerminate() {
+        mAsyncPlayer.stop();
+        mAsyncPlayer = null;
+        super.onTerminate();
     }
 }

@@ -34,7 +34,7 @@
 
     <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++   -->
     
-    <style name="card">
+    <style name="revewcard">
 
     </style>
     
@@ -118,9 +118,9 @@
     
     
     <!--Style for Content View-->
-    <style name="card.content_outer_layout">
+    <style name="revewcard.content_outer_layout">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:minHeight">@dimen/card_base_empty_height</item>
+        <item name="android:minHeight">@dimen/reviewcard_base_empty_height</item>
         <item name="android:layout_marginTop">@dimen/card_content_outer_view_margin_top</item>
         <item name="android:layout_marginBottom">@dimen/card_content_outer_view_margin_bottom</item>
         <item name="android:layout_marginLeft">@dimen/card_content_outer_view_margin_left</item>

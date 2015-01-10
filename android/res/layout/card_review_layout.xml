@@ -11,7 +11,7 @@
         android:id="@+id/card_main_layout"
         style="@style/card.main_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="@dimen/card_material_largeimage_height">
 
         <it.gmariotti.cardslib.library.view.component.CardThumbnailView
             android:id="@+id/card_thumbnail_layout"
@@ -20,26 +20,27 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <it.gmariotti.cardslib.library.view.component.CardHeaderView
                 android:id="@+id/card_header_layout"
                 style="@style/card.header_outer_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"/>
+                android:background="@color/md_green_400"/>
 
             <!-- Main Content View -->
             <FrameLayout
                 android:id="@+id/card_main_content_layout"
-                style="@style/card.content_outer_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"/>
+                style="@style/revewcard.content_outer_layout"
+                android:background="@color/md_yellow_300"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
 
-        </RelativeLayout>
+        </LinearLayout>
 
     </FrameLayout>
     <!-- Compound view for Shadow

@@ -20,5 +20,4 @@
     android:id="@+id/card_thumbnail_image"
     style="@style/card_thumbnail_image"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:scaleType="centerCrop" />
+    android:layout_height="match_parent" />
