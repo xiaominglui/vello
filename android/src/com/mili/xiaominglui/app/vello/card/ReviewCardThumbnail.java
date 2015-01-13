@@ -31,11 +31,7 @@ public class ReviewCardThumbnail extends CardThumbnail {
         if (!TextUtils.isEmpty(mImageUrl)) {
             imageLoader.displayImage(mImageUrl, (ImageView) imageView, mOptions);
         } else {
-
+            ((ImageView) imageView).setImageResource(R.drawable.ic_stat_vaa);
         }
-
-//        imageView.getLayoutParams().width = 128;
-//        imageView.getLayoutParams().height = 128;
-
     }
 }

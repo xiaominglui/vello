@@ -56,8 +56,7 @@
     <dimen name="card_shadow_view_margin_right">0dp</dimen>
 
     <!-- Thumbnail -->
-    <dimen name="card_thumbnail_width">72dp</dimen>
-    <dimen name="card_thumbnail_height">72dp</dimen>
+    <dimen name="reviewcard_thumbnail_height">200dp</dimen>
 
     <!-- Expand -->
     <dimen name="card_expand_layout_padding">2dp</dimen>

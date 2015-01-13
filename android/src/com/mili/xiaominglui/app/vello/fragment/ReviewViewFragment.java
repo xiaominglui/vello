@@ -170,22 +170,6 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         ReviewCard card = new ReviewCard(getActivity().getApplicationContext());
         setCardFromCursor(card, data);
 
-//        CardHeader header = card.getCardHeader();
-//        //Add a popup menu. This method set OverFlow button to visible
-//        header.setPopupMenu(R.menu.popup_reviewcard, new CardHeader.OnClickCardHeaderPopupMenuListener() {
-//            @Override
-//            public void onMenuItemClick(BaseCard card, android.view.MenuItem item) {
-//                int id = item.getItemId();
-//                switch (id) {
-//                    case R.id.action_delete:
-//                        dismissAnimation.setDismissRight(false);
-//                        ((ReviewCard) card).markDeleted();
-//                        dismissAnimation.animateDismiss((Card)card);
-//                        break;
-//                }
-//            }
-//        });
-
         card.setOnLongClickListener(new Card.OnLongCardClickListener() {
             @Override
             public boolean onLongClick(Card card, View view) {
@@ -210,11 +194,13 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         });
 
         //Add the thumbnail
+        ReviewCardThumbnail thumb;
         if (!TextUtils.isEmpty(card.urlResourceThumb)) {
-            ReviewCardThumbnail thumb = new ReviewCardThumbnail(getActivity().getApplicationContext(), card.urlResourceThumb);
-            thumb.setExternalUsage(true);
-            card.addCardThumbnail(thumb);
+            thumb = new ReviewCardThumbnail(getActivity().getApplicationContext(), card.urlResourceThumb);
+
+
         } else {
+            thumb = new ReviewCardThumbnail(getActivity().getApplicationContext(), null);
 //            switch (card.reviewProgress) {
 //                case 0:
 //                case 1:
@@ -236,6 +222,8 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
 //
 //            }
         }
+        thumb.setExternalUsage(true);
+        card.addCardThumbnail(thumb);
 
         return card;
 

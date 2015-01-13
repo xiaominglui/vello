@@ -11,4 +11,26 @@
             backward-compatibility can go here.
         -->
     </style>
+
+    <style name="card">
+
+    </style>
+
+    <style name="card.review" parent="card">
+
+    </style>
+
+    <style name="card.review.thumbnail_image">
+        <item name="android:layout_height">@dimen/reviewcard_thumbnail_height</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:gravity">center</item>
+        <item name="android:scaleType">centerCrop</item>
+    </style>
+
+    <style name="card.review.header">
+
+    </style>
+    <style name="card.review.header.headline">
+        <item name="android:textSize">24sp</item>
+    </style>
 </resources>
