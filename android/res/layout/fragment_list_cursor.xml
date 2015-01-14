@@ -54,7 +54,7 @@
         <it.gmariotti.cardslib.library.view.CardListView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            card:list_card_layout_resourceID="@layout/list_review_card_layout"
+            card:list_card_layout_resourceID="@layout/list_card_review_layout"
             android:id="@+id/list_cursor"/>
 
         <!-- Include undo message layout -->

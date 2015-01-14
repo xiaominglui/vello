@@ -318,4 +318,8 @@
     <color name="md_blue_grey_700">#455a64</color>
     <color name="md_blue_grey_800">#37474f</color>
     <color name="md_blue_grey_900">#263238</color>
+
+    <color name="card_review_background">@android:color/transparent</color>
+    <color name="card_review_header_textcolor">#FFF</color>
+    <color name="gray_background">#ececec</color>
 </resources>

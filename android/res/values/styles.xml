@@ -20,6 +20,18 @@
 
     </style>
 
+    <style name="card.review.main">
+        <item name="android:foreground">?android:selectableItemBackground</item>
+        <item name="android:background">@color/card_review_background</item>
+        <item name="android:layout_marginTop">@dimen/card_review_main_layout_view_margin_top</item>
+        <item name="android:layout_marginBottom">@dimen/card_review_main_layout_view_margin_bottom</item>
+        <item name="android:layout_marginLeft">@dimen/card_review_main_layout_view_margin_left</item>
+        <item name="android:layout_marginRight">@dimen/card_review_main_layout_view_margin_right</item>
+    </style>
+    <style name="card.review.card_thumbnail_outer_layout">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
     <style name="card.review.thumbnail_image">
         <item name="android:layout_height">@dimen/reviewcard_thumbnail_height</item>
         <item name="android:layout_gravity">center</item>
@@ -28,9 +40,9 @@
     </style>
 
     <style name="card.review.header">
-
     </style>
     <style name="card.review.header.headline">
         <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/card_review_header_textcolor</item>
     </style>
 </resources>

@@ -121,6 +121,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        getActivity().getWindow().getDecorView().setBackgroundColor(getResources().getColor(R.color.gray_background));
         hideList(false);
         init();
     }
