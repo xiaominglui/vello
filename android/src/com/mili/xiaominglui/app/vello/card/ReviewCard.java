@@ -17,7 +17,6 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.media.AsyncPlayer;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -26,7 +25,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,16 +35,11 @@ import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.VaaApplication;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.Acceptation;
-import com.mili.xiaominglui.app.vello.data.model.Definition;
 import com.mili.xiaominglui.app.vello.data.model.MiliDictionaryItem;
-import com.mili.xiaominglui.app.vello.data.model.Phonetics;
 import com.mili.xiaominglui.app.vello.data.model.Pronunciation;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
-import com.mili.xiaominglui.app.vello.ui.ReviewCardHeader;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
-
-import org.w3c.dom.Text;
 
 public class ReviewCard extends Card {
 	private static final String TAG = ReviewCard.class.getSimpleName();

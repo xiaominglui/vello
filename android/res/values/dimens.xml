@@ -17,8 +17,8 @@
 
     <!-- Review Main -->
     <dimen name="card_review_main_layout_view_margin_top">12dp</dimen>
-    <dimen name="card_review_main_layout_view_margin_left">12dp</dimen>
-    <dimen name="card_review_main_layout_view_margin_bottom">8dp</dimen>
+    <dimen name="card_review_main_layout_view_margin_left">8dp</dimen>
+    <dimen name="card_review_main_layout_view_margin_bottom">12dp</dimen>
     <dimen name="card_review_main_layout_view_margin_right">8dp</dimen>
 
     <!-- Header -->
@@ -56,7 +56,7 @@
     <dimen name="card_shadow_view_margin_right">0dp</dimen>
 
     <!-- Thumbnail -->
-    <dimen name="reviewcard_thumbnail_height">150dp</dimen>
+    <dimen name="reviewcard_thumbnail_height">200dp</dimen>
 
     <!-- Expand -->
     <dimen name="card_expand_layout_padding">2dp</dimen>

@@ -9,17 +9,19 @@
     <!-- Card visible layout -->
     <FrameLayout
         android:id="@+id/card_main_layout"
+        style="@style/card.review.main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <LinearLayout
-            style="@style/card.review.main"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <it.gmariotti.cardslib.library.view.component.CardThumbnailView
                 android:id="@+id/card_thumbnail_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 style="@style/card.review.card_thumbnail_outer_layout"
                 card:card_thumbnail_layout_resourceID="@layout/review_card_thumbnail_layout" />
 

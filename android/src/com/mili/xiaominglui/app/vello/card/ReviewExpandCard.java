@@ -1,4 +1,4 @@
-package com.mili.xiaominglui.app.vello.ui;
+package com.mili.xiaominglui.app.vello.card;
 
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.data.factory.MiliDictionaryJsonParser;
