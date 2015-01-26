@@ -167,35 +167,6 @@ public class ReviewCard extends Card {
         //This provides a simple (and useless) expand area
         ReviewCardExpand expand = new ReviewCardExpand(mContext, dictItem);
         addCardExpand(expand);
-
-//		ReviewExpandCard expand = new ReviewExpandCard(mContext, trelloCard.desc);
-//		expand.setTitle(trelloCard.desc);
-//		addCardExpand(expand);
-//
-//		setClickable(false);
-//		setLongClickable(false);
-//		setSwipeable(true);
-//
-//		setOnSwipeListener(new OnSwipeListener() {
-//			@Override
-//			public void onSwipe(Card card) {
-//				asyncMarkRecalledWord(card);
-//			}
-//		});
-//
-//		setOnUndoSwipeListListener(new OnUndoSwipeListListener() {
-//			@Override
-//			public void onUndoSwipe(Card card) {
-//				asyncUnmarkRecalledWord(card);
-//			}
-//		});
-//
-//		setOnExpandAnimatorEndListener(new Card.OnExpandAnimatorEndListener() {
-//            @Override
-//            public void onExpandEnd(Card card) {
-//            	setSwipeable(false);
-//            }
-//        });
 	}
 
     public void setReviewButtionStatus(boolean relearned) {

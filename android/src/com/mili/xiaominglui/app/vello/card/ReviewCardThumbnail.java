@@ -19,7 +19,9 @@ public class ReviewCardThumbnail extends CardThumbnail {
         super(context);
         mImageUrl = imageUrl;
         mOptions = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.ic_stat_vaa)
+                .showImageOnLoading(R.drawable.ic_launcher)
+                .showImageForEmptyUri(R.drawable.ic_launcher)
+                .showImageOnFail(R.drawable.ic_launcher)
                 .cacheInMemory(true)
                 .build();
     }
@@ -28,10 +30,6 @@ public class ReviewCardThumbnail extends CardThumbnail {
     public void setupInnerViewElements(ViewGroup parent, View imageView) {
         ImageLoader imageLoader = ImageLoader.getInstance();
 
-        if (!TextUtils.isEmpty(mImageUrl)) {
-            imageLoader.displayImage(mImageUrl, (ImageView) imageView, mOptions);
-        } else {
-            ((ImageView) imageView).setImageResource(R.drawable.ic_stat_vaa);
-        }
+        imageLoader.displayImage(mImageUrl, (ImageView) imageView, mOptions);
     }
 }

@@ -198,36 +198,12 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         ReviewCardThumbnail thumb;
         if (!TextUtils.isEmpty(card.urlResourceThumb)) {
             thumb = new ReviewCardThumbnail(getActivity().getApplicationContext(), card.urlResourceThumb);
-
-
         } else {
             thumb = new ReviewCardThumbnail(getActivity().getApplicationContext(), null);
-//            switch (card.reviewProgress) {
-//                case 0:
-//                case 1:
-//                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color1);
-//                    break;
-//                case 2:
-//                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color3);
-//                    break;
-//                case 3:
-//                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color4);
-//                    break;
-//                case 4:
-//                case 5:
-//                case 6:
-//                case 7:
-//                case 8:
-//                    card.setBackgroundResourceId(R.drawable.demo_card_selector_color5);
-//                    break;
-//
-//            }
         }
         thumb.setExternalUsage(true);
         card.addCardThumbnail(thumb);
-
         return card;
-
     }
 
     private void setCardFromCursor(ReviewCard card, Cursor cursor) {
@@ -293,8 +269,6 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-//        mCards.clear();
-//        mCardList = (CardListView) getActivity().findViewById(R.id.card_list);
         if (mIsSearching) {
             // in Dictionary Mode
             if (data == null)
@@ -313,45 +287,8 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             }
 
             initReviewCards(data);
-//            mAdapter.swapCursor(data);
             displayList();
-//            for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
-//                ReviewCard rc = new ReviewCard(getActivity().getApplicationContext(), data);
-//                rc.setId(rc.trelloCard.id);
-//                rc.init();
-//                mCards.add(rc);
-//                mCardArrayAdapter = new CardArrayAdapter(getActivity(), mCards);
-//                // Enable undo controller!
-//                mCardArrayAdapter.setEnableUndo(true);
-//
-//                if (mCardList != null) {
-//                    mCardList.setAdapter(mCardArrayAdapter);
-//                }
-//            }
         }
-
-//        View empty = getActivity().findViewById(R.id.emptyView);
-//        empty.setOnTouchListener(new ViewGroup.OnTouchListener() {
-//
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                switch (event.getAction()) {
-//                    case MotionEvent.ACTION_DOWN:
-//                        return true;
-//                    case MotionEvent.ACTION_MOVE:
-//                        return true;
-//                    case MotionEvent.ACTION_UP:
-//                        mListener.syncOnAllRecalled();
-//                        return true;
-//                    default:
-//                        return false;
-//                }
-//            }
-//        });
-//        IconicTextView iconicTextView = (IconicTextView) getActivity().findViewById(R.id.iconic_all_recalled);
-//        iconicTextView.setIcon(FontAwesomeIcon.OK);
-//        iconicTextView.setTextColor(Color.GRAY);
-//        mCardList.setEmptyView(empty);
     }
 
     @Override
