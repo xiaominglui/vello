@@ -19,9 +19,9 @@ public class ReviewCardThumbnail extends CardThumbnail {
         super(context);
         mImageUrl = imageUrl;
         mOptions = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.ic_launcher)
-                .showImageForEmptyUri(R.drawable.ic_launcher)
-                .showImageOnFail(R.drawable.ic_launcher)
+                .showImageOnLoading(R.drawable.word_image_default_big)
+                .showImageForEmptyUri(R.drawable.word_image_default_big)
+                .showImageOnFail(R.drawable.word_image_default_big)
                 .cacheInMemory(true)
                 .build();
     }
