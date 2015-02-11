@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -148,7 +149,7 @@ public class VelloService extends Service implements RequestListener, Connection
                     case MSG_TRIGGER_QUERY_WORD:
                         String fakedClipText = (String) msg.obj;
                         if (fakedClipText != null && !service.mLastFakeClipText.equals("")) {
-                            String cleanedKeyword = fakedClipText.trim().toLowerCase();
+                            String cleanedKeyword = fakedClipText.trim().toLowerCase(Locale.US);
                             if (cleanedKeyword.matches("^[a-z]+$")) {
                                 service.lookUpInDictionary(cleanedKeyword);
                             }
@@ -1062,7 +1063,7 @@ public class VelloService extends Service implements RequestListener, Connection
                     long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
                     long deltaTime = VelloConfig.VOCABULARY_LIST_DUE_DELTA[newPostionInLists];
                     long newDueUnixTime = rightNowUnixTimeGMT + deltaTime;
-                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
                     Date newDueDate = new Date(newDueUnixTime);
                     trelloCard.due = format.format(newDueDate);
                 }

@@ -137,7 +137,7 @@ public class AccountUtils {
 
     public static void setVocabularyBoardWebHookId(final Context context, String hookId) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putString(PREF_VOCABULARY_BOARD_WEB_HOOK_ID, hookId).commit();
+        sp.edit().putString(PREF_VOCABULARY_BOARD_WEB_HOOK_ID, hookId).apply();
     }
 
     public static String getVocabularyBoardId(final Context context) {
@@ -147,7 +147,7 @@ public class AccountUtils {
 
     public static void setVocabularyBoardId(final Context context, final String id) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putString(PREF_VOCABULARY_BOARD_ID, id).commit();
+        sp.edit().putString(PREF_VOCABULARY_BOARD_ID, id).apply();
     }
 
     public static String getVocabularyBoardName(final Context context) {
@@ -190,7 +190,7 @@ public class AccountUtils {
 
     public static void setVocabularyListId(final Context context, final String id, final int position) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putString(VOCABULARY_LISTS_TITLE_ID[position], id).commit();
+        sp.edit().putString(VOCABULARY_LISTS_TITLE_ID[position], id).apply();
     }
 
     public static String getVocabularyListTitle(final int position) {
@@ -208,7 +208,7 @@ public class AccountUtils {
 
     public static void setChosenAccountName(final Context context, final String accountName) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putString(PREF_CHOSEN_ACCOUNT, accountName).commit();
+        sp.edit().putString(PREF_CHOSEN_ACCOUNT, accountName).apply();
     }
 
     public static void addAccount(final Context context, final String name, final String type) {

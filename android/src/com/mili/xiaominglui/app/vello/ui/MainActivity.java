@@ -4,6 +4,7 @@ import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 
@@ -458,7 +459,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 		cri.addSortOrder(DbWordCard.Columns.DUE, true);
 		Calendar rightNow = Calendar.getInstance();
 
-		SimpleDateFormat fo = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		SimpleDateFormat fo = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
 		long rightNowUnixTime = rightNow.getTimeInMillis();
 		long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
 		String now = fo.format(new Date(rightNowUnixTimeGMT));

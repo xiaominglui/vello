@@ -10,6 +10,7 @@ import it.gmariotti.cardslib.library.internal.ViewToClickToExpand;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import android.annotation.SuppressLint;
@@ -229,7 +230,7 @@ public class ReviewCard extends Card {
         final AsyncTask<Void, Void, Void> deleteTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
                 Calendar rightNow = Calendar.getInstance();
                 long rightNowUnixTime = rightNow.getTimeInMillis();
                 Date rightNowDate = new Date(rightNowUnixTime);

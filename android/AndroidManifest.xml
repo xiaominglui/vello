@@ -6,7 +6,7 @@
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="19" />
+        android:targetSdkVersion="21" />
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -55,8 +55,8 @@
         </activity>
         <activity
             android:name=".ui.SettingsActivity"
-            android:label="@string/title_settings"
-            android:parentActivityName=".ui.MainActivity" >
+            android:exported="false"
+            android:label="@string/title_settings" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.MainActivity" />

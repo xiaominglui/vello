@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class InitializeWordCardOperation implements Operation {
@@ -40,7 +41,7 @@ public class InitializeWordCardOperation implements Operation {
         long dueUnixTime = rightNowUnixTimeGMT + delta;
 
         SimpleDateFormat format = new SimpleDateFormat(
-                "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
         Date dueDate = new Date(dueUnixTime);
         String stringDueDate = format.format(dueDate);
 

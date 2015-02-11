@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class RestartWordCardOperation implements Operation {
@@ -40,8 +41,7 @@ public class RestartWordCardOperation implements Operation {
     long delta = VelloConfig.VOCABULARY_LIST_DUE_DELTA[VelloConfig.VOCABULARY_LIST_POSITION_NEW];
     long dueUnixTime = rightNowUnixTimeGMT + delta;
     
-    SimpleDateFormat format = new SimpleDateFormat(
-            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
     Date dueDate = new Date(dueUnixTime);
     String stringDueDate = format.format(dueDate);
 	

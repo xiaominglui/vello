@@ -6,7 +6,6 @@ import android.util.Log;
 
 import com.foxykeep.datadroid.exception.DataException;
 import com.mili.xiaominglui.app.vello.config.JSONTag;
-import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.requestmanager.VelloRequestFactory;
 
@@ -19,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class DueWordCardListJsonFactory {
@@ -43,7 +43,7 @@ public class DueWordCardListJsonFactory {
                 String dueString = jsonCard.getString(JSONTag.CARD_ELEM_DUE);
                 if (!dueString.equals("null")) {
                     SimpleDateFormat format = new SimpleDateFormat(
-                            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
 
                     Date date = format.parse(dueString);
                     long dueUnixTime = date.getTime();

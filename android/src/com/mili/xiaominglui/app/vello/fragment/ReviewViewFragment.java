@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import android.app.Activity;
@@ -246,7 +247,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             criteria.addSortOrder(DbWordCard.Columns.DUE, true);
             Calendar rightNow = Calendar.getInstance();
 
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
             long rightNowUnixTime = rightNow.getTimeInMillis();
             long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
             String now = format.format(new Date(rightNowUnixTimeGMT));
