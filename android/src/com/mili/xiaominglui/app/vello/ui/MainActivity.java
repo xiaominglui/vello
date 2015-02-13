@@ -425,7 +425,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	
 	private void postInitAccount() {
 		ContentResolver.setIsSyncable(AccountUtils.getAccount(getApplicationContext()), VelloProvider.AUTHORITY, 1);
-		ContentResolver.setSyncAutomatically(AccountUtils.getAccount(getApplicationContext()), VelloProvider.AUTHORITY, true);
+		ContentResolver.setSyncAutomatically(AccountUtils.getAccount(getApplicationContext()), VelloProvider.AUTHORITY, false);
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 		int syncFreqValue = Integer.valueOf(settings.getString(SettingsActivity.KEY_PREF_SYNC_FREQ, "24"));
