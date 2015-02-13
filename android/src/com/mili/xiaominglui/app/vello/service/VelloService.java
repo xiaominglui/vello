@@ -43,6 +43,7 @@ import android.widget.Toast;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
 import com.mili.xiaominglui.app.vello.R;
+import com.mili.xiaominglui.app.vello.base.C;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.Board;
 import com.mili.xiaominglui.app.vello.data.model.DirtyCard;
@@ -75,6 +76,9 @@ public class VelloService extends Service implements RequestListener, Connection
      */
     public static final String KEY_MONITOR_INTERVAL = "monitor.interval";
     public static final int DEF_MONITOR_INTERVAL = 1000;
+
+    public static final String KEY_SYNC_TIMESTAMP_BEGIN = "sync_begin_timestamp";
+    public static final String KEY_SYNC_TIMESTAMP_END = "sync_end_timestamp";
 
     HashMap<String, DirtyCard> mDirtyCards = new HashMap<String, DirtyCard>();
     HashMap<String, TrelloCard> mMergeCards = new HashMap<String, TrelloCard>();
@@ -355,6 +359,7 @@ public class VelloService extends Service implements RequestListener, Connection
             Log.d(TAG, "getDueReviewCardList with startId = " + startId + " start...");
         }
         sendMessageToClients(VelloService.MSG_STATUS_SYNC_BEGIN, null);
+        C.setPreference(KEY_SYNC_TIMESTAMP_BEGIN, System.currentTimeMillis());
         // step 1: get open trello cards
         getOpenTrelloCardList(startId, false);
     }
@@ -802,6 +807,7 @@ public class VelloService extends Service implements RequestListener, Connection
                                     Log.d(TAG, "...stop command---#" + startId);
                                 }
                                 sendMessageToClients(VelloService.MSG_STATUS_SYNC_END, null);
+                                C.setPreference(KEY_SYNC_TIMESTAMP_END, System.currentTimeMillis());
                                 stopSelf(startId);
                             } catch (RemoteException e) {
                                 e.printStackTrace();
@@ -853,6 +859,7 @@ public class VelloService extends Service implements RequestListener, Connection
                             Log.d(TAG, "...stop command---#" + startId);
                         }
                         sendMessageToClients(VelloService.MSG_STATUS_SYNC_END, null);
+                        C.setPreference(KEY_SYNC_TIMESTAMP_END, System.currentTimeMillis());
                         stopSelf(startId);
                     }
                     return;

@@ -9,6 +9,7 @@ import android.app.Application;
 import android.media.AsyncPlayer;
 
 import com.avos.avoscloud.AVOSCloud;
+import com.mili.xiaominglui.app.vello.base.C;
 import com.mili.xiaominglui.app.vello.util.ACRATrelloSender;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -38,6 +39,7 @@ public class VaaApplication extends Application {
         }
 
         super.onCreate();
+        C.setContext(getApplicationContext());
     }
 
     public static AsyncPlayer getAsyncPlayer() {

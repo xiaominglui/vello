@@ -19,7 +19,10 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.mili.xiaominglui.app.vello.base.C;
+import com.mili.xiaominglui.app.vello.base.log.L;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
+import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.ui.SettingsActivity;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
@@ -101,11 +104,25 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 
                 // handle sync task below
-                if (true) {
-                    if (mSyncHelper == null) {
-                        mSyncHelper = new SyncHelper(mContext);
+                if (mSyncHelper == null) {
+                    mSyncHelper = new SyncHelper(mContext);
+                }
+                C.removePreference(VelloService.KEY_SYNC_TIMESTAMP_END);
+                C.removePreference(VelloService.KEY_SYNC_TIMESTAMP_BEGIN);
+                mSyncHelper.performSync(syncResult, SyncHelper.FLAG_SYNC_REMOTE);
+
+                for (; ; ) {
+                    if (isFinished()) {
+                        L.d(TAG, "sync finished()");
+                        ++syncResult.stats.numUpdates;
+                        return;
                     }
-                    mSyncHelper.performSync(syncResult, SyncHelper.FLAG_SYNC_REMOTE);
+
+                    if (isTimeout()) {
+                        L.d(TAG, "sync timeout");
+                        ++syncResult.stats.numIoExceptions;
+                        return;
+                    }
                 }
             }
         } catch (IOException e) {
@@ -118,5 +135,22 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 wifiLock.release();
             }
         }
+    }
+
+    private boolean isTimeout() {
+        long current = System.currentTimeMillis();
+        long begin = C.getPreference(VelloService.KEY_SYNC_TIMESTAMP_BEGIN, -1L);
+        if (begin > 0) {
+            long diff = current - begin;
+            if (diff > 60000) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isFinished() {
+        long syncEndTime = C.getPreference(VelloService.KEY_SYNC_TIMESTAMP_END, -1L);
+        return syncEndTime > 0;
     }
 }
