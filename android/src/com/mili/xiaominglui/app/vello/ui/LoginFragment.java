@@ -12,6 +12,7 @@ import android.widget.Button;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.adapter.WelcomeFragmentAdapter;
+import com.viewpagerindicator.CirclePageIndicator;
 import com.viewpagerindicator.PageIndicator;
 import com.viewpagerindicator.UnderlinePageIndicator;
 

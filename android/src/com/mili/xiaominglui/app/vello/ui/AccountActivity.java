@@ -2,12 +2,16 @@
 package com.mili.xiaominglui.app.vello.ui;
 
 import android.accounts.Account;
+import android.app.ActionBar;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.view.View;
+import android.view.WindowManager;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.github.johnpersano.supertoasts.SuperToast;
@@ -18,7 +22,6 @@ import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.mili.xiaominglui.app.vello.util.AccountUtils.AuthenticateCallback;
 
 public class AccountActivity extends SherlockFragmentActivity implements LoginFragment.onButtonClickedListener, AuthenticateCallback {
-    private static final String TAG = AccountActivity.class.getSimpleName();
 
     public static final String EXTRA_FINISH_INTENT = "com.mili.xiaominglui.app.vello.extra.FINISH_INTENT";
 
@@ -33,7 +36,19 @@ public class AccountActivity extends SherlockFragmentActivity implements LoginFr
         if (isFinishing()) {
         	return;
         }
-        
+
+        if (Build.VERSION.SDK_INT < 16) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        } else {
+            View decorView = getWindow().getDecorView();
+            int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+            decorView.setSystemUiVisibility(uiOptions);
+            ActionBar actionBar = getActionBar();
+            if (actionBar != null) {
+                actionBar.hide();
+            }
+        }
         setContentView(R.layout.activity_account);
 
         FragmentManager fm = getSupportFragmentManager();

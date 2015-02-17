@@ -18,6 +18,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/md_green_500"
         android:orientation="horizontal">
 
         <Button
@@ -26,7 +27,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:layout_weight="1"
-            android:text="@string/button_login_title" />
+            android:text="@string/button_login_title"
+            android:textColor="@color/md_white" />
     </LinearLayout>
 
 </LinearLayout>

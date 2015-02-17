@@ -3,61 +3,69 @@ package com.mili.xiaominglui.app.vello.ui;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.mili.xiaominglui.app.vello.R;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 public final class WelcomeFragment extends SherlockFragment {
-    private static final String KEY_CONTENT = "TestFragment:Content";
+    private static final String KEY_POSITION = "WelcomeFragment:Position";
 
-    public static WelcomeFragment newInstance(String content) {
+    public static WelcomeFragment newInstance(int position) {
         WelcomeFragment fragment = new WelcomeFragment();
-        fragment.mContent = content;
+        fragment.mPosition = position;
         return fragment;
     }
 
-    private String mContent = "???";
+    private int mPosition = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if ((savedInstanceState != null) && savedInstanceState.containsKey(KEY_CONTENT)) {
-            mContent = savedInstanceState.getString(KEY_CONTENT);
+        if ((savedInstanceState != null) && savedInstanceState.containsKey(KEY_POSITION)) {
+            mPosition = savedInstanceState.getInt(KEY_POSITION);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        TextView text = new TextView(getActivity());
-        text.setGravity(Gravity.CENTER);
-        text.setText(mContent);
-        text.setTextSize(20 * getResources().getDisplayMetrics().density);
-        text.setPadding(20, 20, 20, 20);
-
-        LinearLayout layout = new LinearLayout(getActivity());
-        layout.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
-        layout.setGravity(Gravity.CENTER);
-        if (mContent.startsWith("Discover")) {
-        	layout.setBackgroundResource(R.drawable.discover);
-        } else if (mContent.startsWith("Recall")) {
-        	layout.setBackgroundResource(R.drawable.recall);
-        } else {
-        	layout.setBackgroundResource(R.drawable.acquire);
+        View root = inflater.inflate(R.layout.fragment_welcome, null);
+        ImageView img = (ImageView) root.findViewById(R.id.feature_img);
+        TextView desc = (TextView) root.findViewById(R.id.feature_desc);
+        final Drawable drawableImg;
+        final String titleDesc;
+        switch (mPosition) {
+            case 0:
+                drawableImg = getResources().getDrawable(R.drawable.img_feature_one);
+                titleDesc = getString(R.string.title_feature_one);
+                break;
+            case 1:
+                drawableImg = getResources().getDrawable(R.drawable.img_feature_two);
+                titleDesc = getString(R.string.title_feature_two);
+                break;
+            case 2:
+                drawableImg = getResources().getDrawable(R.drawable.img_feature_three);
+                titleDesc = getString(R.string.title_feature_three);
+                break;
+            default:
+                drawableImg = null;
+                titleDesc = "";
         }
-        layout.addView(text);
-
-        return layout;
+        img.setImageDrawable(drawableImg);
+        desc.setText(titleDesc);
+        return root;
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(KEY_CONTENT, mContent);
+        outState.putInt(KEY_POSITION, mPosition);
     }
 }
