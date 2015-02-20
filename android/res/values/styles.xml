@@ -28,6 +28,14 @@
         <item name="android:layout_marginLeft">@dimen/card_review_main_layout_view_margin_left</item>
         <item name="android:layout_marginRight">@dimen/card_review_main_layout_view_margin_right</item>
     </style>
+    <style name="card.review.expand">
+        <item name="android:foreground">?android:selectableItemBackground</item>
+        <item name="android:background">@color/card_review_background</item>
+        <item name="android:layout_marginTop">@dimen/card_review_expand_layout_view_margin_top</item>
+        <item name="android:layout_marginBottom">@dimen/card_review_expand_layout_view_margin_bottom</item>
+        <item name="android:layout_marginLeft">@dimen/card_review_expand_layout_view_margin_left</item>
+        <item name="android:layout_marginRight">@dimen/card_review_expand_layout_view_margin_right</item>
+    </style>
     <style name="card.review.card_thumbnail_outer_layout">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>

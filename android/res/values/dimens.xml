@@ -18,8 +18,14 @@
     <!-- Review Main -->
     <dimen name="card_review_main_layout_view_margin_top">12dp</dimen>
     <dimen name="card_review_main_layout_view_margin_left">8dp</dimen>
-    <dimen name="card_review_main_layout_view_margin_bottom">12dp</dimen>
+    <dimen name="card_review_main_layout_view_margin_bottom">0dp</dimen>
     <dimen name="card_review_main_layout_view_margin_right">8dp</dimen>
+
+    <!-- Review Expand -->
+    <dimen name="card_review_expand_layout_view_margin_top">0dp</dimen>
+    <dimen name="card_review_expand_layout_view_margin_left">8dp</dimen>
+    <dimen name="card_review_expand_layout_view_margin_bottom">0dp</dimen>
+    <dimen name="card_review_expand_layout_view_margin_right">8dp</dimen>
 
     <!-- Header -->
     <dimen name="card_header_outer_view_margin_top">0dp</dimen>
