@@ -41,6 +41,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.avos.avoscloud.AVAnalytics;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
+import com.mili.xiaominglui.app.vello.base.log.L;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
@@ -86,9 +87,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				}
 				break;
 			case VelloService.MSG_STATUS_INIT_ACCOUNT_END:
-				if (VelloConfig.DEBUG_SWITCH) {
-					Log.d(TAG, "status_init_account_end");
-				}
+                L.d(TAG, "status_init_account_end");
 				theActivity.postInitAccount();
                 break;
 			case VelloService.MSG_STATUS_SYNC_BEGIN:
@@ -371,6 +370,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	}
 
 	private void triggerRefresh() {
+        L.d(TAG, "triggerRefresh");
 		SyncHelper.requestManualSync(new Account(AccountUtils.getAccountName(this), Constants.ACCOUNT_TYPE));
 	}
 	
@@ -424,8 +424,9 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	}
 	
 	private void postInitAccount() {
+        L.d(TAG, "postInitAccount()");
 		ContentResolver.setIsSyncable(AccountUtils.getAccount(getApplicationContext()), VelloProvider.AUTHORITY, 1);
-		ContentResolver.setSyncAutomatically(AccountUtils.getAccount(getApplicationContext()), VelloProvider.AUTHORITY, false);
+		ContentResolver.setSyncAutomatically(AccountUtils.getAccount(getApplicationContext()), VelloProvider.AUTHORITY, true);
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 		int syncFreqValue = Integer.valueOf(settings.getString(SettingsActivity.KEY_PREF_SYNC_FREQ, "24"));

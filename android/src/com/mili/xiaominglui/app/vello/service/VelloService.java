@@ -44,6 +44,7 @@ import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.base.C;
+import com.mili.xiaominglui.app.vello.base.log.L;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.Board;
 import com.mili.xiaominglui.app.vello.data.model.DirtyCard;
@@ -122,6 +123,7 @@ public class VelloService extends Service implements RequestListener, Connection
 
     @Override
     public IBinder onBind(Intent intent) {
+        L.d(TAG, "VelloService onBind");
         return mMessenger.getBinder();
     }
 
@@ -242,7 +244,7 @@ public class VelloService extends Service implements RequestListener, Connection
 
     @Override
     public void onCreate() {
-        Log.i(TAG, "VelloService Started.");
+        Log.i(TAG, "VelloService onCreate.");
         mRequestManager = VelloRequestManager.from(this);
         mRequestList = new ArrayList<Request>();
         mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -261,7 +263,7 @@ public class VelloService extends Service implements RequestListener, Connection
         // Cancel the persistent notification.
 //		mCM.removePrimaryClipChangedListener(this);
 
-        Log.i(TAG, "VelloService Stopped.");
+        L.d(TAG, "VelloService onDestroy.");
         isRunning = false;
         shutdownClipboardMonitor();
     }

@@ -35,6 +35,7 @@ public class SyncHelper {
     public static void requestManualSync(Account mChosenAccount) {
         Bundle b = new Bundle();
         b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        b.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         ContentResolver.requestSync(mChosenAccount, VelloProvider.AUTHORITY, b);
     }
 
