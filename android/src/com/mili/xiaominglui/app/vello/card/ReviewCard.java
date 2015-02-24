@@ -185,6 +185,7 @@ public class ReviewCard extends Card {
     public void setReviewButtionStatus(int status) {
         if (status == BUTTON_STATUS_RELEARNED) {
             mReviewButton.setImageResource(R.drawable.ic_action_close);
+            mReviewButton.setColor(mContext.getResources().getColor(R.color.md_yellow_500));
             if (mReviewCardButtonsOnClickListener != null) {
                 mReviewButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -196,6 +197,7 @@ public class ReviewCard extends Card {
 
         } else if (status == BUTTON_STATUS_TO_DELETE) {
             mReviewButton.setImageResource(R.drawable.ic_action_remove);
+            mReviewButton.setColor(mContext.getResources().getColor(R.color.md_red_500));
             if (mReviewCardButtonsOnClickListener != null) {
                 mReviewButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -207,6 +209,7 @@ public class ReviewCard extends Card {
 
         } else if (status == BUTTON_STATUS_TO_RECALL) {
             mReviewButton.setImageResource(R.drawable.ic_action_done);
+            mReviewButton.setColor(mContext.getResources().getColor(R.color.md_green_500));
             if (mReviewCardButtonsOnClickListener != null) {
                 mReviewButton.setOnClickListener(new View.OnClickListener() {
                     @Override

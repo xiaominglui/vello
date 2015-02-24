@@ -38,7 +38,6 @@
             android:id="@+id/review"
             android:layout_width="@dimen/review_button_width"
             android:layout_height="@dimen/review_button_height"
-            app:cb_color="#99CC00"
             app:cb_pressedRingWidth="8dip" />
 
     </LinearLayout>
