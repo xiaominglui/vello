@@ -44,6 +44,9 @@ import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class ReviewCard extends Card {
 	private static final String TAG = ReviewCard.class.getSimpleName();
+    private static final int BUTTON_STATUS_RELEARNED = 0;
+    private static final int BUTTON_STATUS_TO_DELETE = 1;
+    private static final int BUTTON_STATUS_TO_RECALL = 2;
     protected IconicTextView iconicLifeSign;
 	protected TextView textViewLifeCount;
     private CircleButton mReviewButton;
@@ -96,8 +99,9 @@ public class ReviewCard extends Card {
      * Interface to handle callbacks when Reviewed Button is clicked
      */
     public interface OnClickReviewCardButtonsListener {
-        public void onReviewedButtonClicked(Card card, View view);
+        public void onRelearnedButtonClicked(Card card, View view);
         public void onRecallButtonClicked(Card card, View view);
+        public void onRemoveButtonClicked(Card card, View view);
     }
 
     public void markDeleted() {
@@ -121,7 +125,6 @@ public class ReviewCard extends Card {
             public void onSwipe(Card card) {
                 if (deleted) {
                     Toast.makeText(getContext(), "Delete card: " + mainTitle, Toast.LENGTH_SHORT).show();
-                    asyncMarkRecalledWord();
                     asyncMarkDeleteWordRemotely();
                 } else if (relearned) {
                     // relearned TODO
@@ -161,7 +164,16 @@ public class ReviewCard extends Card {
         setOnExpandAnimatorEndListener(new Card.OnExpandAnimatorEndListener() {
             @Override
             public void onExpandEnd(Card card) {
-                ((ReviewCard) card).setReviewButtionStatus(true);
+                ((ReviewCard) card).setReviewButtionStatus(BUTTON_STATUS_RELEARNED);
+            }
+        });
+
+        setOnLongClickListener(new OnLongCardClickListener() {
+            @Override
+            public boolean onLongClick(Card card, View view) {
+                ((ReviewCard) card).markDeleted();
+                ((ReviewCard) card).setReviewButtionStatus(BUTTON_STATUS_TO_DELETE);
+                return true;
             }
         });
 
@@ -170,19 +182,30 @@ public class ReviewCard extends Card {
         addCardExpand(expand);
 	}
 
-    public void setReviewButtionStatus(boolean relearned) {
-        if (relearned) {
+    public void setReviewButtionStatus(int status) {
+        if (status == BUTTON_STATUS_RELEARNED) {
             mReviewButton.setImageResource(R.drawable.ic_action_close);
             if (mReviewCardButtonsOnClickListener != null) {
                 mReviewButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        mReviewCardButtonsOnClickListener.onReviewedButtonClicked(mCard, view);
+                        mReviewCardButtonsOnClickListener.onRelearnedButtonClicked(mCard, view);
                     }
                 });
             }
 
-        } else {
+        } else if (status == BUTTON_STATUS_TO_DELETE) {
+            mReviewButton.setImageResource(R.drawable.ic_action_remove);
+            if (mReviewCardButtonsOnClickListener != null) {
+                mReviewButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mReviewCardButtonsOnClickListener.onRemoveButtonClicked(mCard, view);
+                    }
+                });
+            }
+
+        } else if (status == BUTTON_STATUS_TO_RECALL) {
             mReviewButton.setImageResource(R.drawable.ic_action_done);
             if (mReviewCardButtonsOnClickListener != null) {
                 mReviewButton.setOnClickListener(new View.OnClickListener() {
@@ -203,7 +226,15 @@ public class ReviewCard extends Card {
     @Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
         mReviewButton = (CircleButton) parent.findViewById(R.id.review);
-        setReviewButtionStatus(relearned);
+        setReviewButtionStatus(BUTTON_STATUS_TO_RECALL);
+
+        if (relearned) {
+            setReviewButtionStatus(BUTTON_STATUS_RELEARNED);
+        }
+
+        if (deleted) {
+            setReviewButtionStatus(BUTTON_STATUS_TO_DELETE);
+        }
     }
 
     @Override
@@ -230,6 +261,10 @@ public class ReviewCard extends Card {
         final AsyncTask<Void, Void, Void> deleteTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
+                Log.d(TAG, "mark Card#"
+                        + idInLocalDB
+                        + "deleted. --- "
+                        + mainTitle);
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
                 Calendar rightNow = Calendar.getInstance();
                 long rightNowUnixTime = rightNow.getTimeInMillis();
