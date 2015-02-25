@@ -57,8 +57,9 @@
             card:list_card_layout_resourceID="@layout/list_card_review_layout"
             android:id="@+id/list_cursor"/>
 
-        <!-- Include undo message layout -->
+        <!-- Include undo message layout
         <include layout="@layout/list_card_undo_materialmobile_message"/>
+        -->
 
     </FrameLayout>
 

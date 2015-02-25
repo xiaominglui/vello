@@ -49,7 +49,7 @@ import com.mili.xiaominglui.app.vello.card.DictCard;
 import com.mili.xiaominglui.app.vello.card.ReviewCard;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
-public class ReviewViewFragment extends BaseListFragment implements LoaderManager.LoaderCallbacks<Cursor>, OnLongClickListener, Callback, DialogInterface.OnClickListener {
+public class ReviewViewFragment extends BaseListFragment implements LoaderManager.LoaderCallbacks<Cursor>, Callback, DialogInterface.OnClickListener {
     private static final String TAG = ReviewViewFragment.class.getSimpleName();
 
     CardListView mListView;
@@ -146,21 +146,6 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
 
         mCardArrayAdapter = new ReviewCardArrayAdapter(getActivity(), cards);
 
-        mCardArrayAdapter.setUndoBarUIElements(new UndoBarController.DefaultUndoBarUIElements(){
-            @Override
-            public SwipeDirectionEnabled isEnabledUndoBarSwipeAction() {
-                return SwipeDirectionEnabled.TOPBOTTOM;
-            }
-
-            @Override
-            public AnimationType getAnimationType() {
-                return AnimationType.TOPBOTTOM;
-            }
-        });
-
-        //Enable undo controller!
-        mCardArrayAdapter.setEnableUndo(true);
-
         dismissAnimation = (SwipeDismissAnimation) new SwipeDismissAnimation(getActivity()).setup(mCardArrayAdapter);
 
         if (mListView != null) {
@@ -175,7 +160,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         card.setReviewCardButtonsOnClickListener(new ReviewCard.OnClickReviewCardButtonsListener() {
             @Override
             public void onRelearnedButtonClicked(Card card, View view) {
-                dismissAnimation.setDismissRight(true);
+                dismissAnimation.setDismissRight(false);
                 ((ReviewCard) card).markRelearned();
                 dismissAnimation.animateDismiss(card);
             }
@@ -357,11 +342,5 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
     public void onDestroyActionMode(ActionMode mode) {
         // TODO Auto-generated method stub
 
-    }
-
-    @Override
-    public boolean onLongClick(View arg0) {
-        // TODO Auto-generated method stub
-        return false;
     }
 }

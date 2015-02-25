@@ -33,6 +33,7 @@ import android.widget.Toast;
 import com.malinskiy.materialicons.widget.IconTextView;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.VaaApplication;
+import com.mili.xiaominglui.app.vello.base.log.L;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.Acceptation;
 import com.mili.xiaominglui.app.vello.data.model.MiliDictionaryItem;
@@ -104,55 +105,38 @@ public class ReviewCard extends Card {
         setShadow(false);
 		CardHeader header = new ReviewCardHeader(mContext);
 		header.setTitle(mainTitle);
-
 		addCardHeader(header);
 
-        setSwipeable(true);
         setOnSwipeListener(new OnSwipeListener() {
             @Override
             public void onSwipe(Card card) {
                 if (deleted) {
-                    Toast.makeText(getContext(), "Delete card: " + mainTitle, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "Delete word: " + mainTitle, Toast.LENGTH_SHORT).show();
                     asyncMarkDeleteWordRemotely();
                 } else if (relearned) {
                     // relearned TODO
-                    Toast.makeText(getContext(), "Relearned card: " + mainTitle, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "Relearned word: " + mainTitle, Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(getContext(), "Recall card: " + mainTitle, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "Recall word: " + mainTitle, Toast.LENGTH_SHORT).show();
                     asyncMarkRecalledWord();
                 }
             }
         });
 
-        setOnUndoSwipeListListener(new OnUndoSwipeListListener() {
-            @Override
-            public void onUndoSwipe(Card card) {
-                Toast.makeText(getContext(), "Undo card: " + mainTitle, Toast.LENGTH_SHORT).show();
-                asyncUnmarkRecalledWord();
-            }
-        });
-
-        setOnUndoHideSwipeListListener(new OnUndoHideSwipeListListener() {
-            @Override
-            public void onUndoHideSwipe(Card card) {
-            }
-        });
-
-        ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().highlightView(false).setupCardElement(ViewToClickToExpand.CardElementUI.HEADER);
+        ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().highlightView(false).setupCardElement(ViewToClickToExpand.CardElementUI.CARD);
         setViewToClickToExpand(viewToClickToExpand);
 
         setOnExpandAnimatorStartListener(new Card.OnExpandAnimatorStartListener() {
             @Override
             public void onExpandStart(Card card) {
-                ((ReviewCard) card).markRelearned();
-
+                markRelearned();
             }
         });
 
         setOnExpandAnimatorEndListener(new Card.OnExpandAnimatorEndListener() {
             @Override
             public void onExpandEnd(Card card) {
-                ((ReviewCard) card).setReviewButtionStatus(BUTTON_STATUS_RELEARNED);
+                setReviewButtionStatus(BUTTON_STATUS_RELEARNED);
             }
         });
 
@@ -264,7 +248,7 @@ public class ReviewCard extends Card {
         final AsyncTask<Void, Void, Void> deleteTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                Log.d(TAG, "mark Card#"
+                L.d(TAG, "mark Card#"
                         + idInLocalDB
                         + "deleted. --- "
                         + mainTitle);
@@ -315,12 +299,10 @@ public class ReviewCard extends Card {
 
             @Override
 			protected Void doInBackground(Void... voids) {
-                if (VelloConfig.DEBUG_SWITCH) {
-                    Log.d(TAG, "mark Card#"
-                            + idInLocalDB
-                            + "recalled. --- "
-                            + mainTitle);
-                }
+                L.d(TAG, "mark Card#"
+                        + idInLocalDB
+                        + "recalled. --- "
+                        + mainTitle);
                 ContentValues cv = new ContentValues();
 
                 int positionList = AccountUtils.getVocabularyListPosition(mContext, idList);
