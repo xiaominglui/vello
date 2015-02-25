@@ -41,6 +41,7 @@ import com.mili.xiaominglui.app.vello.data.model.Pronunciation;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
+import com.mili.xiaominglui.app.vello.util.UIUtils;
 
 public class ReviewCard extends Card {
 	private static final String TAG = ReviewCard.class.getSimpleName();
@@ -394,7 +395,8 @@ public class ReviewCard extends Card {
                         View definitionView = LayoutInflater.from(mContext).inflate(R.layout.definition_item, null);
                         LinearLayout definiitionGroup = (LinearLayout) definitionView.findViewById(R.id.definition_group);
                         ((TextView) definitionView.findViewById(R.id.pos)).setText(acce.pos);
-                        ((TextView) definitionView.findViewById(R.id.definiens)).setText(acce.accep);
+
+                        ((TextView) definitionView.findViewById(R.id.definiens)).setText(UIUtils.toDBC(acce.accep));
                         linearLayoutDefinitionArea.addView(definiitionGroup);
                     }
                 }

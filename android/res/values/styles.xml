@@ -49,7 +49,7 @@
     <style name="card.review.header">
     </style>
     <style name="card.review.header.headline">
-        <item name="android:textSize">24sp</item>
+        <item name="android:textSize">34sp</item>
         <item name="android:textColor">@color/card_review_header_textcolor</item>
     </style>
 </resources>
