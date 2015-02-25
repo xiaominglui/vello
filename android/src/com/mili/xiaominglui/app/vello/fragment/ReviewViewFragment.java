@@ -189,7 +189,6 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             @Override
             public void onRemoveButtonClicked(Card card, View view) {
                 dismissAnimation.setDismissRight(true);
-                ((ReviewCard) card).markDeleted();
                 dismissAnimation.animateDismiss(card);
             }
         });

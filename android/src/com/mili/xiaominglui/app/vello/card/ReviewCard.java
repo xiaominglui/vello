@@ -30,7 +30,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.atermenji.android.iconictextview.IconicTextView;
 import com.malinskiy.materialicons.widget.IconTextView;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.VaaApplication;
@@ -47,8 +46,6 @@ public class ReviewCard extends Card {
     private static final int BUTTON_STATUS_RELEARNED = 0;
     private static final int BUTTON_STATUS_TO_DELETE = 1;
     private static final int BUTTON_STATUS_TO_RECALL = 2;
-    protected IconicTextView iconicLifeSign;
-	protected TextView textViewLifeCount;
     private CircleButton mReviewButton;
 	
 	public TrelloCard trelloCard;
@@ -86,15 +83,6 @@ public class ReviewCard extends Card {
 
     }
 	
-	public ReviewCard(Context context, Cursor c) {
-		super(context, R.layout.card_review_inner_content);
-		trelloCard = new TrelloCard(c);
-		
-		markDeleted = c.getString(DbWordCard.Columns.MARKDELETED.getIndex());
-		dateLastOperation = c.getString(DbWordCard.Columns.DATE_LAST_OPERATION.getIndex());
-		
-	}
-
     /**
      * Interface to handle callbacks when Reviewed Button is clicked
      */
@@ -104,8 +92,8 @@ public class ReviewCard extends Card {
         public void onRemoveButtonClicked(Card card, View view);
     }
 
-    public void markDeleted() {
-        deleted = true;
+    public void markDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     public void markRelearned() {
@@ -171,8 +159,17 @@ public class ReviewCard extends Card {
         setOnLongClickListener(new OnLongCardClickListener() {
             @Override
             public boolean onLongClick(Card card, View view) {
-                ((ReviewCard) card).markDeleted();
-                ((ReviewCard) card).setReviewButtionStatus(BUTTON_STATUS_TO_DELETE);
+                if (deleted) {
+                    if (relearned) {
+                        setReviewButtionStatus(BUTTON_STATUS_RELEARNED);
+                    } else {
+                        setReviewButtionStatus(BUTTON_STATUS_TO_RECALL);
+                    }
+                } else {
+                    ((ReviewCard) card).setReviewButtionStatus(BUTTON_STATUS_TO_DELETE);
+                }
+                markDeleted(!deleted);
+
                 return true;
             }
         });
@@ -238,6 +235,9 @@ public class ReviewCard extends Card {
         if (deleted) {
             setReviewButtionStatus(BUTTON_STATUS_TO_DELETE);
         }
+
+        TextView reviewChecks = (TextView) parent.findViewById(R.id.review_checks);
+        reviewChecks.setText(String.format(mContext.getResources().getString(R.string.title_review_status_checks), reviewProgress));
     }
 
     @Override

@@ -8,9 +8,9 @@ import com.foxykeep.datadroid.exception.ConnectionException;
 import com.foxykeep.datadroid.network.NetworkConnection;
 import com.foxykeep.datadroid.network.NetworkConnection.ConnectionResult;
 import com.foxykeep.datadroid.network.NetworkConnection.Method;
+import com.mili.xiaominglui.app.vello.base.log.L;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.config.WSConfig;
-import com.mili.xiaominglui.app.vello.data.factory.AddWordCardResponseJsonFactory;
 
 import org.acra.collector.CrashReportData;
 import org.acra.sender.ReportSender;
@@ -30,7 +30,7 @@ public class ACRATrelloSender implements ReportSender {
     public void send(CrashReportData data) throws ReportSenderException {
         String token = "d2c1a050532923fde013f752868078918c09feaad5c6e4a841d8540f36db0149";
         String urlString = WSConfig.TRELLO_API_URL + WSConfig.WS_TRELLO_TARGET_CARD
-                + "/52c7ef018f5620c231008e27" + WSConfig.WS_TRELLO_ACTION_COMMENTS;
+                + "/bQj7CXw2" + WSConfig.WS_TRELLO_ACTION_COMMENTS;
 
         String dataString = data.toString();
         int len = dataString.length();
@@ -50,9 +50,7 @@ public class ACRATrelloSender implements ReportSender {
         ConnectionResult result;
         try {
             result = networkConnection.execute();
-            if (VelloConfig.DEBUG_SWITCH) {
-                Log.d(TAG, "result.body = " + result.body);
-            }
+            L.d(TAG, "result.body = " + result.body);
         } catch (ConnectionException e) {
             e.printStackTrace();
         }

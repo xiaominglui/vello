@@ -47,6 +47,7 @@
     <string name="title_feature_one">Discover new words in read</string>
     <string name="title_feature_two">Recall unfamiliar words after read</string>
     <string name="title_feature_three">Acquire more words via read</string>
+    <string name="title_review_status_checks">%1$d/9</string>
     <string name="about_eula">End User License Agreement</string>
     <string name="about_licenses">Open Source Licenses</string>
     <string name="about_body"><![CDATA[
