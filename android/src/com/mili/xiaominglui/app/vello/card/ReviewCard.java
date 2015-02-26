@@ -25,7 +25,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.malinskiy.materialicons.widget.IconTextView;
 import com.mili.xiaominglui.app.vello.R;
@@ -295,7 +294,7 @@ public class ReviewCard extends Card {
                         + mainTitle);
                 ContentValues cv = new ContentValues();
 
-                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
                 Calendar rightNow = Calendar.getInstance();
                 long rightNowUnixTime = rightNow.getTimeInMillis();
 
@@ -331,7 +330,7 @@ public class ReviewCard extends Card {
                 ContentValues cv = new ContentValues();
 
                 int positionList = AccountUtils.getVocabularyListPosition(mContext, idList);
-                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
                 Calendar rightNow = Calendar.getInstance();
                 long rightNowUnixTime = rightNow.getTimeInMillis();
 
