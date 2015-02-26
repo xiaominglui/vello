@@ -23,6 +23,7 @@ public class VelloConfig {
 	7 * 24 * 60 * 60 * 1000,
 	15 * 24 * 60 * 60 * 1000,
 	-1 };
+    public static final long RELEARNED_DUE_DELTA = 15 * 60 * 1000;
     public static final boolean DEBUG_SWITCH = true;
 
     public static int DICTIONARY_MODE_ACTION_BAR_COLOR = 0xFF3F9FE0;

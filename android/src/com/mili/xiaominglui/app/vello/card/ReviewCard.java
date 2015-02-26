@@ -13,16 +13,13 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import android.annotation.SuppressLint;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -111,13 +108,10 @@ public class ReviewCard extends Card {
             @Override
             public void onSwipe(Card card) {
                 if (deleted) {
-                    Toast.makeText(mContext, "Delete word: " + mainTitle, Toast.LENGTH_SHORT).show();
                     asyncMarkDeleteWordRemotely();
                 } else if (relearned) {
-                    // relearned TODO
-                    Toast.makeText(mContext, "Relearned word: " + mainTitle, Toast.LENGTH_SHORT).show();
+                    asyncMarkRelearnedWord();
                 } else {
-                    Toast.makeText(mContext, "Recall word: " + mainTitle, Toast.LENGTH_SHORT).show();
                     asyncMarkRecalledWord();
                 }
             }
@@ -290,8 +284,41 @@ public class ReviewCard extends Card {
 		};
 		unmarkTask.execute();
 	}
+
+    public void asyncMarkRelearnedWord() {
+        final AsyncTask<Void, Void, Void> markTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                L.d(TAG, "mark Card#"
+                        + idInLocalDB
+                        + "relearned. --- "
+                        + mainTitle);
+                ContentValues cv = new ContentValues();
+
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                Calendar rightNow = Calendar.getInstance();
+                long rightNowUnixTime = rightNow.getTimeInMillis();
+
+                long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
+                long delta = VelloConfig.RELEARNED_DUE_DELTA;
+                long dueUnixTime = rightNowUnixTimeGMT + delta;
+
+                Date dueDate = new Date(dueUnixTime);
+                String stringDueDate = format.format(dueDate);
+                cv.put(DbWordCard.Columns.DUE.getName(), stringDueDate);
+
+                Date rightNowDate = new Date(rightNowUnixTime);
+                String stringRightNow = format.format(rightNowDate);
+                cv.put(DbWordCard.Columns.DATE_LAST_OPERATION.getName(), stringRightNow);
+                Uri uri = ContentUris.withAppendedId(DbWordCard.CONTENT_URI, idInLocalDB);
+                mContext.getContentResolver().update(uri, cv, null, null);
+                return null;
+            }
+        };
+        markTask.execute();
+
+    }
 	
-	@SuppressLint("SimpleDateFormat")
 	public void asyncMarkRecalledWord() {
 		final AsyncTask<Void, Void, Void> markTask = new AsyncTask<Void, Void, Void>() {
 
