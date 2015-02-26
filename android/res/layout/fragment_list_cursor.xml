@@ -57,6 +57,13 @@
             card:list_card_layout_resourceID="@layout/list_card_review_layout"
             android:id="@+id/list_cursor"/>
 
+        <ViewStub
+            android:id="@+id/empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout="@layout/empty_review" />
+
         <!-- Include undo message layout
         <include layout="@layout/list_card_undo_materialmobile_message"/>
         -->

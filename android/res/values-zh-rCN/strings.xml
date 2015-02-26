@@ -37,9 +37,7 @@
     <string name="title_settings">设置</string>
     <string name="title_about">关于</string>
     <string name="title_delete_word">删除单词</string>
-    <string name="title_listview_empty">干得好！回顾任务完成！</string>
     <string name="title_listview_hint_sync">点击立即同步单词</string>
-    <string name="title_sync_blank">当前没有需要回顾的单词</string>
     <string name="title_connection_timeout">错误: GET超时</string>
     <string name="title_connection_timeout_hint_retry">点击重试</string>
     <string name="title_phonetics_uk">英</string>
@@ -82,4 +80,6 @@
     <string name="title_feature_one">生词读中现</string>
     <string name="title_feature_two">闲来回顾之</string>
     <string name="title_feature_three">词汇达人见</string>
+    <string name="title_review_status_checks">%1$d/9</string>
+    <string name="title_review_blank">列表为空</string>
 </resources>

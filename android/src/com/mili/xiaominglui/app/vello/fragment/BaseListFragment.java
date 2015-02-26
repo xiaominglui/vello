@@ -4,11 +4,13 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 
 import com.mili.xiaominglui.app.vello.R;
+import com.mili.xiaominglui.app.vello.base.log.L;
 
 /**
  * Created by xiaominglui on 14-10-14.
  */
 public abstract class BaseListFragment extends BaseFragment {
+    private static final String TAG = BaseListFragment.class.getSimpleName();
     protected boolean mListShown;
     protected View mProgressContainer;
     protected View mListContainer;
@@ -26,6 +28,7 @@ public abstract class BaseListFragment extends BaseFragment {
     }
 
     protected void displayList(){
+        L.d(TAG, "displayList");
         if (isResumed()) {
             setListShown(true);
         } else {

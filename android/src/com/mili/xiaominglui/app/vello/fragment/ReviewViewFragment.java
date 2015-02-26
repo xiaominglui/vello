@@ -4,7 +4,6 @@ import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.internal.dismissanimation.SwipeDismissAnimation;
 import it.gmariotti.cardslib.library.view.CardListView;
-import it.gmariotti.cardslib.library.view.listener.UndoBarController;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,9 +24,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -36,8 +33,10 @@ import com.actionbarsherlock.view.ActionMode.Callback;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.adapter.ReviewCardArrayAdapter;
+import com.mili.xiaominglui.app.vello.base.log.L;
 import com.mili.xiaominglui.app.vello.card.ReviewCardThumbnail;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.MiliDictionaryItem;
@@ -130,12 +129,15 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
     private void init() {
 
         mListView = (CardListView) getActivity().findViewById(R.id.list_cursor);
+        View emptyView = getActivity().findViewById(R.id.empty);
+        mListView.setEmptyView(emptyView);
 
         // Force start background query to load sessions
-        getLoaderManager().restartLoader(0, null, this);
+        getLoaderManager().initLoader(0, null, this);
     }
 
     private void initReviewCards(Cursor data) {
+        L.d(TAG, "initReviewCards");
         ArrayList<Card> cards = new ArrayList<Card>();
 
         for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
@@ -143,6 +145,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             card.setId(card.trelloID);
             cards.add(card);
         }
+        data.close();
 
         mCardArrayAdapter = new ReviewCardArrayAdapter(getActivity(), cards);
 
@@ -194,22 +197,26 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         String jsonString = cursor.getString(VelloContent.DbWordCard.Columns.DESC.getIndex());
 
         Gson gson = new Gson();
-        MiliDictionaryItem item = gson.fromJson(jsonString, MiliDictionaryItem.class);
-        if (item != null) {
-            String idList = cursor.getString(VelloContent.DbWordCard.Columns.LIST_ID.getIndex());
-            card.position = cursor.getPosition();
-            card.trelloID = cursor.getString(DbWordCard.Columns.CARD_ID.getIndex());
-            card.closed = cursor.getString(DbWordCard.Columns.CLOSED.getIndex());
-            card.due = cursor.getString(DbWordCard.Columns.DUE.getIndex());
-            card.dictItem = item;
-            card.mainTitle = item.spell;
-            card.secondaryTitle = "";
-            card.idList = idList;
-            card.reviewProgress = AccountUtils.getVocabularyListPosition(getActivity().getApplicationContext(), idList);
-            card.idInLocalDB = cursor.getInt(VelloContent.DbWordCard.Columns.ID.getIndex());
-            card.urlResourceThumb = item.pic;
-            card.errorResourceIdThumb = R.drawable.ic_launcher;
-            card.init();
+        try {
+            MiliDictionaryItem item = gson.fromJson(jsonString, MiliDictionaryItem.class);
+            if (item != null) {
+                String idList = cursor.getString(VelloContent.DbWordCard.Columns.LIST_ID.getIndex());
+                card.position = cursor.getPosition();
+                card.trelloID = cursor.getString(DbWordCard.Columns.CARD_ID.getIndex());
+                card.closed = cursor.getString(DbWordCard.Columns.CLOSED.getIndex());
+                card.due = cursor.getString(DbWordCard.Columns.DUE.getIndex());
+                card.dictItem = item;
+                card.mainTitle = item.spell;
+                card.secondaryTitle = "";
+                card.idList = idList;
+                card.reviewProgress = AccountUtils.getVocabularyListPosition(getActivity().getApplicationContext(), idList);
+                card.idInLocalDB = cursor.getInt(VelloContent.DbWordCard.Columns.ID.getIndex());
+                card.urlResourceThumb = item.pic;
+                card.errorResourceIdThumb = R.drawable.ic_launcher;
+                card.init();
+            }
+        } catch (JsonSyntaxException exception) {
+            L.d(TAG, exception.getStackTrace());
         }
     }
 
@@ -253,6 +260,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        L.d(TAG, "onLoadFinished");
         if (mIsSearching) {
             // in Dictionary Mode
             if (data == null)
@@ -277,11 +285,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        if (VelloConfig.DEBUG_SWITCH) {
-            Log.d(TAG, "onLoaderReset");
-        }
-        mCardArrayAdapter.clear();
-//        mAdapter.swapCursor(null);
+        Log.d(TAG, "onLoaderReset");
     }
 
 

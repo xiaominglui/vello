@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,6 +37,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -103,7 +105,6 @@ public class VelloService extends Service implements RequestListener, Connection
     public static final int MSG_STATUS_INIT_ACCOUNT_END = 8;
     public static final int MSG_STATUS_SYNC_BEGIN = 9;
     public static final int MSG_STATUS_SYNC_END = 10;
-    public static final int MSG_STATUS_SYNC_BLANK = 11;
     public static final int MSG_STATUS_CONNECTION_TIMEOUT = 12;
     public static final int MSG_STATUS_REVOKE_BEGIN = 13;
 
@@ -219,7 +220,7 @@ public class VelloService extends Service implements RequestListener, Connection
                 mTimerTask = new MonitorTimerTask();
             }
             mMonitorTimer.scheduleAtFixedRate(mTimerTask, 0, mPrefs.getInt(KEY_MONITOR_INTERVAL, DEF_MONITOR_INTERVAL));
-            showNotification();
+            showClipMonitorNotification();
         }
         if (sync) {
             if (VelloConfig.DEBUG_SWITCH) {
@@ -810,6 +811,7 @@ public class VelloService extends Service implements RequestListener, Connection
                                 }
                                 sendMessageToClients(VelloService.MSG_STATUS_SYNC_END, null);
                                 C.setPreference(KEY_SYNC_TIMESTAMP_END, System.currentTimeMillis());
+                                showPostSyncNotification();
                                 stopSelf(startId);
                             } catch (RemoteException e) {
                                 e.printStackTrace();
@@ -862,6 +864,7 @@ public class VelloService extends Service implements RequestListener, Connection
                         }
                         sendMessageToClients(VelloService.MSG_STATUS_SYNC_END, null);
                         C.setPreference(KEY_SYNC_TIMESTAMP_END, System.currentTimeMillis());
+                        showPostSyncNotification();
                         stopSelf(startId);
                     }
                     return;
@@ -1086,7 +1089,7 @@ public class VelloService extends Service implements RequestListener, Connection
         return trelloCard;
     }
 
-    private void showNotification() {
+    private void showClipMonitorNotification() {
         Notification notif = new Notification(R.drawable.ic_stat_vaa, "VAA clipboard monitor is started", System.currentTimeMillis());
         notif.flags |= (Notification.FLAG_ONGOING_EVENT | Notification.FLAG_NO_CLEAR);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
@@ -1139,5 +1142,51 @@ public class VelloService extends Service implements RequestListener, Connection
         ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
         pasteData = item.getText().toString();
         Toast.makeText(getApplicationContext(), "clipboard changed --- pasteData=" + pasteData, Toast.LENGTH_SHORT).show();
+    }
+
+    private void showPostSyncNotification() {
+        // show notification
+		Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+		PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+
+		ProviderCriteria cri = new ProviderCriteria();
+		cri.addSortOrder(DbWordCard.Columns.DUE, true);
+		Calendar rightNow = Calendar.getInstance();
+
+		SimpleDateFormat fo = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+		long rightNowUnixTime = rightNow.getTimeInMillis();
+		long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
+		String now = fo.format(new Date(rightNowUnixTimeGMT));
+		cri.addEq(DbWordCard.Columns.MARKDELETED, "false");
+		cri.addLt(DbWordCard.Columns.DUE, now, true);
+		Cursor cur = getContentResolver().query(
+				DbWordCard.CONTENT_URI,
+				DbWordCard.PROJECTION,
+				cri.getWhereClause(),
+				cri.getWhereParams(),
+				cri.getOrderClause());
+		if (cur != null) {
+			int num = cur.getCount();
+			if (num > 0) {
+				Resources res = getApplicationContext().getResources();
+				String stringContentTitle = res.getQuantityString(R.plurals.notif_content_title, num, num);
+				String stringContentText = res.getString(R.string.notif_content_text);
+				Notification noti = new NotificationCompat.Builder(getApplicationContext())
+						.setContentTitle(stringContentTitle)
+						.setContentText(stringContentText)
+						.setSmallIcon(R.drawable.ic_launcher)
+						.setContentIntent(pIntent)
+						.build();
+
+
+				// Hide the notification after its selected
+				noti.flags |= Notification.FLAG_AUTO_CANCEL;
+
+				mNM.notify(0, noti);
+			} else {
+				// no word need recalling
+			}
+			cur.close();
+		}
     }
 }

@@ -1,11 +1,10 @@
 package com.mili.xiaominglui.app.vello.authenticator;
 
-import com.mili.xiaominglui.app.vello.config.VelloConfig;
+import com.mili.xiaominglui.app.vello.base.log.L;
 
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import android.util.Log;
 
 
 
@@ -21,25 +20,18 @@ public class AuthenticationService extends Service {
 
     @Override
     public void onCreate() {
-    	if (VelloConfig.DEBUG_SWITCH) {
-    		Log.d(TAG, "AuthenticationService onCreate.");
-    	}
-
+        L.d(TAG, "AuthenticationService onCreate.");
         mAuthenticator = new Authenticator(this);
     }
 
     @Override
     public void onDestroy() {
-    	if (VelloConfig.DEBUG_SWITCH) {
-    		Log.d(TAG, "AuthenticationService onDestroy.");
-    	}
+        L.d(TAG, "AuthenticationService onDestroy.");
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-    	if (VelloConfig.DEBUG_SWITCH) {
-    		Log.d(TAG, "AuthenticationService onBind.");
-    	}
+        L.d(TAG, "AuthenticationService onBind.");
         return mAuthenticator.getIBinder();
     }
 }

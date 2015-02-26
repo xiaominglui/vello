@@ -1,7 +1,6 @@
 package com.mili.xiaominglui.app.vello.config;
 
 public class VelloConfig {
-    public static final boolean DEBUG_SWITCH = true;
 
     // Vocabulary Lists Config
     public static final int VOCABULARY_LIST_POSITION_NEW = 0;
@@ -24,7 +23,8 @@ public class VelloConfig {
 	7 * 24 * 60 * 60 * 1000,
 	15 * 24 * 60 * 60 * 1000,
 	-1 };
-    
+    public static final boolean DEBUG_SWITCH = true;
+
     public static int DICTIONARY_MODE_ACTION_BAR_COLOR = 0xFF3F9FE0;
     public static int REVIEW_MODE_ACTION_BAR_COLOR = 0xFF222222;
     

@@ -274,12 +274,10 @@ public class ReviewCard extends Card {
 
 			@Override
 			protected Void doInBackground(Void... voids) {
-                if (VelloConfig.DEBUG_SWITCH) {
-                    Log.d(TAG, "unmark Card#"
-                            + idInLocalDB
-                            + "recalled. --- "
-                            + mainTitle);
-                }
+                L.d(TAG, "unmark Card#"
+                        + idInLocalDB
+                        + "recalled. --- "
+                        + mainTitle);
                 ContentValues cv = new ContentValues();
                 cv.put(DbWordCard.Columns.CLOSED.getName(), closed);
                 cv.put(DbWordCard.Columns.DUE.getName(), due);

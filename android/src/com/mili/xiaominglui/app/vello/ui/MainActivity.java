@@ -96,9 +96,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			case VelloService.MSG_STATUS_SYNC_END:
 				theActivity.postSync();
 				break;
-			case VelloService.MSG_STATUS_SYNC_BLANK:
-				theActivity.showSyncBlank();
-				break;
 			case VelloService.MSG_STATUS_REVOKE_BEGIN:
 				theActivity.preAuthTokenRevoke();
 				break;
@@ -434,14 +431,10 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			Bundle extras = new Bundle();
 			ContentResolver.addPeriodicSync(AccountUtils.getAccount(getApplicationContext()), VelloProvider.AUTHORITY, extras, syncFreqValue * 60 * 60);
 		}
-		
-		triggerRefresh();
 	}
 	
 	private void preSync() {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "preSync");
-		}
+        L.d(TAG, "preSync");
 		if (isInFront) {
 			FragmentManager fm = getFragmentManager();
 			fm.beginTransaction().replace(R.id.fragment_container_master, new ProgressFragment()).commit();
@@ -449,69 +442,13 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	}
 	
 	private void postSync() {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "postSync");
-		}
-		// show notification
-		Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-		PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
-
-		ProviderCriteria cri = new ProviderCriteria();
-		cri.addSortOrder(DbWordCard.Columns.DUE, true);
-		Calendar rightNow = Calendar.getInstance();
-
-		SimpleDateFormat fo = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
-		long rightNowUnixTime = rightNow.getTimeInMillis();
-		long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
-		String now = fo.format(new Date(rightNowUnixTimeGMT));
-		cri.addEq(DbWordCard.Columns.MARKDELETED, "false");
-		cri.addLt(DbWordCard.Columns.DUE, now, true);
-		Cursor cur = getContentResolver().query(
-				DbWordCard.CONTENT_URI,
-				DbWordCard.PROJECTION,
-				cri.getWhereClause(),
-				cri.getWhereParams(),
-				cri.getOrderClause());
-		if (cur != null) {
-			int num = cur.getCount();
-			if (num > 0) {
-				Resources res = getApplicationContext().getResources();
-				String stringContentTitle = res.getQuantityString(R.plurals.notif_content_title, num, num);
-				String stringContentText = res.getString(R.string.notif_content_text);
-				Notification noti = new NotificationCompat.Builder(getApplicationContext())
-						.setContentTitle(stringContentTitle)
-						.setContentText(stringContentText)
-						.setSmallIcon(R.drawable.ic_launcher)
-						.setContentIntent(pIntent)
-						.build();
-
-
-				// Hide the notification after its selected
-				noti.flags |= Notification.FLAG_AUTO_CANCEL;
-
-				mNM.notify(0, noti);
-				if (isInFront) {
-					FragmentManager fm = getFragmentManager();
-					fm.beginTransaction().replace(R.id.fragment_container_master, ReviewViewFragment.newInstance()).commit();
-				}
-			} else {
-				// no word need recalling
-				showSyncBlank();
-			}
-			cur.close();
-		}
+        L.d(TAG, "postSync");
+        if (isInFront) {
+            FragmentManager fm = getFragmentManager();
+            fm.beginTransaction().replace(R.id.fragment_container_master, ReviewViewFragment.newInstance()).commit();
+        }
 	}
-	
-	private void showSyncBlank() {
-		if (VelloConfig.DEBUG_SWITCH) {
-			Log.d(TAG, "showSyncBlank called, with isInFront=" + isInFront);
-		}
-		if (isInFront) {
-			FragmentManager fm = getFragmentManager();
-			fm.beginTransaction().replace(R.id.fragment_container_master, SyncBlankViewFragment.newInstance()).commit();
-		}
-	}
-	
+
 	private void preAuthTokenRevoke() {
 		FragmentManager fm = getFragmentManager();
 		fm.beginTransaction().replace(R.id.fragment_container_master, new ProgressFragment()).commit();
