@@ -20,6 +20,8 @@ import android.os.RemoteException;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
+import android.support.v4.app.NavUtils;
+import android.view.MenuItem;
 
 import com.avos.avoscloud.AVInstallation;
 import com.avos.avoscloud.PushService;
@@ -181,6 +183,17 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         super.onPostCreate(savedInstanceState);
         setupSimplePreferencesScreen();
         mListPreference = (ListPreference) getPreferenceScreen().findPreference(KEY_PREF_SYNC_FREQ);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("deprecation")

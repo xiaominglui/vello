@@ -66,14 +66,14 @@
         <activity
             android:name=".ui.SettingsActivity"
             android:exported="false"
-            android:label="@string/title_settings" >
+            android:label="@string/title_settings"
+            android:parentActivityName=".ui.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.MainActivity" />
 
             <intent-filter>
                 <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -82,7 +82,6 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:excludeFromRecents="true"
             android:windowSoftInputMode="adjustResize" >
-
             <!--
                 No intent-filter here! This activity is only ever launched by
                 someone who explicitly knows the class name
