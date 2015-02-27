@@ -54,6 +54,16 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
+            android:name=".ui.FloatDictActivity"
+            android:label="@string/share_lookup_name"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".ui.SettingsActivity"
             android:exported="false"
             android:label="@string/title_settings" >

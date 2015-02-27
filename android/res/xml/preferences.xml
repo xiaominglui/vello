@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <!--
     <PreferenceCategory android:title="@string/pref_dict_title" >
         <CheckBoxPreference
             android:key="pref_dict_clipboard_monitor"
@@ -7,6 +8,7 @@
             android:title="@string/pref_dict_clipboard_monitor"
             android:summary="@string/pref_dict_clipboard_monitor_summary" />
     </PreferenceCategory>
+    -->
     
     <PreferenceCategory android:title="@string/pref_sync_title" >
         <ListPreference

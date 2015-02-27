@@ -2,6 +2,7 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <string name="app_name">VAA</string>
+    <string name="share_lookup_name">VAA Dict</string>
     <string name="action_query_hint">Search word&#8230;</string>
     <string name="toast_no_connection">Please check network connection.</string>
     <string name="toast_auth_failure">Authentication failure!</string>
@@ -46,6 +47,7 @@
     <string name="title_feature_two">Recall unfamiliar words after read</string>
     <string name="title_feature_three">Acquire more words via read</string>
     <string name="title_review_status_checks">%1$d/9</string>
+    <string name="toast_invalid_keyword">Invalid query</string>
     <string name="about_eula">End User License Agreement</string>
     <string name="about_licenses">Open Source Licenses</string>
     <string name="about_body"><![CDATA[

@@ -12,6 +12,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.apache.http.HttpStatus;
+import org.apache.http.entity.mime.MIME;
 
 import wei.mark.standout.StandOutWindow;
 
@@ -20,6 +21,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.content.ClipboardManager.OnPrimaryClipChangedListener;
 import android.content.ContentProviderOperation;
@@ -30,6 +32,8 @@ import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -38,12 +42,15 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.base.C;
 import com.mili.xiaominglui.app.vello.base.log.L;
@@ -51,6 +58,7 @@ import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.Board;
 import com.mili.xiaominglui.app.vello.data.model.DirtyCard;
 import com.mili.xiaominglui.app.vello.data.model.List;
+import com.mili.xiaominglui.app.vello.data.model.MiliDictionaryItem;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
@@ -64,10 +72,10 @@ import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class VelloService extends Service implements RequestListener, ConnectionErrorDialogListener, OnPrimaryClipChangedListener {
     private static final String TAG = VelloService.class.getSimpleName();
+    private static final String MIMETYPE_TEXT_PLAIN = "";
     private static boolean isRunning = false;
     private NotificationManager mNM;
     private ClipboardManager mCM;
-    private WindowManager mWM;
     private Timer mMonitorTimer = null;
     private TimerTask mTimerTask = null;
     private String mLastFakeClipText = "";
@@ -207,11 +215,19 @@ public class VelloService extends Service implements RequestListener, Connection
     public int onStartCommand(Intent intent, int flags, int startId) {
         boolean monitor = false;
         boolean sync = false;
+        boolean share = false;
         if (intent != null) {
             monitor = intent.getBooleanExtra("monitor", false);
             sync = intent.getBooleanExtra("sync", false);
+            share = intent.getBooleanExtra("share", false);
         }
-
+        if (share) {
+            String keyword = intent.getStringExtra("keyword");
+            if (!TextUtils.isEmpty(keyword)) {
+                lookUpInDictionary(keyword);
+            }
+            stopSelf();
+        }
         if (monitor) {
             if (mMonitorTimer == null) {
                 mMonitorTimer = new Timer(false);
@@ -250,12 +266,11 @@ public class VelloService extends Service implements RequestListener, Connection
         mRequestList = new ArrayList<Request>();
         mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        mWM = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
-        mCM = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-//		mCM.addPrimaryClipChangedListener(this);
-        // https://code.google.com/p/android/issues/detail?id=58043
-        // TODO add a option in setting
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            mCM = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+            mCM.addPrimaryClipChangedListener(this);
+            // https://code.google.com/p/android/issues/detail?id=58043
+        }
         isRunning = true;
     }
 
@@ -377,9 +392,7 @@ public class VelloService extends Service implements RequestListener, Connection
     }
 
     private void lookUpInDictionary(String keyword) {
-        if (VelloConfig.DEBUG_SWITCH) {
-            Log.d(TAG, "look up [" + keyword + "] in dictionary...");
-        }
+        L.d(TAG, "look up [" + keyword + "] in dictionary...");
         Request lookUpInDictionary = VelloRequestFactory.lookUpInDictionaryRequest(keyword);
         mRequestManager.execute(lookUpInDictionary, this);
         mRequestList.add(lookUpInDictionary);
@@ -654,7 +667,6 @@ public class VelloService extends Service implements RequestListener, Connection
                     String wsResponse = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_DICTIONARY_WS_RESPONSE);
                     if (!wsResponse.equals("null\n")) {
                         showFloatDictCard(wsResponse);
-//				    addWordCard(keywordInQuery, wsResponse);
                         if (keywordInQuery != null && wsResponse != null) {
                             addWordCard(keywordInQuery, wsResponse);
                         }
@@ -1138,10 +1150,21 @@ public class VelloService extends Service implements RequestListener, Connection
     @Override
     public void onPrimaryClipChanged() {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        String pasteData = "";
-        ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
-        pasteData = item.getText().toString();
-        Toast.makeText(getApplicationContext(), "clipboard changed --- pasteData=" + pasteData, Toast.LENGTH_SHORT).show();
+        String pasteData;
+        if (clipboard.getPrimaryClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
+            ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
+            CharSequence cs = item.getText();
+            if (cs != null) {
+                pasteData = cs.toString();
+                if (pasteData != null) {
+                    Toast.makeText(C.get(), "clipboard changed --- pasteData=" + pasteData, Toast.LENGTH_SHORT).show();
+                    String cleanedKeyword = pasteData.trim().toLowerCase(Locale.US);
+                    if (cleanedKeyword.matches("^[a-z]+$")) {
+                        lookUpInDictionary(cleanedKeyword);
+                    }
+                }
+            }
+        }
     }
 
     private void showPostSyncNotification() {
@@ -1174,14 +1197,12 @@ public class VelloService extends Service implements RequestListener, Connection
 				Notification noti = new NotificationCompat.Builder(getApplicationContext())
 						.setContentTitle(stringContentTitle)
 						.setContentText(stringContentText)
-						.setSmallIcon(R.drawable.ic_launcher)
+						.setSmallIcon(R.drawable.ic_stat_vaa)
 						.setContentIntent(pIntent)
 						.build();
 
-
 				// Hide the notification after its selected
 				noti.flags |= Notification.FLAG_AUTO_CANCEL;
-
 				mNM.notify(0, noti);
 			} else {
 				// no word need recalling

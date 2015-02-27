@@ -20,12 +20,12 @@ import android.os.RemoteException;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
-import android.util.Log;
 
 import com.avos.avoscloud.AVInstallation;
 import com.avos.avoscloud.PushService;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
+import com.mili.xiaominglui.app.vello.base.log.L;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
@@ -224,7 +224,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
                 startMonitor.putExtra("monitor", true);
                 ComponentName service = getApplicationContext().startService(startMonitor);
                 if (service == null) {
-                    Log.e(TAG, "Can't start service " + VelloService.class.getName());
+                    L.e(TAG, "Can't start service " + VelloService.class.getName());
                 }
             } else {
                 sendMessageToService(VelloService.MSG_SHUTDOWN_CLIPBOARD_MONITOR, null);

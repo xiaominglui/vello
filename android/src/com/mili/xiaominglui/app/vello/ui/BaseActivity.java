@@ -14,7 +14,6 @@ public class BaseActivity extends SherlockFragmentActivity {
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-	setTheme(R.style.Theme_Sherlock_Light_DarkActionBar);
         super.onCreate(savedInstanceState);
         
         if (!AccountUtils.isAuthenticated(this)) {
@@ -22,9 +21,9 @@ public class BaseActivity extends SherlockFragmentActivity {
             finish();
         }
         
-        
+
     }
-    
+
     protected void showBadDataErrorDialog() {
         new ErrorDialogFragmentBuilder(this).setTitle(R.string.dialog_error_data_error_title).setMessage(R.string.dialog_error_data_error_message).show();
     }
