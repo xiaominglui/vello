@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Re-package the Log util, now we can control all the logs' switch in this
@@ -25,10 +26,8 @@ public class LogWritter {
 
 
 
-    public static final SimpleDateFormat simpleDateFormatInSS = new
-            SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-    public static final SimpleDateFormat simpleDateFormat = new
-            SimpleDateFormat("yyyy_MM_dd");
+    public static final SimpleDateFormat simpleDateFormatInSS = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US);
+    public static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy_MM_dd", Locale.US);
 
     public static final boolean OUTPUT_MEMORY_INFO = false;
 

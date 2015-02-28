@@ -1,19 +1,10 @@
 <resources>
 
-    <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="element_spacing_normal">8dp</dimen>
-    <dimen name="body_font_size">18sp</dimen>
-    <dimen name="toast_bar_bottom_margin_in_conversation">24dip</dimen>
     <dimen name="text_size_medium">14sp</dimen>
     <dimen name="content_padding_normal">16dp</dimen>
     
     <!-- Card -->
-    <dimen name="reviewcard_base_empty_height">24dp</dimen>
-    <dimen name="card_material_largeimage_height">200dp</dimen>
     <dimen name="card_background_default_radius">2dip</dimen>
-    <dimen name="card_expand">250dp</dimen>
 
     <!-- Review Main -->
     <dimen name="card_review_main_layout_view_margin_top">12dp</dimen>
@@ -27,23 +18,11 @@
     <dimen name="card_review_expand_layout_view_margin_bottom">0dp</dimen>
     <dimen name="card_review_expand_layout_view_margin_right">8dp</dimen>
 
-    <!-- Header -->
-    <dimen name="card_header_outer_view_margin_top">0dp</dimen>
-    <dimen name="card_header_outer_view_margin_left">0dp</dimen>
-    <dimen name="card_header_outer_view_margin_bottom">0dp</dimen>
-    <dimen name="card_header_outer_view_margin_right">0dp</dimen>
-
     <!--Button Header -->
     <dimen name="card_header_button_padding_left">10dp</dimen>
     <dimen name="card_header_button_padding_right">0dp</dimen>
     <dimen name="card_header_button_padding_bottom">0dp</dimen>
     <dimen name="card_header_button_padding_top">0dp</dimen>
-
-    <!-- Title Header -->
-    <dimen name="card_header_review_title_margin_left">10dp</dimen>
-    <dimen name="card_header_review_title_margin_top">5dp</dimen>
-    <dimen name="card_header_review_title_text_size">25sp</dimen>
-    <dimen name="card_header_float_title_text_size">15sp</dimen>
 
     <!-- Content -->
     <dimen name="card_content_outer_view_margin_top">0dp</dimen>

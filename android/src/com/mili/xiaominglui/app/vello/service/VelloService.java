@@ -31,7 +31,6 @@ import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,13 +42,10 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.requestmanager.RequestManager.RequestListener;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.base.C;
 import com.mili.xiaominglui.app.vello.base.log.L;
@@ -57,7 +53,6 @@ import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.Board;
 import com.mili.xiaominglui.app.vello.data.model.DirtyCard;
 import com.mili.xiaominglui.app.vello.data.model.List;
-import com.mili.xiaominglui.app.vello.data.model.MiliDictionaryItem;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
@@ -377,6 +372,7 @@ public class VelloService extends Service implements RequestListener, Connection
         }
         sendMessageToClients(VelloService.MSG_STATUS_SYNC_BEGIN, null);
         C.setPreference(KEY_SYNC_TIMESTAMP_BEGIN, System.currentTimeMillis());
+        showSyncReviewCardNotification();
         // step 1: get open trello cards
         getOpenTrelloCardList(startId, false);
     }
@@ -483,7 +479,7 @@ public class VelloService extends Service implements RequestListener, Connection
         if (mMonitorTimer != null) {
             mMonitorTimer.cancel();
             mMonitorTimer.purge();
-            removeNotification();
+            removeClipMonitorNotification();
         }
     }
 
@@ -820,6 +816,7 @@ public class VelloService extends Service implements RequestListener, Connection
                                 }
                                 sendMessageToClients(VelloService.MSG_STATUS_SYNC_END, null);
                                 C.setPreference(KEY_SYNC_TIMESTAMP_END, System.currentTimeMillis());
+                                removeSyncReviewCardNotification();
                                 showPostSyncNotification();
                                 stopSelf(startId);
                             } catch (RemoteException e) {
@@ -873,6 +870,7 @@ public class VelloService extends Service implements RequestListener, Connection
                         }
                         sendMessageToClients(VelloService.MSG_STATUS_SYNC_END, null);
                         C.setPreference(KEY_SYNC_TIMESTAMP_END, System.currentTimeMillis());
+                        removeSyncReviewCardNotification();
                         showPostSyncNotification();
                         stopSelf(startId);
                     }
@@ -1107,8 +1105,23 @@ public class VelloService extends Service implements RequestListener, Connection
         mNM.notify(R.string.notif_clip_monitor_service_content_title, notif);
     }
 
-    private void removeNotification() {
+    private void removeClipMonitorNotification() {
         mNM.cancel(R.string.notif_clip_monitor_service_content_title);
+    }
+
+    private void showSyncReviewCardNotification() {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(C.get());
+        builder.setSmallIcon(R.drawable.ic_stat_vaa)
+                .setContentTitle(getText(R.string.notif_sync_content_text))
+                .setOngoing(true)
+                .setTicker(getText(R.string.notif_sync_ticker_title));
+        Notification notif = builder.build();
+        // Use layout id because it's unique
+        mNM.notify(R.string.notif_sync_ticker_title, notif);
+    }
+
+    private void removeSyncReviewCardNotification() {
+        mNM.cancel(R.string.notif_sync_ticker_title);
     }
 
     /**

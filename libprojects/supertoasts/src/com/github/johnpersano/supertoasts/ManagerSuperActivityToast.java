@@ -32,7 +32,7 @@ import android.view.ViewGroup;
 /** Manages the life of a SuperActivityToast. Copied from the Crouton library. */
 public class ManagerSuperActivityToast extends Handler {
 	
-	private static final String TAG = "ManagerSuperActivityToast";
+	private static final String TAG = "ManagerSuperActivityT";
 
 	private static final class Messages {
 

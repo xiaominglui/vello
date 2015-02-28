@@ -1,28 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="expandable_background">#ffffcc</color>
-    <color name="transparent">#00000000</color>
-    <color name="transparent_white">#66ffffff</color>
-    <color name="bg_color_new">#aa6666ff</color>
-    <color name="bg_color_1st">#aa6699ff</color>
-    <color name="bg_color_2nd">#aa66ccff</color>
-    <color name="bg_color_3rd">#aaff6699</color>
-    <color name="bg_color_4th">#aaff66cc</color>
-    <color name="bg_color_5th">#aaff66ff</color>
-    <color name="bg_color_6th">#aaccffcc</color>
-    <color name="bg_color_7th">#aaccff99</color>
-    <color name="bg_color_8th">#aaccff66</color>
-    <color name="bg_dictionary_mode">#ffffff</color>
-    <color name="card_selected_color">#aa0099cc</color>
-    <color name="bg_login_button">#f9f9f9</color>
-    
-    <!-- color card -->
-    <color name="demo_card_background_color1">#FFBB33</color>
-    <color name="demo_card_background_color2">#98CC00</color>
-    <color name="demo_card_background_color3">#A966CC</color>
-    <color name="demo_card_background_color4">#33B4E4</color>
-    <color name="demo_card_background_color5">#FF4343</color>
-
     <!-- red -->
     <color name="md_red_50">#fde0dc</color>
     <color name="md_red_100">#f9bdbb</color>

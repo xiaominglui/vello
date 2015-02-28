@@ -42,7 +42,8 @@ public class AccountActivity extends SherlockFragmentActivity implements LoginFr
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
         } else {
             View decorView = getWindow().getDecorView();
-            int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+            int uiOptions;
+            uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
             decorView.setSystemUiVisibility(uiOptions);
             ActionBar actionBar = getActionBar();
             if (actionBar != null) {
