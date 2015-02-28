@@ -262,7 +262,7 @@ public class VelloService extends Service implements RequestListener, Connection
         mPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             mCM = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-            mCM.addPrimaryClipChangedListener(this);
+//            mCM.addPrimaryClipChangedListener(this);
             // https://code.google.com/p/android/issues/detail?id=58043
         }
         isRunning = true;
@@ -1167,7 +1167,6 @@ public class VelloService extends Service implements RequestListener, Connection
             if (cs != null) {
                 pasteData = cs.toString();
                 if (pasteData != null) {
-                    Toast.makeText(C.get(), "clipboard changed --- pasteData=" + pasteData, Toast.LENGTH_SHORT).show();
                     String cleanedKeyword = pasteData.trim().toLowerCase(Locale.US);
                     if (cleanedKeyword.matches("^[a-z]+$")) {
                         lookUpInDictionary(cleanedKeyword);
