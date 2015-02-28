@@ -12,7 +12,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.apache.http.HttpStatus;
-import org.apache.http.entity.mime.MIME;
 
 import wei.mark.standout.StandOutWindow;
 
@@ -506,12 +505,10 @@ public class VelloService extends Service implements RequestListener, Connection
     }
 
     private void showFloatDictCard(String jsonResponse) {
-        if (VelloConfig.DEBUG_SWITCH) {
-            Log.d(TAG, "showFloatDictCard --- " + jsonResponse);
-        }
+        L.d(TAG, "showFloatDictCard --- " + jsonResponse);
         Bundle data = new Bundle();
         data.putString("jsonResponse", jsonResponse);
-        StandOutWindow.show(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID);
+        StandOutWindow.show(C.get(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID);
         StandOutWindow.sendData(getApplicationContext(), FloatDictCardWindow.class, StandOutWindow.DEFAULT_ID, REQ_DATA_CHANGED, data, StandOutWindow.class, StandOutWindow.DEFAULT_ID);
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {

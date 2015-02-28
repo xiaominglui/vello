@@ -18,6 +18,7 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.mili.xiaominglui.app.vello.R;
+import com.mili.xiaominglui.app.vello.card.FloatDictCard;
 import com.mili.xiaominglui.app.vello.data.factory.MiliDictionaryJsonParser;
 import com.mili.xiaominglui.app.vello.data.model.Definition;
 import com.mili.xiaominglui.app.vello.data.model.IcibaWord;
@@ -88,7 +89,7 @@ public class FloatDictCardWindow extends StandOutWindow {
 			} else if (jsonResponse == null && card != null) {
 				word = MiliDictionaryJsonParser.parse(card.desc);
 			}
-			mCard.getCardHeader().setTitle(word.keyword);
+            mCard.setTitle(word.keyword);
 			StringBuilder meaning = new StringBuilder();
 			for (Definition definition : word.definition) {
 				meaning.append(definition.pos);
@@ -97,7 +98,7 @@ public class FloatDictCardWindow extends StandOutWindow {
 				meaning.append(";");
 				meaning.append("\n");
 			}
-			((FloatDictCardHeader) mCard.getCardHeader()).setMeanning(meaning.toString());
+			mCard.setMeanning(meaning.toString());
 			CardView cv = (CardView) window.findViewById(R.id.float_dict_card);
 			cv.refreshCard(mCard);
 			cv.setVisibility(View.VISIBLE);
