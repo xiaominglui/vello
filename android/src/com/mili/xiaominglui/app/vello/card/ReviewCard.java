@@ -29,6 +29,7 @@ import android.widget.TextView;
 import com.malinskiy.materialicons.widget.IconTextView;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.VaaApplication;
+import com.mili.xiaominglui.app.vello.base.C;
 import com.mili.xiaominglui.app.vello.base.log.L;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.Acceptation;
@@ -99,6 +100,14 @@ public class ReviewCard extends Card {
 	
 	public void init() {
         setShadow(false);
+        //Add the thumbnail
+        ReviewCardThumbnail thumb;
+        if (!TextUtils.isEmpty(urlResourceThumb)) {
+            thumb = new ReviewCardThumbnail(C.get(), urlResourceThumb);
+            thumb.setExternalUsage(true);
+            addCardThumbnail(thumb);
+        }
+
 		CardHeader header = new ReviewCardHeader(mContext);
 		header.setTitle(mainTitle);
 		addCardHeader(header);

@@ -181,15 +181,6 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             }
         });
 
-        //Add the thumbnail
-        ReviewCardThumbnail thumb;
-        if (!TextUtils.isEmpty(card.urlResourceThumb)) {
-            thumb = new ReviewCardThumbnail(getActivity().getApplicationContext(), card.urlResourceThumb);
-        } else {
-            thumb = new ReviewCardThumbnail(getActivity().getApplicationContext(), null);
-        }
-        thumb.setExternalUsage(true);
-        card.addCardThumbnail(thumb);
         return card;
     }
 
