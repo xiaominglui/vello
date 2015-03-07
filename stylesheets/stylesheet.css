@@ -3,6 +3,7 @@ body {
   margin: 0;
   padding: 12px;
   padding-bottom: 0;
+  background: #151515 url("../images/bkg.png") 0 0;
   color: #eaeaea;
   font: 16px;
   line-height: 1.5;
