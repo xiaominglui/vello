@@ -2,3 +2,7 @@
 /.bundle
 /android
 /libprojects
+
+# Application specific files
+debug
+build
