@@ -2,7 +2,7 @@
 /.bundle
 /android
 /libprojects
-
+.DS_Store
 # Application specific files
 debug
 build

@@ -7,7 +7,7 @@ title: Overview
 # Intro • 简介
 VAA is a lightweight tool to look up word and aid you remember ever looked up later anytime anywhere.
 
-词道是一个小巧的工具，它可以方便你在阅读时查询不认识的单词，并且随后协助你回顾以掌握这些生词。
+词道是一个小巧的工具，它可以方便你在阅读时查询不熟悉的单词，并且随后协助你回顾以掌握这些单词。
 
 # Get • 安装
 VAA for Chrome
@@ -21,9 +21,9 @@ VAA for Android (Coming Soon)
 # Usage • 用法
 0. 阅读中查询生词
 
-    在桌面电脑上阅读时，可以使用词道Chrome扩展的`快捷查询`或者`鼠标取词`来查询生词；在Android手机上，可以通过`复制取词`的方式查询生词。
+    在桌面电脑通过浏览器阅读时，可以使用词道Chrome扩展的`快捷查词`，`划词查询`或者`右键查词`来查询生词；在 Android 手机上，可以通过`分享查词`功能来查询生词。
 
-    + 快捷查询
+    + 快捷查词
 
     浏览网页时，通过键盘快捷键`Ctrl+q`（默认）或`Alt+q`，唤出词道快捷查词搜索框，输入要查询的单词查询：
 
@@ -33,25 +33,29 @@ VAA for Android (Coming Soon)
 
     <img src="{{ site.baseurl }}/images/result_shortcut.png" alt="浮动窗口" class="img-responsive">
 
-    + 鼠标取词
+    + 划词查询
 
     用鼠标选中要查询的单词，等待片刻后，会弹出含有单词解释的浮动窗口。若开启了修饰键（默认为`Ctrl`），则鼠标选中单词前，需先按下修饰键并保持，待单词选中后释放。
 
     <img src="{{ site.baseurl }}/images/lookup_via_mouse.png" alt="鼠标取词" class="img-responsive">
 
-    + 复制取词
+    + 分享查词
 
-    在手机上任意可以复制的位置，选中要查询的单词:
+    在手机上任意可以选择文本的位置，选中要查询的单词:
 
-    <img src="{{ site.baseurl }}/images/lookup_copied_selected.png" alt="复制取词 — 选择" class="img-responsive">
+    <img src="{{ site.baseurl }}/images/lookup_share_selected.png" alt="分享查词 — 选择" class="img-responsive">
 
-    点击“复制”:
+    点击“分享”:
 
-    <img src="{{ site.baseurl }}/images/lookup_copied_to_copy.png" alt="复制取词 — 复制" class="img-responsive">
+    <img src="{{ site.baseurl }}/images/lookup_share_action.png" alt="分享查词 — 分享" class="img-responsive">
+
+    选择“词道字典”
+
+    <img src="{{ site.baseurl }}/images/lookup_share_vaa_dict.png" alt="分享查词 — 米粒字典" class="img-responsive">
 
     稍等片刻后，会弹出含有单词解释的浮动窗口。
 
-    <img src="{{ site.baseurl }}/images/lookup_copied_result.png" alt="复制取词 — 结果" class="img-responsive">
+    <img src="{{ site.baseurl }}/images/lookup_share_result.png" alt="分享查词 — 结果" class="img-responsive">
 
 1. 阅读后回顾生词
 
@@ -59,11 +63,11 @@ VAA for Android (Coming Soon)
 
       + Chrome上的回顾词单
 
-      <img src="{{ site.baseurl }}/images/words_to_recall_chrome.png" alt="复制取词 — 结果" class="img-responsive">
+      <img src="{{ site.baseurl }}/images/chrome_recall_list.png" alt="回顾词单" class="img-responsive">
 
       + Android上的回顾词单
 
-      <img src="{{ site.baseurl }}/images/words_to_recall_android.png" alt="复制取词 — 结果" class="img-responsive">
+      <img src="{{ site.baseurl }}/images/android_recall_list.png" alt="回顾词单" class="img-responsive">
 
     回顾词单中的每一个生词都需要被成功回顾9次（词道默认回顾9次后就记住了这个单词）之后就不会再出现。
 
