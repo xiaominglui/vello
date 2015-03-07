@@ -43,14 +43,13 @@ VAA for Android (Coming Soon)
 
 1. 阅读后回顾生词
 在阅读之后的碎片时间里，可以通过电脑或者手机，随时随地的查看回顾词单来回顾生词。
-
   + Chrome 上的回顾词单
-    <img src="{{ site.baseurl }}/images/chrome_recall_list.png" alt="回顾词单" class="img-responsive">
+    <img src="{{ site.baseurl }}/images/chrome_recall_list.png" alt="回顾词单 - Chrome" class="img-responsive">
   + Android上的回顾词单
-    <img src="{{ site.baseurl }}/images/android_recall_list.png" alt="回顾词单" class="img-responsive">
+    <img src="{{ site.baseurl }}/images/android_recall_list.png" alt="回顾词单 - Android" class="img-responsive">
     回顾词单中的每一个生词都需要被成功回顾9次（词道默认回顾 __9__ 次后就记住了这个单词）之后就不会再出现。
     回顾词单会自动定期进行数据同步，若有生词需要回顾，则会提醒用户。
   + Chrome 上的回顾提醒
-  <img src="{{ site.baseurl }}/images/notification_recall_chrome.png" alt="复制取词 — 结果" class="img-responsive">
+    <img src="{{ site.baseurl }}/images/notification_recall_chrome.png" alt="回顾提醒 — Chrome" class="img-responsive">
   + Android 上的回顾提醒
-  <img src="{{ site.baseurl }}/images/notification_recall_android.png" alt="复制取词 — 结果" class="img-responsive">
+    <img src="{{ site.baseurl }}/images/notif_recall_android.png" alt="回顾提醒 — Android" class="img-responsive">
