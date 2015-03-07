@@ -21,7 +21,7 @@ VAA（Vocabulary Anytime Anywhere，词道；开发代号：`vello`）是一个�
 # Member • 项目成员
 + jiahe214\[at\]gmail.com
 + xiaominglui\[at\]gmail.com
-+ chenjkai\[at\]163.com
++ chenjkai\[at\]gmail.com
 
 # Contributors • 贡献人员
 + haihun457\[at\]gmail.com
