@@ -29,7 +29,7 @@
     <string name="notif_content_text">Touch here to recall.</string>
     <string name="notif_sync_ticker_title">Syncing now&#8230;</string>
     <string name="notif_sync_content_text">Syncing word to review&#8230;</string>
-    <string name="notif_clip_monitor_service_content_title">VAA lookup copied working&#8230;</string>
+    <string name="notif_clip_monitor_service_content_title">VAA dict working&#8230;</string>
     <string name="notif_clip_monitor_service_content_text">Touch here to recall words</string>
     <string name="title_settings">Settings</string>
     <string name="title_about">About</string>

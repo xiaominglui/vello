@@ -32,7 +32,7 @@ public class FloatDictCardWindow extends StandOutWindow {
 
 	@Override
 	public String getAppName() {
-		return "VAA Lookup Copied";
+		return getString(R.string.share_lookup_name);
 	}
 
 	@Override

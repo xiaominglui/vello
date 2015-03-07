@@ -27,7 +27,7 @@
     <string name="notif_content_text">点击立即开始回顾。</string>
     <string name="notif_sync_ticker_title">开始同步&#8230;</string>
     <string name="notif_sync_content_text">正在同步要回顾的生词&#8230;</string>
-    <string name="notif_clip_monitor_service_content_title">复制查询已启用</string>
+    <string name="notif_clip_monitor_service_content_title">词道字典工作中&#8230;</string>
     <string name="notif_clip_monitor_service_content_text">点击开始回顾。</string>
     <string name="title_review">回顾</string>
     <string name="title_settings">设置</string>
