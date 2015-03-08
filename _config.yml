@@ -1,6 +1,6 @@
 safe: true
 lsi: false
-pygments: true
+highlighter: pygments
 google_analytics_id: 46905336
 baseurl: /vello
 exclude: [

@@ -35,8 +35,28 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0 0 20px;
 }
 
+/* Deep linking */
+.header-link {
+  position: absolute;
+  left: -0.5em;
+  opacity: 0;
+
+  -webkit-transition: opacity 0.2s ease-in-out 0.1s;
+  -moz-transition: opacity 0.2s ease-in-out 0.1s;
+  -ms-transition: opacity 0.2s ease-in-out 0.1s;
+}
+
+h2:hover .header-link,
+h3:hover .header-link,
+h4:hover .header-link,
+h5:hover .header-link,
+h6:hover .header-link {
+  opacity: 1;
+}
+
 li {
-  line-height: 1.4 ;
+  line-height: 1.5 ;
+  margin-bottom: 20px;
 }
 
 /* Header, <header>
@@ -92,7 +112,11 @@ header h2 {
   -webkit-font-smoothing: antialiased;
 }
 section img {
-  max-width: 100%
+  max-width: 100%;
+}
+
+img {
+  margin: 20px;
 }
 
 h1, h2, h3, h4, h5, h6 {
