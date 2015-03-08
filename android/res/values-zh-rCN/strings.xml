@@ -41,8 +41,7 @@
     <string name="about_body"><![CDATA[
         <b>词道 for Android 2015</b><br>
         Version %s<br><br>
-        <a href="http://m.google.com/utos">Terms of Service</a><br><br>
-        <a href="http://www.google.com/policies/privacy/">Privacy Policy</a>
+        <a href="https://xiaominglui.github.io/vello/">主页</a><br>
     ]]></string>
     <string name="eula_text"><![CDATA[
         By downloading, installing or using this application or any portion thereof
@@ -71,7 +70,7 @@
     <string name="title_feature_one">生词读中现</string>
     <string name="title_feature_two">闲来回顾之</string>
     <string name="title_feature_three">词汇达人见</string>
-    <string name="title_review_status_checks">%1$d/9</string>
+    <string name="title_review_status_checks">%1$d/8</string>
     <string name="title_review_blank">列表为空</string>
     <string name="toast_invalid_keyword">无效查询</string>
 </resources>
