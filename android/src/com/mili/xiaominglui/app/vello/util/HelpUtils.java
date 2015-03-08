@@ -61,25 +61,25 @@ public class HelpUtils {
             SpannableStringBuilder aboutBody = new SpannableStringBuilder();
             aboutBody.append(Html.fromHtml(getString(R.string.about_body, versionName)));
 
-            SpannableString licensesLink = new SpannableString(getString(R.string.about_licenses));
-            licensesLink.setSpan(new ClickableSpan() {
-                @Override
-                public void onClick(View view) {
-                    HelpUtils.showOpenSourceLicenses(getActivity());
-                }
-            }, 0, licensesLink.length(), 0);
-            aboutBody.append("\n\n");
-            aboutBody.append(licensesLink);
-
-            SpannableString eulaLink = new SpannableString(getString(R.string.about_eula));
-            eulaLink.setSpan(new ClickableSpan() {
-                @Override
-                public void onClick(View view) {
-                    HelpUtils.showEula(getActivity());
-                }
-            }, 0, eulaLink.length(), 0);
-            aboutBody.append("\n\n");
-            aboutBody.append(eulaLink);
+//            SpannableString eulaLink = new SpannableString(getString(R.string.about_eula));
+//            eulaLink.setSpan(new ClickableSpan() {
+//                @Override
+//                public void onClick(View view) {
+//                    HelpUtils.showEula(getActivity());
+//                }
+//            }, 0, eulaLink.length(), 0);
+//            aboutBody.append("\n\n");
+//            aboutBody.append(eulaLink);
+//
+//            SpannableString licensesLink = new SpannableString(getString(R.string.about_licenses));
+//            licensesLink.setSpan(new ClickableSpan() {
+//                @Override
+//                public void onClick(View view) {
+//                    HelpUtils.showOpenSourceLicenses(getActivity());
+//                }
+//            }, 0, licensesLink.length(), 0);
+//            aboutBody.append("\n\n");
+//            aboutBody.append(licensesLink);
 
             LayoutInflater layoutInflater = (LayoutInflater) getActivity().getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
@@ -121,7 +121,7 @@ public class HelpUtils {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             WebView webView = new WebView(getActivity());
-            webView.loadUrl("file:///android_asset/licenses.html");
+            webView.loadUrl("https://xiaominglui.github.io/vello/");
 
             return new AlertDialog.Builder(getActivity())
                     .setTitle(R.string.about_licenses)

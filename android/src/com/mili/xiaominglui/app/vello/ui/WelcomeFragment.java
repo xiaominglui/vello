@@ -5,13 +5,10 @@ import com.mili.xiaominglui.app.vello.R;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 public final class WelcomeFragment extends SherlockFragment {
@@ -37,28 +34,26 @@ public final class WelcomeFragment extends SherlockFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_welcome, null);
-        ImageView img = (ImageView) root.findViewById(R.id.feature_img);
         TextView desc = (TextView) root.findViewById(R.id.feature_desc);
-        final Drawable drawableImg;
+        ImageView sample = (ImageView) root.findViewById(R.id.img_sample);
+
         final String titleDesc;
         switch (mPosition) {
             case 0:
-                drawableImg = getResources().getDrawable(R.drawable.img_feature_one);
+                sample.setImageDrawable(getResources().getDrawable(R.drawable.dk_lookup_share_float_card));
                 titleDesc = getString(R.string.title_feature_one);
                 break;
             case 1:
-                drawableImg = getResources().getDrawable(R.drawable.img_feature_two);
+                sample.setImageDrawable(getResources().getDrawable(R.drawable.dk_android_recall_list));
                 titleDesc = getString(R.string.title_feature_two);
                 break;
             case 2:
-                drawableImg = getResources().getDrawable(R.drawable.img_feature_three);
+                sample.setImageDrawable(getResources().getDrawable(R.drawable.ic_launcher));
                 titleDesc = getString(R.string.title_feature_three);
                 break;
             default:
-                drawableImg = null;
                 titleDesc = "";
         }
-        img.setImageDrawable(drawableImg);
         desc.setText(titleDesc);
         return root;
     }

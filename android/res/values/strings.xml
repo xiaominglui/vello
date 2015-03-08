@@ -48,7 +48,7 @@
     <string name="about_body"><![CDATA[
         <b>VAA for Android 2015</b><br>
         Version %s<br><br>
-        <a href="https://xiaominglui.github.io/vello/">Homepage</a><br>
+        <a href="https://xiaominglui.github.io/vello/">Homepage</a>
     ]]></string>
     <string name="eula_text"><![CDATA[
         By downloading, installing or using this application or any portion thereof

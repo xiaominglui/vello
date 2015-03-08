@@ -1,34 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/pager"
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-    <com.viewpagerindicator.UnderlinePageIndicator
-        android:id="@+id/indicator"
-        android:layout_width="fill_parent"
-        android:layout_height="2dp" />
-
-    <LinearLayout
+    <ImageView
+        android:id="@+id/feature_img"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/md_green_500"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:contentDescription="@null"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="200.0dip"
+        android:layout_gravity="bottom"
+        android:background="@drawable/login_shadow_gradient" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/pager"
+            android:layout_above="@+id/indicator"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.viewpagerindicator.UnderlinePageIndicator
+            android:id="@+id/indicator"
+            android:layout_above="@+id/log_in"
+            android:layout_width="match_parent"
+            android:layout_height="2dp" />
 
         <Button
             android:id="@+id/log_in"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:layout_weight="1"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="10dp"
+            android:background="@drawable/login_button"
             android:text="@string/button_login_title"
             android:textColor="@color/md_white" />
-    </LinearLayout>
 
-</LinearLayout>
+    </RelativeLayout>
+
+</FrameLayout>

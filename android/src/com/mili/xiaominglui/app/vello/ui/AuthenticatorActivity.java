@@ -59,7 +59,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
      * The tag used to log to adb console.
      */
     private static final String TAG = "AuthenticatorActivity";
-    private static final int AUTH_TIMEOUT_IN_MILLIS = 30 * 1000; // 30 seconds
+    private static final int AUTH_TIMEOUT_IN_MILLIS = 60 * 1000; // 60 seconds
 
     private static final int AUTH_FAILURE_NO_VERIFIER = 0;
     private static final int AUTH_FAILURE_USER_DENY = 1;
