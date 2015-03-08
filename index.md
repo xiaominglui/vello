@@ -31,24 +31,24 @@ VAA for Android (Coming Soon)
     <img src="{{ site.baseurl }}/images/lookup_option_action.png" alt="右键查询" class="img-responsive">
   + 分享查词（ Android App）
     0. 在手机上任意可以选择文本的位置，选中要查询的单词:
-    <img src="{{ site.baseurl }}/images/lookup_share_selected.png" alt="分享查词 — 选择" class="img-responsive">
+    <img src="{{ site.baseurl }}/images/dk_lookup_share_selected.png" alt="分享查词 — 选择" class="img-responsive">
     1. 点击“分享”:
-    <img src="{{ site.baseurl }}/images/lookup_share_action.png" alt="分享查词 — 分享" class="img-responsive">
+    <img src="{{ site.baseurl }}/images/dk_lookup_share_action.png" alt="分享查词 — 分享" class="img-responsive">
     2. 选择“词道字典”
-    <img src="{{ site.baseurl }}/images/lookup_share_vaa_dict.png" alt="分享查词 — 米粒字典" class="img-responsive">
+    <img src="{{ site.baseurl }}/images/dk_lookup_share_vaa_dict.png" alt="分享查词 — 米粒字典" class="img-responsive">
     3. 稍等片刻后，会弹出含有单词解释的浮动窗口。
-    <img src="{{ site.baseurl }}/images/lookup_share_float_card.png" alt="分享查词 — 结果" class="img-responsive">
+    <img src="{{ site.baseurl }}/images/dk_lookup_share_float_card.png" alt="分享查词 — 结果" class="img-responsive">
 
 1. 阅读后回顾生词  
 在阅读之后的碎片时间里，可以通过电脑或者手机，随时随地的查看回顾词单来回顾生词。
   + Chrome 上的回顾词单
     <img src="{{ site.baseurl }}/images/chrome_recall_list.png" alt="回顾词单 - Chrome" class="img-responsive">
   + Android上的回顾词单
-    <img src="{{ site.baseurl }}/images/android_recall_list.png" alt="回顾词单 - Android" class="img-responsive">
+    <img src="{{ site.baseurl }}/images/dk_android_recall_list.png" alt="回顾词单 - Android" class="img-responsive">
   + Chrome 上的回顾提醒
     <img src="{{ site.baseurl }}/images/notification_recall_chrome.png" alt="回顾提醒 — Chrome" class="img-responsive">
   + Android 上的回顾提醒
-    <img src="{{ site.baseurl }}/images/notif_recall_android.png" alt="回顾提醒 — Android" class="img-responsive">
+    <img src="{{ site.baseurl }}/images/dk_notif_recall_android.png" alt="回顾提醒 — Android" class="img-responsive">
 
 # FAQ
 + 问：查询的单词为什么没有马上出现在回顾词单里？  
