@@ -12,10 +12,9 @@
         android:layout_marginTop="10dp"
         android:layout_above="@+id/feature_desc"
         android:scaleType="centerCrop"
-        android:contentDescription="@null"
-        android:src="@drawable/ic_launcher" />
+        android:contentDescription="@null" />
 
-    <TextView
+    <TextViewg
         android:id="@+id/feature_desc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

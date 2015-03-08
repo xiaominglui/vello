@@ -48,7 +48,7 @@ public final class WelcomeFragment extends SherlockFragment {
                 titleDesc = getString(R.string.title_feature_two);
                 break;
             case 2:
-                sample.setImageDrawable(getResources().getDrawable(R.drawable.ic_launcher));
+                sample.setImageDrawable(getResources().getDrawable(R.drawable.vaa512));
                 titleDesc = getString(R.string.title_feature_three);
                 break;
             default:
