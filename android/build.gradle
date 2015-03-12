@@ -4,7 +4,6 @@ dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
     compile project(':libprojects:actionbarsherlock')
     compile project(':libprojects:DataDroid')
-    compile project(':libprojects:iconictextview')
     compile project(':libprojects:viewpagerindicator')
     compile project(':libprojects:supertoasts')
     compile project(':libprojects:standout')

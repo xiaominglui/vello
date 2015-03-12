@@ -9,8 +9,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.atermenji.android.iconictextview.IconicTextView;
-import com.atermenji.android.iconictextview.icon.FontAwesomeIcon;
 import com.mili.xiaominglui.app.vello.R;
 
 public class ConnectionTimeOutFragment extends Fragment {
@@ -47,9 +45,6 @@ public class ConnectionTimeOutFragment extends Fragment {
 				return true;
 			}
 		});
-		IconicTextView iconicTextView = (IconicTextView) rootView.findViewById(R.id.iconic_connection_timeout);
-		iconicTextView.setIcon(FontAwesomeIcon.INFO_SIGN);
-		iconicTextView.setTextColor(Color.LTGRAY);
 		return rootView;
 	}
 }

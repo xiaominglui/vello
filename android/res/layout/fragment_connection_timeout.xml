@@ -6,12 +6,15 @@
     android:gravity="center_vertical"
     android:orientation="vertical" >
 
-    <com.atermenji.android.iconictextview.IconicTextView
+    <com.malinskiy.materialicons.widget.IconTextView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/iconic_connection_timeout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:textSize="100sp" />
+        android:text="{md-warning}"
+        android:textSize="100sp"
+        app:hacky_preview="true" />
 
     <TextView
         android:layout_width="wrap_content"
