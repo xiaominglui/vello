@@ -4,17 +4,23 @@
     android:layout_height="match_parent"
     android:background="@android:color/transparent">
 
-    <ImageView
-        android:id="@+id/img_sample"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="10dp"
-        android:layout_above="@+id/feature_desc"
-        android:scaleType="centerCrop"
-        android:contentDescription="@null" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/feature_desc">
 
-    <TextViewg
+        <ImageView
+            android:id="@+id/img_sample"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="@null" />
+
+    </FrameLayout>
+
+    <TextView
         android:id="@+id/feature_desc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
