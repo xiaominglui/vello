@@ -20,24 +20,17 @@ import android.content.DialogInterface;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v7.view.ActionMode;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.ActionMode.Callback;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.adapter.ReviewCardArrayAdapter;
 import com.mili.xiaominglui.app.vello.base.log.L;
-import com.mili.xiaominglui.app.vello.card.ReviewCardThumbnail;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.MiliDictionaryItem;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
@@ -48,7 +41,7 @@ import com.mili.xiaominglui.app.vello.card.DictCard;
 import com.mili.xiaominglui.app.vello.card.ReviewCard;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
-public class ReviewViewFragment extends BaseListFragment implements LoaderManager.LoaderCallbacks<Cursor>, Callback, DialogInterface.OnClickListener {
+public class ReviewViewFragment extends BaseListFragment implements LoaderManager.LoaderCallbacks<Cursor>, DialogInterface.OnClickListener {
     private static final String TAG = ReviewViewFragment.class.getSimpleName();
 
     CardListView mListView;
@@ -286,55 +279,9 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         getLoaderManager().restartLoader(0, null, this);
     }
 
-    /**
-     * Create a compatible helper that will manipulate the action bar if
-     * available.
-     */
-    private ActionBarHelper createActionBarHelper() {
-        return new ActionBarHelper();
-    }
-
-    private class ActionBarHelper {
-        private final ActionBar mActionBar;
-
-        private ActionBarHelper() {
-            mActionBar = ((SherlockFragmentActivity) getActivity())
-                    .getSupportActionBar();
-        }
-
-        public void init() {
-            mActionBar.setDisplayHomeAsUpEnabled(false);
-            mActionBar.setHomeButtonEnabled(false);
-        }
-
-    }
 
     @Override
     public void onClick(DialogInterface arg0, int arg1) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public void onDestroyActionMode(ActionMode mode) {
         // TODO Auto-generated method stub
 
     }

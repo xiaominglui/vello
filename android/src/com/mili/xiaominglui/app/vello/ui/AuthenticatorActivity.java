@@ -11,12 +11,10 @@ import org.scribe.oauth.OAuthService;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,14 +30,15 @@ import android.webkit.CookieSyncManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
-import com.github.johnpersano.supertoasts.SuperToast;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.authenticator.TrelloAuthApi;
+import com.mili.xiaominglui.app.vello.base.C;
+import com.mili.xiaominglui.app.vello.base.log.L;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
-import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
-import com.mili.xiaominglui.app.vello.data.provider.VelloProvider;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
@@ -82,28 +81,20 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
             if (url.contains("&oauth_verifier=")) {
                 String verifier = (url.split("&oauth_verifier="))[1];
                 if (verifier != null && verifier.length() == Constants.VERIFIER_LENGTH) {
-                    if (VelloConfig.DEBUG_SWITCH) {
-                        Log.i(TAG, "got verifier, next step...");
-                    }
+                    L.i(TAG, "got verifier, next step...");
                     new GetTrelloAccessTokenTask().execute(verifier);
                 } else {
-                    if (VelloConfig.DEBUG_SWITCH) {
-                        Log.i(TAG, "trello not response verifier");
-                    }
+                    L.i(TAG, "trello not response verifier");
                     finishFailure(AUTH_FAILURE_NO_VERIFIER);
                 }
                 return true;
             } else if (url.equals("https://trello.com/")) {
                 // user touch the Deny button
-                if (VelloConfig.DEBUG_SWITCH) {
-                    Log.i(TAG, "user deny auth");
-                }
+                L.i(TAG, "user deny auth");
                 finishFailure(AUTH_FAILURE_USER_DENY);
                 return true;
             } else {
-                if (VelloConfig.DEBUG_SWITCH) {
-                    Log.i(TAG, url + " ---- loading...");
-                }
+                L.i(TAG, url + " ---- loading...");
                 view.loadUrl(url);
                 return true;
             }
@@ -120,11 +111,9 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 
         @Override
         public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-            if (VelloConfig.DEBUG_SWITCH) {
-                Log.d(TAG, "onReceivedError --- " + "errorCode=" + errorCode);
-                Log.d(TAG, "onReceivedError --- " + "description=" + description);
-                Log.d(TAG, "onReceivedError --- " + "failingUrl=" + failingUrl);
-            }
+            L.d(TAG, "onReceivedError --- " + "errorCode=" + errorCode);
+            L.d(TAG, "onReceivedError --- " + "description=" + description);
+            L.d(TAG, "onReceivedError --- " + "failingUrl=" + failingUrl);
             finishFailure(AUTH_FAILURE_ERROR_RECEIVED);
         }
     }
@@ -256,9 +245,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
     }
 
     private void finishAuthenticated(String username) {
-        if (VelloConfig.DEBUG_SWITCH) {
-            Log.i(TAG, "finishAuthenticated(). token=" + mAccessToken + ", username=" + username);
-        }
+        L.i(TAG, "finishAuthenticated(). token=" + mAccessToken + ", username=" + username);
 
         AccountUtils.addAccount(getApplicationContext(), username, Constants.ACCOUNT_TYPE);
         AccountUtils.setAuthToken(getApplicationContext(), username, Constants.ACCOUNT_TYPE, mAccessToken);
@@ -273,35 +260,21 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         sp.edit().clear().apply();
 
-        SuperToast superToast = new SuperToast(this);
-        superToast.setDuration(SuperToast.DURATION_MEDIUM);
-        superToast.setBackgroundResource(SuperToast.BACKGROUND_GREENTRANSLUCENT);
-        superToast.setTextColor(Color.WHITE);
-        superToast.setText(getString(R.string.toast_auth_finished));
-        superToast.show();
+        Toast.makeText(C.get(), R.string.toast_auth_finished, Toast.LENGTH_SHORT).show();
         finish();
     }
 
     private void finishFailure(int type) {
         Log.i(TAG, "finishFailure() --- " + "type=" + type);
-        SuperToast superToast = new SuperToast(getApplicationContext());
         switch (type) {
             case AUTH_FAILURE_TIMEOUT:
-                superToast.setDuration(SuperToast.DURATION_SHORT);
-                superToast.setBackgroundResource(SuperToast.BACKGROUND_ORANGETRANSLUCENT);
-                superToast.setTextColor(Color.WHITE);
-                superToast.setText(getString(R.string.toast_auth_timeout));
-                superToast.show();
+                Toast.makeText(C.get(), R.string.msg_auth_timeout, Toast.LENGTH_SHORT).show();
                 break;
             case AUTH_FAILURE_USER_DENY:
             case AUTH_FAILURE_NO_VERIFIER:
             case AUTH_FAILURE_ERROR_RECEIVED:
             default:
-                superToast.setDuration(SuperToast.DURATION_SHORT);
-                superToast.setBackgroundResource(SuperToast.BACKGROUND_REDTRANSLUCENT);
-                superToast.setTextColor(Color.WHITE);
-                superToast.setText(getString(R.string.toast_auth_failure));
-                superToast.show();
+                Toast.makeText(C.get(), R.string.msg_auth_failure, Toast.LENGTH_SHORT).show();
                 break;
         }
         final Intent intent = new Intent();
@@ -327,6 +300,9 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 
         @Override
         protected void onPostExecute(String result) {
+            if (!mProgressBar.isShown()) {
+                mProgressBar.setVisibility(View.VISIBLE);
+            }
             mWebView.loadUrl(result);
         }
 
@@ -343,9 +319,6 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
 
         @Override
         protected void onPostExecute(Token token) {
-            mWebView.setVisibility(View.INVISIBLE);
-            mProgressBar.setVisibility(View.VISIBLE);
-
             mAccessToken = token.getToken();
             sendMessageToService(VelloService.MSG_READ_TRELLO_ACCOUNT_USERNAME, mAccessToken);
         }

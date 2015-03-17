@@ -1,17 +1,16 @@
 package com.mili.xiaominglui.app.vello.ui;
 
-import com.actionbarsherlock.app.SherlockFragment;
 import com.mili.xiaominglui.app.vello.R;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public final class WelcomeFragment extends SherlockFragment {
+public final class WelcomeFragment extends Fragment {
     private static final String KEY_POSITION = "WelcomeFragment:Position";
 
     public static WelcomeFragment newInstance(int position) {

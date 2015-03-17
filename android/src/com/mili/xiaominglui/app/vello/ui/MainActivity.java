@@ -1,26 +1,17 @@
 package com.mili.xiaominglui.app.vello.ui;
 
 import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 
 
 import android.accounts.Account;
 import android.app.FragmentManager;
-import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
@@ -33,11 +24,10 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.avos.avoscloud.AVAnalytics;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
@@ -281,7 +271,7 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		getSupportMenuInflater().inflate(R.menu.home, menu);
+		getMenuInflater().inflate(R.menu.home, menu);
 
 //		setupSearchMenuItem(menu);
 
@@ -330,7 +320,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
             }
 			break; 
 		case R.id.menu_sync:
-			triggerRefresh();
 			return true;**/
 
 		case R.id.menu_about:
@@ -431,6 +420,8 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			Bundle extras = new Bundle();
 			ContentResolver.addPeriodicSync(AccountUtils.getAccount(getApplicationContext()), VelloProvider.AUTHORITY, extras, syncFreqValue * 60 * 60);
 		}
+
+        triggerRefresh(); // keep this avoid not auto sync after account inited
 	}
 	
 	private void preSync() {
@@ -488,7 +479,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 
 	@Override
 	public void syncOnAllRecalled() {
-		triggerRefresh();
 	}
 
 	@Override
@@ -497,6 +487,5 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 
 	@Override
 	public void onReload() {
-		triggerRefresh();
 	}
 }

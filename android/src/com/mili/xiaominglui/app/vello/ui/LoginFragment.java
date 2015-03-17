@@ -3,6 +3,7 @@ package com.mili.xiaominglui.app.vello.ui;
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
@@ -11,16 +12,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 
-import com.actionbarsherlock.app.SherlockFragment;
-import com.actionbarsherlock.view.MenuItem;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.adapter.WelcomeFragmentAdapter;
 import com.mili.xiaominglui.app.vello.base.log.L;
-import com.viewpagerindicator.CirclePageIndicator;
 import com.viewpagerindicator.PageIndicator;
 import com.viewpagerindicator.UnderlinePageIndicator;
 
-public class LoginFragment extends SherlockFragment implements View.OnClickListener, OnPageChangeListener {
+public class LoginFragment extends Fragment implements View.OnClickListener, OnPageChangeListener {
     private static final String TAG = LoginFragment.class.getSimpleName();
     onButtonClickedListener mListener;
 	WelcomeFragmentAdapter mAdapter;

@@ -1,16 +1,13 @@
 package com.mili.xiaominglui.app.vello.ui;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.mili.xiaominglui.app.vello.R;
-import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
 import com.mili.xiaominglui.app.vello.dialogs.ErrorDialogFragment.ErrorDialogFragmentBuilder;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
-public class BaseActivity extends SherlockFragmentActivity {
+public class BaseActivity extends FragmentActivity {
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {

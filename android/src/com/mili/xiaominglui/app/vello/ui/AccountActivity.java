@@ -4,24 +4,22 @@ package com.mili.xiaominglui.app.vello.ui;
 import android.accounts.Account;
 import android.app.ActionBar;
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.view.WindowManager;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.github.johnpersano.supertoasts.SuperToast;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.mili.xiaominglui.app.vello.util.AccountUtils.AuthenticateCallback;
 
-public class AccountActivity extends SherlockFragmentActivity implements LoginFragment.onButtonClickedListener, AuthenticateCallback {
+public class AccountActivity extends FragmentActivity implements LoginFragment.onButtonClickedListener, AuthenticateCallback {
 
     public static final String EXTRA_FINISH_INTENT = "com.mili.xiaominglui.app.vello.extra.FINISH_INTENT";
 
@@ -86,12 +84,6 @@ public class AccountActivity extends SherlockFragmentActivity implements LoginFr
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
 
         if (activeNetwork == null || !activeNetwork.isConnected()) {
-			SuperToast superToast = new SuperToast(getApplicationContext());
-			superToast.setDuration(SuperToast.DURATION_SHORT);
-			superToast.setBackgroundResource(SuperToast.BACKGROUND_REDTRANSLUCENT);
-			superToast.setTextColor(Color.WHITE);
-			superToast.setText(getString(R.string.toast_no_connection));
-			superToast.show();
             return;
         }
 		mMyTrelloAccount = new Account(VelloConfig.TRELLO_DEFAULT_ACCOUNT_NAME, Constants.ACCOUNT_TYPE);

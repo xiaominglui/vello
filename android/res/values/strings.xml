@@ -5,8 +5,8 @@
     <string name="share_lookup_name">VAA Dict</string>
     <string name="action_query_hint">Search word&#8230;</string>
     <string name="toast_no_connection">Please check network connection.</string>
-    <string name="toast_auth_failure">Authentication failure!</string>
-    <string name="toast_auth_timeout">Authentication timeout!</string>
+    <string name="msg_auth_failure">Authentication failure!</string>
+    <string name="msg_auth_timeout">Authentication timeout!</string>
     <string name="toast_auth_finished">Authenticated!</string>
     
     <string name="description_about">About</string>

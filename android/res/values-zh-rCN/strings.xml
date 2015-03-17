@@ -5,8 +5,8 @@
     <string name="share_lookup_name">词道字典</string>
     <string name="action_query_hint">查询单词…</string>
     <string name="toast_no_connection">请确认是否连接互联网。</string>
-    <string name="toast_auth_failure">授权失败！</string>
-    <string name="toast_auth_timeout">授权超时！</string>
+    <string name="msg_auth_failure">授权失败！</string>
+    <string name="msg_auth_timeout">授权超时！</string>
     <string name="toast_auth_finished">已授权！</string>
     
     <string name="description_about">关于</string>

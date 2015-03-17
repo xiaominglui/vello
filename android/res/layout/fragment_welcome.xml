@@ -28,7 +28,7 @@
         android:gravity="center_horizontal"
         android:padding="5dp"
         android:text="desc"
-        android:textColor="@color/white"
+        android:textColor="@color/md_white"
         android:textSize="22sp" />
 
 </RelativeLayout>

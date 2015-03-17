@@ -2,16 +2,15 @@ apply plugin: 'com.android.application'
 
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
-    compile project(':libprojects:actionbarsherlock')
     compile project(':libprojects:DataDroid')
     compile project(':libprojects:viewpagerindicator')
-    compile project(':libprojects:supertoasts')
     compile project(':libprojects:standout')
     compile 'com.google.code.gson:gson:2.3'
     compile 'com.github.gabrielemariotti.cards:library:1.9.1'
     compile 'com.malinskiy:materialicons:1.0.1'
     compile 'com.github.markushi:circlebutton:1.1'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.3'
+    compile 'com.afollestad:material-dialogs:0.6.3.5'
 }
 
 android {
