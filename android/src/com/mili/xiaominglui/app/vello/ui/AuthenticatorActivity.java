@@ -32,7 +32,6 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.authenticator.TrelloAuthApi;
@@ -57,7 +56,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
     /**
      * The tag used to log to adb console.
      */
-    private static final String TAG = "AuthenticatorActivity";
+    private static final String TAG = AuthenticatorActivity.class.getSimpleName();
     private static final int AUTH_TIMEOUT_IN_MILLIS = 60 * 1000; // 60 seconds
 
     private static final int AUTH_FAILURE_NO_VERIFIER = 0;
@@ -78,23 +77,23 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
     private class MyWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            L.d(TAG, url + " ---- loading...");
             if (url.contains("&oauth_verifier=")) {
                 String verifier = (url.split("&oauth_verifier="))[1];
                 if (verifier != null && verifier.length() == Constants.VERIFIER_LENGTH) {
-                    L.i(TAG, "got verifier, next step...");
+                    L.d(TAG, "got verifier, next step...");
                     new GetTrelloAccessTokenTask().execute(verifier);
                 } else {
-                    L.i(TAG, "trello not response verifier");
+                    L.d(TAG, "trello not response verifier");
                     finishFailure(AUTH_FAILURE_NO_VERIFIER);
                 }
                 return true;
-            } else if (url.equals("https://trello.com/")) {
+            } else if (url.equals("https://trello.com/oob#token=")) {
                 // user touch the Deny button
-                L.i(TAG, "user deny auth");
+                L.d(TAG, "user deny auth");
                 finishFailure(AUTH_FAILURE_USER_DENY);
                 return true;
             } else {
-                L.i(TAG, url + " ---- loading...");
                 view.loadUrl(url);
                 return true;
             }
@@ -268,13 +267,13 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         Log.i(TAG, "finishFailure() --- " + "type=" + type);
         switch (type) {
             case AUTH_FAILURE_TIMEOUT:
-                Toast.makeText(C.get(), R.string.msg_auth_timeout, Toast.LENGTH_SHORT).show();
+                Toast.makeText(C.get(), R.string.msg_auth_timeout, Toast.LENGTH_LONG).show();
                 break;
             case AUTH_FAILURE_USER_DENY:
             case AUTH_FAILURE_NO_VERIFIER:
             case AUTH_FAILURE_ERROR_RECEIVED:
             default:
-                Toast.makeText(C.get(), R.string.msg_auth_failure, Toast.LENGTH_SHORT).show();
+                Toast.makeText(C.get(), R.string.msg_auth_failure, Toast.LENGTH_LONG).show();
                 break;
         }
         final Intent intent = new Intent();
@@ -303,6 +302,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
             if (!mProgressBar.isShown()) {
                 mProgressBar.setVisibility(View.VISIBLE);
             }
+            L.d(TAG, "result="+result);
             mWebView.loadUrl(result);
         }
 
