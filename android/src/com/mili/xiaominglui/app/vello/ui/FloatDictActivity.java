@@ -23,6 +23,7 @@ public class FloatDictActivity extends BaseActivity {
         String type = intent.getType();
 
         if (Intent.ACTION_SEND.equals(action) && type != null) {
+            L.d(TAG, "has valid action");
             if ("text/plain".equals(type)) {
                 handleSendText(intent); // Handle text being sent
             }
@@ -41,6 +42,12 @@ public class FloatDictActivity extends BaseActivity {
     private void handleSendText(Intent intent) {
         String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
         if (sharedText != null) {
+            L.d(TAG, "handleSendText: " + sharedText);
+            if (sharedText.endsWith("(分享自@百度手机浏览器 )")) {
+                int length = sharedText.length();
+                sharedText = sharedText.substring(0, length - 14);
+                L.d(TAG, "handledSendText: " + sharedText);
+            }
             String cleanedKeyword = sharedText.trim().toLowerCase(Locale.US);
             if (cleanedKeyword.matches("^[a-z]+$")) {
                 // Update UI to reflect text being shared

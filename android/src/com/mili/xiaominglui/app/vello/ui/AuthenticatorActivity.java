@@ -27,6 +27,7 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
@@ -74,6 +75,21 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
     private boolean mTimeout;
 
 
+    private class MyWebChromeClient extends WebChromeClient {
+        @Override
+        public void onProgressChanged(WebView view, int newProgress) {
+            if (newProgress == 100) {
+                mProgressBar.setVisibility(View.GONE);
+            } else {
+                if (!mProgressBar.isShown()) {
+                    mProgressBar.setVisibility(View.VISIBLE);
+                }
+                mProgressBar.setProgress(newProgress);
+            }
+            super.onProgressChanged(view, newProgress);
+        }
+    }
+
     private class MyWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -102,10 +118,6 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         @Override
         public void onPageFinished(WebView view, String url) {
             mTimeout = false;
-            if (mProgressBar.isShown()) {
-                mProgressBar.setVisibility(View.INVISIBLE);
-                mWebView.setVisibility(View.VISIBLE);
-            }
         }
 
         @Override
@@ -229,6 +241,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         mWebView = (WebView) findViewById(R.id.webview);
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.setWebViewClient(new MyWebViewClient());
+        mWebView.setWebChromeClient(new MyWebChromeClient());
 
         CookieSyncManager.createInstance(getApplicationContext());
         mCookieManager = CookieManager.getInstance();
