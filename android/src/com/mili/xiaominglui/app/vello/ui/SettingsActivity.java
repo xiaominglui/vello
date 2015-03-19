@@ -214,7 +214,6 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
                 // active PUSH
                 syncFreqPref.setEnabled(false);
                 String idWebhook = AccountUtils.getVocabularyBoardWebHookId(getApplicationContext());
-
                 if (idWebhook.equals("")) {
                     // create and active it
                     sendMessageToService(VelloService.MSG_CREATE_WEBHOOK, null);

@@ -37,7 +37,7 @@
     <string name="title_connection_timeout_hint_retry">Touch to retry now.</string>
     <string name="title_phonetics_uk">UK</string>
     <string name="title_phonetics_us">US</string>
-    <string name="title_review">Recall </string>
+    <string name="title_review">Recall List</string>
     <string name="title_feature_one">Discover new words in read</string>
     <string name="title_feature_two">Recall unfamiliar words after read</string>
     <string name="title_feature_three">Acquire more words via read</string>
