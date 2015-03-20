@@ -22,7 +22,7 @@ public abstract class BaseListFragment extends BaseFragment {
      */
     protected void setupListFragment(View root) {
 
-        mListContainer = root.findViewById(R.id.listContainer);
+        mListContainer = root.findViewById(R.id.ptr_frame);
         mProgressContainer = root.findViewById(R.id.progressContainer);
         mListShown = true;
     }

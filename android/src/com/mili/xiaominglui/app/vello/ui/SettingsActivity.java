@@ -36,7 +36,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
     public static final String KEY_PREF_SYNC_WIFI_ONLY = "pref_sync_wifi_only";
     public static final String KEY_PREF_DICT_CLIPBOARD_MONITOR = "pref_dict_clipboard_monitor";
     private boolean isInFront;
-    private String mNewSyncValue = "0";
+    private String mNewSyncValue = "24";
     private ListPreference mListPreference;
     private SettingsActivityUIHandler mUICallback = new SettingsActivityUIHandler(this);
 
@@ -200,14 +200,10 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
             ListPreference syncFreqPref = (ListPreference) findPreference(key);
             syncFreqPref.setSummary(syncFreqPref.getEntry());
             mNewSyncValue = syncFreqPref.getValue();
-            if (mNewSyncValue.equals("0")) {
-            } else {
-                // choose schedule sync
-                Account account = new Account(AccountUtils.getAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
-                Bundle extras = new Bundle();
-                int pollFrequency = Integer.valueOf(mNewSyncValue) * 60 * 60;
-                ContentResolver.addPeriodicSync(account, VelloProvider.AUTHORITY, extras, pollFrequency);
-            }
+            Account account = new Account(AccountUtils.getAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
+            Bundle extras = new Bundle();
+            int pollFrequency = Integer.valueOf(mNewSyncValue) * 60 * 60;
+            ContentResolver.addPeriodicSync(account, VelloProvider.AUTHORITY, extras, pollFrequency);
         } else if (key.equals(KEY_PREF_DICT_CLIPBOARD_MONITOR)) {
             CheckBoxPreference dictClipMonitorPref = (CheckBoxPreference) findPreference(key);
             if (dictClipMonitorPref.isChecked()) {

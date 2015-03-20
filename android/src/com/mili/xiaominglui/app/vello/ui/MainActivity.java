@@ -30,6 +30,7 @@ import android.view.MenuItem;
 
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
+import com.mili.xiaominglui.app.vello.base.C;
 import com.mili.xiaominglui.app.vello.base.log.L;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
@@ -38,6 +39,7 @@ import com.mili.xiaominglui.app.vello.fragment.ReviewViewFragment;
 import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.syncadapter.SyncHelper;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
+import com.mili.xiaominglui.app.vello.util.CommonUtils;
 import com.mili.xiaominglui.app.vello.util.HelpUtils;
 
 public class MainActivity extends BaseActivity implements ReviewViewFragment.onStatusChangedListener, ConnectionTimeOutFragment.ConnectionTimeOutFragmentEventListener {
@@ -342,11 +344,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 		startActivity(intent);
 	}
 
-	private void triggerRefresh() {
-        L.d(TAG, "triggerRefresh");
-		SyncHelper.requestManualSync(new Account(AccountUtils.getAccountName(this), Constants.ACCOUNT_TYPE));
-	}
-	
 	private void changeColor(int newColor) {
 		// change ActionBar color just if an ActionBar is available
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -408,23 +405,26 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			ContentResolver.addPeriodicSync(AccountUtils.getAccount(getApplicationContext()), VelloProvider.AUTHORITY, extras, syncFreqValue * 60 * 60);
 		}
 
-        triggerRefresh(); // keep this avoid not auto sync after account inited
+        CommonUtils.triggerRefresh();
 	}
 	
 	private void preSync() {
         L.d(TAG, "preSync");
-		if (isInFront) {
-			FragmentManager fm = getFragmentManager();
-			fm.beginTransaction().replace(R.id.fragment_container_master, new ProgressFragment()).commit();
-		}
+//		if (isInFront) {
+//			FragmentManager fm = getFragmentManager();
+//			fm.beginTransaction().replace(R.id.fragment_container_master, new ProgressFragment()).commit();
+//		}
 	}
 	
 	private void postSync() {
         L.d(TAG, "postSync");
-        if (isInFront) {
-            FragmentManager fm = getFragmentManager();
-            fm.beginTransaction().replace(R.id.fragment_container_master, ReviewViewFragment.newInstance()).commit();
-        }
+//        if (isInFront) {
+//            FragmentManager fm = getFragmentManager();
+//            fm.beginTransaction().replace(R.id.fragment_container_master, ReviewViewFragment.newInstance()).commit();
+//        }
+
+        ReviewViewFragment reviewViewFragment = (ReviewViewFragment) getFragmentManager().findFragmentById(R.id.fragment_container_master);
+        reviewViewFragment.synced();
 	}
 
 	private void preAuthTokenRevoke() {
