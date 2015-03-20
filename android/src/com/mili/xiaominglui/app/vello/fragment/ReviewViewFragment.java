@@ -161,7 +161,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
 
                 @Override
                 public boolean checkCanDoRefresh(PtrFrameLayout frame, View content, View header) {
-                    return PtrDefaultHandler.checkContentCanBePulledDown(frame, content, header);
+                    return PtrDefaultHandler.checkContentCanBePulledDown(frame, mListView, header);
                 }
             });
             // the following are default settings
@@ -173,12 +173,12 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             mPtrFrame.setPullToRefresh(false);
             // default is true
             mPtrFrame.setKeepHeaderWhenRefresh(true);
-            mPtrFrame.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mPtrFrame.autoRefresh();
-                }
-            }, 100);
+//            mPtrFrame.postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    mPtrFrame.autoRefresh();
+//                }
+//            }, 100);
         }
     }
 
