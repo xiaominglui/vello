@@ -22,6 +22,8 @@
     <uses-permission android:name="android.permission.READ_LOGS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
         android:name="VaaApplication"
@@ -90,15 +92,6 @@
             -->
         </activity>
 
-        <receiver android:name=".receiver.AVOSPushReceiver" >
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.USER_PRESENT" />
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-                <action android:name="com.avos.avello.SYNC_MSG" />
-            </intent-filter>
-        </receiver>
-
         <!-- The authenticator service -->
         <service
             android:name="com.mili.xiaominglui.app.vello.authenticator.AuthenticationService"
@@ -114,7 +107,6 @@
         <service
             android:name=".data.service.VelloRequestService"
             android:exported="false" />
-        <service android:name="com.avos.avoscloud.PushService" />
         <service
             android:name=".syncadapter.SyncService"
             android:exported="false" >

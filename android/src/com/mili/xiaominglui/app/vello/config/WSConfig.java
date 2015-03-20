@@ -60,7 +60,4 @@ public final class WSConfig {
     
     // mili dictionary
     public static final String WS_DICTIONARY_MILI_API = "http://mili.cmlife.com.cn:8090/words/";
-    
-    // avos cloud
-    public static final String WS_AVELLO_TRELISTENER_URL = "http://dev.vaa.avosapps.com/trelistener";
 }

@@ -22,9 +22,6 @@ import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
-
-import com.avos.avoscloud.AVInstallation;
-import com.avos.avoscloud.PushService;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.base.log.L;
@@ -54,12 +51,6 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         public void handleMessage(Message msg) {
             SettingsActivity theActivity = mActivity.get();
             switch (msg.what) {
-                case VelloService.MSG_STATUS_WEBHOOK_DELETED:
-                    theActivity.postDeleteWebhook();
-                    break;
-                case VelloService.MSG_STATUS_WEBHOOK_CREATED:
-                    theActivity.postCreateWebhook();
-                    break;
                 case VelloService.MSG_VALID_TRELLO_CONNECTION:
                     if (theActivity.isInFront) {
                         theActivity.withValidTrelloConnection();
@@ -210,24 +201,12 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
             syncFreqPref.setSummary(syncFreqPref.getEntry());
             mNewSyncValue = syncFreqPref.getValue();
             if (mNewSyncValue.equals("0")) {
-                // choose PUSH
-                // active PUSH
-                syncFreqPref.setEnabled(false);
-                String idWebhook = AccountUtils.getVocabularyBoardWebHookId(getApplicationContext());
-                if (idWebhook.equals("")) {
-                    // create and active it
-                    sendMessageToService(VelloService.MSG_CREATE_WEBHOOK, null);
-                }
             } else {
                 // choose schedule sync
                 Account account = new Account(AccountUtils.getAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
                 Bundle extras = new Bundle();
                 int pollFrequency = Integer.valueOf(mNewSyncValue) * 60 * 60;
                 ContentResolver.addPeriodicSync(account, VelloProvider.AUTHORITY, extras, pollFrequency);
-                // deactive PUSH
-                if (!AccountUtils.getVocabularyBoardWebHookId(getApplicationContext()).equals("")) {
-                    sendMessageToService(VelloService.MSG_DELETE_WEBHOOK, null);
-                }
             }
         } else if (key.equals(KEY_PREF_DICT_CLIPBOARD_MONITOR)) {
             CheckBoxPreference dictClipMonitorPref = (CheckBoxPreference) findPreference(key);
@@ -242,27 +221,6 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
                 sendMessageToService(VelloService.MSG_SHUTDOWN_CLIPBOARD_MONITOR, null);
             }
 
-        }
-    }
-
-    private void postCreateWebhook() {
-        Account account = new Account(AccountUtils.getAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
-        Bundle extras = new Bundle();
-        ContentResolver.removePeriodicSync(account, VelloProvider.AUTHORITY, extras);
-
-        // save Installation for push
-        PushService.setDefaultPushCallback(getApplicationContext(), MainActivity.class);
-        AVInstallation.getCurrentInstallation().saveInBackground();
-
-        if (isInFront) {
-            mListPreference.setEnabled(true);
-        }
-    }
-
-    private void postDeleteWebhook() {
-        AccountUtils.setVocabularyBoardWebHookId(getApplicationContext(), "");
-        if (isInFront) {
-            mListPreference.setEnabled(true);
         }
     }
 

@@ -12,6 +12,7 @@ import com.foxykeep.datadroid.network.NetworkConnection.ConnectionResult;
 import com.foxykeep.datadroid.network.NetworkConnection.Method;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.service.RequestService.Operation;
+import com.mili.xiaominglui.app.vello.base.log.L;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.config.WSConfig;
 import com.mili.xiaominglui.app.vello.data.factory.CheckTrelloConnectionResponseFactory;
@@ -25,11 +26,7 @@ public class CheckTrelloConnectionOperation implements Operation {
 		NetworkConnection networkConnection = new NetworkConnection(context, urlString);
 		networkConnection.setMethod(Method.GET);
 		ConnectionResult result = networkConnection.execute();
-		
-		if (VelloConfig.DEBUG_SWITCH) {
-		    Log.d(TAG, "result.body = " + result.body);
-		}
-
+        L.d(TAG, "result.body = " + result.body);
 		return CheckTrelloConnectionResponseFactory.parseResult(result.body);
 	}
 

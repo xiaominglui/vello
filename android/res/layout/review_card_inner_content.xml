@@ -36,7 +36,7 @@
         android:layout_alignParentTop="true"
         android:gravity="center_vertical"
         android:drawableLeft="@drawable/ic_word_review_status_checks"
-        android:text="1/9" />
+        android:text="1/8" />
 
     <LinearLayout
         android:layout_width="wrap_content"

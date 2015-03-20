@@ -20,9 +20,9 @@ import android.content.DialogInterface;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v7.view.ActionMode;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -282,7 +282,5 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
 
     @Override
     public void onClick(DialogInterface arg0, int arg1) {
-        // TODO Auto-generated method stub
-
     }
 }

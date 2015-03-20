@@ -43,9 +43,6 @@ public final class JSONTag {
 	public static final String ACTION_ELEM_DATA_CARD = "card";
 	public static final String ACTION_ELEM_DATA_CARD_NAME = "name";
 	
-	// AVOS tags
-	public static final String AVOS_INFORMATION = "infomation";
-
 	// Mili Dictionary tags
 	public static final String MILI_DICTIONARY_SPELL = "spell";
 	public static final String MILI_DICTIONARY_PRON = "pron";
@@ -55,5 +52,4 @@ public final class JSONTag {
 	public static final String MILI_DICTIONARY_ACCETTATION = "accettation";
 	public static final String MILI_DICTIONARY_ACCETTATION_POS = "pos";
 	public static final String MILI_DICTIONARY_ACCETTATION_ACCEP = "accep";
-
 }

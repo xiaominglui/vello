@@ -54,10 +54,6 @@ public class AccountUtils {
         }
         return true;
     }
-    
-    public static boolean isWebHooksCreated(final Context context) {
-    	return !TextUtils.isEmpty(getVocabularyBoardWebHookId(context));
-    }
 
     public static boolean isAuthenticated(final Context context) {
         boolean authenticated = false;
@@ -128,16 +124,6 @@ public class AccountUtils {
                 }
             }
         };
-    }
-
-    public static String getVocabularyBoardWebHookId(final Context context) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        return sp.getString(PREF_VOCABULARY_BOARD_WEB_HOOK_ID, "");
-    }
-
-    public static void setVocabularyBoardWebHookId(final Context context, String hookId) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        sp.edit().putString(PREF_VOCABULARY_BOARD_WEB_HOOK_ID, hookId).apply();
     }
 
     public static String getVocabularyBoardId(final Context context) {

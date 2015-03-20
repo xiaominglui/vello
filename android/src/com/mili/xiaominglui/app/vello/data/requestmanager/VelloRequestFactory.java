@@ -22,8 +22,6 @@ public final class VelloRequestFactory {
     public static final int REQUEST_TYPE_ARCHIVE_WORDCARD = 13;
     public static final int REQUEST_TYPE_UPGRADE_WORDCARD = 14;
     public static final int REQUEST_TYPE_LOOK_UP_IN_DICTIONARY = 16;
-    public static final int REQUEST_TYPE_CREATE_WEBHOOK = 17;
-    public static final int REQUEST_TYPE_DELETE_WEBHOOK = 19;
     public static final int REQUEST_TYPE_CHECK_TRELLO_CONNECTION = 20;
     public static final int REQUEST_TYPE_READ_TRELLO_ACCOUNT_USERNAME = 21;
     public static final int REQUEST_TYPE_DELETE_REMOTE_TRELLO_CARD = 23;
@@ -37,7 +35,6 @@ public final class VelloRequestFactory {
     public static final String BUNDLE_EXTRA_VOCABULARY_LIST_LIST = "com.mili.xiaominglui.app.vello.extra.listList";
     public static final String BUNDLE_EXTRA_VOCABULARY_LIST_ID = "com.mili.xiaominglui.app.vello.extra.listId";
     public static final String BUNDLE_EXTRA_DICTIONARY_WS_RESPONSE = "com.mili.xiaominglui.app.vello.extra.ws.dictionary";
-    public static final String BUNDLE_EXTRA_WEBHOOK_ID = "com.mili.xiaominglui.app.vello.extra.webhook.id";
     public static final String BUNDLE_EXTRA_HAS_AUTH_TOKEN_REVOKED = "com.mili.xiaominglui.app.vello.extra.token_revoked";
     public static final String BUNDLE_EXTRA_REMOTE_MODEL_DELETED = "com.mili.xiaominglui.app.vello.extra.trello.model.deleted";
     public static final String BUNDLE_EXTRA_REMOTE_TRELLO_CARD_UPDATED = "com.mili.xiaominglui.app.vello.extra.trello.card.deleted";
@@ -62,7 +59,7 @@ public final class VelloRequestFactory {
 
     public static Request getOpenTrelloCardListRequest(int startId, boolean force) {
         Request request = new Request(REQUEST_TYPE_GET_OPEN_TRELLO_CARD_LIST);
-        request.setMemoryCacheEnabled(true);
+        request.setMemoryCacheEnabled(false);
         request.put(PARAM_EXTRA_SERVICE_START_ID, startId);
         request.put(PARAM_EXTRA_FORCE_GET_OPEN_TRELLO_CARD, force);
         return request;
@@ -150,18 +147,6 @@ public final class VelloRequestFactory {
 		Request request = new Request(REQUEST_TYPE_ARCHIVE_WORDCARD);
 		request.put(PARAM_EXTRA_VOCABULARY_CARD_ID, idCard);
 		request.setMemoryCacheEnabled(true);
-		return request;
-	}
-
-	public static Request createWebHook() {
-		Request request = new Request(REQUEST_TYPE_CREATE_WEBHOOK);
-		request.setMemoryCacheEnabled(true);
-		return request;
-	}
-	
-	public static Request deleteWebHook() {
-		Request request = new Request(REQUEST_TYPE_DELETE_WEBHOOK);
-		request.setMemoryCacheEnabled(false);
 		return request;
 	}
 

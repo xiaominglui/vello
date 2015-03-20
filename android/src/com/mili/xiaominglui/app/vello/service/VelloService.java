@@ -99,9 +99,6 @@ public class VelloService extends Service implements RequestListener, Connection
     public static final int MSG_INVALID_TRELLO_CONNECTION = 3;
     public static final int MSG_SHOW_FLOAT_WINDOW = 4;
 
-    public static final int MSG_STATUS_WEBHOOK_DELETED = 5;
-    public static final int MSG_STATUS_WEBHOOK_CREATED = 6;
-
     public static final int MSG_STATUS_INIT_ACCOUNT_BEGIN = 7;
     public static final int MSG_STATUS_INIT_ACCOUNT_END = 8;
     public static final int MSG_STATUS_SYNC_BEGIN = 9;
@@ -112,8 +109,6 @@ public class VelloService extends Service implements RequestListener, Connection
     public static final int MSG_CHECK_VOCABULARY_BOARD = 14;
     public static final int MSG_GET_DUE_REVIEW_CARD_LIST = 15;
     public static final int MSG_TRIGGER_QUERY_WORD = 16;
-    public static final int MSG_CREATE_WEBHOOK = 17;
-    public static final int MSG_DELETE_WEBHOOK = 18;
     public static final int MSG_CHECK_TRELLO_CONNECTION = 19;
     public static final int MSG_READ_TRELLO_ACCOUNT_USERNAME = 20;
     public static final int MSG_RETURN_TRELLO_USERNAME = 21;
@@ -163,12 +158,6 @@ public class VelloService extends Service implements RequestListener, Connection
                             }
                         }
                         service.mLastFakeClipText = fakedClipText;
-                        break;
-                    case MSG_DELETE_WEBHOOK:
-                        service.deleteWebHook();
-                        break;
-                    case MSG_CREATE_WEBHOOK:
-                        service.createWebHook();
                         break;
                     case MSG_CHECK_TRELLO_CONNECTION:
                         service.checkTrelloConnection();
@@ -418,24 +407,6 @@ public class VelloService extends Service implements RequestListener, Connection
                 .reStartWordCardRequest(idCard);
         mRequestManager.execute(reStartWordCard, this);
         mRequestList.add(reStartWordCard);
-    }
-
-    private void createWebHook() {
-        if (VelloConfig.DEBUG_SWITCH) {
-            Log.d(TAG, "createWebHook start...");
-        }
-        Request createWebHook = VelloRequestFactory.createWebHook();
-        mRequestManager.execute(createWebHook, this);
-        mRequestList.add(createWebHook);
-    }
-
-    private void deleteWebHook() {
-        if (VelloConfig.DEBUG_SWITCH) {
-            Log.d(TAG, "deleteWebHook start...");
-        }
-        Request setWebHookActive = VelloRequestFactory.deleteWebHook();
-        mRequestManager.execute(setWebHookActive, this);
-        mRequestList.add(setWebHookActive);
     }
 
     private void checkTrelloConnection() {
@@ -889,42 +860,6 @@ public class VelloService extends Service implements RequestListener, Connection
                     }
                     return;
 
-                case VelloRequestFactory.REQUEST_TYPE_CREATE_WEBHOOK:
-                    String hookId = resultData.getString(VelloRequestFactory.BUNDLE_EXTRA_WEBHOOK_ID);
-                    if (hookId != null) {
-                        // hook created, save it
-                        AccountUtils.setVocabularyBoardWebHookId(getApplicationContext(), hookId);
-                        sendMessageToClients(MSG_STATUS_WEBHOOK_CREATED, null);
-                        if (VelloConfig.DEBUG_SWITCH) {
-                            Log.d(TAG, "webhook created.");
-                        }
-
-                    } else {
-                        // to create again
-                        if (VelloConfig.DEBUG_SWITCH) {
-                            Log.d(TAG, "retry --- createWebHook");
-                        }
-                        createWebHook();
-                    }
-                    return;
-
-                case VelloRequestFactory.REQUEST_TYPE_DELETE_WEBHOOK:
-                    boolean hasWebhookDeleted = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_REMOTE_MODEL_DELETED);
-                    if (hasWebhookDeleted) {
-                        // request success
-                        if (VelloConfig.DEBUG_SWITCH) {
-                            Log.d(TAG, "deleteWebHook success");
-                        }
-                        sendMessageToClients(VelloService.MSG_STATUS_WEBHOOK_DELETED, null);
-                    } else {
-                        // request fail, try again
-                        if (VelloConfig.DEBUG_SWITCH) {
-                            Log.d(TAG, "retry --- deleteWebHook");
-                        }
-                        deleteWebHook();
-                    }
-                    return;
-
                 case VelloRequestFactory.REQUEST_TYPE_CHECK_TRELLO_CONNECTION:
                     boolean hasTrelloConnection = resultData.getBoolean(VelloRequestFactory.BUNDLE_EXTRA_TRELLO_CONNECTION);
                     if (hasTrelloConnection) {
@@ -1019,9 +954,7 @@ public class VelloService extends Service implements RequestListener, Connection
             } else if (statusCode == -1) {
                 if (request.getRequestType() == VelloRequestFactory.REQUEST_TYPE_CHECK_TRELLO_CONNECTION) {
                     sendMessageToClients(VelloService.MSG_INVALID_TRELLO_CONNECTION, null);
-                    if (VelloConfig.DEBUG_SWITCH) {
-                        Log.d(TAG, "CheckTrelloConnection end...");
-                    }
+                    L.d(TAG, "CheckTrelloConnection end with connection error");
                 } else {
                     sendMessageToClients(VelloService.MSG_STATUS_CONNECTION_TIMEOUT, null);
                 }

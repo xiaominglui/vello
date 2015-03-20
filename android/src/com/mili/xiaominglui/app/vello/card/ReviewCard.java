@@ -224,6 +224,7 @@ public class ReviewCard extends Card {
 
         TextView reviewChecks = (TextView) parent.findViewById(R.id.review_checks);
         reviewChecks.setText(String.format(mContext.getResources().getString(R.string.title_review_status_checks), reviewProgress));
+
     }
 
     @Override

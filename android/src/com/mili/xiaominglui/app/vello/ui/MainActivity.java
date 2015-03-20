@@ -28,7 +28,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.avos.avoscloud.AVAnalytics;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.authenticator.Constants;
 import com.mili.xiaominglui.app.vello.base.log.L;
@@ -40,8 +39,6 @@ import com.mili.xiaominglui.app.vello.service.VelloService;
 import com.mili.xiaominglui.app.vello.syncadapter.SyncHelper;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.mili.xiaominglui.app.vello.util.HelpUtils;
-import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
-import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 
 public class MainActivity extends BaseActivity implements ReviewViewFragment.onStatusChangedListener, ConnectionTimeOutFragment.ConnectionTimeOutFragmentEventListener {
 	private static final String TAG = MainActivity.class.getSimpleName();
@@ -93,9 +90,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 				if (theActivity.isInFront) {
 					theActivity.showConnectionTimeoutView();
 				}
-				break;
-			case VelloService.MSG_STATUS_WEBHOOK_DELETED:
-				theActivity.localSignOut();
 				break;
 			}
 		}
@@ -196,8 +190,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 
 		handleIntent(getIntent());
 		doBindService();
-		
-		AVAnalytics.trackAppOpened(getIntent());
 	}
 
 	@Override
@@ -334,11 +326,6 @@ public class MainActivity extends BaseActivity implements ReviewViewFragment.onS
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 			int syncFreqValue = Integer.valueOf(settings.getString(SettingsActivity.KEY_PREF_SYNC_FREQ, "24"));
 			if (syncFreqValue == 0) {
-				// deactive PUSH
-				if (!AccountUtils.getVocabularyBoardWebHookId(getApplicationContext()).equals("")) {
-					sendMessageToService(VelloService.MSG_DELETE_WEBHOOK);
-					return true;
-				}
 			}
 			localSignOut();
 			return true;
