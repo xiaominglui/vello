@@ -142,25 +142,6 @@ public class ReviewCard extends Card {
             }
         });
 
-        setOnLongClickListener(new OnLongCardClickListener() {
-            @Override
-            public boolean onLongClick(Card card, View view) {
-                if (deleted) {
-                    if (relearned) {
-                        setReviewButtionStatus(BUTTON_STATUS_RELEARNED);
-                    } else {
-                        setReviewButtionStatus(BUTTON_STATUS_TO_RECALL);
-                    }
-                } else {
-                    ((ReviewCard) card).setReviewButtionStatus(BUTTON_STATUS_TO_DELETE);
-                }
-                markDeleted(!deleted);
-
-                return true;
-            }
-        });
-
-        //This provides a simple (and useless) expand area
         ReviewCardExpand expand = new ReviewCardExpand(mContext, dictItem);
         addCardExpand(expand);
 	}
@@ -212,6 +193,22 @@ public class ReviewCard extends Card {
     @Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
         mReviewButton = (CircleButton) parent.findViewById(R.id.review);
+        mReviewButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (deleted) {
+                    if (relearned) {
+                        setReviewButtionStatus(BUTTON_STATUS_RELEARNED);
+                    } else {
+                        setReviewButtionStatus(BUTTON_STATUS_TO_RECALL);
+                    }
+                } else {
+                    setReviewButtionStatus(BUTTON_STATUS_TO_DELETE);
+                }
+                markDeleted(!deleted);
+                return true;
+            }
+        });
         setReviewButtionStatus(BUTTON_STATUS_TO_RECALL);
 
         if (relearned) {

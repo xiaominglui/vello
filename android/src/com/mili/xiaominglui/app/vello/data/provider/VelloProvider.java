@@ -239,7 +239,6 @@ public class VelloProvider extends ContentProvider {
             case DB_DICT_CARD:
             	break;
         }
-
 //        getContext().getContentResolver().notifyChange(uri, null, false);
         return result;
     }
