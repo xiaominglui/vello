@@ -52,6 +52,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
     private PtrClassicFrameLayout mPtrFrame;
     ActionMode mActionMode;
 
+    private ArrayList<Card> mCards;
     protected CardArrayAdapter mCardArrayAdapter;
     SwipeDismissAnimation dismissAnimation;
 
@@ -130,22 +131,8 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         View emptyView = getActivity().findViewById(R.id.empty);
         mListView.setEmptyView(emptyView);
 
-        // Force start background query to load sessions
-        getLoaderManager().initLoader(0, null, this);
-    }
-
-    private void initReviewCards(Cursor data) {
-        L.d(TAG, "initReviewCards");
-        ArrayList<Card> cards = new ArrayList<Card>();
-
-        for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
-            ReviewCard card =  initReviewCard(data);
-            card.setId(card.trelloID);
-            cards.add(card);
-        }
-        data.close();
-
-        mCardArrayAdapter = new ReviewCardArrayAdapter(getActivity(), cards);
+        mCards = new ArrayList<Card>();
+        mCardArrayAdapter = new ReviewCardArrayAdapter(getActivity(), mCards);
 
         dismissAnimation = (SwipeDismissAnimation) new SwipeDismissAnimation(getActivity()).setup(mCardArrayAdapter);
 
@@ -156,6 +143,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             mPtrFrame.setPtrHandler(new PtrHandler() {
                 @Override
                 public void onRefreshBegin(PtrFrameLayout frame) {
+//                    hideList(false);
                     CommonUtils.triggerRefresh();
                 }
 
@@ -173,13 +161,30 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             mPtrFrame.setPullToRefresh(false);
             // default is true
             mPtrFrame.setKeepHeaderWhenRefresh(true);
-            mPtrFrame.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mPtrFrame.autoRefresh();
-                }
-            }, 100);
+//            mPtrFrame.postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    mPtrFrame.autoRefresh();
+//                }
+//            }, 100);
         }
+
+        // Force start background query to load sessions
+        getLoaderManager().initLoader(0, null, this);
+    }
+
+    private void initReviewCards(Cursor data) {
+        L.d(TAG, "initReviewCards");
+
+        if (mCards == null) return;
+        mCards.clear();
+
+        for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
+            ReviewCard card = initReviewCard(data);
+            card.setId(card.trelloID);
+            mCards.add(card);
+        }
+        data.close();
     }
 
     private ReviewCard initReviewCard(Cursor data) {
@@ -206,7 +211,6 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
                 dismissAnimation.animateDismiss(card);
             }
         });
-
         return card;
     }
 
@@ -296,7 +300,10 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             }
 
             initReviewCards(data);
-            displayList();
+            mCardArrayAdapter.notifyDataSetChanged();
+            if (!mListShown) {
+                displayList();
+            }
         }
     }
 
