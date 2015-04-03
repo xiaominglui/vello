@@ -24,7 +24,6 @@ import android.content.DialogInterface;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,13 +33,10 @@ import com.google.gson.JsonSyntaxException;
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.adapter.ReviewCardArrayAdapter;
 import com.mili.xiaominglui.app.vello.base.log.L;
-import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.data.model.MiliDictionaryItem;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent;
-import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbDictCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.data.provider.util.ProviderCriteria;
-import com.mili.xiaominglui.app.vello.card.DictCard;
 import com.mili.xiaominglui.app.vello.card.ReviewCard;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
 import com.mili.xiaominglui.app.vello.util.CommonUtils;
@@ -56,27 +52,13 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
     protected CardArrayAdapter mCardArrayAdapter;
     SwipeDismissAnimation dismissAnimation;
 
-    private onStatusChangedListener mListener;
-
-    private String mCurFilter = "";
-    private boolean mIsSearching = false;
-
     @Override
     public int getTitleResourceId() {
         return R.string.title_review;
     }
 
     public static Fragment newInstance() {
-        Fragment f = new ReviewViewFragment();
-        return f;
-    }
-
-    public interface onStatusChangedListener {
-        public void onModeChanged(int modeColor);
-
-        public void syncOnAllRecalled();
-
-        public void onWordRecalled();
+        return new ReviewViewFragment();
     }
 
     @Override
@@ -90,19 +72,11 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        try {
-            mListener = (onStatusChangedListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement onStatusChangedListener");
-        }
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setRetainInstance(true);
-//        setHasOptionsMenu(true);
     }
 
     @Override
@@ -131,7 +105,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         View emptyView = getActivity().findViewById(R.id.empty);
         mListView.setEmptyView(emptyView);
 
-        mCards = new ArrayList<Card>();
+        mCards = new ArrayList<>();
         mCardArrayAdapter = new ReviewCardArrayAdapter(getActivity(), mCards);
 
         dismissAnimation = (SwipeDismissAnimation) new SwipeDismissAnimation(getActivity()).setup(mCardArrayAdapter);
@@ -143,7 +117,6 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             mPtrFrame.setPtrHandler(new PtrHandler() {
                 @Override
                 public void onRefreshBegin(PtrFrameLayout frame) {
-//                    hideList(false);
                     CommonUtils.triggerRefresh();
                 }
 
@@ -251,59 +224,33 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         // show all open WordCards whose due time bigger than mobile local now
         // time && syncInNext mark not set
         ProviderCriteria criteria = new ProviderCriteria();
-        if (TextUtils.isEmpty(mCurFilter)) {
-            // Review Mode
-            mIsSearching = false;
-            mListener.onModeChanged(VelloConfig.REVIEW_MODE_ACTION_BAR_COLOR);
-            criteria.addSortOrder(DbWordCard.Columns.DUE, true);
-            Calendar rightNow = Calendar.getInstance();
+        criteria.addSortOrder(DbWordCard.Columns.DUE, true);
+        Calendar rightNow = Calendar.getInstance();
 
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
-            long rightNowUnixTime = rightNow.getTimeInMillis();
-            long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
-            String now = format.format(new Date(rightNowUnixTimeGMT));
-            criteria.addEq(DbWordCard.Columns.MARKDELETED, "false");
-            criteria.addLt(DbWordCard.Columns.DUE, now, true);
-            criteria.addNe(DbWordCard.Columns.CLOSED, "true");
-            return new CursorLoader(getActivity(), DbWordCard.CONTENT_URI,
-                    DbWordCard.PROJECTION, criteria.getWhereClause(),
-                    criteria.getWhereParams(), criteria.getOrderClause());
-        } else {
-            // Dictionary Mode
-            mIsSearching = true;
-            mListener.onModeChanged(VelloConfig.DICTIONARY_MODE_ACTION_BAR_COLOR);
-            criteria.addLike(DbDictCard.Columns.KEYWORD, mCurFilter + "%");
-            return new CursorLoader(getActivity(), DbDictCard.CONTENT_URI,
-                    DbDictCard.PROJECTION, criteria.getWhereClause(),
-                    criteria.getWhereParams(), criteria.getOrderClause());
-        }
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+        long rightNowUnixTime = rightNow.getTimeInMillis();
+        long rightNowUnixTimeGMT = rightNowUnixTime - TimeZone.getDefault().getRawOffset();
+        String now = format.format(new Date(rightNowUnixTimeGMT));
+        criteria.addEq(DbWordCard.Columns.MARKDELETED, "false");
+        criteria.addLt(DbWordCard.Columns.DUE, now, true);
+        criteria.addNe(DbWordCard.Columns.CLOSED, "true");
+        return new CursorLoader(getActivity(), DbWordCard.CONTENT_URI,
+                DbWordCard.PROJECTION, criteria.getWhereClause(),
+                criteria.getWhereParams(), criteria.getOrderClause());
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         L.d(TAG, "onLoadFinished");
-        if (mIsSearching) {
-            // in Dictionary Mode
-            if (data == null)
-                return;
-            for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
-                DictCard dc = new DictCard(getActivity()
-                        .getApplicationContext(), data);
-                dc.setSwipeable(false);
+        // in Review Mode
+        if (getActivity() == null) {
+            return;
+        }
 
-                mCardArrayAdapter.add(dc);
-            }
-        } else {
-            // in Review Mode
-            if (getActivity() == null) {
-                return;
-            }
-
-            initReviewCards(data);
-            mCardArrayAdapter.notifyDataSetChanged();
-            if (!mListShown) {
-                displayList();
-            }
+        initReviewCards(data);
+        mCardArrayAdapter.notifyDataSetChanged();
+        if (!mListShown) {
+            displayList();
         }
     }
 
@@ -311,14 +258,6 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
     public void onLoaderReset(Loader<Cursor> loader) {
         L.d(TAG, "onLoaderReset");
     }
-
-
-
-    void onQueryTextChange(String newText) {
-        mCurFilter = !TextUtils.isEmpty(newText) ? newText : null;
-        getLoaderManager().restartLoader(0, null, this);
-    }
-
 
     @Override
     public void onClick(DialogInterface arg0, int arg1) {

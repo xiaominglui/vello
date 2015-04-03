@@ -5,23 +5,13 @@ import android.view.animation.AnimationUtils;
 
 import com.mili.xiaominglui.app.vello.R;
 import com.mili.xiaominglui.app.vello.base.log.L;
-
-/**
- * Created by xiaominglui on 14-10-14.
- */
 public abstract class BaseListFragment extends BaseFragment {
     private static final String TAG = BaseListFragment.class.getSimpleName();
     protected boolean mListShown;
     protected View mProgressContainer;
     protected View mListContainer;
 
-    /**
-     * Setup the list fragment
-     *
-     * @param root
-     */
     protected void setupListFragment(View root) {
-
         mListContainer = root.findViewById(R.id.ptr_frame);
         mProgressContainer = root.findViewById(R.id.progressContainer);
         mListShown = true;
@@ -40,10 +30,6 @@ public abstract class BaseListFragment extends BaseFragment {
         setListShown(false,animate);
     }
 
-    /**
-     * @param shown
-     * @param animate
-     */
     protected void setListShown(boolean shown, boolean animate) {
         if (mListShown == shown) {
             return;

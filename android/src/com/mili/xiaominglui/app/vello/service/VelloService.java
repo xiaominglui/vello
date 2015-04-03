@@ -946,7 +946,7 @@ public class VelloService extends Service implements RequestListener, Connection
                     if (VelloConfig.DEBUG_SWITCH) {
                         Log.d(TAG, "invalid token");
                     }
-                    AccountUtils.signOut(getApplicationContext());
+                    AccountUtils.signOut(C.get());
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(intent);
                 }

@@ -137,7 +137,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         WeakReference<AuthenticatorActivity> mActivity;
 
         UIHandler(AuthenticatorActivity activity) {
-            mActivity = new WeakReference<AuthenticatorActivity>(activity);
+            mActivity = new WeakReference<>(activity);
         }
 
         @Override
@@ -199,6 +199,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
                     msg.replyTo = mMessenger;
                     mVelloService.send(msg);
                 } catch (RemoteException e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -326,8 +327,7 @@ public class AuthenticatorActivity extends AccountAuthenticatorActivity {
         @Override
         protected Token doInBackground(String... params) {
             Verifier verifier = new Verifier(params[0]);
-            Token accessToken = mService.getAccessToken(mRequestToken, verifier);
-            return accessToken;
+            return mService.getAccessToken(mRequestToken, verifier);
         }
 
         @Override

@@ -56,9 +56,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         try {
             boolean wifiNetwork = false;
 
-            boolean isScheduleSyncTrigger = extras.getBoolean(SyncConstants.SYNC_BUNDLE_KEY_SCHEDULE_SYNC_TRIGGER, false);
-
-
             if (mConnManager == null) {
                 mConnManager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
             }
@@ -90,7 +87,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             String token = AccountUtils.getAuthToken(mContext);
             if (token.equals("")) {
                 syncResult.stats.numAuthExceptions++;
-                // TODO auth failed now, what to do.
+                AccountUtils.signOut(C.get());
             } else {
                 if (wifiOnly) {
                     WifiManager wifiManager = (WifiManager) this.getContext().getSystemService(Context.WIFI_SERVICE);
