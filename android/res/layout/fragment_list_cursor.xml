@@ -53,6 +53,7 @@
                 android:id="@+id/empty"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:gravity="center"
                 android:text="@string/title_review_blank"
                 android:textColor="@color/md_grey_500"
                 android:textSize="24sp" />
