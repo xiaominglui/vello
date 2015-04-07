@@ -71,6 +71,6 @@
     <string name="title_feature_two">闲来回顾之</string>
     <string name="title_feature_three">词汇达人见</string>
     <string name="title_review_status_checks">%1$d/8</string>
-    <string name="title_review_blank">列表为空</string>
+    <string name="title_review_blank">词单为空</string>
     <string name="toast_invalid_keyword">无效查询</string>
 </resources>

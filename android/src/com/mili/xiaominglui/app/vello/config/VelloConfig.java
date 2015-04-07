@@ -43,5 +43,9 @@ public class VelloConfig {
 	public static final String API_SECRET = "71ae43e7beebe76bd75bd98cc81425e04979dfc3cb2a12f16094e15f5e348fcf";
 
 	public static final int FLOAT_DICT_CARD_DISMISS_TIME = 5 * 1000;
+
+    public static final String PRE_SHOW_INTRO = "show_intro";
+
+    public static final String SAMPLE_BOARD_ID = "4ff6eeafd0b1db1e63b17afd";
     
 }

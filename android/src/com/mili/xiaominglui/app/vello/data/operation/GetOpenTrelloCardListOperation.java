@@ -14,6 +14,7 @@ import com.foxykeep.datadroid.network.NetworkConnection.ConnectionResult;
 import com.foxykeep.datadroid.network.NetworkConnection.Method;
 import com.foxykeep.datadroid.requestmanager.Request;
 import com.foxykeep.datadroid.service.RequestService.Operation;
+import com.mili.xiaominglui.app.vello.base.C;
 import com.mili.xiaominglui.app.vello.config.VelloConfig;
 import com.mili.xiaominglui.app.vello.config.WSConfig;
 import com.mili.xiaominglui.app.vello.data.factory.TrelloCardListJsonFactory;
@@ -25,7 +26,13 @@ public class GetOpenTrelloCardListOperation implements Operation {
 	@Override
 	public Bundle execute(Context context, Request request) throws ConnectionException, DataException, CustomRequestException {
 		String token = AccountUtils.getAuthToken(context);
-		String vocabularyBoardId = AccountUtils.getVocabularyBoardId(context);
+		String vocabularyBoardId;
+		boolean showIntro = C.getPreference(VelloConfig.PRE_SHOW_INTRO, false);
+		if (showIntro) {
+			vocabularyBoardId = VelloConfig.SAMPLE_BOARD_ID;
+		} else {
+			vocabularyBoardId = AccountUtils.getVocabularyBoardId(C.get());
+		}
 		String urlString = WSConfig.TRELLO_API_URL + WSConfig.WS_TRELLO_TARGET_BOARD + "/" + vocabularyBoardId + WSConfig.WS_TRELLO_FIELD_CARDS;
 
 		HashMap<String, String> parameterMap = new HashMap<String, String>();

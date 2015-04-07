@@ -16,7 +16,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
@@ -206,8 +205,6 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        // show all open WordCards whose due time bigger than mobile local now
-        // time && syncInNext mark not set
         ProviderCriteria criteria = new ProviderCriteria();
         criteria.addSortOrder(DbWordCard.Columns.DUE, true);
         Calendar rightNow = Calendar.getInstance();
@@ -219,9 +216,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
         criteria.addEq(DbWordCard.Columns.MARKDELETED, "false");
         criteria.addLt(DbWordCard.Columns.DUE, now, true);
         criteria.addNe(DbWordCard.Columns.CLOSED, "true");
-        return new CursorLoader(getActivity(), DbWordCard.CONTENT_URI,
-                DbWordCard.PROJECTION, criteria.getWhereClause(),
-                criteria.getWhereParams(), criteria.getOrderClause());
+        return new CursorLoader(getActivity(), DbWordCard.CONTENT_URI, DbWordCard.PROJECTION, criteria.getWhereClause(), criteria.getWhereParams(), criteria.getOrderClause());
     }
 
     @Override

@@ -65,7 +65,6 @@ import com.mili.xiaominglui.app.vello.util.AccountUtils;
 
 public class VelloService extends Service implements RequestListener, ConnectionErrorDialogListener, OnPrimaryClipChangedListener {
     private static final String TAG = VelloService.class.getSimpleName();
-    private static final String MIMETYPE_TEXT_PLAIN = "";
     private static boolean isRunning = false;
     private NotificationManager mNM;
     private ClipboardManager mCM;
@@ -94,7 +93,6 @@ public class VelloService extends Service implements RequestListener, Connection
     public static final int MSG_REGISTER_CLIENT = 0;
 
     public static final int MSG_DIALOG_BAD_DATA_ERROR_SHOW = 0;
-    public static final int MSG_SHOW_RESULT_WORDCARD = 1;
     public static final int MSG_VALID_TRELLO_CONNECTION = 2;
     public static final int MSG_INVALID_TRELLO_CONNECTION = 3;
     public static final int MSG_SHOW_FLOAT_WINDOW = 4;
