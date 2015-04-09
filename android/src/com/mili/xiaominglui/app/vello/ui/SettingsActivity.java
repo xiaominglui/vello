@@ -3,6 +3,7 @@ package com.mili.xiaominglui.app.vello.ui;
 import java.lang.ref.WeakReference;
 
 import android.accounts.Account;
+import android.app.ActionBar;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -36,7 +37,6 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
     public static final String KEY_PREF_SYNC_WIFI_ONLY = "pref_sync_wifi_only";
     public static final String KEY_PREF_DICT_CLIPBOARD_MONITOR = "pref_dict_clipboard_monitor";
     private boolean isInFront;
-    private String mNewSyncValue = "24";
     private ListPreference mListPreference;
     private SettingsActivityUIHandler mUICallback = new SettingsActivityUIHandler(this);
 
@@ -44,7 +44,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         WeakReference<SettingsActivity> mActivity;
 
         SettingsActivityUIHandler(SettingsActivity activity) {
-            mActivity = new WeakReference<SettingsActivity>(activity);
+            mActivity = new WeakReference<>(activity);
         }
 
         @Override
@@ -88,7 +88,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
                 // anything with it
             }
 
-            sendMessageToService(VelloService.MSG_CHECK_TRELLO_CONNECTION, null);
+//            sendMessageToService(VelloService.MSG_CHECK_TRELLO_CONNECTION, null);
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -109,6 +109,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
                     msg.replyTo = mMessenger;
                     mService.send(msg);
                 } catch (RemoteException e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -141,7 +142,9 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
-            getActionBar().setDisplayHomeAsUpEnabled(true);
+            ActionBar bar = getActionBar();
+            if (bar != null)
+                getActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
 
@@ -159,6 +162,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         }
 
         getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+        withValidTrelloConnection();
     }
 
     @Override
@@ -199,7 +203,7 @@ public class SettingsActivity extends PreferenceActivity implements OnSharedPref
         if (key.equals(KEY_PREF_SYNC_FREQ)) {
             ListPreference syncFreqPref = (ListPreference) findPreference(key);
             syncFreqPref.setSummary(syncFreqPref.getEntry());
-            mNewSyncValue = syncFreqPref.getValue();
+            String mNewSyncValue = syncFreqPref.getValue();
             Account account = new Account(AccountUtils.getAccountName(getApplicationContext()), Constants.ACCOUNT_TYPE);
             Bundle extras = new Bundle();
             int pollFrequency = Integer.valueOf(mNewSyncValue) * 60 * 60;

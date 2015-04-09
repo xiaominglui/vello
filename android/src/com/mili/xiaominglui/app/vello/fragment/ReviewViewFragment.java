@@ -118,6 +118,7 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
             mPtrFrame.setPullToRefresh(false);
             // default is true
             mPtrFrame.setKeepHeaderWhenRefresh(true);
+            mPtrFrame.disableWhenHorizontalMove(true);
 //            mPtrFrame.postDelayed(new Runnable() {
 //                @Override
 //                public void run() {

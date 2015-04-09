@@ -253,7 +253,7 @@ public class MainActivity extends BaseActivity implements ConnectionTimeOutFragm
 			ContentResolver.addPeriodicSync(AccountUtils.getAccount(getApplicationContext()), VelloProvider.AUTHORITY, extras, syncFreqValue * 60 * 60);
 		}
 
-		C.setPreference(VelloConfig.PRE_SHOW_INTRO, true);
+//		C.setPreference(VelloConfig.PRE_SHOW_INTRO, true);
         CommonUtils.triggerRefresh();
 	}
 	private void postSync() {
