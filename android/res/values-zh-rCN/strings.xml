@@ -29,7 +29,7 @@
     <string name="notif_sync_content_text">正在同步要回顾的生词&#8230;</string>
     <string name="notif_clip_monitor_service_content_title">词道字典工作中&#8230;</string>
     <string name="notif_clip_monitor_service_content_text">点击开始回顾。</string>
-    <string name="title_review">回顾词单</string>
+    <string name="title_review">生词本</string>
     <string name="title_settings">设置</string>
     <string name="title_about">关于</string>
     <string name="title_connection_timeout">错误: GET超时</string>
@@ -60,7 +60,7 @@
         with Google\'s privacy policy.
     ]]></string>
     <string name="ok">确认</string>
-    <string name="label_provider_wordcard">回顾词单</string>
+    <string name="label_provider_wordcard">生词本</string>
     <string name="pref_sync_title">同步</string>
     <string name="pref_sync_frequency">同步频率</string>
     <string name="pref_sync_wifi_only">仅通过 Wi-Fi 同步数据</string>
@@ -70,7 +70,11 @@
     <string name="title_feature_one">生词读中现</string>
     <string name="title_feature_two">闲来回顾之</string>
     <string name="title_feature_three">词汇达人见</string>
-    <string name="title_review_status_checks">%1$d/8</string>
     <string name="title_review_blank">词单为空</string>
     <string name="toast_invalid_keyword">无效查询</string>
+    <string name="title_button_recalled">想起来了</string>
+    <string name="title_button_relearn">想不起来</string>
+    <string name="title_button_correct">正确</string>
+    <string name="title_button_incorrect">错了</string>
+    <string name="title_button_relearned">复习好了</string>
 </resources>

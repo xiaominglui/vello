@@ -19,38 +19,29 @@
   -->
 
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="horizontal"
     android:layout_marginLeft="3dp"
     android:layout_marginRight="3dp">
 
-
-    <TextView
-        android:id="@+id/review_checks"
-        android:layout_width="wrap_content"
+    <com.rey.material.widget.Button
+        style="@style/FlatColorButtonRippleStyle"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Button"
+        android:textColor="@color/md_red_500"
+        android:id="@+id/left"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:gravity="center_vertical"
-        android:drawableLeft="@drawable/ic_word_review_status_checks"
-        android:text="1/8" />
+        android:layout_weight="1" />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <com.rey.material.widget.Button
+        style="@style/FlatColorButtonRippleStyle"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Button"
+        android:textColor="@color/md_green_500"
+        android:id="@+id/right"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal">
+        android:layout_weight="1" />
 
-        <at.markushi.ui.CircleButton
-            android:id="@+id/review"
-            android:layout_width="@dimen/review_button_width"
-            android:layout_height="@dimen/review_button_height"
-            app:cb_pressedRingWidth="8dip" />
-
-    </LinearLayout>
-
-</RelativeLayout>
+</LinearLayout>

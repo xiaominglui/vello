@@ -1,7 +1,6 @@
 package com.mili.xiaominglui.app.vello.card;
 
 
-import at.markushi.ui.CircleButton;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardExpand;
 import it.gmariotti.cardslib.library.internal.CardHeader;
@@ -38,14 +37,16 @@ import com.mili.xiaominglui.app.vello.data.model.Pronunciation;
 import com.mili.xiaominglui.app.vello.data.model.TrelloCard;
 import com.mili.xiaominglui.app.vello.data.provider.VelloContent.DbWordCard;
 import com.mili.xiaominglui.app.vello.util.AccountUtils;
+import com.rey.material.widget.Button;
 
 public class ReviewCard extends Card {
 	private static final String TAG = ReviewCard.class.getSimpleName();
-    private static final int BUTTON_STATUS_RELEARNED = 0;
-    private static final int BUTTON_STATUS_TO_DELETE = 1;
-    private static final int BUTTON_STATUS_TO_RECALL = 2;
-    private CircleButton mReviewButton;
-	
+    private static final int STATUS_REVIEW_INIT = 0;
+    private static final int STATUS_REVIEW_TO_RECALL = 1;
+    private static final int STATUS_REVIEW_TO_RELEARN = 2;
+
+    private Button mLeft;
+    private Button mRight;
 	public TrelloCard trelloCard;
 	
 	public String markDeleted;
@@ -67,40 +68,29 @@ public class ReviewCard extends Card {
     public String urlResourceThumb;
     public int reviewProgress;
 
-    private OnClickReviewCardButtonsListener mReviewCardButtonsOnClickListener;
     private Card mCard;
 
-    private boolean deleted;
-    private boolean relearned;
+    private int mStatus;
+
+    private OnCardReviewedListener mListener;
 
     public ReviewCard(Context context) {
         super(context, R.layout.review_card_inner_content);
         mCard = this;
-        deleted = false;
-        relearned = false;
-
-    }
-	
-    /**
-     * Interface to handle callbacks when Reviewed Button is clicked
-     */
-    public interface OnClickReviewCardButtonsListener {
-        public void onRelearnedButtonClicked(Card card, View view);
-        public void onRecallButtonClicked(Card card, View view);
-        public void onRemoveButtonClicked(Card card, View view);
+        mStatus = STATUS_REVIEW_INIT;
     }
 
-    public void markDeleted(boolean deleted) {
-        this.deleted = deleted;
+    public interface OnCardReviewedListener {
+        void onReviewed(Card card);
     }
 
-    public void markRelearned() {
-        relearned = true;
+    public void setOnCardReviewedListener (OnCardReviewedListener listener) {
+        mListener = listener;
     }
 	
 	public void init() {
+        L.d(TAG, "init()---" + mStatus);
         setShadow(false);
-        //Add the thumbnail
         ReviewCardThumbnail thumb;
         if (!TextUtils.isEmpty(urlResourceThumb)) {
             thumb = new ReviewCardThumbnail(C.get(), urlResourceThumb);
@@ -112,116 +102,90 @@ public class ReviewCard extends Card {
 		header.setTitle(mainTitle);
 		addCardHeader(header);
 
-        setOnSwipeListener(new OnSwipeListener() {
-            @Override
-            public void onSwipe(Card card) {
-                if (deleted) {
-                    asyncMarkDeleteWordRemotely();
-                } else if (relearned) {
-                    asyncMarkRelearnedWord();
-                } else {
-                    asyncMarkRecalledWord();
-                }
-            }
-        });
-
-        ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().highlightView(false).setupCardElement(ViewToClickToExpand.CardElementUI.CARD);
+        ViewToClickToExpand viewToClickToExpand = ViewToClickToExpand.builder().enableForExpandAction();
         setViewToClickToExpand(viewToClickToExpand);
-
-        setOnExpandAnimatorStartListener(new Card.OnExpandAnimatorStartListener() {
-            @Override
-            public void onExpandStart(Card card) {
-                markRelearned();
-            }
-        });
-
-        setOnExpandAnimatorEndListener(new Card.OnExpandAnimatorEndListener() {
-            @Override
-            public void onExpandEnd(Card card) {
-                setReviewButtionStatus(BUTTON_STATUS_RELEARNED);
-            }
-        });
 
         ReviewCardExpand expand = new ReviewCardExpand(mContext, dictItem);
         addCardExpand(expand);
 	}
 
-    public void setReviewButtionStatus(int status) {
-        if (status == BUTTON_STATUS_RELEARNED) {
-            mReviewButton.setImageResource(R.drawable.ic_action_close);
-            mReviewButton.setColor(mContext.getResources().getColor(R.color.md_yellow_500));
-            if (mReviewCardButtonsOnClickListener != null) {
-                mReviewButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        mReviewCardButtonsOnClickListener.onRelearnedButtonClicked(mCard, view);
-                    }
-                });
-            }
-
-        } else if (status == BUTTON_STATUS_TO_DELETE) {
-            mReviewButton.setImageResource(R.drawable.ic_action_remove);
-            mReviewButton.setColor(mContext.getResources().getColor(R.color.md_red_500));
-            if (mReviewCardButtonsOnClickListener != null) {
-                mReviewButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        mReviewCardButtonsOnClickListener.onRemoveButtonClicked(mCard, view);
-                    }
-                });
-            }
-
-        } else if (status == BUTTON_STATUS_TO_RECALL) {
-            mReviewButton.setImageResource(R.drawable.ic_action_done);
-            mReviewButton.setColor(mContext.getResources().getColor(R.color.md_green_500));
-            if (mReviewCardButtonsOnClickListener != null) {
-                mReviewButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        mReviewCardButtonsOnClickListener.onRecallButtonClicked(mCard, view);
-                    }
-                });
-            }
-
-        }
-    }
-
-    public void setReviewCardButtonsOnClickListener(OnClickReviewCardButtonsListener listener) {
-        mReviewCardButtonsOnClickListener = listener;
-    }
-
     @Override
     public void setupInnerViewElements(ViewGroup parent, View view) {
-        mReviewButton = (CircleButton) parent.findViewById(R.id.review);
-        mReviewButton.setOnLongClickListener(new View.OnLongClickListener() {
+        L.d(TAG, "setupInnerViewElements---"+mStatus+"/"+mainTitle);
+        mLeft = (Button) parent.findViewById(R.id.left);
+        mRight = (Button) parent.findViewById(R.id.right);
+        if (mStatus == STATUS_REVIEW_INIT) {
+            L.d(TAG, "init");
+            mLeft.setText(C.get().getString(R.string.title_button_relearn));
+            mRight.setText(C.get().getString(R.string.title_button_recalled));
+            mLeft.setVisibility(View.VISIBLE);
+            mRight.setVisibility(View.VISIBLE);
+        }
+
+        mLeft.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onLongClick(View v) {
-                if (deleted) {
-                    if (relearned) {
-                        setReviewButtionStatus(BUTTON_STATUS_RELEARNED);
-                    } else {
-                        setReviewButtionStatus(BUTTON_STATUS_TO_RECALL);
+            public void onClick(View v) {
+                if (v instanceof Button) {
+                    Button button = (Button) v;
+                    String status = button.getText().toString();
+                    if (status.equals(C.get().getString(R.string.title_button_relearn))) {
+                        mStatus = STATUS_REVIEW_TO_RELEARN;
+                        mCard.doExpand();
+                        mLeft.setVisibility(View.INVISIBLE);
+                        mRight.setText(C.get().getString(R.string.title_button_relearned));
+                    } else if (status.equals(C.get().getString(R.string.title_button_incorrect))) {
+                        if (mListener != null) {
+                            mListener.onReviewed(mCard);
+                        }
+                        asyncMarkRelearnedWord();
                     }
-                } else {
-                    setReviewButtionStatus(BUTTON_STATUS_TO_DELETE);
                 }
-                markDeleted(!deleted);
-                return true;
+
             }
         });
-        setReviewButtionStatus(BUTTON_STATUS_TO_RECALL);
 
-        if (relearned) {
-            setReviewButtionStatus(BUTTON_STATUS_RELEARNED);
-        }
+        mRight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (v instanceof Button) {
+                    Button button = (Button) v;
+                    String status = button.getText().toString();
+                    if (status.equals(C.get().getString(R.string.title_button_recalled))) {
+                        mStatus = STATUS_REVIEW_TO_RECALL;
+                        mCard.doExpand();
+                        mLeft.setText(C.get().getString(R.string.title_button_incorrect));
+                        mRight.setText(C.get().getString(R.string.title_button_correct));
+                    } else if (status.equals(C.get().getString(R.string.title_button_correct))) {
+                        if (mListener != null) {
+                            mListener.onReviewed(mCard);
+                        }
+                        asyncMarkRecalledWord();
+                    } else if (status.equals(C.get().getString(R.string.title_button_relearned))) {
+                        if (mListener != null) {
+                            mListener.onReviewed(mCard);
+                        }
+                        asyncMarkRelearnedWord();
+                    }
+                }
 
-        if (deleted) {
-            setReviewButtionStatus(BUTTON_STATUS_TO_DELETE);
-        }
-
-        TextView reviewChecks = (TextView) parent.findViewById(R.id.review_checks);
-        reviewChecks.setText(String.format(mContext.getResources().getString(R.string.title_review_status_checks), reviewProgress));
-
+            }
+        });
+//        mReviewButton.setOnLongClickListener(new View.OnLongClickListener() {
+//            @Override
+//            public boolean onLongClick(View v) {
+//                if (deleted) {
+//                    if (relearned) {
+//                        setReviewButtionStatus(BUTTON_STATUS_RELEARNED);
+//                    } else {
+//                        setReviewButtionStatus(BUTTON_STATUS_TO_RECALL);
+//                    }
+//                } else {
+//                    setReviewButtionStatus(BUTTON_STATUS_TO_DELETE);
+//                }
+//                markDeleted(!deleted);
+//                return true;
+//            }
+//        });
     }
 
     @Override

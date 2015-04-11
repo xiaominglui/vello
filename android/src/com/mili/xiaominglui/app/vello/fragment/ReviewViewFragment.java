@@ -147,25 +147,13 @@ public class ReviewViewFragment extends BaseListFragment implements LoaderManage
 
     private ReviewCard initReviewCard(Cursor data) {
         ReviewCard card = new ReviewCard(getActivity().getApplicationContext());
+
         setCardFromCursor(card, data);
 
-        card.setReviewCardButtonsOnClickListener(new ReviewCard.OnClickReviewCardButtonsListener() {
+        card.setOnCardReviewedListener(new ReviewCard.OnCardReviewedListener() {
             @Override
-            public void onRelearnedButtonClicked(Card card, View view) {
-                dismissAnimation.setDismissRight(false);
-                ((ReviewCard) card).markRelearned();
-                dismissAnimation.animateDismiss(card);
-            }
-
-            @Override
-            public void onRecallButtonClicked(Card card, View view) {
-                dismissAnimation.setDismissRight(true);
-                dismissAnimation.animateDismiss(card);
-            }
-
-            @Override
-            public void onRemoveButtonClicked(Card card, View view) {
-                dismissAnimation.setDismissRight(true);
+            public void onReviewed(Card card) {
+                L.d(TAG, "onReviewed");
                 dismissAnimation.animateDismiss(card);
             }
         });

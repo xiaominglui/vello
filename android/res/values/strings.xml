@@ -41,7 +41,6 @@
     <string name="title_feature_one">Discover new words in read</string>
     <string name="title_feature_two">Recall unfamiliar words after read</string>
     <string name="title_feature_three">Acquire more words via read</string>
-    <string name="title_review_status_checks">%1$d/8</string>
     <string name="toast_invalid_keyword">Invalid query</string>
     <string name="about_eula">End User License Agreement</string>
     <string name="about_licenses">Open Source Licenses</string>
@@ -75,4 +74,9 @@
     <string name="pref_sync_frequency_summary_no_reliable_network">Can\'t establish a reliable connection to the server.</string>
     <string name="pref_sync_frequency_summary_retrieving_setting">Retrieving settings&#8230;</string>
     <string name="title_review_blank">List blank</string>
+    <string name="title_button_correct">Correct</string>
+    <string name="title_button_recalled">Recalled</string>
+    <string name="title_button_relearn">Relearn</string>
+    <string name="title_button_relearned">Relearned</string>
+    <string name="title_button_incorrect">InCorrect</string>
 </resources>
