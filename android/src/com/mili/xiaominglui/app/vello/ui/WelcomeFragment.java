@@ -61,7 +61,6 @@ public final class WelcomeFragment extends Fragment {
         final String titleDesc;
         switch (mPosition) {
             case 0:
-                insertImages(mPosition);
                 titleDesc = getString(R.string.title_feature_one);
                 break;
             case 1:
@@ -80,27 +79,16 @@ public final class WelcomeFragment extends Fragment {
 
     private void insertImages(int position) {
         mFeatureGallery.removeAllViews();
+        View v = null;
         switch (position) {
             case 0:
-                for (int res : mImageIdsOne) {
-                    ImageView imageView = (ImageView) LayoutInflater.from(C.get()).inflate(R.layout.feature_gallery_item, mFeatureGallery, false);
-                    imageView.setImageResource(res);
-                    mFeatureGallery.addView(imageView);
-                }
+                v = LayoutInflater.from(C.get()).inflate(R.layout.feature_gallery_item_lookup, mFeatureGallery, true);
                 break;
             case 1:
-                for (int res : mImageIdsTwo) {
-                    ImageView imageView = (ImageView) LayoutInflater.from(C.get()).inflate(R.layout.feature_gallery_item, mFeatureGallery, false);
-                    imageView.setImageResource(res);
-                    mFeatureGallery.addView(imageView);
-                }
+                v = LayoutInflater.from(C.get()).inflate(R.layout.feature_gallery_item_review, mFeatureGallery, true);
                 break;
             case 2:
-                for (int res : mImageIdsThree) {
-                    ImageView imageView = (ImageView) LayoutInflater.from(C.get()).inflate(R.layout.feature_gallery_item, mFeatureGallery, false);
-                    imageView.setImageResource(res);
-                    mFeatureGallery.addView(imageView);
-                }
+                v = LayoutInflater.from(C.get()).inflate(R.layout.feature_gallery_item_final, mFeatureGallery, true);
                 break;
         }
     }

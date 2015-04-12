@@ -20,7 +20,7 @@
     <string name="dialog_button_retry">Retry</string>
     <string name="dialog_error_data_error_title">Incorrect data</string>
     <string name="dialog_error_data_error_message">Received data is invalid.</string>
-    <string name="button_login_title">Log In</string>
+    <string name="button_login_title">Login</string>
     
     <plurals name="notif_content_title">
         <item quantity="one">1 word to recall</item>

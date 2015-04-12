@@ -20,7 +20,7 @@
     <string name="dialog_button_retry">重试</string>
     <string name="dialog_error_data_error_title">数据有误</string>
     <string name="dialog_error_data_error_message">接收到的数据无效</string>
-    <string name="button_login_title">登入</string>
+    <string name="button_login_title">登录</string>
     <plurals name="notif_content_title">
         <item quantity="other">有%d个单词该回顾了。</item>
     </plurals>

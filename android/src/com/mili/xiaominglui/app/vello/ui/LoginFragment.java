@@ -32,7 +32,7 @@ public class LoginFragment extends Fragment implements View.OnClickListener, OnP
 	}
 	
 	public interface onButtonClickedListener {
-		public void onSignInButtonClicked();
+        void onSignInButtonClicked();
 	}
 	
 	@Override
