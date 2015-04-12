@@ -41,10 +41,10 @@ VAA for Android (Coming Soon)
       <img src="{{ site.baseurl }}/images/dk_lookup_share_float_card.png" alt="分享查词 — 结果" class="img-responsive">
 
 1. 词道生词本  
-在阅读之后的碎片时间里，可以通过电脑或者手机，随时随地的查看回顾词单来回顾生词。
-  + Chrome 上的回顾词单
+在阅读之后的碎片时间里，可以通过电脑或者手机，随时随地的查看生词本来回顾生词。
+  + Chrome 上的生词本
     <img src="{{ site.baseurl }}/images/chrome_recall_list.png" alt="生词本 - Chrome" class="img-responsive">
-  + Android上的回顾词单
+  + Android上的生词本
     <img src="{{ site.baseurl }}/images/dk_android_recall_list.png" alt="生词本 - Android" class="img-responsive">
   + Chrome 上的回顾提醒
     <img src="{{ site.baseurl }}/images/notification_recall_chrome.png" alt="回顾提醒 — Chrome" class="img-responsive">
