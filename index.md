@@ -40,19 +40,19 @@ VAA for Android (Coming Soon)
     3. 稍等片刻后，会弹出含有单词解释的浮动窗口。
       <img src="{{ site.baseurl }}/images/dk_lookup_share_float_card.png" alt="分享查词 — 结果" class="img-responsive">
 
-1. 回顾清单  
+1. 词道生词本  
 在阅读之后的碎片时间里，可以通过电脑或者手机，随时随地的查看回顾词单来回顾生词。
   + Chrome 上的回顾词单
-    <img src="{{ site.baseurl }}/images/chrome_recall_list.png" alt="回顾词单 - Chrome" class="img-responsive">
+    <img src="{{ site.baseurl }}/images/chrome_recall_list.png" alt="生词本 - Chrome" class="img-responsive">
   + Android上的回顾词单
-    <img src="{{ site.baseurl }}/images/dk_android_recall_list.png" alt="回顾词单 - Android" class="img-responsive">
+    <img src="{{ site.baseurl }}/images/dk_android_recall_list.png" alt="生词本 - Android" class="img-responsive">
   + Chrome 上的回顾提醒
     <img src="{{ site.baseurl }}/images/notification_recall_chrome.png" alt="回顾提醒 — Chrome" class="img-responsive">
   + Android 上的回顾提醒
     <img src="{{ site.baseurl }}/images/dk_notif_recall_android.png" alt="回顾提醒 — Android" class="img-responsive">
 
 # FAQ
-+ 问：查询的单词为什么没有马上出现在回顾词单里？  
++ 问：查询的单词为什么没有马上出现在生词本里？  
 答：查询的单词加入回顾队列后，需达到特定的回顾时间点，才会出现在回顾词单里。目前这个回顾时间点符合艾宾浩斯记忆曲线。具体的回顾时间点参考[这里](http://www.douban.com/group/topic/1054905/)。
 + 问：艾宾浩斯记忆曲线有用吗？  
 答：艾宾浩斯记忆曲线仅仅是一个科学工作者的实验结果，有参考意义。但对于记单词这件事情来说，它不是关键，重复才是王道。艾宾浩斯记忆曲线只是重复的一种方式，反复回顾吧，一定有用！
