@@ -70,7 +70,7 @@
     <string name="title_feature_one">生词读中现</string>
     <string name="title_feature_two">闲来回顾之</string>
     <string name="title_feature_three">词汇达人见</string>
-    <string name="title_review_blank">词单为空</string>
+    <string name="title_review_blank">生词本为空</string>
     <string name="toast_invalid_keyword">无效查询</string>
     <string name="title_button_recalled">想起来了</string>
     <string name="title_button_relearn">想不起来</string>

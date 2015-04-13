@@ -4,7 +4,7 @@ import android.util.Log;
 
 public class L {
     public static final boolean VDBG = false;
-    public static final boolean DDBG = true;
+    public static final boolean DDBG = false;
     public static final boolean IDBG = false;
     public static final boolean EDBG = false;
     public static final boolean WDBG = false;
