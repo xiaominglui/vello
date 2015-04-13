@@ -13,7 +13,7 @@ title: 主页
 <a href="https://chrome.google.com/webstore/detail/词道/cgkjfohooamppcndhnmamboiipnmeaak" target="_blank" class="get-chrome"><img src="{{ site.baseurl }}/images/chromewebstore.png" alt="Download from Chrome Web Store" class="chrome-webstore"></a>  
 VAA for Chrome
 
-<a href="https://play.google.com/store/search?q=pub:vaa" target="_blank"><img alt="Get it on Google Play" src="https://developer.android.com/images/brand/en_generic_rgb_wo_45.png" /></a>  
+<a href="https://play.google.com/store/apps/details?id=com.mili.xiaominglui.app.vello" target="_blank"><img alt="Get it on Google Play" src="https://developer.android.com/images/brand/en_generic_rgb_wo_45.png" /></a>  
 VAA for Android (Coming Soon)
 
 # 用法
