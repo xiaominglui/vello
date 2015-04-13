@@ -79,4 +79,6 @@
     <string name="title_button_relearn">Relearn</string>
     <string name="title_button_relearned">Relearned</string>
     <string name="title_button_incorrect">InCorrect</string>
+    <string name="title_hint_scroll_down">Scroll down to learn more</string>
+    <string name="title_hint_scroll_right">Scroll right to learn more</string>
 </resources>

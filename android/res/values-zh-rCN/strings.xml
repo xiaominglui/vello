@@ -77,4 +77,6 @@
     <string name="title_button_correct">正确</string>
     <string name="title_button_incorrect">错了</string>
     <string name="title_button_relearned">复习好了</string>
+    <string name="title_hint_scroll_down">上滑了解更多</string>
+    <string name="title_hint_scroll_right">左滑了解更多</string>
 </resources>

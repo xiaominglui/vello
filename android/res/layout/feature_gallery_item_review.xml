@@ -22,7 +22,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/md_white"
             android:textSize="12sp"
-            android:text="scroll down to learn more"/>
+            android:text="@string/title_hint_scroll_down"/>
     </LinearLayout>
 
 
@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/md_white"
             android:textSize="12sp"
-            android:text="scroll right to learn more"/>
+            android:text="@string/title_hint_scroll_right"/>
     </LinearLayout>
 
 </merge>
